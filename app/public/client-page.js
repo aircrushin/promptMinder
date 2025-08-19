@@ -217,8 +217,8 @@ export default function PublicPromptsClient() {
             {/* Background decoration */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/30 via-transparent to-purple-50/30 dark:from-blue-950/20 dark:to-purple-950/20 pointer-events-none" />
             
-            <div className="relative">
-                <div className="container mx-auto px-4 py-12 sm:py-16 lg:py-20">
+            <div className="relative align-center justify-center">
+                <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:py-20">
                     {/* Enhanced header section */}
                     <div className="text-center mb-16 space-y-6">
                         <div className="space-y-4">
@@ -349,7 +349,7 @@ export default function PublicPromptsClient() {
                         </div>
                     </div>
 
-                    {/* Masonry/Waterfall layout - 小红书风格 */}
+                    {/* Masonry/Waterfall layout */}
                     {filteredPrompts.length > 0 ? (
                         <div className="masonry-container columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6">
                             {filteredPrompts.map((p, i) => (
@@ -393,7 +393,7 @@ export default function PublicPromptsClient() {
                 <button
                     onClick={scrollToTop}
                     className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 dark:from-blue-600 dark:to-purple-700 dark:hover:from-blue-700 dark:hover:to-purple-800 text-white rounded-full shadow-xl hover:shadow-2xl backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-4 focus:ring-blue-400/50 dark:focus:ring-blue-500/50"
-                    title="回到顶部"
+                    title="回到顶部/backtotop"
                     aria-label="Back to top"
                 >
                     <ChevronUp className="w-6 h-6 mx-auto" />
