@@ -96,7 +96,7 @@ export default function Footer({ t }) {
               </h3>
               <ul className="mt-4 space-y-4">
                 <li>
-                  <Link href="https://code.promptate.xyz/" target="_blank" className="text-sm text-gray-500 hover:text-gray-900">
+                  <Link href="https://code.lucids.top/" target="_blank" className="text-sm text-gray-500 hover:text-gray-900">
                     {translations.promptCoder}
                   </Link>
                 </li>
@@ -111,7 +111,7 @@ export default function Footer({ t }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://www.promptate.xyz/" target="_blank" className="text-sm text-gray-500 hover:text-gray-900">
+                  <Link href="https://prompt.lucids.top/" target="_blank" className="text-sm text-gray-500 hover:text-gray-900">
                     {translations.promptate}
                   </Link>
                 </li>
