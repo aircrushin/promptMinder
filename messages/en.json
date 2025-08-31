@@ -337,6 +337,7 @@
     "manageTags": "Manage Tags",
     "versionsCount": "{count} versions",
     "versionHistoryTitle": "Version History",
+    "createNewVersion": "Create New Version",
     "deleteConfirmTitle": "Confirm Deletion",
     "deleteConfirmDescription": "Are you sure you want to delete this prompt? This action cannot be undone.",
     "cancel": "Cancel",
