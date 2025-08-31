@@ -334,6 +334,13 @@ export default function PromptsPage() {
     setSelectedVersions(versions);
   }, []);
 
+  const handleCreateNewVersion = useCallback(() => {
+    if (selectedVersions?.length) {
+      const latest = selectedVersions[0];
+      window.location.href = `/prompts/${latest.id}/edit`;
+    }
+  }, [selectedVersions]);
+
   const handleCreatePrompt = useCallback(async () => {
     if (!t?.promptsPage) return;
     
@@ -710,10 +717,13 @@ export default function PromptsPage() {
           <VisuallyHidden.Root>
             <DialogTitle>Dialog</DialogTitle>
           </VisuallyHidden.Root>
-          <DialogHeader>
+          <DialogHeader className="flex items-center justify-between">
             <DialogTitle className="text-xl">
               {tp.versionHistoryTitle}
             </DialogTitle>
+            <Button size="sm" onClick={handleCreateNewVersion}>
+              {tp.createNewVersion}
+            </Button>
           </DialogHeader>
           <div className="space-y-3 mt-4 max-h-[60vh] overflow-y-auto pr-1">
             {selectedVersions?.map((version) => (

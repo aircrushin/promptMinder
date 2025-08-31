@@ -337,6 +337,7 @@
     "manageTags": "标签管理",
     "versionsCount": "{count} 个版本",
     "versionHistoryTitle": "版本历史",
+    "createNewVersion": "创建新版本",
     "deleteConfirmTitle": "确认删除",
     "deleteConfirmDescription": "你确定要删除这个提示词吗？此操作无法撤销。",
     "cancel": "取消",
