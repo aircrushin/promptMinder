@@ -37,11 +37,52 @@
     "subtitleStart": "An open-source prompt management platform built for ",
     "animatedText": [
       "AI practitioners",
-      "content creators"
+      "content creators",
+      "developers",
+      "researchers"
     ],
     "subtitleEnd": "",
     "description": "Supports version control, team collaboration, smart categorization, and more.",
-    "ctaButton": "Start Using for Free"
+    "ctaButton": "Start Using for Free",
+    "secondaryCta": "Explore prompt gallery",
+    "quickHighlights": [
+      {
+        "title": "Version aware",
+        "description": "Branch, compare, and roll back prompts without fear."
+      },
+      {
+        "title": "Collaborative",
+        "description": "Bring product, research, and ops into the same workspace."
+      },
+      {
+        "title": "Secure by default",
+        "description": "Enterprise-grade protection and audit trails built in."
+      }
+    ],
+    "stats": [
+      {
+        "label": "Teams onboarded",
+        "value": "2.3K+"
+      },
+      {
+        "label": "Prompts versioned",
+        "value": "68K"
+      },
+      {
+        "label": "Avg. time saved",
+        "value": "41%"
+      }
+    ],
+    "snapshot": {
+      "badge": "Workflow snapshot",
+      "status": "Live sync",
+      "promptLabel": "Prompt version #24",
+      "promptText": "Generate a launch plan for a multi-region rollout",
+      "approvalLabel": "Approval",
+      "approvalValue": "2 reviewers left feedback",
+      "experimentsLabel": "Experiments",
+      "experimentsValue": "92% success rate"
+    }
   },
   "features": {
     "title": "Powerful and Simple Features",

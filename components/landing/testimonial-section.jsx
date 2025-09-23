@@ -3,65 +3,79 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-// 接收 t prop
 export function TestimonialSection({ t }) {
-  // 如果 t 不存在，提供一个默认值
-  const translations = t || {
-    title: 'Loved by Millions of Users',
-    items: [
-      { content: "This is a very simple way...", author: "IndieAI", title: "AI Indie Developer" },
-      { content: "Prompt Minder is really great...", author: "Xiao Rui", title: "Prompt Engineer" },
-      { content: "Prompt Minder creates...", author: "aircrushin", title: "AI Enthusiast" },
-    ]
-  };
-  // 使用翻译后的 testimonials 列表，保持 avatar 不变
+  const translations =
+    t || {
+      title: "Loved by Millions of Users",
+      items: [
+        {
+          content: "This is a very simple way to iterate and manage prompts.",
+          author: "IndieAI",
+          title: "AI Indie Developer",
+        },
+        {
+          content: "Prompt Minder is really great, simple but not simplistic.",
+          author: "Xiao Rui",
+          title: "Prompt Engineer",
+        },
+        {
+          content: "Prompt Minder creates a great debugging environment.",
+          author: "aircrushin",
+          title: "AI Enthusiast",
+        },
+      ],
+    };
+
   const testimonials = translations.items.map((item, index) => ({
     ...item,
     avatar: [
       `https://api.dicebear.com/7.x/bottts/svg?seed=123`,
       `https://api.dicebear.com/7.x/pixel-art/svg?seed=456`,
-      `https://api.dicebear.com/7.x/fun-emoji/svg?seed=789`
-    ][index]
+      `https://api.dicebear.com/7.x/fun-emoji/svg?seed=789`,
+    ][index % 3],
   }));
 
   return (
-    <section className="py-24 bg-white">
-      <div className="container mx-auto px-8">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-20">
-           {/* 使用翻译 */}
-          {translations.title}
-        </h2>
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white py-24">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-20 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-indigo-400/20 blur-[140px]" />
+        <div className="absolute -right-20 bottom-8 h-72 w-72 rounded-full bg-blue-400/15 blur-[160px]" />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
-           {/* 使用翻译后的 testimonials 列表 */}
+      <div className="relative mx-auto max-w-6xl px-6">
+        <div className="mx-auto mb-16 max-w-3xl text-center">
+          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+            {translations.title}
+          </h2>
+        </div>
+
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial, index) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
+              key={`${testimonial.author}-${index}`}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group bg-white rounded-xl p-8 border border-gray-200 hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 flex flex-col"
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.45, delay: index * 0.08 }}
+              className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-white/50 bg-white/85 p-8 shadow-xl shadow-blue-200/40 backdrop-blur transition-transform duration-300 hover:-translate-y-2"
             >
-              <div className="min-h-[160px] flex flex-col flex-grow">
-                <p className="text-gray-700 text-lg italic mb-4">
-                   {/* 使用翻译 */}
-                  &ldquo;{testimonial.content}&rdquo;
-                </p>
-                <div className="mt-auto flex items-center gap-3">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <p className="text-base leading-relaxed text-slate-700">
+                &ldquo;{testimonial.content}&rdquo;
+              </p>
+              <div className="mt-8 flex items-center gap-4">
+                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-blue-100/70 bg-blue-50">
                   <Image
                     src={testimonial.avatar}
-                    alt={testimonial.author} // alt 文本通常不需要翻译，或者可以用作者名
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover"
+                    alt={testimonial.author}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
                   />
-                  <div>
-                    <p className="font-medium text-gray-900">{testimonial.author}</p> { /* 作者名保持不变 */}
-                    <p className="text-sm text-gray-500"> 
-                      {/* 使用翻译 */}
-                      {testimonial.title}
-                    </p>
-                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{testimonial.author}</p>
+                  <p className="text-xs uppercase tracking-wide text-blue-600/80">{testimonial.title}</p>
                 </div>
               </div>
             </motion.div>
@@ -70,4 +84,4 @@ export function TestimonialSection({ t }) {
       </div>
     </section>
   );
-} 
+}

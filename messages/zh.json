@@ -37,11 +37,52 @@
     "subtitleStart": "开源的提示词管理平台，为",
     "animatedText": [
       "AI从业者",
-      "内容创作者"
+      "内容创作者",
+      "开发者",
+      "研究者"
     ],
     "subtitleEnd": "打造",
     "description": "支持版本控制、团队协作、智能分类等功能",
-    "ctaButton": "免费开始使用"
+    "ctaButton": "免费开始使用",
+    "secondaryCta": "浏览提示词合集",
+    "quickHighlights": [
+      {
+        "title": "版本感知",
+        "description": "自如创建分支、比对差异，随时回滚。"
+      },
+      {
+        "title": "协同工作",
+        "description": "让产品、研究与运营团队在同一工作区协作。"
+      },
+      {
+        "title": "默认安全",
+        "description": "企业级防护与审计记录，数据始终受控。"
+      }
+    ],
+    "stats": [
+      {
+        "label": "接入团队数",
+        "value": "2.3K+"
+      },
+      {
+        "label": "已托管提示词",
+        "value": "68K"
+      },
+      {
+        "label": "平均节省时间",
+        "value": "41%"
+      }
+    ],
+    "snapshot": {
+      "badge": "工作流快照",
+      "status": "实时同步",
+      "promptLabel": "提示词版本 #24",
+      "promptText": "生成多区域上线计划",
+      "approvalLabel": "审批",
+      "approvalValue": "2 位审阅者已反馈",
+      "experimentsLabel": "实验",
+      "experimentsValue": "成功率 92%"
+    }
   },
   "features": {
     "title": "强大而简单的功能",

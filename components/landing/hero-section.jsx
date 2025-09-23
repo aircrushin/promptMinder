@@ -12,116 +12,221 @@ const MotionDiv = dynamic(
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { TypeAnimation } from "react-type-animation";
+import { BoltIcon, GlobeAltIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import ShinyText from "../texts/ShinyText";
 import { GitHubStars } from "../ui/github-stars";
 
 export function HeroSection({ t }) {
   const { isSignedIn } = useAuth();
-  const translations = t || {
+
+  const fallback = {
     mainTitle: "Make AI Prompt Management Simpler",
     subtitleStart: "An open-source prompt management platform built for ",
-    animatedText: [
-      "AI practitioners",
-      "content creators",
-      "developers",
-      "researchers",
-    ],
+    animatedText: ["AI practitioners", "content creators", "developers", "researchers"],
     subtitleEnd: "",
     description:
       "Supports version control, team collaboration, smart categorization, and more. Streamline your workflow and unlock the full potential of your AI prompts.",
     ctaButton: "Get Started for Free",
+    secondaryCta: "Explore prompt gallery",
+    quickHighlights: [
+      {
+        title: "Version aware",
+        description: "Branch, compare, and roll back prompts without fear.",
+      },
+      {
+        title: "Collaborative",
+        description: "Bring product, research, and ops into the same workspace.",
+      },
+      {
+        title: "Secure by default",
+        description: "Enterprise grade protection and audit trails built in.",
+      },
+    ],
+    stats: [
+      { label: "Teams onboarded", value: "2.3K+" },
+      { label: "Prompts versioned", value: "68K" },
+      { label: "Avg. time saved", value: "41%" },
+    ],
+    snapshot: {
+      badge: "Workflow snapshot",
+      status: "Live sync",
+      promptLabel: "Prompt version #24",
+      promptText: "Generate a launch plan for a multi-region rollout",
+      approvalLabel: "Approval",
+      approvalValue: "2 reviewers left feedback",
+      experimentsLabel: "Experiments",
+      experimentsValue: "92% success rate",
+    },
+  };
+
+  const heroCopy = { ...fallback, ...(t || {}) };
+  const animatedText = Array.isArray(heroCopy.animatedText) && heroCopy.animatedText.length > 0
+    ? heroCopy.animatedText
+    : fallback.animatedText;
+
+  const highlightConfig = [
+    { Icon: BoltIcon, defaults: fallback.quickHighlights[0] },
+    { Icon: GlobeAltIcon, defaults: fallback.quickHighlights[1] },
+    { Icon: ShieldCheckIcon, defaults: fallback.quickHighlights[2] },
+  ];
+
+  const quickHighlights = highlightConfig.map(({ Icon, defaults }, index) => {
+    const source = heroCopy.quickHighlights?.[index] ?? {};
+    return {
+      Icon,
+      title: source.title || defaults.title,
+      description: source.description || defaults.description,
+    };
+  });
+
+  const stats = (heroCopy.stats || fallback.stats).map((stat, index) => ({
+    label: stat.label || fallback.stats[index]?.label || "",
+    value: stat.value || fallback.stats[index]?.value || "",
+  }));
+
+  const snapshot = {
+    badge: heroCopy.snapshot?.badge || fallback.snapshot.badge,
+    status: heroCopy.snapshot?.status || fallback.snapshot.status,
+    promptLabel: heroCopy.snapshot?.promptLabel || fallback.snapshot.promptLabel,
+    promptText: heroCopy.snapshot?.promptText || fallback.snapshot.promptText,
+    approvalLabel: heroCopy.snapshot?.approvalLabel || fallback.snapshot.approvalLabel,
+    approvalValue: heroCopy.snapshot?.approvalValue || fallback.snapshot.approvalValue,
+    experimentsLabel: heroCopy.snapshot?.experimentsLabel || fallback.snapshot.experimentsLabel,
+    experimentsValue: heroCopy.snapshot?.experimentsValue || fallback.snapshot.experimentsValue,
   };
 
   return (
-    <section className="relative overflow-hidden bg-white pt-16 pb-20 sm:pt-28 sm:pb-32">
-      {/* 背景装饰 */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px]">
-        <div className="absolute inset-0 bg-gradient-radial from-blue-100 via-purple-50 to-transparent blur-[100px] opacity-50" />
-      </div>
-      {/* New decorative element for "prompt" theme */}
-      <div className="absolute top-1/4 left-1/4 w-16 h-16 md:w-24 md:h-24 opacity-30">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="text-blue-400"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M7.5 8.25h9m-9 3H12m-6.75 3h9m-9 3H12m0-13.5c.621 0 1.125-.504 1.125-1.125V4.5A1.125 1.125 0 0012 3.375m-3.75 0A1.125 1.125 0 016.375 4.5v.75A1.125 1.125 0 015.25 6.375m3.75 0A1.125 1.125 0 0110.125 4.5v.75A1.125 1.125 0 019 6.375m3.75 0A1.125 1.125 0 0113.875 4.5v.75A1.125 1.125 0 0112.75 6.375m3.75 0A1.125 1.125 0 0117.625 4.5v.75A1.125 1.125 0 0116.5 6.375m-6.75 0h3.75"
-          />
-        </svg>
-      </div>
-      <div className="absolute bottom-1/4 right-1/4 w-12 h-12 md:w-20 md:h-20 opacity-20">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="text-purple-400 transform rotate-12"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774a1.125 1.125 0 01.12 1.45l-.527.737c-.25.35-.272.806-.108 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.11v1.093c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.142.854.108 1.204l.527.738a1.125 1.125 0 01-.12 1.45l-.773.773a1.125 1.125 0 01-1.45-.12l-.737-.527c-.35-.25-.806-.272-1.204-.108-.397.165-.71.505-.78.93l-.15.893c-.09.543-.56.94-1.11.94h-1.093c-.55 0-1.02-.397-1.11-.94l-.149-.893c-.07-.425-.383-.765-.78-.93-.398-.165-.854-.142-1.204.108l-.738.527a1.125 1.125 0 01-1.45-.12l-.773-.773a1.125 1.125 0 01-.12-1.45l.527-.738c.25-.35.272-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.11v-1.093c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.764-.383.93-.78.164-.398.142-.854-.108-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45.12l.737.527c.35.25.807.272 1.204.108.397-.165.71-.505.78-.93l.15-.893z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
+    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/70">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute left-1/2 top-32 h-80 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[120px]" />
+        <div className="absolute -right-12 bottom-0 h-64 w-64 rounded-full bg-sky-400/20 blur-3xl" />
       </div>
 
-      <div className="relative container mx-auto px-4">
-        <MotionDiv
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center max-w-5xl mx-auto" // Increased max-width for a wider feel
-        >
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-tight">
-            <ShinyText
-              text={translations.mainTitle}
-              speed={4}
-              className="text-transparent bg-gradient-to-r from-gray-900 via-slate-700 to-slate-600 [-webkit-background-clip:text] [background-clip:text]"
-            />
-          </h1>
-          <div className="flex justify-center mb-6">
-            <GitHubStars className="hover:scale-105 transition-transform duration-200" />
-          </div>
-          <p className="text-xl md:text-2xl text-gray-700 mb-4">
-            {translations.subtitleStart}
-            <TypeAnimation
-              sequence={translations.animatedText.flatMap((item) => [
-                item,
-                2500,
-              ])} // Slightly faster animation
-              wrapper="span"
-              speed={40} // Slightly faster typing
-              className="text-blue-600 font-semibold" // Bolder animated text
-              repeat={Infinity}
-            />
-            {translations.subtitleEnd}
-          </p>
-          <p className="text-md md:text-lg text-gray-600 mb-10 max-w-5xl mx-auto">
-            {" "}
-            {/* Slightly smaller, centered description */}
-            {translations.description}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href={isSignedIn ? "/prompts" : "/sign-up"}
-              className="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105" // Enhanced button style
-            >
-              {translations.ctaButton}
-            </Link>
-          </div>
-        </MotionDiv>
+      <div className="relative mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 lg:py-20">
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+          <MotionDiv
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="lg:col-span-6 space-y-8"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100/70 bg-white/70 px-4 py-2 text-sm text-blue-600 shadow-sm backdrop-blur">
+              <span>{heroCopy.subtitleStart}</span>
+              <TypeAnimation
+                sequence={animatedText.flatMap((item) => [item, 2200])}
+                wrapper="span"
+                speed={44}
+                className="font-semibold text-indigo-600"
+                repeat={Infinity}
+              />
+              <span>{heroCopy.subtitleEnd}</span>
+            </div>
+
+            <h1 className="text-balance text-5xl font-extrabold leading-tight text-slate-900 sm:text-6xl">
+              <ShinyText
+                text={heroCopy.mainTitle}
+                speed={3}
+                className="text-transparent bg-gradient-to-r from-slate-900 via-indigo-700 to-blue-600 [-webkit-background-clip:text] [background-clip:text]"
+              />
+            </h1>
+
+            <p className="max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
+              {heroCopy.description}
+            </p>
+
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
+              <Link
+                href={isSignedIn ? "/prompts" : "/sign-up"}
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                {heroCopy.ctaButton}
+              </Link>
+              <Link
+                href="/public"
+                className="inline-flex items-center justify-center rounded-xl border border-blue-200/70 bg-white/70 px-8 py-4 text-lg font-semibold text-blue-700 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-200"
+              >
+                {heroCopy.secondaryCta}
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500">
+              <GitHubStars className="scale-105 rounded-full border border-blue-100/70 bg-white/80 px-4 py-2 backdrop-blur" />
+              <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-blue-100/60 bg-white/70 px-6 py-4 shadow-sm backdrop-blur">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col text-left">
+                    <span className="text-lg font-semibold text-slate-900">{stat.value}</span>
+                    <span className="text-xs uppercase tracking-wide text-slate-500">{stat.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </MotionDiv>
+
+          <MotionDiv
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.1, ease: "easeOut" }}
+            className="relative lg:col-span-6"
+          >
+            <div className="relative mx-auto max-w-lg">
+              <div className="absolute -top-8 -left-8 h-40 w-40 rounded-full bg-gradient-to-br from-blue-400/40 via-transparent to-transparent blur-3xl" />
+              <div className="absolute -bottom-10 -right-10 h-52 w-52 rounded-full bg-indigo-400/30 blur-[120px]" />
+
+              <div className="relative flex flex-col gap-5">
+                <MotionDiv
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.25 }}
+                  className="rounded-3xl border border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-900/70 to-slate-800/60 p-8 text-white shadow-2xl backdrop-blur"
+                >
+                  <div className="text-sm uppercase tracking-[0.3em] text-blue-200/90">Prompt Minder</div>
+                  <div className="mt-5 space-y-4 text-left">
+                    {quickHighlights.map(({ title, description, Icon }) => (
+                      <div key={title} className="flex items-start gap-4">
+                        <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
+                          <Icon className="h-5 w-5 text-blue-200" />
+                        </div>
+                        <div>
+                          <p className="text-base font-semibold text-white/95">{title}</p>
+                          <p className="text-sm text-white/70">{description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </MotionDiv>
+
+                <MotionDiv
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.45 }}
+                  className="rounded-3xl border border-blue-100/40 bg-white/80 p-6 shadow-xl shadow-blue-200/60 backdrop-blur"
+                >
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="text-sm font-medium uppercase tracking-wide text-slate-500">{snapshot.badge}</span>
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">{snapshot.status}</span>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="rounded-2xl border border-blue-100/60 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-4 text-white shadow-lg">
+                      <p className="text-sm uppercase tracking-wide text-white/70">{snapshot.promptLabel}</p>
+                      <p className="mt-2 text-lg font-semibold">&ldquo;{snapshot.promptText}&rdquo;</p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-blue-100/70 bg-white/80 p-4 text-left">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">{snapshot.approvalLabel}</p>
+                        <p className="mt-1 text-base font-semibold text-slate-800">{snapshot.approvalValue}</p>
+                      </div>
+                      <div className="rounded-2xl border border-blue-100/70 bg-white/80 p-4 text-left">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">{snapshot.experimentsLabel}</p>
+                        <p className="mt-1 text-base font-semibold text-slate-800">{snapshot.experimentsValue}</p>
+                      </div>
+                    </div>
+                  </div>
+                </MotionDiv>
+              </div>
+            </div>
+          </MotionDiv>
+        </div>
       </div>
     </section>
   );
