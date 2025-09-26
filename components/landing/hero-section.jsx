@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useMemo } from "react";
 
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
@@ -63,6 +64,14 @@ export function HeroSection({ t }) {
   const animatedText = Array.isArray(heroCopy.animatedText) && heroCopy.animatedText.length > 0
     ? heroCopy.animatedText
     : fallback.animatedText;
+  const animationSignature = useMemo(
+    () => animatedText.join("|"),
+    [animatedText]
+  );
+  const animationSequence = useMemo(
+    () => animatedText.flatMap((item) => [item, 2200]),
+    [animationSignature]
+  );
 
   const highlightConfig = [
     { Icon: BoltIcon, defaults: fallback.quickHighlights[0] },
@@ -114,7 +123,8 @@ export function HeroSection({ t }) {
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-100/70 bg-white/70 px-4 py-2 text-sm text-blue-600 shadow-sm backdrop-blur">
               <span>{heroCopy.subtitleStart}</span>
               <TypeAnimation
-                sequence={animatedText.flatMap((item) => [item, 2200])}
+                key={animationSignature}
+                sequence={animationSequence}
                 wrapper="span"
                 speed={44}
                 className="font-semibold text-indigo-600"
