@@ -69,7 +69,7 @@ const structuredData = {
       "@type": "Organization",
       name: "Prompt Minder",
       url: siteUrl,
-      logo: `${siteUrl}/logo2.png`,
+      logo: `${siteUrl}/logo.svg`,
       sameAs: [],
     },
     {

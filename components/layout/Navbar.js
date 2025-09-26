@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, FolderPlus, Library, LogOut, Languages, Globe } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -38,10 +38,10 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <Link href="/" className="flex items-center group">
             <OptimizedImage 
-              src="/logo2.png" 
+              src="/logo.svg" 
               alt="PromptMinder" 
-              width={60} 
-              height={60} 
+              width={56} 
+              height={56} 
               priority
               className="rounded-lg"
             />
@@ -101,15 +101,18 @@ export default function Navbar() {
               </NavigationMenuList>
             </NavigationMenu>
 
-            <div className="sm:hidden flex items-center ml-4">
+            <div className="flex items-center ml-4 sm:ml-8 space-x-2 sm:space-x-4">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="sm:hidden">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[240px] sm:hidden">
-                  <div className="flex flex-col gap-4 mt-4">
+                <SheetContent side="right" className="w-[260px]">
+                  <SheetTitle className="sr-only">
+                    {t.navbar?.menuTitle || 'Navigation menu'}
+                  </SheetTitle>
+                  <div className="flex flex-col gap-4 mt-6">
                     <Link
                       href="/prompts"
                       className={`${
@@ -143,16 +146,18 @@ export default function Navbar() {
                       <Globe className="h-4 w-4" />
                       {t.navbar.public}
                     </Link>
-                    <Button variant="ghost" onClick={toggleLanguage} className="justify-start mt-4">
-                      <Languages className="h-4 w-4 mr-2" /> 
+                    <Button
+                      variant="ghost"
+                      onClick={toggleLanguage}
+                      className="justify-start"
+                    >
+                      <Languages className="h-4 w-4 mr-2" />
                       {t.language.switchTo} ({t.language.current})
                     </Button>
                   </div>
                 </SheetContent>
               </Sheet>
-            </div>
 
-            <div className="flex items-center ml-8 space-x-4">
               <Button variant="outline" size="icon" onClick={toggleLanguage} className="hidden sm:inline-flex">
                 <Languages className="h-5 w-5" />
               </Button>

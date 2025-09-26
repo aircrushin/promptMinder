@@ -27,10 +27,10 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <OptimizedImage 
-              src="/logo2.png" 
+              src="/logo.svg" 
               alt="PromptMinder" 
-              width={60} 
-              height={60} 
+              width={56} 
+              height={56} 
               priority
               className="rounded-lg"
             />
