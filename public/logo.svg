@@ -1,12 +1,95 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
   <defs>
-    <linearGradient id="pmGradient" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3B82F6" />
-      <stop offset="1" stop-color="#06B6D4" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fb923c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <rect x="8" y="10" width="48" height="44" rx="14" fill="url(#pmGradient)" />
-  <path d="M20 24h16c4.418 0 8 3.582 8 8s-3.582 8-8 8h-3.6L28 44v-6h-8c-4.418 0-8-3.582-8-8s3.582-8 8-8z" fill="#F0F9FF" fill-opacity="0.95" />
-  <path d="M22 26h6c3.314 0 6 2.686 6 6s-2.686 6-6 6h-2v6h-4V26z" fill="#0F172A" fill-opacity="0.7" />
-  <path d="M33 26h8l3.4 5.3 2.6-5.3h4l-5.6 8.7L52 44h-4l-3.5-5.4L41 44h-4l5.6-9.1L33 26z" fill="#0F172A" fill-opacity="0.7" />
+  
+  <rect width="100" height="100" fill="url(#bg)" rx="22"/>
+  
+  <!-- Brain/Mind symbol (左侧) -->
+  <g transform="translate(25, 50)">
+    <!-- 简化的大脑轮廓 -->
+    <path d="M -8 -12 Q -12 -12 -12 -8 Q -12 -4 -10 -2 Q -12 0 -12 4 Q -12 8 -8 8 Q -6 6 -4 6 Q -4 2 -6 0 Q -4 -2 -4 -6 Q -4 -10 -8 -12 Z" 
+          fill="none" 
+          stroke="#ffffff" 
+          stroke-width="2.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          opacity="0.9"/>
+    <path d="M -2 -12 Q 2 -12 2 -8 Q 2 -4 0 -2 Q 2 0 2 4 Q 2 8 -2 8 Q -4 6 -6 6 Q -6 2 -4 0 Q -6 -2 -6 -6 Q -6 -10 -2 -12 Z" 
+          fill="none" 
+          stroke="#ffffff" 
+          stroke-width="2.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          opacity="0.9"/>
+  </g>
+  
+  <!-- Connection flow (连接线) -->
+  <path d="M 35 50 L 45 50" 
+        stroke="#ffffff" 
+        stroke-width="2" 
+        stroke-dasharray="3,3" 
+        opacity="0.6">
+    <animate attributeName="stroke-dashoffset" 
+             from="0" to="-6" 
+             dur="1s" 
+             repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Bell/Reminder symbol (右侧 - 提醒) -->
+  <g transform="translate(60, 50)">
+    <!-- 铃铛 -->
+    <path d="M -6 -8 L -6 -10 Q -6 -12 -4 -12 L 4 -12 Q 6 -12 6 -10 L 6 -8" 
+          fill="none" 
+          stroke="url(#glow)" 
+          stroke-width="2.5" 
+          stroke-linecap="round"/>
+    <path d="M -8 -8 Q -8 0 -4 4 L 4 4 Q 8 0 8 -8 Z" 
+          fill="none" 
+          stroke="url(#glow)" 
+          stroke-width="2.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <path d="M -2 4 Q -2 7 0 7 Q 2 7 2 4" 
+          fill="none" 
+          stroke="url(#glow)" 
+          stroke-width="2.5" 
+          stroke-linecap="round"/>
+    
+    <!-- 铃铛内的提示点 -->
+    <circle cx="0" cy="-2" r="2" fill="url(#glow)">
+      <animate attributeName="opacity" 
+               values="1;0.3;1" 
+               dur="2s" 
+               repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Prompt symbol (底部 - 命令提示符) -->
+  <g transform="translate(50, 75)" opacity="0.8">
+    <path d="M -8 -3 L -3 0 L -8 3" 
+          fill="none" 
+          stroke="#ffffff" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <line x1="-1" y1="0" x2="8" y2="0" 
+          stroke="#ffffff" 
+          stroke-width="2" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- Decorative particles -->
+  <circle cx="75" cy="25" r="2" fill="#ffffff" opacity="0.4"/>
+  <circle cx="85" cy="35" r="1.5" fill="#ffffff" opacity="0.3"/>
+  <circle cx="20" cy="30" r="1.5" fill="#ffffff" opacity="0.3"/>
 </svg>
