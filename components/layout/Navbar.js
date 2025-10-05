@@ -38,7 +38,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <Link href="/" className="flex items-center group">
             <OptimizedImage 
-              src="/logo.svg" 
+              src="/logo2.png" 
               alt="PromptMinder" 
               width={56} 
               height={56} 
