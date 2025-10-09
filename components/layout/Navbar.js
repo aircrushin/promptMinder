@@ -170,7 +170,7 @@ export default function Navbar() {
                         <Library className="h-4 w-4 shrink-0" />
                         <span className="text-sm">{safeT.navbar.manage}</span>
                       </Link>
-                      <Link
+                      {/* <Link
                         href="/prompts/new"
                         className={`${
                           pathname === '/prompts/new'
@@ -180,7 +180,7 @@ export default function Navbar() {
                       >
                         <FolderPlus className="h-4 w-4 shrink-0" />
                         <span className="text-sm">{safeT.navbar.new}</span>
-                      </Link>
+                      </Link> */}
                       <Link
                         href="/public"
                         className={`${

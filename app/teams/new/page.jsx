@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useTeam } from "@/contexts/team-context";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -32,8 +31,6 @@ export default function CreateTeamPage() {
       teamNamePlaceholder: "请输入团队名称",
       descriptionLabel: "团队描述",
       descriptionPlaceholder: "请输入团队描述（可选）",
-      personalSpaceLabel: "个人空间",
-      personalSpaceDescription: "创建一个仅供自己使用的个人空间",
       cancel: "取消",
       creating: "创建中...",
       create: "创建团队"
@@ -42,7 +39,6 @@ export default function CreateTeamPage() {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    isPersonal: false,
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -65,7 +61,6 @@ export default function CreateTeamPage() {
           name: form.name.trim(),
           description: form.description || null,
           avatarUrl: null,
-          isPersonal: form.isPersonal,
         }),
       });
 
@@ -146,23 +141,6 @@ export default function CreateTeamPage() {
                   }
                   placeholder={safeT.createTeamPage.descriptionPlaceholder}
                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 p-5 transition-all duration-200 hover:bg-muted/30">
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold">{safeT.createTeamPage.personalSpaceLabel}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {safeT.createTeamPage.personalSpaceDescription}
-                  </p>
-                </div>
-                <Switch
-                  checked={form.isPersonal}
-                  onCheckedChange={(value) =>
-                    setForm((prev) => ({ ...prev, isPersonal: value }))
-                  }
-                  disabled={submitting}
-                  className="data-[state=checked]:bg-primary"
                 />
               </div>
             </CardContent>
