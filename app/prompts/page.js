@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTeam } from "@/contexts/team-context";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { extractVariables } from "@/lib/promptVariables";
 import { apiClient } from "@/lib/api-client";
@@ -153,6 +154,7 @@ const NewPromptCard = ({ onClick }) => {
 
 export default function PromptsPage() {
   const { language, t } = useLanguage();
+  const { activeTeamId, isPersonal } = useTeam();
   const { toast } = useToast();
   const { copy } = useClipboard();
   const [prompts, setPrompts] = useState([]);
@@ -204,20 +206,23 @@ export default function PromptsPage() {
         page: currentPage,
         limit: pageSize,
       };
-      
+
       if (selectedTags.length > 0) {
         params.tag = selectedTags[0];
       }
-      
-      const data = await apiClient.getPrompts(params);
-      
+
+      const options = activeTeamId ? { teamId: activeTeamId } : {};
+      const data = await apiClient.getPrompts(params, options);
+
       if (data.prompts) {
         setPrompts(
           data.prompts.map((prompt) => ({
             ...prompt,
             version: prompt.version || "1.0",
             cover_img: prompt.cover_img || "/default-cover.jpg",
-            tags: prompt.tags?.split(",") || [],
+            tags: Array.isArray(prompt.tags)
+              ? prompt.tags
+              : (prompt.tags || "").split(",").filter(Boolean),
           }))
         );
         setPagination(data.pagination);
@@ -227,7 +232,9 @@ export default function PromptsPage() {
             ...prompt,
             version: prompt.version || "1.0",
             cover_img: prompt.cover_img || "/default-cover.jpg",
-            tags: prompt.tags?.split(",") || [],
+            tags: Array.isArray(prompt.tags)
+              ? prompt.tags
+              : (prompt.tags || "").split(",").filter(Boolean),
           }))
         );
       }
@@ -241,7 +248,7 @@ export default function PromptsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, selectedTags, toast]);
+  }, [activeTeamId, currentPage, pageSize, selectedTags, toast]);
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleCopy = useCallback(async (content) => {
@@ -257,7 +264,7 @@ export default function PromptsPage() {
     if (!t?.promptsPage) return;
     
     try {
-      await apiClient.deletePrompt(promptToDelete);
+      await apiClient.deletePrompt(promptToDelete, activeTeamId ? { teamId: activeTeamId } : {});
       fetchPrompts();
       setDeleteDialogOpen(false);
       toast({
@@ -272,7 +279,7 @@ export default function PromptsPage() {
         duration: 2000,
       });
     }
-  }, [promptToDelete, toast, t?.promptsPage, fetchPrompts]);
+  }, [promptToDelete, toast, t?.promptsPage, fetchPrompts, activeTeamId]);
 
   // 分页处理函数
   const handlePageChange = useCallback((page) => {
@@ -305,7 +312,7 @@ export default function PromptsPage() {
     if (!t?.promptsPage) return;
     
     try {
-      await apiClient.sharePrompt(id);
+      await apiClient.sharePrompt(id, activeTeamId ? { teamId: activeTeamId } : {});
       const shareUrl = `${window.location.origin}/share/${id}`;
       await copy(shareUrl);
     } catch (error) {
@@ -316,7 +323,7 @@ export default function PromptsPage() {
         duration: 2000,
       });
     }
-  }, [copy, toast, t?.promptsPage]);
+  }, [copy, toast, t?.promptsPage, activeTeamId]);
 
   // Memoize prompt grouping to avoid recalculating on every render
   const groupedPrompts = useMemo(() => {
@@ -343,7 +350,6 @@ export default function PromptsPage() {
 
   const handleCreatePrompt = useCallback(async () => {
     if (!t?.promptsPage) return;
-    
     if (!newPrompt.title.trim() || !newPrompt.content.trim()) {
       toast({
         variant: "destructive",
@@ -355,13 +361,16 @@ export default function PromptsPage() {
 
     setIsSubmitting(true);
     try {
-      const newPromptData = await apiClient.createPrompt({
-        ...newPrompt,
-        id: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_public: true,
-      });
+      const newPromptData = await apiClient.createPrompt(
+        {
+          ...newPrompt,
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_public: true,
+        },
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
 
       fetchPrompts();
 
@@ -389,11 +398,14 @@ export default function PromptsPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [newPrompt, toast, t?.promptsPage, fetchPrompts]);
+  }, [newPrompt, toast, t?.promptsPage, fetchPrompts, activeTeamId]);
 
   const handleCreateTag = useCallback(async (inputValue) => {
     try {
-      await apiClient.createTag({ name: inputValue });
+      await apiClient.createTag(
+        { name: inputValue, scope: activeTeamId ? 'team' : 'personal' },
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
       const newOption = { value: inputValue, label: inputValue };
       setTagOptions((prev) => [...prev, newOption]);
       return newOption;
@@ -406,7 +418,7 @@ export default function PromptsPage() {
       });
     }
     return null;
-  }, [toast]);
+  }, [toast, activeTeamId]);
 
   const handleOptimize = useCallback(async () => {
     if (!newPrompt.content.trim() || !t?.promptsPage) return;
@@ -462,17 +474,30 @@ export default function PromptsPage() {
   useEffect(() => {
     setCurrentPage(1);
     fetchPrompts();
-  }, [selectedTags]);
+  }, [selectedTags, activeTeamId, fetchPrompts]);
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const data = await apiClient.getTags();
-        const mappedTags = data.map((tag) => ({
-          value: tag.name,
-          label: tag.name,
-        }));
-        setTagOptions(mappedTags);
+        const data = await apiClient.getTags(activeTeamId ? { teamId: activeTeamId } : {});
+
+        if (data?.team || data?.personal || data?.global) {
+          const combined = [
+            ...(data.team || []),
+            ...(data.personal || []),
+          ];
+          const mappedTags = combined.map((tag) => ({
+            value: tag.name,
+            label: tag.name,
+          }));
+          setTagOptions(mappedTags);
+        } else if (Array.isArray(data)) {
+          const mappedTags = data.map((tag) => ({
+            value: tag.name,
+            label: tag.name,
+          }));
+          setTagOptions(mappedTags);
+        }
       } catch (error) {
         console.error("Error fetching tags:", error);
         toast({
@@ -484,7 +509,7 @@ export default function PromptsPage() {
     };
 
     fetchTags();
-  }, [toast]);
+  }, [toast, activeTeamId]);
 
   if (!t) return null;
   const tp = t.promptsPage;
@@ -496,13 +521,22 @@ export default function PromptsPage() {
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <h1 className="text-3xl font-bold tracking-tight">{tp.title}</h1>
-              <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-lg">
-                <span className="text-sm font-medium text-secondary-foreground">
-                  {tp.totalPrompts.replace(
-                    "{count}",
-                    pagination.total.toString()
-                  )}
-                </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-lg">
+                  <span className="text-sm font-medium text-secondary-foreground">
+                    {tp.totalPrompts.replace(
+                      "{count}",
+                      pagination.total.toString()
+                    )}
+                  </span>
+                </div>
+                {!isPersonal && activeTeamId && (
+                  <Link href="/teams">
+                    <Button variant="outline" className="whitespace-nowrap">
+                      {tp.manageTeam}
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
 

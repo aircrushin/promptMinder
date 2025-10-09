@@ -59,7 +59,19 @@ export default function TagsPage() {
   const fetchTags = useCallback(async () => {
     try {
       const data = await apiClient.getTags();
-      setTags(data);
+
+      // Normalize API response to a flat array for rendering safety
+      const teamTags = Array.isArray(data?.team) ? data.team : [];
+      const personalTags = Array.isArray(data?.personal) ? data.personal : [];
+      const globalTags = Array.isArray(data?.global) ? data.global : [];
+      const fallback = Array.isArray(data) ? data : [];
+
+      // Prefer structured response if present; otherwise fallback to legacy array
+      const normalized = (teamTags.length || personalTags.length || globalTags.length)
+        ? [...teamTags, ...personalTags, ...globalTags]
+        : fallback;
+
+      setTags(normalized);
     } catch (err) {
       setError(err.message || t?.tagsPage?.fetchError || 'Failed to fetch tags');
     } finally {

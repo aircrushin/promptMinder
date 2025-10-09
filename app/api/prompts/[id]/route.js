@@ -1,101 +1,184 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+import { requireUserId } from '@/lib/auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
+import { resolveTeamContext } from '@/lib/team-request.js'
+import { TEAM_ROLES } from '@/lib/team-service.js'
+
+async function getPromptId(paramsPromise) {
+  const { id } = await paramsPromise
+  if (!id) {
+    throw new Error('Prompt id missing in route params')
+  }
+  return id
+}
+
+function isCreator(prompt, userId) {
+  return prompt.created_by === userId || prompt.user_id === userId
+}
+
+function ensureManagerPermission(membership) {
+  return membership && [TEAM_ROLES.ADMIN, TEAM_ROLES.OWNER].includes(membership.role)
+}
 
 export async function GET(request, { params }) {
-  const { id } = await params;
-  const { userId } = await auth()
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-  
-  const { data: prompt, error } = await supabase
-    .from('prompts')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .single();
+  try {
+    const id = await getPromptId(params)
+    const userId = await requireUserId()
+    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    let membership = null
+    if (teamId) {
+      membership = await teamService.requireMembership(teamId, userId)
+    }
+
+    let query = supabase.from('prompts').select('*').eq('id', id)
+    if (teamId) {
+      query = query.eq('team_id', teamId)
+    } else {
+      query = query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+    }
+
+    const { data: prompt, error } = await query.maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(prompt)
+  } catch (error) {
+    return handleApiError(error, 'Unable to load prompt')
   }
-
-  if (!prompt) {
-    return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
-  }
-
-  return NextResponse.json(prompt);
 }
 
 export async function POST(request, { params }) {
-  const { id } = await params;
-  const { userId } = await auth()
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+  try {
+    const id = await getPromptId(params)
+    const userId = await requireUserId()
+    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
 
-  const { title, content, description, is_public, tags, image_url, version } = await request.json();
+    let membership = null
+    if (teamId) {
+      membership = await teamService.requireMembership(teamId, userId)
+    }
 
-  const { data: prompt, error } = await supabase
-    .from('prompts')
-    .select('version')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .single();
+    let query = supabase.from('prompts').select('*').eq('id', id)
+    if (teamId) {
+      query = query.eq('team_id', teamId)
+    } else {
+      query = query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+    }
 
-  if (error || !prompt) {
-    return NextResponse.json({ error: error ? error.message : 'Prompt not found' }, { status: 500 });
+    const { data: prompt, error } = await query.maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt not found' }, { status: 404 })
+    }
+
+    if (!isCreator(prompt, userId) && !ensureManagerPermission(membership)) {
+      return NextResponse.json({ error: 'Only the creator or team managers can update this prompt' }, { status: 403 })
+    }
+
+    const payload = await request.json()
+
+    const updateData = {
+      updated_at: new Date().toISOString(),
+    }
+
+    if (payload.title !== undefined) updateData.title = payload.title
+    if (payload.content !== undefined) updateData.content = payload.content
+    if (payload.description !== undefined) updateData.description = payload.description
+    if (payload.is_public !== undefined) updateData.is_public = payload.is_public
+    if (payload.tags !== undefined) updateData.tags = payload.tags
+    if (payload.image_url !== undefined || payload.cover_img !== undefined) {
+      updateData.cover_img = payload.cover_img ?? payload.image_url
+    }
+    if (payload.version !== undefined) updateData.version = payload.version
+    if (payload.projectId !== undefined) updateData.project_id = payload.projectId
+
+    if (Object.keys(updateData).length === 1) {
+      return NextResponse.json({ message: 'No changes supplied' })
+    }
+
+    let updateQuery = supabase.from('prompts').update(updateData).eq('id', id)
+    if (prompt.team_id) {
+      updateQuery = updateQuery.eq('team_id', prompt.team_id)
+    }
+
+    const { error: updateError } = await updateQuery
+
+    if (updateError) {
+      throw updateError
+    }
+
+    return NextResponse.json({ message: 'Prompt updated successfully' })
+  } catch (error) {
+    return handleApiError(error, 'Unable to update prompt')
   }
-
-  const updateData = {
-    updated_at: new Date().toISOString(),
-    user_id: userId
-  };
-  if (title !== undefined) updateData.title = title;
-  if (content !== undefined) updateData.content = content;
-  if (description !== undefined) updateData.description = description;
-  if (is_public !== undefined) updateData.is_public = is_public;
-  if (tags !== undefined) updateData.tags = tags;
-  if (image_url !== undefined) updateData.cover_img = image_url;
-  if (version !== undefined) updateData.version = version;
-
-  const { error: updateError } = await supabase
-    .from('prompts')
-    .update(updateData)
-    .eq('id', id);
-
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ message: 'Prompt updated successfully', version: version });
 }
 
 export async function DELETE(request, { params }) {
-  const { id } = await params;
-  const { userId } = await auth()
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+  try {
+    const id = await getPromptId(params)
+    const userId = await requireUserId()
+    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
 
-  // 检查提示词是否存在
-  const { data: prompt, error: checkError } = await supabase
-    .from('prompts')
-    .select('id')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .single();
+    let membership = null
+    if (teamId) {
+      membership = await teamService.requireMembership(teamId, userId)
+    }
 
-  if (checkError || !prompt) {
-    return NextResponse.json(
-      { error: checkError ? checkError.message : 'Prompt not found' }, 
-      { status: 404 }
-    );
+    let query = supabase.from('prompts').select('id, created_by, user_id, team_id').eq('id', id)
+    if (teamId) {
+      query = query.eq('team_id', teamId)
+    } else {
+      query = query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+    }
+
+    const { data: prompt, error } = await query.maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt not found' }, { status: 404 })
+    }
+
+    const canDelete = isCreator(prompt, userId) || ensureManagerPermission(membership)
+    if (!canDelete) {
+      return NextResponse.json({ error: 'Only the creator or team managers can delete this prompt' }, { status: 403 })
+    }
+
+    let deleteQuery = supabase.from('prompts').delete().eq('id', id)
+    if (prompt.team_id) {
+      deleteQuery = deleteQuery.eq('team_id', prompt.team_id)
+    }
+
+    const { error: deleteError } = await deleteQuery
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    return NextResponse.json({ message: 'Prompt deleted successfully' })
+  } catch (error) {
+    return handleApiError(error, 'Unable to delete prompt')
   }
-
-  // 执行删除操作
-  const { error: deleteError } = await supabase
-    .from('prompts')
-    .delete()
-    .eq('id', id);
-
-  if (deleteError) {
-    return NextResponse.json({ error: deleteError.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ message: 'Prompt deleted successfully' });
-} 
+}

@@ -1,57 +1,51 @@
 'use client';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, use, Suspense } from 'react';
-import { Spinner } from '@/components/ui/Spinner';
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import Image from 'next/image';
+
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Loader2, Wand2 } from "lucide-react";
+import { Spinner } from '@/components/ui/Spinner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2, Wand2 } from 'lucide-react';
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalFooter,
   ModalTitle,
-} from "@/components/ui/modal"
+} from '@/components/ui/modal';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { useTeam } from '@/contexts/team-context';
 
-// Dynamic imports for heavy components
 const CreatableSelect = dynamic(() => import('react-select/creatable'), {
   loading: () => <Skeleton className="h-10 w-full" />,
-  ssr: false
+  ssr: false,
 });
 
-const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.div), {
+const MotionDiv = dynamic(() => import('framer-motion').then((mod) => mod.motion.div), {
   loading: () => <div className="animate-pulse" />,
-  ssr: false
+  ssr: false,
 });
 
 const VariableInputs = dynamic(() => import('@/components/prompt/VariableInputs'), {
   loading: () => <Skeleton className="h-16 w-full" />,
-  ssr: false
+  ssr: false,
 });
 
 export default function EditPrompt({ params }) {
   const router = useRouter();
-  const { id } = use(params);
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { toast } = useToast();
-  const [prompt, setPrompt] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const state = window.history.state;
-      if (state?.usr?.state?.prompt) {
-        return state.usr.state.prompt;
-      }
-    }
-    return null;
-  });
+  const { activeTeamId } = useTeam();
+  const promptId = params?.id;
+
+  const [prompt, setPrompt] = useState(null);
   const [originalVersion, setOriginalVersion] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
@@ -60,74 +54,129 @@ export default function EditPrompt({ params }) {
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (id && !prompt) {
-          const data = await apiClient.request(`/api/prompts/${id}`);
-          setPrompt(data);
-          setOriginalVersion(data.version);
-        } else if (prompt && originalVersion === null) {
-          setOriginalVersion(prompt.version);
-        }
+    const fetchInitialData = async () => {
+      if (!promptId) {
+        return;
+      }
 
-        const tagsData = await apiClient.getTags();
-        setTagOptions(tagsData.map(tag => ({ value: tag.name, label: tag.name })));
+      try {
+        const [promptData, tagsData] = await Promise.all([
+          apiClient.request(`/api/prompts/${promptId}`, activeTeamId ? { teamId: activeTeamId } : {}),
+          apiClient.getTags(activeTeamId ? { teamId: activeTeamId } : {}),
+        ]);
+
+        setPrompt(promptData);
+        setOriginalVersion(promptData.version);
+
+        let tagList = []
+        if (Array.isArray(tagsData?.team)) {
+          tagList = tagList.concat(tagsData.team)
+        }
+        if (Array.isArray(tagsData?.personal)) {
+          tagList = tagList.concat(tagsData.personal)
+        }
+        if (!tagList.length && Array.isArray(tagsData)) {
+          tagList = tagsData
+        }
+        const uniqueTags = Array.from(new Map(tagList.map((tag) => [tag.name, tag])).values());
+        setTagOptions(uniqueTags.map((tag) => ({ value: tag.name, label: tag.name })));
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching prompt:', error);
+        toast({
+          variant: 'destructive',
+          description: error.message || '加载提示词失败',
+        });
       }
     };
 
-    fetchData();
-  }, [id, prompt, originalVersion]);
+    fetchInitialData();
+  }, [promptId, activeTeamId, toast]);
 
-  if (!t) return <div className="flex justify-center items-center min-h-[70vh]"><Spinner className="w-8 h-8" /></div>;
+  if (!t) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
+
   const tp = t.promptEditPage;
-  if (!tp) return <div className="flex justify-center items-center min-h-[70vh]"><Spinner className="w-8 h-8" /></div>;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  if (!prompt) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setIsSubmitting(true);
-
     try {
       const isNewVersion = originalVersion !== prompt.version;
-      let data;
+      let result;
 
-      const submitData = {
-        ...prompt
-      };
-      
       if (isNewVersion) {
-        // Create new version
-        delete submitData.id;
-        delete submitData.created_at;
-        delete submitData.updated_at;
-        data = await apiClient.createPrompt({
-          ...submitData,
+        const newPromptPayload = {
+          ...prompt,
           id: crypto.randomUUID(),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          is_public: true
-        });
+        };
+        delete newPromptPayload.team_id;
+        result = await apiClient.createPrompt(newPromptPayload, activeTeamId ? { teamId: activeTeamId } : {});
+        toast({ title: '成功', description: tp.createVersionSuccess });
+        router.push(`/prompts/${result.id}`);
       } else {
-        // Update existing prompt
-        data = await apiClient.updatePrompt(id, submitData);
+        const updatePayload = { ...prompt };
+        result = await apiClient.updatePrompt(promptId, updatePayload, activeTeamId ? { teamId: activeTeamId } : {});
+        toast({ title: '成功', description: tp.updateSuccess });
+        router.push('/prompts');
       }
-
-      toast({
-        title: "成功",
-        description: isNewVersion ? tp.createVersionSuccess : tp.updateSuccess,
-      });
-      router.push(`/prompts/${isNewVersion ? data.id : id}`);
     } catch (error) {
-      toast({
-        title: "错误",
-        description: error.message || tp.updateError,
-        variant: "destructive",
-      });
       console.error('Error updating prompt:', error);
+      toast({
+        title: '错误',
+        description: error.message || tp.updateError,
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const tagSelectProps = {
+    isCreatable: true,
+    onKeyDown: (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        const inputValue = event.target.value;
+        if (inputValue) {
+          tagSelectProps.onCreateOption(inputValue);
+        }
+      }
+    },
+    onCreateOption: async (inputValue) => {
+      try {
+        if (!activeTeamId) {
+          throw new Error('请选择团队后再创建标签');
+        }
+        await apiClient.createTag({ name: inputValue }, { teamId: activeTeamId });
+        const newOption = { value: inputValue, label: inputValue };
+        setTagOptions((prev) => [...prev, newOption]);
+
+        const tags = prompt.tags ? `${prompt.tags},${inputValue}` : inputValue;
+        setPrompt((prev) => ({ ...prev, tags }));
+      } catch (error) {
+        console.error('Error creating tag:', error);
+        toast({
+          variant: 'destructive',
+          description: error.message || '创建标签失败',
+        });
+      }
+    },
   };
 
   const handleOptimize = async () => {
@@ -135,10 +184,9 @@ export default function EditPrompt({ params }) {
     setIsOptimizing(true);
     setOptimizedContent('');
     setShowOptimizeModal(true);
-    
+
     try {
       const response = await apiClient.generate(prompt.content);
-      
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let tempContent = '';
@@ -146,32 +194,31 @@ export default function EditPrompt({ params }) {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
-        
+        const lines = chunk.split('\n').filter((line) => line.trim());
+
         for (const line of lines) {
           try {
             const jsonStr = line.replace(/^data: /, '').trim();
             if (!jsonStr || jsonStr === '[DONE]') continue;
-            
-            const data = JSON.parse(jsonStr);
-            if (data.choices?.[0]?.delta?.content) {
-              tempContent += data.choices[0].delta.content;
+
+            const delta = JSON.parse(jsonStr);
+            if (delta.choices?.[0]?.delta?.content) {
+              tempContent += delta.choices[0].delta.content;
               setOptimizedContent(tempContent);
             }
-          } catch (e) {
-            console.error(tp.optimizeParsingError, e);
+          } catch (error) {
+            console.error(tp.optimizeParsingError, error);
           }
         }
       }
-
     } catch (error) {
       console.error(tp.optimizeErrorLog, error);
       toast({
-        title: "错误",
+        title: '错误',
         description: error.message || tp.optimizeRetry,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setIsOptimizing(false);
@@ -179,75 +226,61 @@ export default function EditPrompt({ params }) {
   };
 
   const handleApplyOptimized = () => {
-    setPrompt(prev => ({
-      ...prev,
-      content: optimizedContent
-    }));
+    setPrompt((prev) => ({ ...prev, content: optimizedContent }));
     setShowOptimizeModal(false);
-    toast({
-      title: "成功",
-      description: tp.applyOptimizeSuccess,
-    });
+    toast({ title: '成功', description: tp.applyOptimizeSuccess });
   };
-
-  if (!prompt) {
-    return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        <Spinner className="w-8 h-8" />
-      </div>
-    );
-  }
 
   return (
     <>
-      <Suspense fallback={<div className="container max-w-3xl mx-auto p-6 animate-pulse"><Skeleton className="h-8 w-48 mb-8" /><Card><CardContent className="p-6"><Skeleton className="h-96 w-full" /></CardContent></Card></div>}>
-        <MotionDiv 
+      <Suspense
+        fallback={
+          <div className="container mx-auto max-w-7xl p-6 animate-pulse">
+            <Skeleton className="mb-6 h-8 w-48" />
+            <Card>
+              <CardContent className="pt-6">
+                <Skeleton className="h-96 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        }
+      >
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="container max-w-3xl mx-auto p-6"
+          transition={{ duration: 0.5 }}
+          className="container mx-auto max-w-7xl p-6"
         >
-        <div className="flex items-center gap-4 mb-8">
-          <button 
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
-          <h1 className="text-3xl font-bold">{tp.title}</h1>
-        </div>
-
-        <Card className="shadow-lg">
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <MotionDiv 
-                className="space-y-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-lg font-medium">{tp.formTitleLabel}</Label>
+          <h1 className="mb-6 text-3xl font-bold">{tp.title}</h1>
+          <Card>
+            <CardContent className="pt-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
+                  <Label htmlFor="title" className="text-base">
+                    {tp.formTitleLabel}
+                    <span className="ml-1 text-red-500">*</span>
+                  </Label>
                   <Input
                     id="title"
                     value={prompt.title}
-                    onChange={(e) => setPrompt({ ...prompt, title: e.target.value })}
-                    className="h-12"
+                    onChange={(event) => setPrompt({ ...prompt, title: event.target.value })}
                     placeholder={tp.formTitlePlaceholder}
                     required
                   />
-                </div>
+                </MotionDiv>
 
-                <div className="space-y-2">
-                  <Label htmlFor="content" className="text-lg font-medium">{tp.formContentLabel}</Label>
+                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
+                  <Label htmlFor="content" className="text-base">
+                    {tp.formContentLabel}
+                    <span className="ml-1 text-red-500">*</span>
+                  </Label>
                   <div className="relative">
                     <Textarea
                       id="content"
                       value={prompt.content}
-                      onChange={(e) => setPrompt({ ...prompt, content: e.target.value })}
-                      className="min-h-[250px] resize-y pr-12"
+                      onChange={(event) => setPrompt({ ...prompt, content: event.target.value })}
                       placeholder={tp.formContentPlaceholder}
+                      className="min-h-[250px] pr-12"
                       required
                     />
                     <Button
@@ -258,153 +291,96 @@ export default function EditPrompt({ params }) {
                       onClick={handleOptimize}
                       disabled={isOptimizing || !prompt.content.trim()}
                     >
-                      {isOptimizing ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Wand2 className="h-4 w-4" />
-                      )}
+                      {isOptimizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                     </Button>
                   </div>
                   <p className="text-sm text-muted-foreground">{tp.variableTip}</p>
-                </div>
+                </MotionDiv>
 
-                {/* 动态变量输入组件 */}
                 <Suspense fallback={<Skeleton className="h-16 w-full" />}>
-                  <VariableInputs
-                    content={prompt.content}
-                    className="my-4"
-                  />
+                  <VariableInputs content={prompt.content} className="my-4" />
                 </Suspense>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-lg font-medium">{tp.formDescriptionLabel}</Label>
+                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
+                  <Label htmlFor="description" className="text-base">
+                    {tp.formDescriptionLabel}
+                  </Label>
                   <Textarea
                     id="description"
-                    value={prompt.description}
-                    onChange={(e) => setPrompt({ ...prompt, description: e.target.value })}
-                    className="min-h-[80px] resize-y"
+                    value={prompt.description || ''}
+                    onChange={(event) => setPrompt({ ...prompt, description: event.target.value })}
                     placeholder={tp.formDescriptionPlaceholder}
+                    className="min-h-[80px]"
                   />
-                </div>
+                </MotionDiv>
 
                 <div className="space-y-2">
-                  <Label htmlFor="tags" className="text-lg font-medium">{tp.formTagsLabel}</Label>
+                  <Label htmlFor="tags" className="text-base">
+                    {tp.formTagsLabel}
+                  </Label>
                   <CreatableSelect
+                    key="tags-select"
                     id="tags"
                     isMulti
-                    value={prompt.tags?.split(',').map(tag => ({ value: tag, label: tag }))||[]}
+                    value={prompt.tags ? prompt.tags.split(',').map((tag) => ({ value: tag, label: tag })) : []}
                     onChange={(selected) => {
-                      const tags = selected ? selected.map(option => option.value).join(',') : '';
+                      const tags = selected ? selected.map((option) => option.value).join(',') : '';
                       setPrompt({ ...prompt, tags });
                     }}
                     options={tagOptions}
+                    placeholder={tp.formTagsPlaceholder}
                     className="basic-multi-select"
                     classNamePrefix="select"
-                    placeholder={tp.formTagsPlaceholder}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        minHeight: '2.5rem',
-                      })
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }
-                    }}
-                    onCreateOption={async (inputValue) => {
-                      try {
-                        await apiClient.createTag({ name: inputValue });
-                        const newOption = { value: inputValue, label: inputValue };
-                        setTagOptions([...tagOptions, newOption]);
-                        
-                        const newTags = prompt.tags ? `${prompt.tags},${inputValue}` : inputValue;
-                        setPrompt({ ...prompt, tags: newTags });
-                      } catch (error) {
-                        console.error('Error creating new tag:', error);
-                        toast({
-                          title: "错误",
-                          description: error.message || '创建标签失败',
-                          variant: "destructive",
-                        });
-                      }
-                    }}
+                    {...tagSelectProps}
+                    instanceId="tags-select"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="version" className="text-lg font-medium">{tp.formVersionLabel}</Label>
+                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
+                  <Label htmlFor="version" className="text-base">
+                    {tp.formVersionLabel}
+                  </Label>
                   <Input
                     id="version"
-                    value={prompt.version}
-                    onChange={(e) => setPrompt({ ...prompt, version: e.target.value })}
-                    className="h-12"
+                    value={prompt.version || ''}
+                    onChange={(event) => setPrompt({ ...prompt, version: event.target.value })}
                     placeholder={tp.formVersionPlaceholder}
                   />
-                </div>
-              </MotionDiv>
+                  <p className="text-sm text-muted-foreground">{tp.versionSuggestion}</p>
+                </MotionDiv>
 
-              <div className="flex gap-4 pt-4">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-32 h-12"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <Spinner className="w-4 h-4" />
-                      <span>{tp.saving}</span>
-                    </div>
-                  ) : tp.save}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => router.back()}
-                  className="w-32 h-12"
-                >
-                  {tp.cancel}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </MotionDiv>
+                <MotionDiv className="flex gap-4" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
+                  <Button type="submit" disabled={isSubmitting} className="relative">
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : tp.submitButton}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => router.back()}>
+                    {tp.cancelButton}
+                  </Button>
+                </MotionDiv>
+              </form>
+            </CardContent>
+          </Card>
+        </MotionDiv>
       </Suspense>
 
-      <Modal isOpen={showOptimizeModal} onClose={() => setShowOptimizeModal(false)}>
-        <ModalContent className="max-w-3xl max-h-[80vh]">
+      <Modal open={showOptimizeModal} onOpenChange={setShowOptimizeModal}>
+        <ModalContent className="sm:max-w-2xl">
           <ModalHeader>
-            <ModalTitle>{tp.optimizePreviewTitle}</ModalTitle>
+            <ModalTitle>{tp.optimizeModalTitle}</ModalTitle>
           </ModalHeader>
-          <div className="relative min-h-[200px] max-h-[50vh] overflow-y-auto">
-            <Textarea
-              value={optimizedContent}
-              onChange={(e) => setOptimizedContent(e.target.value)}
-              className="min-h-[200px] w-full"
-              placeholder={tp.optimizePlaceholder}
-            />
+          <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 text-sm leading-relaxed">
+            {optimizedContent || tp.optimizeProcessing}
           </div>
           <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowOptimizeModal(false)}
-              className="mr-2"
-            >
-              {tp.cancel}
+            <Button variant="outline" onClick={() => setShowOptimizeModal(false)}>
+              {tp.optimizeCancel}
             </Button>
-            <Button
-              type="button"
-              onClick={handleApplyOptimized}
-              disabled={!optimizedContent.trim()}
-            >
-              {tp.applyOptimization}
+            <Button onClick={handleApplyOptimized} disabled={!optimizedContent.trim()}>
+              {tp.optimizeApply}
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
     </>
   );
-} 
+}

@@ -183,7 +183,7 @@ CREATE TABLE teams (
 -- Create team member relationship table
 CREATE TABLE team_user_relation (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID NOT NULL,
+    team_id UUID,
     user_id TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

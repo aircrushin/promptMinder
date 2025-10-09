@@ -20,7 +20,7 @@
 - ✅ **标签化管理** - 自定义标签，快速分类和检索
 - ✅ **公私有模式** - 支持私有提示词和公共分享
 - ✅ **AI 智能生成** - 集成 AI 模型，智能生成优质提示词
-- ✅ **团队协作** - 支持团队创建和成员管理（开发中）
+- ✅ **团队协作** - 支持团队创建、成员管理与权限控制
 - ✅ **提示词贡献** - 社区贡献功能，审核发布流程
 
 ### 用户体验
@@ -183,7 +183,7 @@ CREATE TABLE teams (
 -- 创建团队成员关系表
 CREATE TABLE team_user_relation (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID NOT NULL,
+    team_id UUID,
     user_id TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -212,6 +212,21 @@ CREATE TABLE prompt_contributions (
 ```
 
 更多 SQL 文件可以在 `/sql` 目录中找到。
+
+### 团队协作迁移指南
+
+现有用户升级到团队协作版本时，需要按顺序执行以下步骤：
+
+1. **应用最新数据库结构**
+   - 依次运行 `sql/teams.sql`, `sql/project.sql`, `sql/prompts.sql`, `sql/tags.sql`，确保新增的外键、检查约束和索引落地。
+2. **回填历史数据**
+   - 执行 `sql/backfill_team_data.sql`，它会为每位用户创建个人团队并将既有提示词、项目、标签挂接到对应团队。
+   - 迁移后可通过脚本末尾的查询检查是否仍存在缺失 `team_id` 的记录。
+3. **发布前校验**
+   - 确认 `team_members` 表中每个团队仅保留一个 `owner`，同时 `teams.owner_id` 与对应成员一致。
+   - 为生产环境配置 `SUPABASE_URL` / `SUPABASE_ANON_KEY`，并在部署前运行 `npm run lint && npm test`。
+
+> 建议先在测试环境导入生产快照验证迁移脚本，确认无数据丢失后再在生产执行。
 
 ## 🔐 认证配置
 

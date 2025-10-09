@@ -1,92 +1,123 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+import { requireUserId } from '@/lib/auth.js'
+import { resolveTeamContext } from '@/lib/team-request.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function POST(request) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    const { sourceId, promptData } = await request.json();
+    const userId = await requireUserId()
+    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
 
-    let dataToCopy = {};
+    let targetTeamId = null
+    if (teamId) {
+      await teamService.requireMembership(teamId, userId)
+      targetTeamId = teamId
+    }
+
+    const { sourceId, promptData } = await request.json()
+
+    if (!sourceId && !promptData) {
+      return NextResponse.json({ error: 'Invalid request: Missing sourceId or promptData' }, { status: 400 })
+    }
+
+    const timestamp = new Date().toISOString()
+
+    let dataToCopy = null
 
     if (promptData) {
-      // Case 1: Importing a prompt from a public (markdown) source
       dataToCopy = {
-        title: promptData.role, // 'role' from markdown is the title
+        title: promptData.role,
         content: promptData.prompt,
         description: `Imported from public collection. Original category: ${promptData.category}`,
         tags: promptData.category || null,
-        cover_img: null, // No cover image from markdown
-      };
+        cover_img: null,
+      }
     } else if (sourceId) {
-      // Case 2: Copying a prompt that exists in the database
-      const { data: sourcePrompt, error: fetchError } = await supabase
-        .from('prompts')
-        .select('*')
-        .eq('id', sourceId)
-        .eq('is_public', true)
-        .single();
+      let sourcePrompt = null
 
-      if (fetchError || !sourcePrompt) {
-        return NextResponse.json({ error: 'Prompt not found or not public' }, { status: 404 });
+      if (teamId) {
+        const { data: teamPrompt, error: teamPromptError } = await supabase
+          .from('prompts')
+          .select('*')
+          .eq('id', sourceId)
+          .eq('team_id', teamId)
+          .maybeSingle()
+
+        if (teamPromptError) {
+          throw teamPromptError
+        }
+
+        sourcePrompt = teamPrompt
       }
 
-      if (sourcePrompt.user_id === userId) {
-        return NextResponse.json({ error: 'Cannot copy your own prompt' }, { status: 400 });
+      if (!sourcePrompt) {
+        const { data: publicPrompt, error: publicError } = await supabase
+          .from('prompts')
+          .select('*')
+          .eq('id', sourceId)
+          .eq('is_public', true)
+          .maybeSingle()
+
+        if (publicError) {
+          throw publicError
+        }
+
+        if (!publicPrompt) {
+          return NextResponse.json({ error: 'Prompt not found or unavailable' }, { status: 404 })
+        }
+
+        if (publicPrompt.user_id === userId) {
+          return NextResponse.json({ error: 'Cannot copy your own public prompt' }, { status: 400 })
+        }
+
+        sourcePrompt = publicPrompt
       }
-      
+
       dataToCopy = {
         title: sourcePrompt.title,
         content: sourcePrompt.content,
         description: sourcePrompt.description,
         tags: sourcePrompt.tags,
         cover_img: sourcePrompt.cover_img,
-      };
-
-    } else {
-      return NextResponse.json({ error: 'Invalid request: Missing sourceId or promptData' }, { status: 400 });
+        project_id: sourcePrompt.project_id,
+      }
     }
 
-    // Create the new prompt record for the current user
-    const newPromptData = {
+    const insertPayload = {
       id: crypto.randomUUID(),
+      team_id: targetTeamId,
+      project_id: targetTeamId ? dataToCopy.project_id || null : null,
       title: dataToCopy.title,
       content: dataToCopy.content,
       description: dataToCopy.description,
       tags: dataToCopy.tags,
-      version: '1.0.0', // Reset version
+      version: '1.0.0',
       user_id: userId,
-      is_public: false, // Imported prompts are private by default
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      cover_img: dataToCopy.cover_img
-    };
+      created_by: userId,
+      is_public: false,
+      cover_img: dataToCopy.cover_img,
+      created_at: timestamp,
+      updated_at: timestamp,
+    }
 
     const { data: newPrompt, error: insertError } = await supabase
       .from('prompts')
-      .insert([newPromptData])
+      .insert([insertPayload])
       .select()
-      .single();
+      .single()
 
     if (insertError) {
-      console.error('Insert error:', insertError);
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      throw insertError
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Prompt copied successfully',
-      prompt: newPrompt
-    });
-
+      prompt: newPrompt,
+    })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, 'Unable to copy prompt')
   }
-} 
+}

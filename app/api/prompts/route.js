@@ -1,94 +1,139 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+import { requireUserId } from '@/lib/auth.js'
+import { resolveTeamContext } from '@/lib/team-request.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function GET(request) {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-  const { userId } = await auth()
-  
-  // 从 URL 中获取查询参数
-  const { searchParams } = new URL(request.url);
-  const tag = searchParams.get('tag');
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '10');
-  const offset = (page - 1) * limit;
+  try {
+    const userId = await requireUserId()
+    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true
+    })
 
-  let query = supabase
-    .from('prompts')
-    .select('*')
-    .eq('user_id', userId);
-    
-  // 如果存在 tag 参数，添加过滤条件
-  if (tag) {
-    query = query.ilike('tags', `%${tag}%`);
-  }
-
-  // 分页查询
-  query = query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  const { data: prompts, error } = await query;
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  // 获取总数
-  let countQuery = supabase
-    .from('prompts')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
-    
-  if (tag) {
-    countQuery = countQuery.ilike('tags', `%${tag}%`);
-  }
-
-  const { count, error: countError } = await countQuery;
-
-  if (countError) {
-    console.error('Count error:', countError);
-  }
-
-  return NextResponse.json({
-    prompts,
-    pagination: {
-      page,
-      limit,
-      total: count || 0,
-      totalPages: Math.ceil((count || 0) / limit)
+    if (teamId) {
+      await teamService.requireMembership(teamId, userId)
     }
-  });
+
+    const { searchParams } = new URL(request.url)
+    const tag = searchParams.get('tag')
+    const search = searchParams.get('search')
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '10', 10)
+    const offset = (page - 1) * limit
+
+    let query = supabase
+      .from('prompts')
+      .select('*')
+
+    if (teamId) {
+      query = query.eq('team_id', teamId)
+    } else {
+      query = query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+    }
+
+    if (tag) {
+      query = query.ilike('tags', `%${tag}%`)
+    }
+
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+    }
+
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    const { data: prompts, error } = await query
+
+    if (error) {
+      throw error
+    }
+
+    let countQuery = supabase
+      .from('prompts')
+      .select('*', { count: 'exact', head: true })
+
+    if (teamId) {
+      countQuery = countQuery.eq('team_id', teamId)
+    } else {
+      countQuery = countQuery.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+    }
+
+    if (tag) {
+      countQuery = countQuery.ilike('tags', `%${tag}%`)
+    }
+
+    if (search) {
+      countQuery = countQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+    }
+
+    const { count, error: countError } = await countQuery
+
+    if (countError) {
+      throw countError
+    }
+
+    return NextResponse.json({
+      prompts: prompts || [],
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit)
+      }
+    })
+  } catch (error) {
+    return handleApiError(error, 'Unable to load prompts')
+  }
 }
 
 export async function POST(request) {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-  const { userId } = await auth();
-
   try {
-    const data = await request.json();
-    const promptData = {
+    const userId = await requireUserId()
+    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true
+    })
+
+    let targetTeamId = null
+    if (teamId) {
+      await teamService.requireMembership(teamId, userId)
+      targetTeamId = teamId
+    }
+
+    const data = await request.json()
+    const timestamp = new Date().toISOString()
+
+    const promptPayload = {
       id: crypto.randomUUID(),
-      ...data,
+      team_id: targetTeamId,
+      project_id: targetTeamId ? data.projectId || null : null,
+      title: data.title,
+      content: data.content,
+      description: data.description || null,
+      created_by: userId,
       user_id: userId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      is_public: true
-    };
+      version: data.version || null,
+      tags: data.tags || null,
+      is_public: data.is_public ?? false,
+      cover_img: data.cover_img || data.image_url || null,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
 
     const { data: newPrompt, error } = await supabase
       .from('prompts')
-      .insert([promptData])
-      .select();
+      .insert([promptPayload])
+      .select()
+      .single()
 
     if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      throw error
     }
 
-    return NextResponse.json(newPrompt[0]);
+    return NextResponse.json(newPrompt, { status: 201 })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, 'Unable to create prompt')
   }
-} 
+}
