@@ -68,7 +68,7 @@ export default function TeamInvitesPage() {
           asChild
           className="transition-all duration-200 hover:bg-muted/50"
         >
-          <Link href="/teams" legacyBehavior>
+          <Link href="/teams">
             <ArrowLeft className="mr-2 h-4 w-4" />
             返回团队管理
           </Link>

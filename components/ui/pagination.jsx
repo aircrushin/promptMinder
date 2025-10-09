@@ -71,14 +71,14 @@ export function Pagination({
     const right = currentPage + delta;
     const range = [];
     const rangeWithDots = [];
-    
+
     for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= left && i <= right)) {
             range.push(i);
         }
     }
 
-    let l;
+    let l = 0;
     for (const i of range) {
         if (l) {
             if (i - l === 2) {

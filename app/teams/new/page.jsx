@@ -18,6 +18,27 @@ export default function CreateTeamPage() {
   const { toast } = useToast();
   const { refresh } = useTeam();
   const { t } = useLanguage();
+
+  // 提供默认翻译对象作为后备
+  const safeT = t || {
+    createTeamPage: {
+      nameRequired: "请输入团队名称",
+      createSuccess: "团队创建成功",
+      createError: "创建团队失败",
+      backToTeams: "返回团队管理",
+      title: "创建新团队",
+      subtitle: "创建一个新的团队来协作管理提示词",
+      teamNameLabel: "团队名称",
+      teamNamePlaceholder: "请输入团队名称",
+      descriptionLabel: "团队描述",
+      descriptionPlaceholder: "请输入团队描述（可选）",
+      personalSpaceLabel: "个人空间",
+      personalSpaceDescription: "创建一个仅供自己使用的个人空间",
+      cancel: "取消",
+      creating: "创建中...",
+      create: "创建团队"
+    }
+  };
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -30,7 +51,7 @@ export default function CreateTeamPage() {
     if (!form.name.trim()) {
       toast({
         variant: "destructive",
-        description: t.createTeamPage.nameRequired,
+        description: safeT.createTeamPage.nameRequired,
       });
       return;
     }
@@ -54,7 +75,7 @@ export default function CreateTeamPage() {
       }
 
       const payload = await response.json();
-      toast({ description: t.createTeamPage.createSuccess });
+      toast({ description: safeT.createTeamPage.createSuccess });
       await refresh();
       router.push("/teams");
       router.refresh();
@@ -62,7 +83,7 @@ export default function CreateTeamPage() {
       console.error("[CreateTeamPage] create error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.createTeamPage.createError,
+        description: error.message || safeT.createTeamPage.createError,
       });
     } finally {
       setSubmitting(false);
@@ -77,9 +98,9 @@ export default function CreateTeamPage() {
           className="mb-8 transition-all duration-200 hover:bg-muted/50"
           asChild
         >
-          <Link href="/teams" legacyBehavior>
+          <Link href="/teams">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            {t.createTeamPage.backToTeams}
+            {safeT.createTeamPage.backToTeams}
           </Link>
         </Button>
 
@@ -89,17 +110,17 @@ export default function CreateTeamPage() {
               <div className="p-2 rounded-lg bg-primary/10">
                 <Sparkles className="h-6 w-6 text-primary" />
               </div>
-              {t.createTeamPage.title}
+              {safeT.createTeamPage.title}
             </CardTitle>
             <p className="text-muted-foreground leading-relaxed">
-              {t.createTeamPage.subtitle}
+              {safeT.createTeamPage.subtitle}
             </p>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-8 px-8">
               <div className="space-y-3">
                 <Label htmlFor="team-name" className="text-sm font-semibold">
-                  {t.createTeamPage.teamNameLabel}
+                  {safeT.createTeamPage.teamNameLabel}
                 </Label>
                 <Input
                   id="team-name"
@@ -107,7 +128,7 @@ export default function CreateTeamPage() {
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, name: event.target.value }))
                   }
-                  placeholder={t.createTeamPage.teamNamePlaceholder}
+                  placeholder={safeT.createTeamPage.teamNamePlaceholder}
                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                   required
                 />
@@ -115,7 +136,7 @@ export default function CreateTeamPage() {
 
               <div className="space-y-3">
                 <Label htmlFor="team-description" className="text-sm font-semibold">
-                  {t.createTeamPage.descriptionLabel}
+                  {safeT.createTeamPage.descriptionLabel}
                 </Label>
                 <Input
                   id="team-description"
@@ -123,16 +144,16 @@ export default function CreateTeamPage() {
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, description: event.target.value }))
                   }
-                  placeholder={t.createTeamPage.descriptionPlaceholder}
+                  placeholder={safeT.createTeamPage.descriptionPlaceholder}
                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
               <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 p-5 transition-all duration-200 hover:bg-muted/30">
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold">{t.createTeamPage.personalSpaceLabel}</p>
+                  <p className="text-sm font-semibold">{safeT.createTeamPage.personalSpaceLabel}</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {t.createTeamPage.personalSpaceDescription}
+                    {safeT.createTeamPage.personalSpaceDescription}
                   </p>
                 </div>
                 <Switch
@@ -153,7 +174,7 @@ export default function CreateTeamPage() {
                 disabled={submitting}
                 className="transition-all duration-200 hover:bg-muted"
               >
-                {t.createTeamPage.cancel}
+                {safeT.createTeamPage.cancel}
               </Button>
               <Button
                 type="submit"
@@ -161,7 +182,7 @@ export default function CreateTeamPage() {
                 className="transition-all duration-200 hover:shadow-md hover:scale-[1.02] bg-gradient-to-r from-primary to-primary/90"
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {submitting ? t.createTeamPage.creating : t.createTeamPage.create}
+                {submitting ? safeT.createTeamPage.creating : safeT.createTeamPage.create}
               </Button>
             </CardFooter>
           </form>

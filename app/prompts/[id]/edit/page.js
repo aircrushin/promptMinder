@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { use, useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Spinner } from '@/components/ui/Spinner';
@@ -43,7 +43,14 @@ export default function EditPrompt({ params }) {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { activeTeamId } = useTeam();
-  const promptId = params?.id;
+  const paramsResource = useMemo(() => {
+    if (params && typeof params.then === 'function') {
+      return params;
+    }
+    return Promise.resolve(params);
+  }, [params]);
+  const resolvedParams = use(paramsResource);
+  const promptId = resolvedParams?.id;
 
   const [prompt, setPrompt] = useState(null);
   const [originalVersion, setOriginalVersion] = useState(null);

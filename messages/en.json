@@ -570,6 +570,8 @@
     "saving": "Saving...",
     "save": "Save",
     "cancel": "Cancel",
+    "submitButton": "Save Changes",
+    "cancelButton": "Cancel",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
     "applyOptimization": "Apply Optimization Result"

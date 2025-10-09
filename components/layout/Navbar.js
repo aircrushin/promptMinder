@@ -30,13 +30,29 @@ export default function Navbar() {
     checkAuth();
   }, []);
 
-  if (!t) return null;
+  // 如果翻译对象不可用，使用默认的中文翻译
+  const safeT = t || {
+    navbar: {
+      manage: '提示词管理',
+      new: '新建提示词',
+      public: '公共库',
+      menuTitle: '菜单',
+      menuSubtitle: '导航菜单',
+      teamSection: '团队',
+      navigationSection: '导航',
+      settingsSection: '设置'
+    },
+    language: {
+      switchTo: '切换语言',
+      current: '中文'
+    }
+  };
 
   return (
     <nav className="border-b">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <Link href="/" className="flex items-center group" legacyBehavior>
+          <Link href="/" className="flex items-center group">
             <OptimizedImage 
               src="/logo2.png" 
               alt="PromptMinder" 
@@ -54,48 +70,51 @@ export default function Navbar() {
             <NavigationMenu className="hidden sm:flex">
               <NavigationMenuList className="space-x-8">
                 <NavigationMenuItem>
-                  <Link href="/prompts" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={`${
-                        pathname === '/prompts'
-                          ? 'text-primary font-medium'
-                          : 'text-muted-foreground'
-                      } flex items-center gap-1`}
-                    >
+                  <NavigationMenuLink
+                    asChild
+                    className={`${
+                      pathname === '/prompts'
+                        ? 'text-primary font-medium'
+                        : 'text-muted-foreground'
+                    } flex items-center gap-1`}
+                  >
+                    <Link href="/prompts">
                       <Library className="h-4 w-4" />
-                      {t.navbar.manage}
-                    </NavigationMenuLink>
-                  </Link>
+                      {safeT.navbar.manage}
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
                 
-                <NavigationMenuItem>
-                  <Link href="/prompts/new" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={`${
-                        pathname === '/prompts/new'
-                          ? 'text-primary font-medium'
-                          : 'text-muted-foreground'
-                      } flex items-center gap-1`}
-                    >
+                {/* <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={`${
+                      pathname === '/prompts/new'
+                        ? 'text-primary font-medium'
+                        : 'text-muted-foreground'
+                    } flex items-center gap-1`}
+                  >
+                    <Link href="/prompts/new">
                       <FolderPlus className="h-4 w-4" />
-                      {t.navbar.new}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
+                      {safeT.navbar.new}
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem> */}
 
                 <NavigationMenuItem>
-                  <Link href="/public" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={`${
-                        pathname === '/public'
-                          ? 'text-primary font-medium'
-                          : 'text-muted-foreground'
-                      } flex items-center gap-1`}
-                    >
+                  <NavigationMenuLink
+                    asChild
+                    className={`${
+                      pathname === '/public'
+                        ? 'text-primary font-medium'
+                        : 'text-muted-foreground'
+                    } flex items-center gap-1`}
+                  >
+                    <Link href="/public">
                       <Globe className="h-4 w-4" />
-                      {t.navbar.public}
-                    </NavigationMenuLink>
-                  </Link>
+                      {safeT.navbar.public}
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
 
               </NavigationMenuList>
@@ -113,13 +132,13 @@ export default function Navbar() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px] sm:w-[320px]">
                   <SheetTitle className="sr-only">
-                    {t.navbar.menuTitle}
+                    {safeT.navbar.menuTitle}
                   </SheetTitle>
 
                   {/* Header Section */}
                   <div className="flex flex-col gap-1 pb-4 border-b">
                     <p className="text-xs text-muted-foreground">
-                      {t.navbar.menuSubtitle}
+                      {safeT.navbar.menuSubtitle}
                     </p>
                   </div>
 
@@ -128,7 +147,7 @@ export default function Navbar() {
                     <SignedIn>
                       <div className="space-y-2">
                         <div className="text-xs font-medium text-muted-foreground px-2">
-                          {t.navbar.teamSection}
+                          {safeT.navbar.teamSection}
                         </div>
                         <TeamSwitcher className="w-full" />
                       </div>
@@ -138,7 +157,7 @@ export default function Navbar() {
                     {/* Navigation Links */}
                     <nav className="space-y-1">
                       <div className="text-xs font-medium text-muted-foreground px-2 mb-2">
-                        {t.navbar.navigationSection}
+                        {safeT.navbar.navigationSection}
                       </div>
                       <Link
                         href="/prompts"
@@ -147,9 +166,9 @@ export default function Navbar() {
                             ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}
-                        legacyBehavior>
+                      >
                         <Library className="h-4 w-4 shrink-0" />
-                        <span className="text-sm">{t.navbar.manage}</span>
+                        <span className="text-sm">{safeT.navbar.manage}</span>
                       </Link>
                       <Link
                         href="/prompts/new"
@@ -158,9 +177,9 @@ export default function Navbar() {
                             ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}
-                        legacyBehavior>
+                      >
                         <FolderPlus className="h-4 w-4 shrink-0" />
-                        <span className="text-sm">{t.navbar.new}</span>
+                        <span className="text-sm">{safeT.navbar.new}</span>
                       </Link>
                       <Link
                         href="/public"
@@ -169,9 +188,9 @@ export default function Navbar() {
                             ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}
-                        legacyBehavior>
+                      >
                         <Globe className="h-4 w-4 shrink-0" />
-                        <span className="text-sm">{t.navbar.public}</span>
+                        <span className="text-sm">{safeT.navbar.public}</span>
                       </Link>
                     </nav>
 
@@ -180,7 +199,7 @@ export default function Navbar() {
                     {/* Settings Section */}
                     <div className="space-y-1">
                       <div className="text-xs font-medium text-muted-foreground px-2 mb-2">
-                        {t.navbar.settingsSection}
+                        {safeT.navbar.settingsSection}
                       </div>
                       <Button
                         variant="ghost"
@@ -189,8 +208,8 @@ export default function Navbar() {
                       >
                         <Languages className="h-4 w-4 shrink-0" />
                         <div className="flex flex-col items-start">
-                          <span className="text-sm">{t.language.switchTo}</span>
-                          <span className="text-xs text-muted-foreground">({t.language.current})</span>
+                          <span className="text-sm">{safeT.language.switchTo}</span>
+                          <span className="text-xs text-muted-foreground">({safeT.language.current})</span>
                         </div>
                       </Button>
                     </div>

@@ -111,8 +111,15 @@ export default function Home() {
   // const t = translations[language];
   // useEffect(() => { ... }, [language]);
 
-  // Context 加载保护
-  if (!t) return null; 
+  // 提供默认翻译对象作为后备
+  const safeT = t || {
+    hero: { title: "Prompt Minder", subtitle: "专业的AI提示词管理平台", cta: "开始使用" },
+    features: { title: "核心功能", items: [] },
+    testimonials: { title: "用户评价", items: [] },
+    faq: { title: "常见问题", items: [] },
+    cta: { title: "立即开始", description: "免费体验所有功能", button: "免费开始" },
+    footer: { copyright: "© 2024 Prompt Minder. All rights reserved." }
+  }; 
 
   return (
     <>
@@ -121,25 +128,25 @@ export default function Home() {
       <main className="flex min-h-screen flex-col pt-16">
         {/* 将 Context 中的 t 传递给子组件 */}
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-          <HeroSection t={t.hero} />
+          <HeroSection t={safeT.hero} />
         </Suspense>
         <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
-          <FeatureSection t={t.features} />
+          <FeatureSection t={safeT.features} />
         </Suspense>
         {/* <PricingSection /> */}
         <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
-          <TestimonialSection t={t.testimonials} />
+          <TestimonialSection t={safeT.testimonials} />
         </Suspense>
         <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
-          <FAQSection t={t.faq} />
+          <FAQSection t={safeT.faq} />
         </Suspense>
         <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
-          <CTASection t={t.cta} />
+          <CTASection t={safeT.cta} />
         </Suspense>
       </main>
       {/* 将 Context 中的 t 传递给 Footer */}
       <Suspense fallback={<div className="h-32 bg-secondary/10 animate-pulse"></div>}>
-        <Footer t={t.footer} />
+        <Footer t={safeT.footer} />
       </Suspense>
     </>
   );

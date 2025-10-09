@@ -540,7 +540,7 @@ export default function PromptsPage() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3 md:gap-4">
               <div className="relative w-full md:w-[320px]">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
                   <Search className="h-4 w-4" />
@@ -553,7 +553,7 @@ export default function PromptsPage() {
                 />
               </div>
               {!isLoading && (
-                <>
+                <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:gap-4">
                   <TagFilter
                     allTags={allTags}
                     selectedTags={selectedTags}
@@ -561,15 +561,19 @@ export default function PromptsPage() {
                     className="touch-manipulation w-full md:w-auto"
                     t={t}
                   />
-                  <Link href="/tags" className="w-full md:w-auto" legacyBehavior>
-                    <Button variant="outline" className="w-full group">
+                  <Link href="/tags" legacyBehavior>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="group px-3 self-start md:self-auto"
+                    >
                       <Tags className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
                       <span className="group-hover:text-primary transition-colors">
                         {tp.manageTags}
                       </span>
                     </Button>
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>

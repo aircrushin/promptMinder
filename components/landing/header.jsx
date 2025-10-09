@@ -25,7 +25,7 @@ export function Header() {
       <div className="mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center" legacyBehavior>
+          <Link href="/" className="flex items-center">
             <OptimizedImage 
               src="/logo2.png" 
               alt="PromptMinder" 
@@ -46,32 +46,34 @@ export function Header() {
               <NavigationMenu className="hidden sm:flex">
                 <NavigationMenuList className="space-x-8">
                   <NavigationMenuItem>
-                    <Link href="/prompts" legacyBehavior passHref>
-                      <NavigationMenuLink
-                        className={`${
-                          pathname === '/prompts'
-                            ? 'text-primary font-medium'
-                            : 'text-muted-foreground'
-                        } flex items-center gap-1`}
-                      >
+                    <NavigationMenuLink
+                      asChild
+                      className={`${
+                        pathname === '/prompts'
+                          ? 'text-primary font-medium'
+                          : 'text-muted-foreground'
+                      } flex items-center gap-1`}
+                    >
+                      <Link href="/prompts">
                         <Library className="h-4 w-4" />
                         {t.header.manage}
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <Link href="/public" legacyBehavior passHref>
-                      <NavigationMenuLink
-                        className={`${
-                          pathname === '/public'
-                            ? 'text-primary font-medium'
-                            : 'text-muted-foreground'
-                        } flex items-center gap-1`}
-                      >
+                    <NavigationMenuLink
+                      asChild
+                      className={`${
+                        pathname === '/public'
+                          ? 'text-primary font-medium'
+                          : 'text-muted-foreground'
+                      } flex items-center gap-1`}
+                    >
+                      <Link href="/public">
                         <LayoutGrid className="h-4 w-4" />
                         {t.header.public}
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
@@ -83,12 +85,12 @@ export function Header() {
                   <Languages className="h-5 w-5" />
               </Button>
               <SignedOut>
-                <Link href="/prompts" legacyBehavior>
+                <Link href="/prompts">
                   <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
                     {t.auth.login}
                   </button>
                 </Link>
-                <Link href="/prompts" legacyBehavior>
+                <Link href="/prompts">
                   <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
                     {t.auth.signup}
                   </button>

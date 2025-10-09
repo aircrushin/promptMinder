@@ -49,10 +49,93 @@ export default function TeamsPage() {
   const { user } = useUser();
   const { t } = useLanguage();
 
+  // 提供默认翻译对象作为后备
+  const safeT = t || {
+    teamsPage: {
+      title: "团队管理",
+      subtitle: "管理你的团队和成员",
+      ownerRole: "拥有者",
+      admin: "管理员",
+      member: "成员",
+      loadTeamError: "加载团队失败",
+      teamDataFormatError: "团队数据格式错误",
+      inviteEmailRequired: "请输入邮箱地址",
+      inviteMemberError: "邀请成员失败",
+      inviteSent: "邀请已发送",
+      updateMemberError: "更新成员失败",
+      memberUpdated: "成员已更新",
+      removeMemberError: "移除成员失败",
+      memberRemoved: "成员已移除",
+      updateTeamError: "更新团队失败",
+      teamUpdated: "团队已更新",
+      selectTransferTarget: "请选择转移目标",
+      transferOwnershipError: "转移所有权失败",
+      ownershipTransferred: "所有权已转移",
+      deleteConfirmRequired: "请输入团队名称确认删除",
+      deleteTeamError: "删除团队失败",
+      teamDeleted: "团队已删除",
+      leftTeam: "已离开团队",
+      leaveTeamError: "离开团队失败",
+      joinedTeam: "已加入团队",
+      acceptInviteError: "接受邀请失败",
+      owner: "团队拥有者",
+      membersCount: "成员数量",
+      pendingInvites: "待处理邀请",
+      teamDescription: "团队描述",
+      role: "角色",
+      unknownRole: "未知角色",
+      personalSpace: "个人空间",
+      selectTeam: "选择团队",
+      pending: "（待确认）",
+      noTeamSelected: "未选择团队",
+      noTeamsMessage: "暂无可管理的团队",
+      refresh: "刷新",
+      createTeam: "创建团队",
+      inviteMember: "邀请成员",
+      editTeam: "编辑团队",
+      transferOwnership: "转移所有权",
+      deleteTeam: "删除团队",
+      leaveTeam: "离开团队",
+      inviteMemberDialog: {
+        title: "邀请成员",
+        description: "邀请新成员加入你的团队",
+        emailLabel: "邮箱地址",
+        emailPlaceholder: "请输入邮箱地址",
+        roleLabel: "角色",
+        cancel: "取消",
+        sendInvite: "发送邀请"
+      },
+      editTeamDialog: {
+        title: "编辑团队信息",
+        teamNameLabel: "团队名称",
+        teamDescriptionLabel: "团队描述",
+        descriptionPlaceholder: "请输入团队描述",
+        cancel: "取消",
+        save: "保存"
+      },
+      transferOwnershipDialog: {
+        title: "转移所有权",
+        description: "将团队所有权转移给其他成员",
+        selectMemberLabel: "选择新拥有者",
+        selectMemberPlaceholder: "请选择成员",
+        cancel: "取消",
+        transfer: "转移"
+      },
+      deleteTeamDialog: {
+        title: "删除团队",
+        description: "此操作不可逆，删除后所有数据将被永久清除",
+        confirmLabel: "请输入团队名称确认删除：",
+        confirmPlaceholder: "团队名称",
+        cancel: "取消",
+        delete: "删除团队"
+      }
+    }
+  };
+
   const ROLE_LABELS = {
-    owner: t.teamsPage.ownerRole,
-    admin: t.teamsPage.admin,
-    member: t.teamsPage.member,
+    owner: safeT.teamsPage.ownerRole,
+    admin: safeT.teamsPage.admin,
+    member: safeT.teamsPage.member,
   };
   const {
     teams,
@@ -117,13 +200,13 @@ export default function TeamsPage() {
       const response = await fetch(`/api/teams/${teamId}`);
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || t.teamsPage.loadTeamError);
+        throw new Error(payload?.error || safeT.teamsPage.loadTeamError);
       }
       const payload = await response.json();
       
       // 验证数据完整性
       if (!payload.team || typeof payload.team !== 'object') {
-        throw new Error(t.teamsPage.teamDataFormatError);
+        throw new Error(safeT.teamsPage.teamDataFormatError);
       }
       
       // 确保members数组存在
@@ -140,7 +223,7 @@ export default function TeamsPage() {
       console.error("[TeamsPage] load error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.loadTeamError,
+        description: error.message || safeT.teamsPage.loadTeamError,
         duration: 2000,
       });
       setTeamDetails(null);
@@ -153,7 +236,7 @@ export default function TeamsPage() {
     if (!inviteForm.email.trim()) {
       toast({
         variant: "destructive",
-        description: t.teamsPage.inviteEmailRequired,
+        description: safeT.teamsPage.inviteEmailRequired,
       });
       return;
     }
@@ -172,11 +255,11 @@ export default function TeamsPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || t.teamsPage.inviteMemberError);
+        throw new Error(payload?.error || safeT.teamsPage.inviteMemberError);
       }
 
       toast({
-        description: t.teamsPage.inviteSent,
+        description: safeT.teamsPage.inviteSent,
       });
       setInviteForm({ email: "", role: "member" });
       setInviteOpen(false);
@@ -186,7 +269,7 @@ export default function TeamsPage() {
       console.error("[TeamsPage] invite error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.inviteMemberError,
+        description: error.message || safeT.teamsPage.inviteMemberError,
       });
     }
   };
@@ -203,17 +286,17 @@ export default function TeamsPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || t.teamsPage.updateMemberError);
+        throw new Error(payload?.error || safeT.teamsPage.updateMemberError);
       }
 
-      toast({ description: t.teamsPage.memberUpdated });
+      toast({ description: safeT.teamsPage.memberUpdated });
       setRefreshKey((prev) => prev + 1);
       refresh();
     } catch (error) {
       console.error("[TeamsPage] update member error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.updateMemberError,
+        description: error.message || safeT.teamsPage.updateMemberError,
       });
     }
   };
@@ -226,17 +309,17 @@ export default function TeamsPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || t.teamsPage.removeMemberError);
+        throw new Error(payload?.error || safeT.teamsPage.removeMemberError);
       }
 
-      toast({ description: t.teamsPage.memberRemoved });
+      toast({ description: safeT.teamsPage.memberRemoved });
       setRefreshKey((prev) => prev + 1);
       refresh();
     } catch (error) {
       console.error("[TeamsPage] remove member error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.removeMemberError,
+        description: error.message || safeT.teamsPage.removeMemberError,
       });
     }
   };
@@ -256,10 +339,10 @@ export default function TeamsPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || t.teamsPage.updateTeamError);
+        throw new Error(payload?.error || safeT.teamsPage.updateTeamError);
       }
 
-      toast({ description: t.teamsPage.teamUpdated });
+      toast({ description: safeT.teamsPage.teamUpdated });
       setEditOpen(false);
       setRefreshKey((prev) => prev + 1);
       refresh();
@@ -267,7 +350,7 @@ export default function TeamsPage() {
       console.error("[TeamsPage] update team error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.updateTeamError,
+        description: error.message || safeT.teamsPage.updateTeamError,
       });
     }
   };
@@ -276,7 +359,7 @@ export default function TeamsPage() {
     if (!transferTarget) {
       toast({
         variant: "destructive",
-        description: t.teamsPage.selectTransferTarget,
+        description: safeT.teamsPage.selectTransferTarget,
       });
       return;
     }
@@ -292,10 +375,10 @@ export default function TeamsPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || t.teamsPage.transferOwnershipError);
+        throw new Error(payload?.error || safeT.teamsPage.transferOwnershipError);
       }
 
-      toast({ description: t.teamsPage.ownershipTransferred });
+      toast({ description: safeT.teamsPage.ownershipTransferred });
       setTransferOpen(false);
       setTransferTarget("");
       setRefreshKey((prev) => prev + 1);
@@ -304,7 +387,7 @@ export default function TeamsPage() {
       console.error("[TeamsPage] transfer ownership error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.transferOwnershipError,
+        description: error.message || safeT.teamsPage.transferOwnershipError,
       });
     }
   };
@@ -317,7 +400,7 @@ export default function TeamsPage() {
     if (deleteConfirm.trim() !== activeTeam.name) {
       toast({
         variant: "destructive",
-        description: t.teamsPage.deleteConfirmRequired,
+        description: safeT.teamsPage.deleteConfirmRequired,
       });
       return;
     }
@@ -325,7 +408,7 @@ export default function TeamsPage() {
     setDeleteLoading(true);
     try {
       await deleteTeam(activeTeamId);
-      toast({ description: t.teamsPage.teamDeleted });
+      toast({ description: safeT.teamsPage.teamDeleted });
       setDeleteOpen(false);
       setDeleteConfirm("");
       setTeamDetails(null);
@@ -334,7 +417,7 @@ export default function TeamsPage() {
       console.error("[TeamsPage] delete team error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.deleteTeamError,
+        description: error.message || safeT.teamsPage.deleteTeamError,
       });
     } finally {
       setDeleteLoading(false);
@@ -344,14 +427,14 @@ export default function TeamsPage() {
   const handleLeaveTeam = async () => {
     try {
       await leaveTeam(activeTeamId);
-      toast({ description: t.teamsPage.leftTeam });
+      toast({ description: safeT.teamsPage.leftTeam });
       setRefreshKey((prev) => prev + 1);
       refresh();
     } catch (error) {
       console.error("[TeamsPage] leave team error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.leaveTeamError,
+        description: error.message || safeT.teamsPage.leaveTeamError,
       });
     }
   };
@@ -359,14 +442,14 @@ export default function TeamsPage() {
   const handleAcceptInvite = async (teamId) => {
     try {
       await acceptInvite(teamId);
-      toast({ description: t.teamsPage.joinedTeam });
+      toast({ description: safeT.teamsPage.joinedTeam });
       setRefreshKey((prev) => prev + 1);
       refresh();
     } catch (error) {
       console.error("[TeamsPage] accept invite error", error);
       toast({
         variant: "destructive",
-        description: error.message || t.teamsPage.acceptInviteError,
+        description: error.message || safeT.teamsPage.acceptInviteError,
       });
     }
   };
@@ -408,10 +491,10 @@ export default function TeamsPage() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              {t.teamsPage.title}
+              {safeT.teamsPage.title}
             </h1>
             <p className="text-muted-foreground mt-2 text-base">
-              {t.teamsPage.subtitle}
+              {safeT.teamsPage.subtitle}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -422,14 +505,14 @@ export default function TeamsPage() {
               className="transition-all duration-200 hover:bg-muted/50"
             >
               <RefreshCw className={cn("mr-2 h-4 w-4", teamLoading && "animate-spin")} />
-              {t.teamsPage.refresh}
+              {safeT.teamsPage.refresh}
             </Button>
             <Button 
               onClick={() => router.push("/teams/new")}
               className="transition-all duration-200 hover:shadow-md hover:scale-[1.02] bg-gradient-to-r from-primary to-primary/90"
             >
               <Plus className="mr-2 h-4 w-4" />
-              {t.teamsPage.createTeam}
+              {safeT.teamsPage.createTeam}
             </Button>
           </div>
         </div>
@@ -438,13 +521,13 @@ export default function TeamsPage() {
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-2xl">
-              {activeTeam ? activeTeam.name : t.teamsPage.noTeamSelected}
+              {activeTeam ? activeTeam.name : safeT.teamsPage.noTeamSelected}
             </CardTitle>
             {activeTeam && (
               <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                <span>{t.teamsPage.role}：{ROLE_LABELS[activeMembership?.role] || t.teamsPage.unknownRole}</span>
+                <span>{safeT.teamsPage.role}：{ROLE_LABELS[activeMembership?.role] || safeT.teamsPage.unknownRole}</span>
                 {/* <span>团队 ID：{activeTeam.id}</span> */}
-                {activeTeam.is_personal && <Badge variant="secondary">{t.teamsPage.personalSpace}</Badge>}
+                {activeTeam.is_personal && <Badge variant="secondary">{safeT.teamsPage.personalSpace}</Badge>}
               </div>
             )}
           </div>
@@ -455,20 +538,20 @@ export default function TeamsPage() {
               disabled={teamLoading || teams.length === 0}
             >
               <SelectTrigger className="w-[240px]">
-                <SelectValue placeholder={t.teamsPage.selectTeam} />
+                <SelectValue placeholder={safeT.teamsPage.selectTeam} />
               </SelectTrigger>
               <SelectContent>
                 {teams.map((membership) => (
                   <SelectItem key={membership.team.id} value={membership.team.id}>
                     {membership.team.name}{" "}
-                    {membership.status === "pending" ? t.teamsPage.pending : ""}
+                    {membership.status === "pending" ? safeT.teamsPage.pending : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {!activeTeam && teams.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                {t.teamsPage.noTeamsMessage}
+                {safeT.teamsPage.noTeamsMessage}
               </p>
             )}
           </div>
@@ -497,7 +580,7 @@ export default function TeamsPage() {
                     <div className="p-1.5 rounded-md bg-primary/10">
                       <Shield className="h-4 w-4 text-primary" />
                     </div>
-                    {t.teamsPage.owner}
+                    {safeT.teamsPage.owner}
                   </div>
                   <p className="mt-3 text-lg font-semibold truncate">
                     {ownerDisplayName || teamDetails.team.owner_id}
@@ -508,7 +591,7 @@ export default function TeamsPage() {
                     <div className="p-1.5 rounded-md bg-blue-500/10">
                       <Users className="h-4 w-4 text-blue-500" />
                     </div>
-                    {t.teamsPage.membersCount}
+                    {safeT.teamsPage.membersCount}
                   </div>
                   <p className="mt-3 text-lg font-semibold">
                     {teamDetails.members?.filter((m) => m.status === "active").length || 0}
@@ -519,7 +602,7 @@ export default function TeamsPage() {
                     <div className="p-1.5 rounded-md bg-amber-500/10">
                       <Mail className="h-4 w-4 text-amber-500" />
                     </div>
-                    {t.teamsPage.pendingInvites}
+                    {safeT.teamsPage.pendingInvites}
                   </div>
                   <p className="mt-3 text-lg font-semibold">
                     {teamDetails.members?.filter((m) => m.status === "pending").length || 0}
@@ -529,7 +612,7 @@ export default function TeamsPage() {
 
               {teamDetails.team.description && (
                 <div className="rounded-lg bg-muted/30 p-4 border border-border/40">
-                  <h3 className="text-sm font-medium text-muted-foreground">{t.teamsPage.teamDescription}</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">{safeT.teamsPage.teamDescription}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-foreground/80">
                     {teamDetails.team.description}
                   </p>
@@ -542,23 +625,23 @@ export default function TeamsPage() {
                     <DialogTrigger asChild>
                       <Button>
                         <UserPlus className="mr-2 h-4 w-4" />
-                        {t.teamsPage.inviteMember}
+                        {safeT.teamsPage.inviteMember}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{t.teamsPage.inviteMemberDialog.title}</DialogTitle>
+                        <DialogTitle>{safeT.teamsPage.inviteMemberDialog.title}</DialogTitle>
                         <DialogDescription>
-                          {t.teamsPage.inviteMemberDialog.description}
+                          {safeT.teamsPage.inviteMemberDialog.description}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                          <Label htmlFor="invite-email">{t.teamsPage.inviteMemberDialog.emailLabel}</Label>
+                          <Label htmlFor="invite-email">{safeT.teamsPage.inviteMemberDialog.emailLabel}</Label>
                           <Input
                             id="invite-email"
                             type="email"
-                            placeholder={t.teamsPage.inviteMemberDialog.emailPlaceholder}
+                            placeholder={safeT.teamsPage.inviteMemberDialog.emailPlaceholder}
                             value={inviteForm.email}
                             onChange={(event) =>
                               setInviteForm((prev) => ({
@@ -569,7 +652,7 @@ export default function TeamsPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="invite-role">{t.teamsPage.inviteMemberDialog.roleLabel}</Label>
+                          <Label htmlFor="invite-role">{safeT.teamsPage.inviteMemberDialog.roleLabel}</Label>
                           <Select
                             value={inviteForm.role}
                             onValueChange={(value) =>
@@ -583,17 +666,17 @@ export default function TeamsPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="member">{t.teamsPage.member}</SelectItem>
-                              <SelectItem value="admin">{t.teamsPage.admin}</SelectItem>
+                              <SelectItem value="member">{safeT.teamsPage.member}</SelectItem>
+                              <SelectItem value="admin">{safeT.teamsPage.admin}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
                       <DialogFooter>
                         <Button variant="outline" onClick={() => setInviteOpen(false)}>
-                          {t.teamsPage.inviteMemberDialog.cancel}
+                          {safeT.teamsPage.inviteMemberDialog.cancel}
                         </Button>
-                        <Button onClick={handleInviteMember}>{t.teamsPage.inviteMemberDialog.sendInvite}</Button>
+                        <Button onClick={handleInviteMember}>{safeT.teamsPage.inviteMemberDialog.sendInvite}</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -602,15 +685,15 @@ export default function TeamsPage() {
                 {isManager && (
                   <Dialog open={editOpen} onOpenChange={setEditOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="secondary">{t.teamsPage.editTeam}</Button>
+                      <Button variant="secondary">{safeT.teamsPage.editTeam}</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{t.teamsPage.editTeamDialog.title}</DialogTitle>
+                        <DialogTitle>{safeT.teamsPage.editTeamDialog.title}</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                          <Label htmlFor="team-name">{t.teamsPage.editTeamDialog.teamNameLabel}</Label>
+                          <Label htmlFor="team-name">{safeT.teamsPage.editTeamDialog.teamNameLabel}</Label>
                           <Input
                             id="team-name"
                             value={editForm.name}
@@ -620,7 +703,7 @@ export default function TeamsPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="team-description">{t.teamsPage.editTeamDialog.teamDescriptionLabel}</Label>
+                          <Label htmlFor="team-description">{safeT.teamsPage.editTeamDialog.teamDescriptionLabel}</Label>
                           <Input
                             id="team-description"
                             value={editForm.description}
@@ -630,15 +713,15 @@ export default function TeamsPage() {
                                 description: event.target.value,
                               }))
                             }
-                            placeholder={t.teamsPage.editTeamDialog.descriptionPlaceholder}
+                            placeholder={safeT.teamsPage.editTeamDialog.descriptionPlaceholder}
                           />
                         </div>
                       </div>
                       <DialogFooter>
                         <Button variant="outline" onClick={() => setEditOpen(false)}>
-                          {t.teamsPage.editTeamDialog.cancel}
+                          {safeT.teamsPage.editTeamDialog.cancel}
                         </Button>
-                        <Button onClick={handleSaveTeam}>{t.teamsPage.editTeamDialog.save}</Button>
+                        <Button onClick={handleSaveTeam}>{safeT.teamsPage.editTeamDialog.save}</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -649,21 +732,21 @@ export default function TeamsPage() {
                     <DialogTrigger asChild>
                       <Button variant="outline">
                         <ArrowRightLeft className="mr-2 h-4 w-4" />
-                        {t.teamsPage.transferOwnership}
+                        {safeT.teamsPage.transferOwnership}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{t.teamsPage.transferOwnershipDialog.title}</DialogTitle>
+                        <DialogTitle>{safeT.teamsPage.transferOwnershipDialog.title}</DialogTitle>
                         <DialogDescription>
-                          {t.teamsPage.transferOwnershipDialog.description}
+                          {safeT.teamsPage.transferOwnershipDialog.description}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="py-4">
-                        <Label className="mb-2 block text-sm font-medium">{t.teamsPage.transferOwnershipDialog.selectMemberLabel}</Label>
+                        <Label className="mb-2 block text-sm font-medium">{safeT.teamsPage.transferOwnershipDialog.selectMemberLabel}</Label>
                         <Select value={transferTarget} onValueChange={setTransferTarget}>
                           <SelectTrigger>
-                            <SelectValue placeholder={t.teamsPage.transferOwnershipDialog.selectMemberPlaceholder} />
+                            <SelectValue placeholder={safeT.teamsPage.transferOwnershipDialog.selectMemberPlaceholder} />
                           </SelectTrigger>
                           <SelectContent>
                             {transferableMembers.map((member) => (
@@ -676,9 +759,9 @@ export default function TeamsPage() {
                       </div>
                       <DialogFooter>
                         <Button variant="outline" onClick={() => setTransferOpen(false)}>
-                          {t.teamsPage.transferOwnershipDialog.cancel}
+                          {safeT.teamsPage.transferOwnershipDialog.cancel}
                         </Button>
-                        <Button onClick={handleTransferOwnership}>{t.teamsPage.transferOwnershipDialog.transfer}</Button>
+                        <Button onClick={handleTransferOwnership}>{safeT.teamsPage.transferOwnershipDialog.transfer}</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -689,34 +772,34 @@ export default function TeamsPage() {
                     <DialogTrigger asChild>
                       <Button variant="destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        {t.teamsPage.deleteTeam}
+                        {safeT.teamsPage.deleteTeam}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{t.teamsPage.deleteTeamDialog.title}</DialogTitle>
+                        <DialogTitle>{safeT.teamsPage.deleteTeamDialog.title}</DialogTitle>
                         <DialogDescription>
-                          {t.teamsPage.deleteTeamDialog.description}
+                          {safeT.teamsPage.deleteTeamDialog.description}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-3 py-2">
                         <p className="text-sm text-muted-foreground">
-                          {t.teamsPage.deleteTeamDialog.confirmLabel} <span className="font-semibold">{activeTeam?.name}</span>
+                          {safeT.teamsPage.deleteTeamDialog.confirmLabel} <span className="font-semibold">{activeTeam?.name}</span>
                         </p>
                         <Input
                           value={deleteConfirm}
                           onChange={(event) => setDeleteConfirm(event.target.value)}
-                          placeholder={t.teamsPage.deleteTeamDialog.confirmPlaceholder}
+                          placeholder={safeT.teamsPage.deleteTeamDialog.confirmPlaceholder}
                           autoFocus
                         />
                       </div>
                       <DialogFooter>
                         <Button variant="outline" onClick={() => handleDeleteDialogChange(false)} disabled={deleteLoading}>
-                          {t.teamsPage.deleteTeamDialog.cancel}
+                          {safeT.teamsPage.deleteTeamDialog.cancel}
                         </Button>
                         <Button variant="destructive" onClick={handleDeleteTeam} disabled={deleteLoading}>
                           {deleteLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          {t.teamsPage.deleteTeamDialog.delete}
+                          {safeT.teamsPage.deleteTeamDialog.delete}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -732,7 +815,7 @@ export default function TeamsPage() {
                 {activeMembership && activeMembership.role !== "owner" && (
                   <Button variant="destructive" onClick={handleLeaveTeam}>
                     <UserMinus className="mr-2 h-4 w-4" />
-                    {t.teamsPage.leaveTeam}
+                    {safeT.teamsPage.leaveTeam}
                   </Button>
                 )}
               </div>

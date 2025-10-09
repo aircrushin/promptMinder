@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Badge } from "@/components/ui/badge"
 
-function TagFilter({ allTags, selectedTags, onTagSelect }) {
+function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }) {
   const toggleTag = (tag) => {
     if (selectedTags.includes(tag)) {
       onTagSelect(selectedTags.filter(t => t !== tag));
@@ -11,12 +11,12 @@ function TagFilter({ allTags, selectedTags, onTagSelect }) {
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {allTags.map((tag) => (
         <Badge
           key={tag}
           variant={selectedTags.includes(tag) ? "default" : "outline"}
-          className={`cursor-pointer hover:opacity-80 ${
+          className={`cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80 ${
             selectedTags.includes(tag) ? "" : "bg-background"
           }`}
           onClick={() => toggleTag(tag)}

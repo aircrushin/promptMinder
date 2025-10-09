@@ -626,6 +626,8 @@
     "saving": "保存中...",
     "save": "保存",
     "cancel": "取消",
+    "submitButton": "保存修改",
+    "cancelButton": "取消",
     "optimizePreviewTitle": "优化结果预览",
     "optimizePlaceholder": "正在生成优化内容...",
     "applyOptimization": "应用优化结果"
