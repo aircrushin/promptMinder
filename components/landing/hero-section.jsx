@@ -111,7 +111,6 @@ export function HeroSection({ t }) {
         <div className="absolute left-1/2 top-32 h-80 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[120px]" />
         <div className="absolute -right-12 bottom-0 h-64 w-64 rounded-full bg-sky-400/20 blur-3xl" />
       </div>
-
       <div className="relative mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
           <MotionDiv
@@ -149,13 +148,13 @@ export function HeroSection({ t }) {
               <Link
                 href={isSignedIn ? "/prompts" : "/sign-up"}
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-              >
+                legacyBehavior>
                 {heroCopy.ctaButton}
               </Link>
               <Link
                 href="/public"
                 className="inline-flex items-center justify-center rounded-xl border border-blue-200/70 bg-white/70 px-8 py-4 text-lg font-semibold text-blue-700 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-200"
-              >
+                legacyBehavior>
                 {heroCopy.secondaryCta}
               </Link>
             </div>

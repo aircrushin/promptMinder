@@ -139,17 +139,15 @@ export default function TagsPage() {
         <Link
           href="/tags/new"
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-        >
+          legacyBehavior>
           {tp.newTagButton}
         </Link>
       </div>
-
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-
       {tags.length === 0 ? (
         <div className="text-center text-gray-500 py-8">
           {tp.noTagsMessage}
@@ -216,7 +214,6 @@ export default function TagsPage() {
           </div>
         </div>
       )}
-
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
         <ModalContent>
           <ModalHeader>
@@ -239,7 +236,6 @@ export default function TagsPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-
       <Modal isOpen={editModalOpen} onClose={() => setEditModalOpen(false)}>
         <ModalContent>
           <ModalHeader>

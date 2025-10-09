@@ -63,7 +63,6 @@ export default function PerformanceDashboard() {
           </label>
         </div>
       </div>
-
       {/* Core Web Vitals */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Core Web Vitals</h2>
@@ -90,7 +89,6 @@ export default function PerformanceDashboard() {
           })}
         </div>
       </div>
-
       {/* Memory Usage */}
       {memoryUsage && (
         <div>
@@ -120,7 +118,6 @@ export default function PerformanceDashboard() {
           </div>
         </div>
       )}
-
       {/* Bundle Metrics */}
       {bundleMetrics && (
         <div>
@@ -159,7 +156,6 @@ export default function PerformanceDashboard() {
           </div>
         </div>
       )}
-
       {/* Custom Metrics */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Custom Metrics</h2>

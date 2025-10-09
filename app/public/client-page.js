@@ -216,7 +216,6 @@ export default function PublicPromptsClient() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
             {/* Background decoration */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/30 via-transparent to-purple-50/30 dark:from-blue-950/20 dark:to-purple-950/20 pointer-events-none" />
-            
             <div className="relative align-center justify-center">
                 <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:py-20">
                     {/* Enhanced header section */}
@@ -366,7 +365,7 @@ export default function PublicPromptsClient() {
                         </div>
                     ) : searchQuery ? (
                         // 搜索无结果提示
-                        <div className="text-center py-16">
+                        (<div className="text-center py-16">
                             <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">🔍</div>
                             <h3 className="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">
                                 {t.publicPage.noResults}
@@ -380,14 +379,12 @@ export default function PublicPromptsClient() {
                                     {t.publicPage.clearSearch}
                                 </button>
                             </p>
-                        </div>
+                        </div>)
                     ) : null}
                 </div>
             </div>
-            
             {/* Footer */}
             <Footer t={t.footer} />
-
             {/* 回到顶部按钮 */}
             {showBackToTop && (
                 <button

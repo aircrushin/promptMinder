@@ -174,7 +174,6 @@ function PromptList({ prompts, onDelete, onShare }) {
           );
         })}
       </div>
-
       <Dialog open={!!selectedVersions} onOpenChange={() => setSelectedVersions(null)}>
         <DialogContent>
           <DialogHeader>
@@ -182,11 +181,11 @@ function PromptList({ prompts, onDelete, onShare }) {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             {selectedVersions?.map((version) => (
-              <Link 
-                key={version.id} 
+              <Link
+                key={version.id}
                 href={`/prompts/${version.id}`}
                 className="block"
-              >
+                legacyBehavior>
                 <Card className="p-4 hover:bg-accent cursor-pointer">
                   <div className="flex justify-between items-center">
                     <div>

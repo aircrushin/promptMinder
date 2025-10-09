@@ -36,7 +36,7 @@ export default function Navbar() {
     <nav className="border-b">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <Link href="/" className="flex items-center group">
+          <Link href="/" className="flex items-center group" legacyBehavior>
             <OptimizedImage 
               src="/logo2.png" 
               alt="PromptMinder" 
@@ -147,7 +147,7 @@ export default function Navbar() {
                             ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}
-                      >
+                        legacyBehavior>
                         <Library className="h-4 w-4 shrink-0" />
                         <span className="text-sm">{t.navbar.manage}</span>
                       </Link>
@@ -158,7 +158,7 @@ export default function Navbar() {
                             ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}
-                      >
+                        legacyBehavior>
                         <FolderPlus className="h-4 w-4 shrink-0" />
                         <span className="text-sm">{t.navbar.new}</span>
                       </Link>
@@ -169,7 +169,7 @@ export default function Navbar() {
                             ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}
-                      >
+                        legacyBehavior>
                         <Globe className="h-4 w-4 shrink-0" />
                         <span className="text-sm">{t.navbar.public}</span>
                       </Link>

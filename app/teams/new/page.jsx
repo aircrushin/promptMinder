@@ -77,7 +77,7 @@ export default function CreateTeamPage() {
           className="mb-8 transition-all duration-200 hover:bg-muted/50"
           asChild
         >
-          <Link href="/teams">
+          <Link href="/teams" legacyBehavior>
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t.createTeamPage.backToTeams}
           </Link>

@@ -25,7 +25,7 @@ export function Header() {
       <div className="mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center" legacyBehavior>
             <OptimizedImage 
               src="/logo2.png" 
               alt="PromptMinder" 
@@ -83,12 +83,12 @@ export function Header() {
                   <Languages className="h-5 w-5" />
               </Button>
               <SignedOut>
-                <Link href="/prompts">
+                <Link href="/prompts" legacyBehavior>
                   <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
                     {t.auth.login}
                   </button>
                 </Link>
-                <Link href="/prompts">
+                <Link href="/prompts" legacyBehavior>
                   <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
                     {t.auth.signup}
                   </button>

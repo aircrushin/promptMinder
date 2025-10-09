@@ -63,7 +63,6 @@ export default function PerformanceMonitor({ enabled = process.env.NODE_ENV === 
           ×
         </button>
       </div>
-      
       {/* Core Web Vitals */}
       <div className="mb-3">
         <h4 className="font-semibold mb-1">Core Web Vitals</h4>
@@ -102,7 +101,6 @@ export default function PerformanceMonitor({ enabled = process.env.NODE_ENV === 
           )}
         </div>
       </div>
-
       {/* Memory Usage */}
       {memoryUsage && (
         <div className="mb-3">
@@ -123,7 +121,6 @@ export default function PerformanceMonitor({ enabled = process.env.NODE_ENV === 
           </div>
         </div>
       )}
-
       {/* Bundle Metrics */}
       {bundleMetrics && (
         <div className="mb-3">
@@ -144,7 +141,6 @@ export default function PerformanceMonitor({ enabled = process.env.NODE_ENV === 
           </div>
         </div>
       )}
-
       {/* Custom Metrics */}
       <div className="mb-3">
         <h4 className="font-semibold mb-1">Custom Metrics</h4>
@@ -160,7 +156,6 @@ export default function PerformanceMonitor({ enabled = process.env.NODE_ENV === 
             ))}
         </div>
       </div>
-
       <div className="text-xs text-gray-400 mt-2">
         Press Ctrl+Shift+P to toggle
       </div>
