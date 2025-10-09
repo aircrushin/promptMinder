@@ -148,13 +148,13 @@ export function HeroSection({ t }) {
               <Link
                 href={isSignedIn ? "/prompts" : "/sign-up"}
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                legacyBehavior>
+               >
                 {heroCopy.ctaButton}
               </Link>
               <Link
                 href="/public"
                 className="inline-flex items-center justify-center rounded-xl border border-blue-200/70 bg-white/70 px-8 py-4 text-lg font-semibold text-blue-700 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-200"
-                legacyBehavior>
+               >
                 {heroCopy.secondaryCta}
               </Link>
             </div>

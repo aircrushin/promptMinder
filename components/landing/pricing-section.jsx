@@ -111,7 +111,7 @@ export function PricingSection() {
                     ? "bg-blue-500 text-white hover:bg-blue-600"
                     : "bg-gray-900 text-white hover:bg-gray-800"
                 }`}
-                legacyBehavior>
+               >
                 {plan.cta}
               </Link>
             </motion.div>

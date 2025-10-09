@@ -185,7 +185,7 @@ function PromptList({ prompts, onDelete, onShare }) {
                 key={version.id}
                 href={`/prompts/${version.id}`}
                 className="block"
-                legacyBehavior>
+               >
                 <Card className="p-4 hover:bg-accent cursor-pointer">
                   <div className="flex justify-between items-center">
                     <div>

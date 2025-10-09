@@ -531,11 +531,9 @@ export default function PromptsPage() {
                   </span>
                 </div>
                 {!isPersonal && activeTeamId && (
-                  <Link href="/teams" legacyBehavior>
-                    <Button variant="outline" className="whitespace-nowrap">
-                      {tp.manageTeam}
-                    </Button>
-                  </Link>
+                  <Button asChild variant="outline" className="whitespace-nowrap">
+                    <Link href="/teams">{tp.manageTeam}</Link>
+                  </Button>
                 )}
               </div>
             </div>
@@ -561,18 +559,19 @@ export default function PromptsPage() {
                     className="touch-manipulation w-full md:w-auto"
                     t={t}
                   />
-                  <Link href="/tags" legacyBehavior>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="group px-3 self-start md:self-auto"
-                    >
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="group px-3 self-start md:self-auto"
+                  >
+                    <Link href="/tags">
                       <Tags className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
                       <span className="group-hover:text-primary transition-colors">
                         {tp.manageTags}
                       </span>
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>
@@ -768,7 +767,7 @@ export default function PromptsPage() {
                 key={version.id}
                 href={`/prompts/${version.id}`}
                 className="block"
-                legacyBehavior>
+              >
                 <Card className="p-4 hover:bg-accent/50 cursor-pointer transition-colors border border-border/50 hover:border-primary/30">
                   <div className="flex justify-between items-center">
                     <div>

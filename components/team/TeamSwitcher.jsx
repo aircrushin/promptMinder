@@ -87,19 +87,19 @@ export function TeamSwitcher({ className, showFallbackCreate = true }) {
           </SelectContent>
         </Select>
         {showFallbackCreate && activeTeams.length === 0 && (
-          <Link href="/teams/new" legacyBehavior>
-            <Button size="sm" className="gap-2">
+          <Button asChild size="sm" className="gap-2">
+            <Link href="/teams/new">
               <PlusCircle className="h-4 w-4" />
               创建团队
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         )}
       </div>
       {pendingCount > 0 && (
         <Link
           href="/teams/invites"
           className="mt-1 block text-xs text-muted-foreground hover:text-primary transition-colors"
-          legacyBehavior>
+        >
           你有 {pendingCount} 个待处理邀请
         </Link>
       )}

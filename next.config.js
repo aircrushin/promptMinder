@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
@@ -120,7 +121,8 @@ const nextConfig = {
 
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"]
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    outputFileTracingRoot: path.join(__dirname),
   },
 
   // Enable gzip compression
