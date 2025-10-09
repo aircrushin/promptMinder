@@ -86,6 +86,7 @@ const nextConfig = {
 
     return config;
   },
+
   images: {
     domains: [
       "api.dicebear.com",
@@ -116,23 +117,18 @@ const nextConfig = {
     // Enable image optimization for static images
     unoptimized: false,
   },
+
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
-    // Enable modern bundling features
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"]
   },
+
   // Enable gzip compression
   compress: true,
+
   // Enable static optimization
   output: "standalone",
+
   // Enable CSS modules optimization
   modularizeImports: {
     "lucide-react": {
@@ -142,6 +138,15 @@ const nextConfig = {
       transform: "@radix-ui/react-icons/dist/{{member}}.js",
     },
   },
+
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    }
+  }
 };
 
 module.exports = withBundleAnalyzer(nextConfig);

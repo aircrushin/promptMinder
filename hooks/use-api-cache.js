@@ -253,10 +253,7 @@ export function useCacheMonitoring() {
   
   return metrics;
 }
-/
-**
- * Hook for data prefetching
- */
+
 export function usePrefetching() {
   const [stats, setStats] = useState({
     queueLength: 0,
