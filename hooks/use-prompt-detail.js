@@ -23,7 +23,9 @@ export function usePromptDetail(id) {
           fetch(`/api/prompts?title=${encodeURIComponent(data.title)}`)
             .then((response) => response.json())
             .then((versionsData) => {
-              const sameTitle = versionsData.filter(v => v.title === data.title);
+              // API returns { prompts: [], pagination: {} }
+              const promptsList = versionsData.prompts || [];
+              const sameTitle = promptsList.filter(v => v.title === data.title);
               setVersions(sameTitle.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
             })
             .catch((error) => console.error('Error fetching versions:', error))
