@@ -27,11 +27,7 @@ export function TeamProvider({ children }) {
   }, [])
 
   const applyActiveTeamFallback = useCallback((resolvedTeams, preferredId) => {
-    if (preferredId === PERSONAL_TEAM_ID) {
-      setActiveTeamId(null)
-      persistPreference(null)
-      return
-    }
+    const normalizedPreferredId = preferredId ?? null
 
     if (!resolvedTeams.length) {
       setActiveTeamId(null)
@@ -39,12 +35,18 @@ export function TeamProvider({ children }) {
       return
     }
 
+    if (normalizedPreferredId === null || normalizedPreferredId === PERSONAL_TEAM_ID) {
+      setActiveTeamId(null)
+      persistPreference(null)
+      return
+    }
     const activeOrPending = resolvedTeams.filter((team) => team.status === 'active')
-    const hasPreferred = preferredId && activeOrPending.some((team) => team.team.id === preferredId)
+    const hasPreferred =
+      normalizedPreferredId && activeOrPending.some((team) => team.team.id === normalizedPreferredId)
 
     if (hasPreferred) {
-      setActiveTeamId(preferredId)
-      persistPreference(preferredId)
+      setActiveTeamId(normalizedPreferredId)
+      persistPreference(normalizedPreferredId)
       return
     }
 

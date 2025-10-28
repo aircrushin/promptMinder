@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, memo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -57,6 +59,8 @@ function CheckIcon(props) {
 function PromptCardComponent({ prompt }) {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
   const { copy, copied } = useClipboard(
     t?.publicPage?.copySuccess || '已复制',
     t?.publicPage?.copyError || '复制失败'
@@ -71,6 +75,11 @@ function PromptCardComponent({ prompt }) {
   };
 
   const handleImport = async () => {
+    if (!isSignedIn) {
+      router.push('/sign-in');
+      return;
+    }
+    
     setIsImporting(true);
     try {
       await apiClient.copyPrompt(prompt);
