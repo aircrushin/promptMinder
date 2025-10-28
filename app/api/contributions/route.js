@@ -94,10 +94,15 @@ export async function GET(request) {
     }
 
     // 获取总数
-    const { count, error: countError } = await supabase
+    let countQuery = supabase
       .from('prompt_contributions')
-      .select('*', { count: 'exact', head: true })
-      .eq(status !== 'all' ? 'status' : 'id', status !== 'all' ? status : contributions[0]?.id || 'dummy');
+      .select('*', { count: 'exact', head: true });
+    
+    if (status !== 'all') {
+      countQuery = countQuery.eq('status', status);
+    }
+    
+    const { count, error: countError } = await countQuery;
 
     if (countError) {
       console.error('Count error:', countError);

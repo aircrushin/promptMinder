@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server'
 
 // 获取单个贡献详情
 export async function GET(request, { params }) {
@@ -29,7 +28,10 @@ export async function GET(request, { params }) {
 // 更新贡献状态（审核）
 export async function PATCH(request, { params }) {
   const { id } = await params;
-  const { userId } = await auth(); // 需要登录用户（管理员）
+  
+  // 从请求头获取管理员邮箱（由前端发送）
+  const adminEmail = request.headers.get('x-admin-email');
+  
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
@@ -56,7 +58,7 @@ export async function PATCH(request, { params }) {
       status,
       admin_notes: adminNotes || null,
       reviewed_at: new Date().toISOString(),
-      reviewed_by: userId,
+      reviewed_by: adminEmail || 'admin',
       updated_at: new Date().toISOString()
     };
 
@@ -120,7 +122,6 @@ export async function PATCH(request, { params }) {
 // 删除贡献
 export async function DELETE(request, { params }) {
   const { id } = await params;
-  const { userId } = await auth(); // 需要登录用户（管理员）
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
