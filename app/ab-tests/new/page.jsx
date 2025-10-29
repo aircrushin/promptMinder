@@ -10,10 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { defaultAbTestsTranslations } from "@/lib/translations/ab-tests";
 
 export default function NewABTestPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const abTests = t?.abTests ?? defaultAbTestsTranslations;
   const [loading, setLoading] = useState(false);
   const [prompts, setPrompts] = useState([]);
   const [formData, setFormData] = useState({
@@ -79,8 +83,8 @@ export default function NewABTestPage() {
     // 验证
     if (!formData.name.trim()) {
       toast({
-        title: "错误",
-        description: "请输入测试名称",
+        title: abTests.common.errorTitle,
+        description: abTests.common.toast.missingName,
         variant: "destructive"
       });
       return;
@@ -88,8 +92,8 @@ export default function NewABTestPage() {
 
     if (!formData.baseline_prompt_id) {
       toast({
-        title: "错误",
-        description: "请选择基准版本",
+        title: abTests.common.errorTitle,
+        description: abTests.common.toast.missingBaseline,
         variant: "destructive"
       });
       return;
@@ -98,8 +102,8 @@ export default function NewABTestPage() {
     const validVariants = formData.variant_prompt_ids.filter(id => id);
     if (validVariants.length === 0) {
       toast({
-        title: "错误",
-        description: "请至少添加一个变体版本",
+        title: abTests.common.errorTitle,
+        description: abTests.common.toast.missingVariant,
         variant: "destructive"
       });
       return;
@@ -109,8 +113,8 @@ export default function NewABTestPage() {
     const allIds = [formData.baseline_prompt_id, ...validVariants];
     if (new Set(allIds).size !== allIds.length) {
       toast({
-        title: "错误",
-        description: "不能选择重复的提示词",
+        title: abTests.common.errorTitle,
+        description: abTests.common.toast.duplicatePrompt,
         variant: "destructive"
       });
       return;
@@ -131,8 +135,8 @@ export default function NewABTestPage() {
 
       if (response.ok) {
         toast({
-          title: "成功",
-          description: "A/B测试创建成功"
+          title: abTests.common.successTitle,
+          description: abTests.common.toast.createSuccess
         });
         router.push(`/ab-tests/${data.id}`);
       } else {
@@ -141,7 +145,7 @@ export default function NewABTestPage() {
     } catch (error) {
       console.error('Error creating test:', error);
       toast({
-        title: "错误",
+        title: abTests.common.errorTitle,
         description: error.message,
         variant: "destructive"
       });
@@ -158,36 +162,36 @@ export default function NewABTestPage() {
           onClick={() => router.push('/ab-tests')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          返回
+          {abTests.common.actions.back}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>创建A/B测试</CardTitle>
+          <CardTitle>{abTests.new.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 基本信息 */}
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">测试名称 *</Label>
+                <Label htmlFor="name">{abTests.new.form.name}</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="例如：提示词优化测试 v1"
+                  placeholder={abTests.new.form.namePlaceholder}
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="description">描述</Label>
+                <Label htmlFor="description">{abTests.new.form.description}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="描述这次测试的目的和预期效果..."
+                  placeholder={abTests.new.form.descriptionPlaceholder}
                   rows={3}
                 />
               </div>
@@ -195,16 +199,16 @@ export default function NewABTestPage() {
 
             {/* 提示词选择 */}
             <div className="space-y-4 border-t pt-4">
-              <h3 className="font-semibold">提示词配置</h3>
-              
+              <h3 className="font-semibold">{abTests.new.form.promptConfig}</h3>
+
               <div>
-                <Label htmlFor="baseline">基准版本 (Baseline) *</Label>
+                <Label htmlFor="baseline">{abTests.new.form.baseline}</Label>
                 <Select
                   value={formData.baseline_prompt_id}
                   onValueChange={(value) => setFormData({ ...formData, baseline_prompt_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="选择基准提示词" />
+                    <SelectValue placeholder={abTests.new.form.baselinePlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     {prompts.map((prompt) => (
@@ -215,13 +219,13 @@ export default function NewABTestPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-1">
-                  选择作为对比基准的提示词版本
+                  {abTests.new.form.baselineHelp}
                 </p>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <Label>变体版本 (Variants) *</Label>
+                  <Label>{abTests.new.form.variants}</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -229,10 +233,10 @@ export default function NewABTestPage() {
                     onClick={handleAddVariant}
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    添加变体
+                    {abTests.new.form.addVariant}
                   </Button>
                 </div>
-                
+
                 <div className="space-y-2">
                   {formData.variant_prompt_ids.map((variantId, index) => (
                     <div key={index} className="flex gap-2">
@@ -241,7 +245,12 @@ export default function NewABTestPage() {
                         onValueChange={(value) => handleVariantChange(index, value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={`选择变体 ${String.fromCharCode(65 + index)}`} />
+                          <SelectValue
+                            placeholder={abTests.new.form.variantPlaceholder.replace(
+                              '{label}',
+                              String.fromCharCode(65 + index)
+                            )}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {prompts.map((prompt) => (
@@ -269,10 +278,10 @@ export default function NewABTestPage() {
 
             {/* 测试配置 */}
             <div className="space-y-4 border-t pt-4">
-              <h3 className="font-semibold">测试配置</h3>
+              <h3 className="font-semibold">{abTests.new.form.testConfig}</h3>
 
               <div>
-                <Label htmlFor="goal_metric">目标指标 *</Label>
+                <Label htmlFor="goal_metric">{abTests.new.form.goalMetric}</Label>
                 <Select
                   value={formData.goal_metric}
                   onValueChange={(value) => setFormData({ ...formData, goal_metric: value })}
@@ -281,19 +290,20 @@ export default function NewABTestPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user_rating">用户评分</SelectItem>
-                    <SelectItem value="cost">成本</SelectItem>
-                    <SelectItem value="success_rate">成功率</SelectItem>
-                    <SelectItem value="response_time">响应时间</SelectItem>
+                    {['user_rating', 'cost', 'success_rate', 'response_time'].map((metric) => (
+                      <SelectItem key={metric} value={metric}>
+                        {abTests.common.goalMetrics[metric] || metric}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-1">
-                  选择用于判断获胜版本的指标
+                  {abTests.new.form.goalMetricHelp}
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="target_improvement">目标提升 (%)</Label>
+                <Label htmlFor="target_improvement">{abTests.new.form.targetImprovement}</Label>
                 <Input
                   id="target_improvement"
                   type="number"
@@ -304,12 +314,12 @@ export default function NewABTestPage() {
                   step="0.1"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  期望达到的改进百分比
+                  {abTests.new.form.targetImprovementHelp}
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="min_sample_size">最小样本量 *</Label>
+                <Label htmlFor="min_sample_size">{abTests.new.form.minSampleSize}</Label>
                 <Input
                   id="min_sample_size"
                   type="number"
@@ -320,7 +330,7 @@ export default function NewABTestPage() {
                   required
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  达到这个样本量后才能得出有效结论
+                  {abTests.new.form.minSampleSizeHelp}
                 </p>
               </div>
             </div>
@@ -332,10 +342,10 @@ export default function NewABTestPage() {
                 variant="outline"
                 onClick={() => router.push('/ab-tests')}
               >
-                取消
+                {abTests.common.actions.cancel}
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? '创建中...' : '创建测试'}
+                {loading ? abTests.common.actions.creating : abTests.common.actions.create}
               </Button>
             </div>
           </form>

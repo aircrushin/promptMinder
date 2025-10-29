@@ -5,12 +5,16 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Play, Pause, TrendingUp, Clock, Users } from "lucide-react";
+import { Plus, TrendingUp, Clock, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { defaultAbTestsTranslations } from "@/lib/translations/ab-tests";
 
 export default function ABTestsPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const abTests = t?.abTests ?? defaultAbTestsTranslations;
   const [experiments, setExperiments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -38,7 +42,7 @@ export default function ABTestsPage() {
     } catch (error) {
       console.error('Error loading experiments:', error);
       toast({
-        title: "错误",
+        title: abTests.common.errorTitle,
         description: error.message,
         variant: "destructive"
       });
@@ -49,10 +53,10 @@ export default function ABTestsPage() {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      draft: { label: '草稿', variant: 'secondary' },
-      running: { label: '运行中', variant: 'default' },
-      completed: { label: '已完成', variant: 'outline' },
-      stopped: { label: '已停止', variant: 'destructive' }
+      draft: { label: abTests.common.status.draft, variant: 'secondary' },
+      running: { label: abTests.common.status.running, variant: 'default' },
+      completed: { label: abTests.common.status.completed, variant: 'outline' },
+      stopped: { label: abTests.common.status.stopped, variant: 'destructive' }
     };
 
     const config = statusConfig[status] || statusConfig.draft;
@@ -60,27 +64,21 @@ export default function ABTestsPage() {
   };
 
   const getGoalMetricLabel = (metric) => {
-    const labels = {
-      user_rating: '用户评分',
-      cost: '成本',
-      success_rate: '成功率',
-      response_time: '响应时间'
-    };
-    return labels[metric] || metric;
+    return abTests.common.goalMetrics[metric] || metric;
   };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">A/B 测试</h1>
+          <h1 className="text-3xl font-bold mb-2">{abTests.list.title}</h1>
           <p className="text-muted-foreground">
-            对比不同版本的提示词，找出最优方案
+            {abTests.list.subtitle}
           </p>
         </div>
         <Button onClick={() => router.push('/ab-tests/new')}>
           <Plus className="w-4 h-4 mr-2" />
-          创建测试
+          {abTests.list.createButton}
         </Button>
       </div>
 
@@ -93,7 +91,7 @@ export default function ABTestsPage() {
             size="sm"
             onClick={() => setFilter(status)}
           >
-            {status === 'all' ? '全部' : getStatusBadge(status).props.children}
+            {status === 'all' ? abTests.list.filters.all : getStatusBadge(status).props.children}
           </Button>
         ))}
       </div>
@@ -102,19 +100,19 @@ export default function ABTestsPage() {
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted-foreground">加载中...</p>
+          <p className="mt-2 text-muted-foreground">{abTests.list.loading}</p>
         </div>
       ) : experiments.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <TrendingUp className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">还没有A/B测试</h3>
+            <h3 className="text-lg font-semibold mb-2">{abTests.list.empty.title}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              创建您的第一个测试，开始优化提示词效果
+              {abTests.list.empty.description}
             </p>
             <Button onClick={() => router.push('/ab-tests/new')}>
               <Plus className="w-4 h-4 mr-2" />
-              创建第一个测试
+              {abTests.list.empty.action}
             </Button>
           </CardContent>
         </Card>
@@ -141,7 +139,7 @@ export default function ABTestsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center text-sm">
                     <TrendingUp className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">目标指标：</span>
+                    <span className="text-muted-foreground">{abTests.list.card.goalMetric}</span>
                     <span className="ml-1 font-medium">
                       {getGoalMetricLabel(experiment.goal_metric)}
                     </span>
@@ -149,7 +147,7 @@ export default function ABTestsPage() {
 
                   <div className="flex items-center text-sm">
                     <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">样本量：</span>
+                    <span className="text-muted-foreground">{abTests.list.card.sampleSize}</span>
                     <span className="ml-1 font-medium">
                       {experiment.current_sample_size} / {experiment.min_sample_size}
                     </span>
@@ -159,8 +157,11 @@ export default function ABTestsPage() {
                     <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
                     <span className="text-muted-foreground">
                       {experiment.started_at
-                        ? `开始于 ${new Date(experiment.started_at).toLocaleDateString()}`
-                        : '未开始'}
+                        ? abTests.list.card.startedAt.replace(
+                            '{date}',
+                            new Date(experiment.started_at).toLocaleDateString()
+                          )
+                        : abTests.list.card.notStarted}
                     </span>
                   </div>
 
@@ -168,7 +169,7 @@ export default function ABTestsPage() {
                   {experiment.status === 'running' && (
                     <div className="mt-3">
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="text-muted-foreground">进度</span>
+                        <span className="text-muted-foreground">{abTests.list.card.progress}</span>
                         <span className="font-medium">
                           {Math.min(
                             100,

@@ -3,13 +3,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus, Trophy, AlertCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { defaultAbTestsTranslations } from "@/lib/translations/ab-tests";
 
 export default function ResultsAnalysis({ results }) {
+  const { t } = useLanguage();
+  const abTests = t?.abTests ?? defaultAbTestsTranslations;
+
   if (!results) {
     return (
       <div className="text-center py-8">
         <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-        <p className="text-muted-foreground">暂无测试结果</p>
+        <p className="text-muted-foreground">{abTests.results.empty}</p>
       </div>
     );
   }
@@ -17,13 +22,7 @@ export default function ResultsAnalysis({ results }) {
   const { experiment, baseline, variants, winner, isComplete } = results;
 
   const getMetricLabel = (metric) => {
-    const labels = {
-      user_rating: '平均评分',
-      cost: '平均成本',
-      success_rate: '成功率',
-      response_time: '响应时间'
-    };
-    return labels[metric] || metric;
+    return abTests.common.goalMetrics[metric] || metric;
   };
 
   const getMetricValue = (stats, metric) => {
@@ -59,34 +58,34 @@ export default function ResultsAnalysis({ results }) {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>测试概况</CardTitle>
+            <CardTitle>{abTests.results.overviewTitle}</CardTitle>
             {isComplete ? (
-              <Badge variant="default">测试完成</Badge>
+              <Badge variant="default">{abTests.results.status.complete}</Badge>
             ) : (
-              <Badge variant="secondary">进行中</Badge>
+              <Badge variant="secondary">{abTests.results.status.running}</Badge>
             )}
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground mb-1">目标指标</div>
+              <div className="text-sm text-muted-foreground mb-1">{abTests.results.goalMetric}</div>
               <div className="text-lg font-semibold">{getMetricLabel(experiment.goalMetric)}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">样本量</div>
+              <div className="text-sm text-muted-foreground mb-1">{abTests.results.sampleSize}</div>
               <div className="text-lg font-semibold">
                 {experiment.currentSampleSize} / {experiment.minSampleSize}
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">完成度</div>
+              <div className="text-sm text-muted-foreground mb-1">{abTests.results.completion}</div>
               <div className="text-lg font-semibold">
                 {Math.min(100, Math.round((experiment.currentSampleSize / experiment.minSampleSize) * 100))}%
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">目标提升</div>
+              <div className="text-sm text-muted-foreground mb-1">{abTests.results.targetImprovement}</div>
               <div className="text-lg font-semibold">
                 {experiment.targetImprovement ? `${experiment.targetImprovement}%` : 'N/A'}
               </div>
@@ -113,7 +112,7 @@ export default function ResultsAnalysis({ results }) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-500" />
-              <CardTitle>获胜版本</CardTitle>
+              <CardTitle>{abTests.results.winnerTitle}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -121,7 +120,7 @@ export default function ResultsAnalysis({ results }) {
               <div>
                 <div className="font-semibold text-lg">{winner.name.toUpperCase()}</div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  在 {getMetricLabel(experiment.goalMetric)} 指标上表现最佳
+                  {abTests.results.winnerDescription.replace('{metric}', getMetricLabel(experiment.goalMetric))}
                 </div>
               </div>
               <div className="text-right">
@@ -137,7 +136,7 @@ export default function ResultsAnalysis({ results }) {
       {/* 详细对比 */}
       <Card>
         <CardHeader>
-          <CardTitle>详细对比</CardTitle>
+          <CardTitle>{abTests.results.detailsTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -145,8 +144,8 @@ export default function ResultsAnalysis({ results }) {
             <div className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <div className="font-semibold">基准版本 (Baseline)</div>
-                  <div className="text-sm text-muted-foreground">样本数: {baseline.stats.count}</div>
+                  <div className="font-semibold">{abTests.results.baselineLabel}</div>
+                  <div className="text-sm text-muted-foreground">{abTests.results.sampleCount}: {baseline.stats.count}</div>
                 </div>
                 {winner && winner.name === 'baseline' && (
                   <Trophy className="w-5 h-5 text-yellow-500" />
@@ -155,19 +154,19 @@ export default function ResultsAnalysis({ results }) {
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <div className="text-xs text-muted-foreground">平均评分</div>
+                  <div className="text-xs text-muted-foreground">{abTests.results.averages.rating}</div>
                   <div className="text-lg font-semibold">{baseline.stats.avgRating.toFixed(2)}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">平均成本</div>
+                  <div className="text-xs text-muted-foreground">{abTests.results.averages.cost}</div>
                   <div className="text-lg font-semibold">${baseline.stats.avgCost.toFixed(4)}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">成功率</div>
+                  <div className="text-xs text-muted-foreground">{abTests.results.averages.success}</div>
                   <div className="text-lg font-semibold">{baseline.stats.successRate.toFixed(1)}%</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">响应时间</div>
+                  <div className="text-xs text-muted-foreground">{abTests.results.averages.responseTime}</div>
                   <div className="text-lg font-semibold">{baseline.stats.avgResponseTime.toFixed(0)}ms</div>
                 </div>
               </div>
@@ -197,12 +196,14 @@ export default function ResultsAnalysis({ results }) {
                 experiment.goalMetric
               );
 
+              const variantLabel = variant.name.replace('variant_', '').toUpperCase();
+
               return (
                 <div key={variant.name} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="font-semibold flex items-center gap-2">
-                        变体 {variant.name.replace('variant_', '').toUpperCase()}
+                        {abTests.results.variantTitle.replace('{label}', variantLabel)}
                         {improvement !== 0 && (
                           <div className={`flex items-center gap-1 ${getImprovementColor(improvement)}`}>
                             {getImprovementIcon(improvement)}
@@ -212,7 +213,7 @@ export default function ResultsAnalysis({ results }) {
                           </div>
                         )}
                       </div>
-                      <div className="text-sm text-muted-foreground">样本数: {variant.stats.count}</div>
+                      <div className="text-sm text-muted-foreground">{abTests.results.sampleCount}: {variant.stats.count}</div>
                     </div>
                     {winner && winner.name === variant.name && (
                       <Trophy className="w-5 h-5 text-yellow-500" />
@@ -221,19 +222,19 @@ export default function ResultsAnalysis({ results }) {
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
-                      <div className="text-xs text-muted-foreground">平均评分</div>
+                      <div className="text-xs text-muted-foreground">{abTests.results.averages.rating}</div>
                       <div className="text-lg font-semibold">{variant.stats.avgRating.toFixed(2)}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">平均成本</div>
+                      <div className="text-xs text-muted-foreground">{abTests.results.averages.cost}</div>
                       <div className="text-lg font-semibold">${variant.stats.avgCost.toFixed(4)}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">成功率</div>
+                      <div className="text-xs text-muted-foreground">{abTests.results.averages.success}</div>
                       <div className="text-lg font-semibold">{variant.stats.successRate.toFixed(1)}%</div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">响应时间</div>
+                      <div className="text-xs text-muted-foreground">{abTests.results.averages.responseTime}</div>
                       <div className="text-lg font-semibold">{variant.stats.avgResponseTime.toFixed(0)}ms</div>
                     </div>
                   </div>
@@ -259,19 +260,22 @@ export default function ResultsAnalysis({ results }) {
       {!isComplete && (
         <Card>
           <CardHeader>
-            <CardTitle>测试建议</CardTitle>
+            <CardTitle>{abTests.results.recommendationsTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
               <p className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 text-blue-500" />
                 <span>
-                  还需要 <strong>{experiment.minSampleSize - experiment.currentSampleSize}</strong> 个样本才能得出可靠结论
+                  {abTests.results.recommendationNeedSamples.replace(
+                    '{count}',
+                    `${Math.max(0, experiment.minSampleSize - experiment.currentSampleSize)}`
+                  )}
                 </span>
               </p>
               <p className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 text-blue-500" />
-                <span>建议在不同时间段和用户群体中进行测试，以获得更全面的数据</span>
+                <span>{abTests.results.recommendationDiversity}</span>
               </p>
             </div>
           </CardContent>

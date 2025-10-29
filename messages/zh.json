@@ -834,5 +834,166 @@
     "items": "条",
     "goTo": "跳至",
     "page": "页"
+  },
+  "abTests": {
+    "common": {
+      "successTitle": "成功",
+      "errorTitle": "错误",
+      "loading": "加载中...",
+      "status": {
+        "draft": "草稿",
+        "running": "运行中",
+        "completed": "已完成",
+        "stopped": "已停止"
+      },
+      "goalMetrics": {
+        "user_rating": "用户评分",
+        "cost": "成本",
+        "success_rate": "成功率",
+        "response_time": "响应时间"
+      },
+      "actions": {
+        "back": "返回",
+        "start": "启动测试",
+        "stop": "停止测试",
+        "delete": "删除",
+        "cancel": "取消",
+        "create": "创建测试",
+        "creating": "创建中..."
+      },
+      "toast": {
+        "startSuccess": "测试已启动",
+        "stopSuccess": "测试已停止",
+        "deleteSuccess": "测试已删除",
+        "createSuccess": "A/B测试创建成功",
+        "missingName": "请输入测试名称",
+        "missingBaseline": "请选择基准版本",
+        "missingVariant": "请至少添加一个变体版本",
+        "duplicatePrompt": "不能选择重复的提示词"
+      }
+    },
+    "list": {
+      "title": "A/B 测试",
+      "subtitle": "对比不同版本的提示词，找出最优方案",
+      "createButton": "创建测试",
+      "filters": {
+        "all": "全部"
+      },
+      "loading": "加载中...",
+      "empty": {
+        "title": "还没有A/B测试",
+        "description": "创建您的第一个测试，开始优化提示词效果",
+        "action": "创建第一个测试"
+      },
+      "card": {
+        "goalMetric": "目标指标：",
+        "sampleSize": "样本量：",
+        "startedAt": "开始于 {date}",
+        "notStarted": "未开始",
+        "progress": "进度"
+      }
+    },
+    "detail": {
+      "tabs": {
+        "overview": "概览",
+        "compare": "版本对比",
+        "results": "结果分析"
+      },
+      "notFound": {
+        "title": "测试不存在",
+        "button": "返回列表"
+      },
+      "overview": {
+        "basicInfo": "基本信息",
+        "testConfig": "测试配置",
+        "fields": {
+          "status": "状态：",
+          "goalMetric": "目标指标：",
+          "minSampleSize": "最小样本量：",
+          "currentSampleSize": "当前样本量：",
+          "baselinePrompt": "基准提示词：",
+          "variantCount": "变体数量：",
+          "startedAt": "开始时间：",
+          "endedAt": "结束时间："
+        }
+      },
+      "variants": {
+        "buttonLabel": "变体 {label}"
+      },
+      "resultsCallout": {
+        "title": "暂无测试结果",
+        "description": "启动测试并收集数据后，结果将在这里显示"
+      },
+      "deleteDialog": {
+        "title": "确认删除",
+        "description": "确定要删除这个A/B测试吗？此操作无法撤销，所有相关数据都将被删除。",
+        "confirm": "删除"
+      }
+    },
+    "new": {
+      "title": "创建A/B测试",
+      "form": {
+        "name": "测试名称 *",
+        "namePlaceholder": "例如：提示词优化测试 v1",
+        "description": "描述",
+        "descriptionPlaceholder": "描述这次测试的目的和预期效果...",
+        "promptConfig": "提示词配置",
+        "baseline": "基准版本 (Baseline) *",
+        "baselinePlaceholder": "选择基准提示词",
+        "baselineHelp": "选择作为对比基准的提示词版本",
+        "variants": "变体版本 (Variants) *",
+        "addVariant": "添加变体",
+        "variantPlaceholder": "选择变体 {label}",
+        "testConfig": "测试配置",
+        "goalMetric": "目标指标 *",
+        "goalMetricHelp": "选择用于判断获胜版本的指标",
+        "targetImprovement": "目标提升 (%)",
+        "targetImprovementHelp": "期望达到的改进百分比",
+        "minSampleSize": "最小样本量 *",
+        "minSampleSizeHelp": "达到这个样本量后才能得出有效结论"
+      }
+    },
+    "promptCompare": {
+      "selectPrompt": "请选择要对比的提示词",
+      "baselineTitle": "基准版本 (Baseline)",
+      "baselineBadge": "原始",
+      "versionLabel": "版本",
+      "variantTitle": "变体 {label}",
+      "variantBadge": "测试中",
+      "summaryTitle": "对比摘要",
+      "baselineWords": "基准字数",
+      "variantWords": "变体字数",
+      "wordsDelta": "字数变化",
+      "similarity": "相似度",
+      "legendBaseline": "红色高亮表示基准版本中的文本",
+      "legendVariant": "绿色高亮表示变体版本中的文本"
+    },
+    "results": {
+      "empty": "暂无测试结果",
+      "overviewTitle": "测试概况",
+      "status": {
+        "complete": "测试完成",
+        "running": "进行中"
+      },
+      "goalMetric": "目标指标",
+      "sampleSize": "样本量",
+      "completion": "完成度",
+      "targetImprovement": "目标提升",
+      "winnerTitle": "获胜版本",
+      "winnerDescription": "在 {metric} 指标上表现最佳",
+      "detailsTitle": "详细对比",
+      "baselineLabel": "基准版本 (Baseline)",
+      "sampleCount": "样本数",
+      "averages": {
+        "rating": "平均评分",
+        "cost": "平均成本",
+        "success": "成功率",
+        "responseTime": "响应时间"
+      },
+      "variantTitle": "变体 {label}",
+      "recommendationsTitle": "测试建议",
+      "recommendationNeedSamples": "还需要 {count} 个样本才能得出可靠结论",
+      "recommendationDiversity": "建议在不同时间段和用户群体中进行测试，以获得更全面的数据"
+    }
   }
-} 
+}

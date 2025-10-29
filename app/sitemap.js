@@ -11,6 +11,8 @@ export default async function sitemap() {
     '/tags',
     '/privacy',
     '/terms',
+    '/teams',
+    '/ab-tests',
     '/sign-in',
     '/sign-up',
   ].map((route) => ({
@@ -36,6 +38,7 @@ export default async function sitemap() {
       }
     }
   } catch (e) {
+    console.log('Error when breaking down dynamic routes:', e);
     // Swallow errors to avoid breaking sitemap
   }
 
