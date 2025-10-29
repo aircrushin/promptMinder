@@ -3,6 +3,24 @@ import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 
+function applyPromptFilters(query, { teamId, userId, tag, search }) {
+  const baseQuery = teamId
+    ? query.eq('team_id', teamId)
+    : query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+
+  let filteredQuery = baseQuery
+
+  if (tag) {
+    filteredQuery = filteredQuery.ilike('tags', `%${tag}%`)
+  }
+
+  if (search) {
+    filteredQuery = filteredQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+  }
+
+  return filteredQuery
+}
+
 export async function GET(request) {
   try {
     const userId = await requireUserId()
@@ -22,65 +40,41 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit') || '10', 10)
     const offset = (page - 1) * limit
 
-    let query = supabase
-      .from('prompts')
-      .select('*')
+    const filters = { teamId, userId, tag, search }
 
-    if (teamId) {
-      query = query.eq('team_id', teamId)
-    } else {
-      query = query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
-    }
-
-    if (tag) {
-      query = query.ilike('tags', `%${tag}%`)
-    }
-
-    if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
-    }
-
-    query = query
+    const dataQuery = applyPromptFilters(
+      supabase
+        .from('prompts')
+        .select('*'),
+      filters
+    )
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
-    const { data: prompts, error } = await query
+    const countQuery = applyPromptFilters(
+      supabase
+        .from('prompts')
+        .select('*', { count: 'exact', head: true }),
+      filters
+    )
 
-    if (error) {
-      throw error
+    const [promptsResult, countResult] = await Promise.all([dataQuery, countQuery])
+
+    if (promptsResult.error) {
+      throw promptsResult.error
     }
 
-    let countQuery = supabase
-      .from('prompts')
-      .select('*', { count: 'exact', head: true })
-
-    if (teamId) {
-      countQuery = countQuery.eq('team_id', teamId)
-    } else {
-      countQuery = countQuery.or(`created_by.eq.${userId},user_id.eq.${userId}`)
-    }
-
-    if (tag) {
-      countQuery = countQuery.ilike('tags', `%${tag}%`)
-    }
-
-    if (search) {
-      countQuery = countQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
-    }
-
-    const { count, error: countError } = await countQuery
-
-    if (countError) {
-      throw countError
+    if (countResult.error) {
+      throw countResult.error
     }
 
     return NextResponse.json({
-      prompts: prompts || [],
+      prompts: promptsResult.data || [],
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: countResult.count || 0,
+        totalPages: Math.ceil((countResult.count || 0) / limit)
       }
     })
   } catch (error) {
