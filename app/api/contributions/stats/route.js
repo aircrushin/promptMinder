@@ -1,9 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server'
 
 export async function GET(request) {
-  const { userId } = await auth(); // 需要登录用户（管理员）
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
