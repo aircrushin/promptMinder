@@ -42,6 +42,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Pagination } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const STATUS_THEMES = {
   pending: {
@@ -70,41 +71,42 @@ const STATUS_THEMES = {
   },
 };
 
-const STAT_CARD_META = [
+const getStatCardMeta = (t) => [
   {
     key: "total",
-    title: "总贡献数",
+    title: t.admin.contributions.statsCards.total,
     icon: FileText,
     gradient: "from-slate-900/80 via-slate-900/20 to-slate-900/5",
   },
   {
     key: "pending",
-    title: "待审核",
+    title: t.admin.contributions.statsCards.pending,
     icon: Clock,
     gradient: "from-amber-500/80 via-amber-500/20 to-amber-500/5",
   },
   {
     key: "approved",
-    title: "已通过",
+    title: t.admin.contributions.statsCards.approved,
     icon: CheckCircle,
     gradient: "from-emerald-500/80 via-emerald-500/20 to-emerald-500/5",
   },
   {
     key: "rejected",
-    title: "已拒绝",
+    title: t.admin.contributions.statsCards.rejected,
     icon: XCircle,
     gradient: "from-rose-500/80 via-rose-500/20 to-rose-500/5",
   },
 ];
 
-const STATUS_LABELS = {
-  all: "全部状态",
-  pending: "待审核",
-  approved: "已通过",
-  rejected: "已拒绝",
-};
+const getStatusLabels = (t) => ({
+  all: t.admin.contributions.statusLabels.all,
+  pending: t.admin.contributions.statusLabels.pending,
+  approved: t.admin.contributions.statusLabels.approved,
+  rejected: t.admin.contributions.statusLabels.rejected,
+});
 
 export default function AdminContributionsPage() {
+  const { t } = useLanguage();
   const [contributions, setContributions] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -148,22 +150,22 @@ export default function AdminContributionsPage() {
         setPagination(data.pagination);
       } else {
         toast({
-          title: "错误",
-          description: "加载贡献列表失败",
+          title: t.admin.contributions.toast.error,
+          description: t.admin.contributions.toast.loadError,
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Failed to fetch contributions:", error);
       toast({
-        title: "错误",
-        description: "加载贡献列表失败",
+        title: t.admin.contributions.toast.error,
+        description: t.admin.contributions.toast.loadError,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, toast]);
+  }, [currentPage, statusFilter, toast, t]);
 
   // 加载统计数据
   useEffect(() => {
@@ -200,27 +202,30 @@ export default function AdminContributionsPage() {
   const totalPending = stats?.pending ?? 0;
   const queueBadge = stats
     ? totalPending > 0
-      ? `${totalPending}条待审核`
-      : "队列已清空"
-    : "统计加载中...";
+      ? t.admin.contributions.queueBadge.replace("{count}", totalPending)
+      : t.admin.contributions.queueEmpty
+    : t.admin.contributions.statsLoading;
 
   const statusOptions = useMemo(
     () => ["all", "pending", "approved", "rejected"],
     []
   );
 
+  const statusLabels = getStatusLabels(t);
+  const statCardMeta = getStatCardMeta(t);
+
   const getStatusBadge = (status) => {
     const statusConfig = {
       pending: {
-        label: "待审核",
+        label: t.admin.contributions.statusLabels.pending,
         icon: <Clock className="h-3 w-3" />,
       },
       approved: {
-        label: "已通过",
+        label: t.admin.contributions.statusLabels.approved,
         icon: <CheckCircle className="h-3 w-3" />,
       },
       rejected: {
-        label: "已拒绝",
+        label: t.admin.contributions.statusLabels.rejected,
         icon: <XCircle className="h-3 w-3" />,
       },
     };
@@ -246,9 +251,9 @@ export default function AdminContributionsPage() {
     const diffTime = Math.abs(now - date);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "今天";
-    if (diffDays === 1) return "昨天";
-    if (diffDays < 7) return `${diffDays}天前`;
+    if (diffDays === 0) return t.admin.contributions.time.today;
+    if (diffDays === 1) return t.admin.contributions.time.yesterday;
+    if (diffDays < 7) return t.admin.contributions.time.daysAgo.replace("{count}", diffDays);
     return date.toLocaleDateString("zh-CN");
   };
 
@@ -276,8 +281,8 @@ export default function AdminContributionsPage() {
 
       if (response.ok) {
         toast({
-          title: "审核成功",
-          description: status === "approved" ? "贡献已通过审核" : "贡献已被拒绝",
+          title: t.admin.contributions.toast.reviewSuccess,
+          description: status === "approved" ? t.admin.contributions.toast.approved : t.admin.contributions.toast.rejected,
         });
         // 刷新列表
         fetchContributions();
@@ -297,16 +302,16 @@ export default function AdminContributionsPage() {
       } else {
         const error = await response.json();
         toast({
-          title: "审核失败",
-          description: error.error || "操作失败，请重试",
+          title: t.admin.contributions.toast.reviewFailed,
+          description: error.error || t.admin.contributions.toast.retryError,
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Failed to review:", error);
       toast({
-        title: "审核失败",
-        description: "操作失败，请重试",
+        title: t.admin.contributions.toast.reviewFailed,
+        description: t.admin.contributions.toast.retryError,
         variant: "destructive",
       });
     } finally {
@@ -322,12 +327,12 @@ export default function AdminContributionsPage() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-foreground/5 px-4 py-1 text-xs tracking-wide text-muted-foreground backdrop-blur">
-                <Sparkles className="h-3.5 w-3.5" /> 审核工作台
+                <Sparkles className="h-3.5 w-3.5" /> {t.admin.contributions.headerBadge}
               </div>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">提示词审核管理</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t.admin.contributions.pageTitle}</h1>
                 <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-                  快速筛选、审核并发布来自社区的提示词贡献。保持流程顺畅，高效处理待办。
+                  {t.admin.contributions.pageDescription}
                 </p>
               </div>
             </div>
@@ -350,10 +355,10 @@ export default function AdminContributionsPage() {
                   >
                     <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")}
                     />
-                    刷新数据
+                    {t.admin.contributions.refreshButton}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>重新获取最新统计与列表</TooltipContent>
+                <TooltipContent>{t.admin.contributions.refreshTooltip}</TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -379,7 +384,7 @@ export default function AdminContributionsPage() {
                       {title}
                     </CardTitle>
                     <span className="text-xs font-medium uppercase tracking-wide text-white/60 dark:text-white/50">
-                      Status
+                      {t.admin.contributions.statsCards.statusLabel}
                     </span>
                   </div>
                   <div className="rounded-xl bg-black/10 p-2 text-white/80 backdrop-blur dark:bg-white/10">
@@ -406,11 +411,11 @@ export default function AdminContributionsPage() {
           <CardContent className="flex flex-col gap-4 p-6">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <SlidersHorizontal className="h-4 w-4" /> 快速筛选
+                <SlidersHorizontal className="h-4 w-4" /> {t.admin.contributions.filters.title}
               </div>
               {hasActiveFilters ? (
                 <Button variant="ghost" size="sm" onClick={handleResetFilters}>
-                  清除筛选
+                  {t.admin.contributions.filters.reset}
                 </Button>
               ) : null}
             </div>
@@ -418,7 +423,7 @@ export default function AdminContributionsPage() {
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="搜索标题或类别..."
+                  placeholder={t.admin.contributions.filters.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -436,12 +441,12 @@ export default function AdminContributionsPage() {
                 }}
               >
                 <SelectTrigger className="h-11 w-full rounded-xl border-muted/60 bg-background/70 shadow-sm lg:w-[220px]">
-                  <SelectValue placeholder="选择状态" />
+                  <SelectValue placeholder={t.admin.contributions.filters.statusPlaceholder} />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
                   {statusOptions.map((status) => (
                     <SelectItem key={status} value={status}>
-                      {STATUS_LABELS[status]}
+                      {statusLabels[status]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -450,15 +455,15 @@ export default function AdminContributionsPage() {
 
             {hasActiveFilters ? (
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span>当前筛选:</span>
+                <span>{t.admin.contributions.filters.currentFilters}</span>
                 {searchTerm ? (
                   <Badge variant="secondary" className="rounded-full bg-muted px-3 py-1 text-xs">
-                    关键字: {searchTerm}
+                    {t.admin.contributions.filters.keyword} {searchTerm}
                   </Badge>
                 ) : null}
                 {statusFilter !== "pending" ? (
                   <Badge variant="secondary" className="rounded-full bg-muted px-3 py-1 text-xs">
-                    状态: {STATUS_LABELS[statusFilter]}
+                    {t.admin.contributions.filters.status} {statusLabels[statusFilter]}
                   </Badge>
                 ) : null}
               </div>
@@ -483,9 +488,9 @@ export default function AdminContributionsPage() {
         <Card className="p-12">
           <div className="text-center">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">暂无贡献</h3>
+            <h3 className="text-lg font-semibold mb-2">{t.admin.contributions.emptyState.noContributions}</h3>
             <p className="text-muted-foreground">
-              {searchTerm ? "没有找到匹配的贡献" : "当前没有任何贡献记录"}
+              {searchTerm ? t.admin.contributions.emptyState.noResults : t.admin.contributions.emptyState.noContributionsDesc}
             </p>
           </div>
         </Card>
@@ -528,18 +533,18 @@ export default function AdminContributionsPage() {
                     <div className="flex-1 space-y-3">
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="text-lg font-semibold leading-snug">
-                          {contribution.title || "未命名提示词"}
+                          {contribution.title || t.admin.contributions.contributionCard.untitled}
                         </h3>
                         {getStatusBadge(contribution.status)}
                         {isPending && (
                           <Badge variant="outline" className="rounded-full border-dashed px-3 py-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">
-                            点击展开审核
+                            {t.admin.contributions.contributionCard.expandHint}
                           </Badge>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <Badge variant="outline" className="rounded-full border-dashed px-3 py-0.5 text-xs">
-                          {contribution.role_category || "未分类"}
+                          {contribution.role_category || t.admin.contributions.contributionCard.untitled}
                         </Badge>
                         <Separator orientation="vertical" className="hidden h-3 sm:block" />
                         <span>{formatDate(contribution.created_at)}</span>
@@ -548,26 +553,26 @@ export default function AdminContributionsPage() {
                             <Separator orientation="vertical" className="hidden h-3 sm:block" />
                             <span className="inline-flex items-center gap-1">
                               <Users className="h-3.5 w-3.5" />
-                              {contributorDisplay}
+                              {contributorDisplay || t.admin.contributions.contributionCard.anonymous}
                             </span>
                           </>
                         )}
                       </div>
                       {!isExpanded && (
                         <p className="line-clamp-2 text-sm text-muted-foreground">
-                          {contribution.content || "（暂无内容）"}
+                          {contribution.content || t.admin.contributions.contributionCard.noContent}
                         </p>
                       )}
                       {!isPending && contribution.reviewed_at && (
                         <div className="flex flex-wrap items-center gap-2 rounded-xl bg-background/70 p-3 text-xs text-muted-foreground">
-                          <span>审核时间</span>
+                          <span>{t.admin.contributions.contributionCard.reviewTime}</span>
                           <Separator orientation="vertical" className="h-3" />
                           <span>
                             {new Date(contribution.reviewed_at).toLocaleString("zh-CN")}
                           </span>
                           {contribution.admin_notes ? (
                             <Badge variant="secondary" className="rounded-full bg-muted px-2.5 py-0.5 text-[11px]">
-                              备注: {contribution.admin_notes}
+                              {t.admin.contributions.contributionCard.notePrefix} {contribution.admin_notes}
                             </Badge>
                           ) : null}
                         </div>
@@ -598,13 +603,13 @@ export default function AdminContributionsPage() {
                           </TooltipContent>
                         </Tooltip>
                       ) : (
-                        <Button variant="ghost" size="sm" asChild>
+                            <Button variant="ghost" size="sm" asChild>
                           <Link
                             href={`/admin/contributions/${contribution.id}`}
                             onClick={(event) => event.stopPropagation()}
                             className="inline-flex items-center gap-1"
                           >
-                            <Eye className="h-4 w-4" /> 查看详情
+                            <Eye className="h-4 w-4" /> {t.admin.contributions.contributionCard.viewDetails}
                           </Link>
                         </Button>
                       )}
@@ -617,24 +622,24 @@ export default function AdminContributionsPage() {
                         <div className="space-y-5">
                           <div>
                             <Label className="text-sm font-medium text-foreground">
-                              提示词内容
+                              {t.admin.contributions.contributionCard.content}
                             </Label>
                             <ScrollArea className="mt-3 max-h-[320px] rounded-2xl border border-dashed bg-muted/20 p-4">
                               <pre className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                                {contribution.content || "（暂无内容）"}
+                                {contribution.content || t.admin.contributions.contributionCard.noContent}
                               </pre>
                             </ScrollArea>
                           </div>
 
                           <div className="grid gap-3 sm:grid-cols-2">
                             <div className="rounded-xl border bg-background/80 p-4">
-                              <p className="text-xs text-muted-foreground">提交者</p>
+                              <p className="text-xs text-muted-foreground">{t.admin.contributions.contributionCard.contributor}</p>
                               <p className="mt-1 text-sm font-medium text-foreground">
-                                {contributorDisplay}
+                                {contributorDisplay || t.admin.contributions.contributionCard.anonymous}
                               </p>
                             </div>
                             <div className="rounded-xl border bg-background/80 p-4">
-                              <p className="text-xs text-muted-foreground">提交时间</p>
+                              <p className="text-xs text-muted-foreground">{t.admin.contributions.contributionCard.submitTime}</p>
                               <p className="mt-1 text-sm font-medium text-foreground">
                                 {new Date(contribution.created_at).toLocaleString("zh-CN")}
                               </p>
@@ -649,11 +654,11 @@ export default function AdminContributionsPage() {
                                 htmlFor={`notes-${contribution.id}`}
                                 className="text-sm font-medium"
                               >
-                                审核备注（可选）
+                                {t.admin.contributions.reviewPanel.notesLabel}
                               </Label>
                               <Textarea
                                 id={`notes-${contribution.id}`}
-                                placeholder="添加审核备注或意见..."
+                                placeholder={t.admin.contributions.reviewPanel.notesPlaceholder}
                                 value={reviewNotes[contribution.id] || ""}
                                 onChange={(e) =>
                                   setReviewNotes((prev) => ({
@@ -682,10 +687,10 @@ export default function AdminContributionsPage() {
                                   htmlFor={`publish-${contribution.id}`}
                                   className="text-sm font-medium"
                                 >
-                                  通过后自动发布到公开提示词库
+                                  {t.admin.contributions.reviewPanel.autoPublishLabel}
                                 </Label>
                                 <p className="text-xs text-muted-foreground">
-                                  可在详情页再次调整是否公开。
+                                  {t.admin.contributions.reviewPanel.autoPublishDesc}
                                 </p>
                               </div>
                             </div>
@@ -701,12 +706,12 @@ export default function AdminContributionsPage() {
                                 {isReviewing ? (
                                   <>
                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                    处理中...
+                                    {t.admin.contributions.reviewPanel.processing}
                                   </>
                                 ) : (
                                   <>
                                     <CheckCircle className="h-4 w-4" />
-                                    通过审核
+                                    {t.admin.contributions.reviewPanel.approveButton}
                                   </>
                                 )}
                               </Button>
@@ -721,12 +726,12 @@ export default function AdminContributionsPage() {
                                 {isReviewing ? (
                                   <>
                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                    处理中...
+                                    {t.admin.contributions.reviewPanel.processing}
                                   </>
                                 ) : (
                                   <>
                                     <XCircle className="h-4 w-4" />
-                                    拒绝贡献
+                                    {t.admin.contributions.reviewPanel.rejectButton}
                                   </>
                                 )}
                               </Button>
@@ -738,7 +743,7 @@ export default function AdminContributionsPage() {
                               disabled={isReviewing}
                               onClick={() => setExpandedId(null)}
                             >
-                              取消
+                              {t.admin.contributions.reviewPanel.cancelButton}
                             </Button>
 
                             <Button variant="ghost" className="w-full" asChild>
@@ -747,7 +752,7 @@ export default function AdminContributionsPage() {
                                 onClick={(event) => event.stopPropagation()}
                                 className="inline-flex items-center justify-center gap-1 text-sm"
                               >
-                                <Eye className="h-4 w-4" /> 查看完整详情页
+                                <Eye className="h-4 w-4" /> {t.admin.contributions.reviewPanel.viewFullDetails}
                               </Link>
                             </Button>
                           </div>
