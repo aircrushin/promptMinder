@@ -89,13 +89,23 @@ const nextConfig = {
   },
 
   images: {
-    domains: [
-      "api.dicebear.com",
-      "source.unsplash.com",
-      "emqozkcwoekqiibyempf.supabase.co",
-      "cdn.buymeacoffee.com",
-    ],
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.dicebear.com",
+      },
+      {
+        protocol: "https",
+        hostname: "source.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "emqozkcwoekqiibyempf.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.buymeacoffee.com",
+      },
       {
         protocol: "https",
         hostname: "*.supabase.co",
@@ -122,8 +132,10 @@ const nextConfig = {
   // Performance optimizations
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
-    outputFileTracingRoot: path.join(__dirname),
   },
+  
+  // Output file tracing (moved from experimental in Next.js 16)
+  outputFileTracingRoot: path.join(__dirname),
 
   // Enable gzip compression
   compress: true,
@@ -131,15 +143,7 @@ const nextConfig = {
   // Enable static optimization
   output: "standalone",
 
-  // Enable CSS modules optimization
-  modularizeImports: {
-    "lucide-react": {
-      transform: "lucide-react/dist/esm/icons/{{member}}",
-    },
-    "@radix-ui/react-icons": {
-      transform: "@radix-ui/react-icons/dist/{{member}}.js",
-    },
-  },
+  // modularizeImports removed - Next.js 16 handles this automatically via optimizePackageImports
 
   turbopack: {
     rules: {
