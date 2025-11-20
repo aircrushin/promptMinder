@@ -67,6 +67,9 @@ export function PromptGrid({
   onOpenVersions,
   onOpenPrompt,
   translations,
+  user,
+  role,
+  isPersonal,
 }) {
   const pageCopy = translations?.promptsPage;
   const variableTemplate = translations?.variableInputs?.variableCount;
@@ -86,6 +89,10 @@ export function PromptGrid({
               ? variableTemplate.replace("{count}", variables.length.toString())
               : `${variables.length} 变量`)
           : null;
+
+        const isCreator = latestPrompt.created_by === user?.id || latestPrompt.user_id === user?.id;
+        const isManager = role === 'admin' || role === 'owner';
+        const canManage = isPersonal || isCreator || isManager;
 
         const handleCardClick = () => {
           if (versions.length > 1) {
@@ -138,17 +145,19 @@ export function PromptGrid({
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onDeletePrompt?.(latestPrompt.id);
-                      }}
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canManage && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onDeletePrompt?.(latestPrompt.id);
+                        }}
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -172,6 +181,22 @@ export function PromptGrid({
                   <Clock className="h-3 w-3" />
                   {new Date(latestPrompt.updated_at).toLocaleString()}
                 </div>
+                {!isPersonal && latestPrompt.creator && (
+                  <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-border/50" title={`Created by ${latestPrompt.creator.fullName || latestPrompt.creator.email}`}>
+                    <div className="h-4 w-4 rounded-full overflow-hidden bg-secondary ring-1 ring-border/50 flex-shrink-0">
+                        {latestPrompt.creator.imageUrl ? (
+                            <img src={latestPrompt.creator.imageUrl} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                            <div className="h-full w-full flex items-center justify-center text-[10px] font-medium">
+                                {(latestPrompt.creator.firstName?.[0] || latestPrompt.creator.email?.[0] || '?').toUpperCase()}
+                            </div>
+                        )}
+                    </div>
+                    <span className="text-xs text-muted-foreground truncate max-w-[80px]">
+                        {latestPrompt.creator.fullName || latestPrompt.creator.firstName || latestPrompt.creator.username || latestPrompt.creator.email?.split('@')[0]}
+                    </span>
+                  </div>
+                )}
                 {hasVariables && (
                   <div className="flex items-center gap-1 ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
                     <svg

@@ -76,8 +76,21 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: '用户服务暂时不可用' }, { status: 503 })
     }
 
-    const users = await clerk.users.getUserList({ emailAddress: [normalizedEmail], limit: 1 })
+    const result = await clerk.users.getUserList({ emailAddress: [normalizedEmail], limit: 1 })
+    
+    // Handle both Array and PaginatedResponse formats
+    const users = Array.isArray(result?.data) 
+      ? result.data 
+      : Array.isArray(result) 
+        ? result 
+        : []
+        
     if (!users.length) {
+      console.warn(`[team-members] User not found for email: ${normalizedEmail}`, {
+        resultType: typeof result,
+        hasData: !!result?.data,
+        isArray: Array.isArray(result)
+      })
       return NextResponse.json({ error: '未找到该邮箱对应的用户' }, { status: 404 })
     }
 

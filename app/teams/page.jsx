@@ -885,17 +885,6 @@ export default function TeamsPage() {
                                 接受邀请
                               </Button>
                             )}
-                            {isManager && member.status === "pending" && (member.user_id && member.user_id !== activeMembership?.userId) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  handleUpdateMember(member.user_id, { status: "active" })
-                                }
-                              >
-                                标记为已加入
-                              </Button>
-                            )}
                             {isManager &&
                               (member.user_id && member.user_id !== activeTeam?.owner_id) &&
                               member.status === "active" && (

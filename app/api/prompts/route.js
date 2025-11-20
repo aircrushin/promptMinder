@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
+import { clerkClient } from '@clerk/nextjs/server'
 
 function applyPromptFilters(query, { teamId, userId, tag, search }) {
   const baseQuery = teamId
@@ -68,8 +69,59 @@ export async function GET(request) {
       throw countResult.error
     }
 
+    let prompts = promptsResult.data || []
+    
+    // Enrich prompts with creator info if possible
+    if (prompts.length > 0) {
+      const userIds = Array.from(new Set(prompts.map(p => p.created_by).filter(Boolean)))
+      
+      if (userIds.length > 0) {
+        try {
+          let clerk
+          if (typeof clerkClient === 'function') {
+            clerk = await clerkClient()
+          } else {
+            clerk = clerkClient
+          }
+
+          if (clerk?.users) {
+            const users = await clerk.users.getUserList({
+              userId: userIds,
+              limit: userIds.length,
+            })
+
+            const userMap = new Map()
+            const userList = Array.isArray(users?.data) ? users.data : (Array.isArray(users) ? users : [])
+            
+            userList.forEach(user => {
+              const email = user.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress 
+                || user.emailAddresses?.[0]?.emailAddress
+              
+              userMap.set(user.id, {
+                id: user.id,
+                fullName: user.fullName,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                imageUrl: user.imageUrl,
+                email: email
+              })
+            })
+
+            prompts = prompts.map(prompt => ({
+              ...prompt,
+              creator: userMap.get(prompt.created_by) || null
+            }))
+          }
+        } catch (error) {
+          console.warn('Failed to fetch creator details:', error)
+          // Continue without creator details rather than failing
+        }
+      }
+    }
+
     return NextResponse.json({
-      prompts: promptsResult.data || [],
+      prompts: prompts,
       pagination: {
         page,
         limit,

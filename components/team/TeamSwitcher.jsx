@@ -52,69 +52,79 @@ export function TeamSwitcher({ className }) {
       <div className="flex items-center gap-2">
         <Select
           value={selectedValue}
-          onValueChange={(value) => {
-            if (value === CREATE_TEAM_VALUE) {
-              setOpen(false)
-              router.push('/teams/new')
-              return
-            }
+        onValueChange={(value) => {
+          if (value === CREATE_TEAM_VALUE) {
+            setOpen(false)
+            router.push('/teams/new')
+            return
+          }
 
-            if (value === PERSONAL_TEAM_ID) {
-              setOpen(false)
-              selectTeam(null)
-              router.push('/prompts')
-              return
-            }
-            selectTeam(value)
-          }}
-          open={open}
-          onOpenChange={setOpen}
-        >
-          <SelectTrigger className="w-[220px]">
+          if (value === PERSONAL_TEAM_ID) {
+            setOpen(false)
+            selectTeam(null)
+            router.push('/prompts')
+            return
+          }
+          selectTeam(value)
+        }}
+        open={open}
+        onOpenChange={setOpen}
+      >
+        <SelectTrigger className="w-[220px]">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <SelectValue placeholder={safeT.teamsPage?.selectTeam || '选择团队'} />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={PERSONAL_TEAM_ID}>
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <SelectValue placeholder={safeT.teamsPage?.selectTeam || '选择团队'} />
+              <span>{safeT.teamsPage?.personalSpace || '个人空间'}</span>
             </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={PERSONAL_TEAM_ID}>
-              <div className="flex items-center gap-2">
-                <span>{safeT.teamsPage?.personalSpace || '个人空间'}</span>
+          </SelectItem>
+          {activeTeams.length === 0 && (
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              {safeT.teamsPage?.noTeamSelected || '暂无已加入的团队'}
+            </div>
+          )}
+          {activeTeams.map((membership) => (
+            <SelectItem key={membership.team.id} value={membership.team.id}>
+              <div className="flex items-center justify-between gap-2">
+                <span>{membership.team.name}</span>
+                <Badge variant="secondary" className="capitalize">
+                  {membership.role}
+                </Badge>
               </div>
             </SelectItem>
-            {activeTeams.length === 0 && (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
-                {safeT.teamsPage?.noTeamSelected || '暂无已加入的团队'}
-              </div>
-            )}
-            {activeTeams.map((membership) => (
-              <SelectItem key={membership.team.id} value={membership.team.id}>
-                <div className="flex items-center justify-between gap-2">
-                  <span>{membership.team.name}</span>
-                  <Badge variant="secondary" className="capitalize">
-                    {membership.role}
-                  </Badge>
-                </div>
-              </SelectItem>
-            ))}
-            <SelectSeparator />
-            <SelectItem value={CREATE_TEAM_VALUE}>
-              <div className="flex items-center gap-2 text-primary">
-                <PlusCircle className="h-4 w-4" />
-                <span>{safeT.teamsPage?.createTeam || '创建团队'}</span>
-              </div>
-            </SelectItem>
-          </SelectContent>
+          ))}
+          <SelectSeparator />
+          <SelectItem value={CREATE_TEAM_VALUE}>
+            <div className="flex items-center gap-2 text-primary">
+              <PlusCircle className="h-4 w-4" />
+              <span>{safeT.teamsPage?.createTeam || '创建团队'}</span>
+            </div>
+          </SelectItem>
+        </SelectContent>
         </Select>
+        
+        {pendingCount > 0 && (
+          <Link href="/teams/invites">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2 text-muted-foreground hover:text-primary gap-1.5 bg-muted/30 hover:bg-muted/50"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="text-xs font-medium">
+                {pendingCount} {safeT.teamsPage?.pendingInvites || '待处理邀请'}
+              </span>
+            </Button>
+          </Link>
+        )}
       </div>
-      {pendingCount > 0 && (
-        <Link
-          href="/teams/invites"
-          className="mt-1 block text-xs text-muted-foreground hover:text-primary transition-colors"
-        >
-          {pendingCount} {safeT.teamsPage?.pendingInvites || '待处理邀请'}
-        </Link>
-      )}
     </div>
   );
 }

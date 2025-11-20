@@ -19,6 +19,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTeam } from "@/contexts/team-context";
+import { useUser } from "@clerk/nextjs";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { apiClient } from "@/lib/api-client";
 import { useClipboard } from "@/lib/clipboard";
@@ -35,7 +36,8 @@ const TagFilter = dynamic(() => import("@/components/prompt/TagFilter"), {
 
 export default function PromptsPage() {
   const { t } = useLanguage();
-  const { activeTeamId, isPersonal } = useTeam();
+  const { user } = useUser();
+  const { activeTeamId, isPersonal, activeMembership } = useTeam();
   const { toast } = useToast();
   const { copy } = useClipboard();
   const router = useRouter();
@@ -495,6 +497,9 @@ export default function PromptsPage() {
                 onOpenVersions={showVersions}
                 onOpenPrompt={handleOpenPrompt}
                 translations={t}
+                user={user}
+                role={activeMembership?.role}
+                isPersonal={isPersonal}
               />
 
               {pagination.totalPages > 1 && (

@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
 import ChatTestWrapper from '@/components/chat/ChatTestWrapper';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTeam } from '@/contexts/team-context';
+import { useUser } from "@clerk/nextjs";
 import VariableInputs from '@/components/prompt/VariableInputs';
 import { replaceVariables } from '@/lib/promptVariables';
 import PromptHeader from '@/components/prompt/PromptHeader';
@@ -18,6 +20,8 @@ export default function PromptDetail({ params }) {
   const { id } = use(params);
   const router = useRouter();
   const { t } = useLanguage();
+  const { user } = useUser();
+  const { activeMembership, isPersonal } = useTeam();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const {
@@ -45,6 +49,11 @@ export default function PromptDetail({ params }) {
     return <PromptSkeleton />;
   }
 
+  const isCreator = prompt.created_by === user?.id || prompt.user_id === user?.id;
+  const role = activeMembership?.role;
+  const isManager = role === 'admin' || role === 'owner';
+  const canManage = isPersonal || isCreator || isManager;
+
   const tp = t.promptDetailPage;
 
   return (
@@ -71,6 +80,7 @@ export default function PromptDetail({ params }) {
                 onVersionChange={handleVersionChange}
                 onDelete={() => setShowDeleteConfirm(true)}
                 t={t}
+                canManage={canManage}
               />
 
               {/* Variable inputs */}
@@ -89,6 +99,7 @@ export default function PromptDetail({ params }) {
                 hasVariables={hasVariables}
                 renderedContent={renderedContent}
                 t={t}
+                canManage={canManage}
               />
             </CardContent>
           </Card>

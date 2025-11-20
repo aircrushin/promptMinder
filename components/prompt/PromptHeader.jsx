@@ -17,7 +17,8 @@ export default function PromptHeader({
   selectedVersion, 
   onVersionChange, 
   onDelete,
-  t 
+  t,
+  canManage = true
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -146,27 +147,31 @@ export default function PromptHeader({
           </svg>
         </Button>
 
-        <Button
-          onClick={handleEdit}
-          variant="default"
-          className="relative overflow-hidden group w-8 h-8 p-0"
-          title={tp.editTooltip}
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-        </Button>
+        {canManage && (
+          <>
+            <Button
+              onClick={handleEdit}
+              variant="default"
+              className="relative overflow-hidden group w-8 h-8 p-0"
+              title={tp.editTooltip}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </Button>
 
-        <Button
-          onClick={onDelete}
-          variant="destructive"
-          className="relative overflow-hidden group w-8 h-8 p-0"
-          title={tp.deleteTooltip}
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </Button>
+            <Button
+              onClick={onDelete}
+              variant="destructive"
+              className="relative overflow-hidden group w-8 h-8 p-0"
+              title={tp.deleteTooltip}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
