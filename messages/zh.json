@@ -592,6 +592,20 @@
     "editPlaceholder": "请输入标签名称",
     "save": "保存"
   },
+  "newTagPage": {
+    "title": "创建新标签",
+    "nameLabel": "标签名称",
+    "namePlaceholder": "输入标签名称",
+    "nameRequired": "标签名称为必填项",
+    "cancel": "取消",
+    "create": "创建标签",
+    "creating": "创建中...",
+    "createError": "创建标签失败",
+    "cancelConfirmTitle": "确认取消",
+    "cancelConfirmMessage": "确定要取消创建标签吗？已输入的内容将会丢失。",
+    "continueEditing": "继续编辑",
+    "confirmCancel": "确认取消"
+  },
   "sharePage": {
     "contentTitle": "提示词内容",
     "copyButton": "复制提示词",
@@ -761,6 +775,7 @@
     "pendingInvites": "待处理邀请",
     "teamDescription": "团队简介",
     "inviteMember": "邀请成员",
+    "viewInvites": "查看邀请",
     "inviteMemberDialog": {
       "title": "邀请成员加入团队",
       "description": "输入对方的邮箱地址，并选择该成员在团队中的角色。",

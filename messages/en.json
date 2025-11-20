@@ -536,6 +536,20 @@
     "editPlaceholder": "Please enter tag name",
     "save": "Save"
   },
+  "newTagPage": {
+    "title": "Create New Tag",
+    "nameLabel": "Tag Name",
+    "namePlaceholder": "Enter tag name",
+    "nameRequired": "Tag name is required",
+    "cancel": "Cancel",
+    "create": "Create Tag",
+    "creating": "Creating...",
+    "createError": "Failed to create tag",
+    "cancelConfirmTitle": "Confirm Cancel",
+    "cancelConfirmMessage": "Are you sure you want to cancel creating the tag? All entered content will be lost.",
+    "continueEditing": "Continue Editing",
+    "confirmCancel": "Confirm Cancel"
+  },
   "sharePage": {
     "contentTitle": "Prompt Content",
     "copyButton": "Copy Prompt",
@@ -739,6 +753,7 @@
     "pendingInvites": "Pending Invites",
     "teamDescription": "Team Description",
     "inviteMember": "Invite Member",
+    "viewInvites": "View Invitations",
     "inviteMemberDialog": {
       "title": "Invite Member to Team",
       "description": "Enter the email address and select the member's role in the team.",

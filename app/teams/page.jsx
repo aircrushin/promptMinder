@@ -808,7 +808,7 @@ export default function TeamsPage() {
 
                 {!isPersonalTeam && (
                   <Button variant="outline" asChild>
-                    <Link href="/teams/invites">查看邀请</Link>
+                    <Link href="/teams/invites">{safeT.teamsPage.viewInvites}</Link>
                   </Button>
                 )}
 
