@@ -50,13 +50,33 @@ export async function POST(request, { params }) {
     }
 
     const normalizedEmail = targetEmail.trim().toLowerCase()
+    let clerk
 
-    // Check if clerkClient is available
-    if (!clerkClient || !clerkClient.users) {
+    try {
+      // Handle both function (v5+) and object (older) forms of clerkClient
+      if (typeof clerkClient === 'function') {
+        clerk = await clerkClient()
+      } else {
+        clerk = clerkClient
+      }
+    } catch (clerkError) {
+      console.error('[team-members] Failed to initialize Clerk client', clerkError)
+      return NextResponse.json(
+        { error: '用户服务暂时不可用', details: clerkError.message }, 
+        { status: 503 }
+      )
+    }
+
+    if (!clerk?.users) {
+      console.error('[team-members] Clerk client invalid:', { 
+        type: typeof clerk, 
+        hasUsers: !!clerk?.users,
+        isFunction: typeof clerkClient === 'function'
+      })
       return NextResponse.json({ error: '用户服务暂时不可用' }, { status: 503 })
     }
 
-    const users = await clerkClient.users.getUserList({ emailAddress: [normalizedEmail] })
+    const users = await clerk.users.getUserList({ emailAddress: [normalizedEmail], limit: 1 })
     if (!users.length) {
       return NextResponse.json({ error: '未找到该邮箱对应的用户' }, { status: 404 })
     }

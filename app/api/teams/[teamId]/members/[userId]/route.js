@@ -30,12 +30,22 @@ export async function PATCH(request, { params }) {
 
     let membership
     if (memberUserId === actorUserId && body?.status === TEAM_STATUSES.ACTIVE) {
-      // Check if clerkClient is available
-      if (!clerkClient || !clerkClient.users) {
+      let clerk
+      try {
+        if (typeof clerkClient === 'function') {
+          clerk = await clerkClient()
+        } else {
+          clerk = clerkClient
+        }
+      } catch (clerkError) {
+        console.error('[team-members/update] Failed to initialize Clerk client', clerkError)
+      }
+
+      if (!clerk?.users) {
         return NextResponse.json({ error: '用户服务暂时不可用' }, { status: 503 })
       }
 
-      const actorUser = await clerkClient.users.getUser(actorUserId)
+      const actorUser = await clerk.users.getUser(actorUserId)
       const primaryEmail = actorUser?.primaryEmailAddress?.emailAddress
       membership = await teamService.acceptInvite(teamId, actorUserId, primaryEmail || null)
     } else {
