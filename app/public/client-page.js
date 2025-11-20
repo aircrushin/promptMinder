@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Search, X, ChevronUp, Plus } from 'lucide-react';
+import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import Footer from '@/components/layout/Footer';
@@ -28,6 +29,18 @@ export default function PublicPromptsClient() {
         content: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // 分页状态
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(20);
+    const [pagination, setPagination] = useState({
+        total: 0,
+        totalPages: 0,
+        currentPage: 1,
+        pageSize: 20,
+        hasNextPage: false,
+        hasPreviousPage: false
+    });
     
     // 滚动监听器
     useEffect(() => {
@@ -58,8 +71,19 @@ export default function PublicPromptsClient() {
                 setLoading(true);
                 setError(null);
                 
-                const data = await apiClient.request(`/api/prompts/public?lang=${language}`);
+                const data = await apiClient.request(`/api/prompts/public?lang=${language}&page=${currentPage}&pageSize=${pageSize}`);
                 setPrompts(data.prompts || []);
+                setPagination(data.pagination || {
+                    total: 0,
+                    totalPages: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                    hasNextPage: false,
+                    hasPreviousPage: false
+                });
+                
+                // 滚动到顶部
+                scrollToTop();
             } catch (err) {
                 console.error('Error fetching prompts:', err);
                 setError(err.message);
@@ -69,9 +93,28 @@ export default function PublicPromptsClient() {
         };
         
         fetchPrompts();
-    }, [language]); // 当语言改变时重新获取数据
+    }, [language, currentPage, pageSize]); // 当语言或页码改变时重新获取数据
 
-    // 过滤后的提示词列表
+    // 分页导航函数
+    const goToPage = (page) => {
+        if (page >= 1 && page <= pagination.totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
+    const nextPage = () => {
+        if (pagination.hasNextPage) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const previousPage = () => {
+        if (pagination.hasPreviousPage) {
+            setCurrentPage(prev => prev - 1);
+        }
+    };
+
+    // 过滤后的提示词列表 (现在只用于客户端搜索显示)
     const filteredPrompts = useMemo(() => {
         if (!searchQuery.trim()) {
             return prompts;
@@ -234,7 +277,7 @@ export default function PublicPromptsClient() {
                         <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
                             <span className="px-4 bg-white/80 dark:bg-gray-900/80 rounded-full py-1">
-                                {t.publicPage.totalPrompts.replace('{count}', searchQuery ? filteredPrompts.length : prompts.length)}
+                                {t.publicPage.totalPrompts.replace('{count}', pagination.total)}
                             </span>
                             <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
                         </div>
@@ -381,6 +424,120 @@ export default function PublicPromptsClient() {
                             </p>
                         </div>)
                     ) : null}
+
+                    {/* 分页控件 - 只在非搜索状态下显示 */}
+                    {!searchQuery && pagination.totalPages > 1 && (
+                        <div className="mt-12 flex justify-center items-center gap-2">
+                            {/* 上一页按钮 */}
+                            <button
+                                onClick={previousPage}
+                                disabled={!pagination.hasPreviousPage}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
+                                    ${pagination.hasPreviousPage
+                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-700'
+                                        : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
+                                    }
+                                `}
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span className="hidden sm:inline">{t.publicPage.pagination.previous}</span>
+                            </button>
+
+                            {/* 页码按钮 */}
+                            <div className="flex items-center gap-2">
+                                {(() => {
+                                    const pages = [];
+                                    const totalPages = pagination.totalPages;
+                                    const current = pagination.currentPage;
+                                    
+                                    // 始终显示第一页
+                                    pages.push(1);
+                                    
+                                    // 计算显示范围
+                                    let startPage = Math.max(2, current - 1);
+                                    let endPage = Math.min(totalPages - 1, current + 1);
+                                    
+                                    // 如果当前页靠近开始，多显示后面的页
+                                    if (current <= 3) {
+                                        endPage = Math.min(totalPages - 1, 4);
+                                    }
+                                    
+                                    // 如果当前页靠近结束，多显示前面的页
+                                    if (current >= totalPages - 2) {
+                                        startPage = Math.max(2, totalPages - 3);
+                                    }
+                                    
+                                    // 添加省略号（如果需要）
+                                    if (startPage > 2) {
+                                        pages.push('ellipsis-start');
+                                    }
+                                    
+                                    // 添加中间页码
+                                    for (let i = startPage; i <= endPage; i++) {
+                                        pages.push(i);
+                                    }
+                                    
+                                    // 添加省略号（如果需要）
+                                    if (endPage < totalPages - 1) {
+                                        pages.push('ellipsis-end');
+                                    }
+                                    
+                                    // 始终显示最后一页（如果总页数大于1）
+                                    if (totalPages > 1) {
+                                        pages.push(totalPages);
+                                    }
+                                    
+                                    return pages.map((page, index) => {
+                                        if (typeof page === 'string') {
+                                            // 省略号
+                                            return (
+                                                <span
+                                                    key={page}
+                                                    className="px-2 text-gray-400 dark:text-gray-600"
+                                                >
+                                                    ...
+                                                </span>
+                                            );
+                                        }
+                                        
+                                        const isActive = page === current;
+                                        return (
+                                            <button
+                                                key={page}
+                                                onClick={() => goToPage(page)}
+                                                className={`
+                                                    min-w-[2.5rem] h-10 px-3 rounded-lg font-medium transition-all duration-300
+                                                    ${isActive
+                                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-110'
+                                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-500 hover:text-white shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-700'
+                                                    }
+                                                `}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    });
+                                })()}
+                            </div>
+
+                            {/* 下一页按钮 */}
+                            <button
+                                onClick={nextPage}
+                                disabled={!pagination.hasNextPage}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
+                                    ${pagination.hasNextPage
+                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-700'
+                                        : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
+                                    }
+                                `}
+                            >
+                                <span className="hidden sm:inline">{t.publicPage.pagination.next}</span>
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Footer */}

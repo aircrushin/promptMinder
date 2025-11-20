@@ -652,6 +652,12 @@
       "deleteSuccess": "Deleted Successfully",
       "deleteFailed": "Delete Failed",
       "networkError": "Network error, please try again"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "loading": "Loading...",
+      "error": "Failed to load"
     }
   },
   "admin": {
@@ -813,4 +819,4 @@
     "goTo": "Go to",
     "page": "page"
   }
-} 
+}

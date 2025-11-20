@@ -674,6 +674,12 @@
       "deleteSuccess": "删除成功",
       "deleteFailed": "删除失败",
       "networkError": "网络错误，请重试"
+    },
+    "pagination": {
+      "previous": "上一页",
+      "next": "下一页",
+      "loading": "加载中...",
+      "error": "加载失败"
     }
   },
   "admin": {
@@ -835,4 +841,4 @@
     "goTo": "跳至",
     "page": "页"
   }
-} 
+}

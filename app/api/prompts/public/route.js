@@ -48,6 +48,8 @@ const parsePromptsFromFile = (filePath, language) => {
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const language = searchParams.get('lang') || 'zh';
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
     
     try {
         // 根据语言选择对应的文件
@@ -59,12 +61,27 @@ export async function GET(request) {
             return NextResponse.json({ error: 'File not found' }, { status: 404 });
         }
         
-        const prompts = parsePromptsFromFile(filePath, language);
+        const allPrompts = parsePromptsFromFile(filePath, language);
+        
+        // 计算分页
+        const total = allPrompts.length;
+        const totalPages = Math.ceil(total / pageSize);
+        const currentPage = Math.max(1, Math.min(page, totalPages || 1));
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const prompts = allPrompts.slice(startIndex, endIndex);
         
         return NextResponse.json({ 
             prompts,
             language,
-            total: prompts.length
+            pagination: {
+                total,
+                totalPages,
+                currentPage,
+                pageSize,
+                hasNextPage: currentPage < totalPages,
+                hasPreviousPage: currentPage > 1
+            }
         });
     } catch (error) {
         console.error('Error reading prompts file:', error);
