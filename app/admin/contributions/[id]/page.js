@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   CheckCircle,
   XCircle,
@@ -29,6 +29,7 @@ export default function ContributionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [contribution, setContribution] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -48,16 +49,16 @@ export default function ContributionDetailPage() {
         setAdminNotes(data.admin_notes || "");
       } else {
         toast({
-          title: "错误",
-          description: "加载贡献详情失败",
+          title: t?.admin?.contributions?.detailPage?.loadError || "错误",
+          description: t?.admin?.contributions?.detailPage?.loadErrorDesc || "加载贡献详情失败",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Failed to fetch contribution:", error);
       toast({
-        title: "错误",
-        description: "加载贡献详情失败",
+        title: t?.admin?.contributions?.detailPage?.loadError || "错误",
+        description: t?.admin?.contributions?.detailPage?.loadErrorDesc || "加载贡献详情失败",
         variant: "destructive",
       });
     } finally {
@@ -68,7 +69,7 @@ export default function ContributionDetailPage() {
   const handleReview = async (status) => {
     setProcessing(true);
     const adminEmail = localStorage.getItem("admin_email");
-    
+
     try {
       const response = await fetch(`/api/contributions/${params.id}`, {
         method: "PATCH",
@@ -86,11 +87,12 @@ export default function ContributionDetailPage() {
       if (response.ok) {
         const data = await response.json();
         toast({
-          title: "审核成功",
+          title: t?.admin?.contributions?.detailPage?.reviewSuccess || "审核成功",
           description:
             status === "approved"
-              ? "贡献已通过审核" + (publishToPrompts ? "并发布到公开库" : "")
-              : "贡献已被拒绝",
+              ? (t?.admin?.contributions?.detailPage?.reviewSuccessApproved || "贡献已通过审核") +
+                (publishToPrompts ? (t?.admin?.contributions?.detailPage?.reviewSuccessPublished || "并发布到公开库") : "")
+              : (t?.admin?.contributions?.detailPage?.reviewSuccessRejected || "贡献已被拒绝"),
         });
         fetchContribution(); // 重新加载数据
         // 审核成功后返回列表页
@@ -98,16 +100,16 @@ export default function ContributionDetailPage() {
       } else {
         const error = await response.json();
         toast({
-          title: "错误",
-          description: error.error || "审核操作失败",
+          title: t?.admin?.contributions?.detailPage?.reviewError || "错误",
+          description: error.error || (t?.admin?.contributions?.detailPage?.reviewErrorRetry || "审核操作失败"),
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Failed to review contribution:", error);
       toast({
-        title: "错误",
-        description: "审核操作失败",
+        title: t?.admin?.contributions?.detailPage?.reviewError || "错误",
+        description: t?.admin?.contributions?.detailPage?.reviewErrorRetry || "审核操作失败",
         variant: "destructive",
       });
     } finally {
@@ -118,19 +120,19 @@ export default function ContributionDetailPage() {
   const getStatusBadge = (status) => {
     const statusConfig = {
       pending: {
-        label: "待审核",
+        label: t?.admin?.contributions?.status?.pending || "待审核",
         variant: "default",
         icon: <Clock className="w-4 h-4 mr-1" />,
         color: "text-yellow-600",
       },
       approved: {
-        label: "已通过",
+        label: t?.admin?.contributions?.status?.approved || "已通过",
         variant: "success",
         icon: <CheckCircle className="w-4 h-4 mr-1" />,
         color: "text-green-600",
       },
       rejected: {
-        label: "已拒绝",
+        label: t?.admin?.contributions?.status?.rejected || "已拒绝",
         variant: "destructive",
         icon: <XCircle className="w-4 h-4 mr-1" />,
         color: "text-red-600",
@@ -172,14 +174,14 @@ export default function ContributionDetailPage() {
         <Card className="p-12">
           <div className="text-center">
             <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">未找到贡献</h3>
+            <h3 className="text-lg font-semibold mb-2">{t?.admin?.contributions?.detailPage?.notFound || "未找到贡献"}</h3>
             <p className="text-muted-foreground mb-6">
-              该贡献可能已被删除或不存在
+              {t?.admin?.contributions?.detailPage?.notFoundDesc || "该贡献可能已被删除或不存在"}
             </p>
             <Link href="/admin/contributions">
               <Button>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                返回列表
+                {t?.admin?.contributions?.detailPage?.backToList || "返回列表"}
               </Button>
             </Link>
           </div>
@@ -188,6 +190,17 @@ export default function ContributionDetailPage() {
     );
   }
 
+  if (!t || !t.admin || !t.admin.contributions) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-5xl flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  const tc = t.admin.contributions;
+  const td = tc.detailPage;
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       {/* 返回按钮 */}
@@ -195,7 +208,7 @@ export default function ContributionDetailPage() {
         <Link href="/admin/contributions">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            返回列表
+            {td.backToList}
           </Button>
         </Link>
       </div>
@@ -217,7 +230,7 @@ export default function ContributionDetailPage() {
                   </Badge>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(contribution.created_at).toLocaleString("zh-CN")}
+                    {new Date(contribution.created_at).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -231,7 +244,7 @@ export default function ContributionDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileText className="w-5 h-5" />
-              提示词内容
+              {td.promptContent}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -248,19 +261,19 @@ export default function ContributionDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <User className="w-5 h-5" />
-              贡献者信息
+              {tc.contributorInfo}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label className="text-muted-foreground">姓名</Label>
+                <Label className="text-muted-foreground">{td.contributorName}</Label>
                 <p className="font-medium">
-                  {contribution.contributor_name || "未提供"}
+                  {contribution.contributor_name || td.contributorNotProvided}
                 </p>
               </div>
               <div className="space-y-1">
-                <Label className="text-muted-foreground">邮箱</Label>
+                <Label className="text-muted-foreground">{td.contributorEmail}</Label>
                 <p className="font-medium flex items-center gap-2">
                   {contribution.contributor_email ? (
                     <>
@@ -268,7 +281,7 @@ export default function ContributionDetailPage() {
                       {contribution.contributor_email}
                     </>
                   ) : (
-                    "未提供"
+                    td.contributorNotProvided
                   )}
                 </p>
               </div>
@@ -280,26 +293,26 @@ export default function ContributionDetailPage() {
         {contribution.reviewed_at && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">审核信息</CardTitle>
+              <CardTitle className="text-lg">{td.reviewInfo}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground">审核时间</Label>
+                  <Label className="text-muted-foreground">{tc.reviewedAt}</Label>
                   <p className="font-medium">
-                    {new Date(contribution.reviewed_at).toLocaleString("zh-CN")}
+                    {new Date(contribution.reviewed_at).toLocaleString()}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground">审核人</Label>
+                  <Label className="text-muted-foreground">{tc.reviewedBy}</Label>
                   <p className="font-medium">
-                    {contribution.reviewed_by || "系统"}
+                    {contribution.reviewed_by || tc.system}
                   </p>
                 </div>
               </div>
               {contribution.admin_notes && (
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground">审核备注</Label>
+                  <Label className="text-muted-foreground">{tc.reviewNotesLabel}</Label>
                   <div className="bg-muted p-3 rounded-lg">
                     <p className="text-sm">{contribution.admin_notes}</p>
                   </div>
@@ -307,14 +320,14 @@ export default function ContributionDetailPage() {
               )}
               {contribution.published_prompt_id && (
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground">已发布为公开提示词</Label>
+                  <Label className="text-muted-foreground">{td.publishedPrompt}</Label>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-600" />
                     <Link
                       href={`/prompts/${contribution.published_prompt_id}`}
                       className="text-sm text-blue-600 hover:underline"
                     >
-                      查看已发布的提示词
+                      {td.viewPublishedPrompt}
                     </Link>
                   </div>
                 </div>
@@ -329,7 +342,7 @@ export default function ContributionDetailPage() {
             <CardHeader className="bg-primary/5">
               <CardTitle className="text-lg flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" />
-                快速审核
+                {td.quickReview}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -342,18 +355,18 @@ export default function ContributionDetailPage() {
                     onCheckedChange={setPublishToPrompts}
                   />
                   <Label htmlFor="publish-to-prompts" className="cursor-pointer flex-1">
-                    <span className="font-medium">自动发布到公开提示词库</span>
+                    <span className="font-medium">{td.autoPublishLabel}</span>
                     <span className="block text-xs text-muted-foreground mt-0.5">
-                      通过审核后立即将此提示词发布到公开库
+                      {td.autoPublishDesc}
                     </span>
                   </Label>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="admin-notes">审核备注（可选）</Label>
+                  <Label htmlFor="admin-notes">{td.adminNotes}</Label>
                   <Textarea
                     id="admin-notes"
-                    placeholder="输入审核意见或备注（如拒绝原因等）..."
+                    placeholder={td.adminNotesPlaceholder}
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                     rows={3}
@@ -369,12 +382,12 @@ export default function ContributionDetailPage() {
                     {processing ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        处理中...
+                        {tc.processing}
                       </>
                     ) : (
                       <>
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        通过审核
+                        {td.approveButton}
                       </>
                     )}
                   </Button>
@@ -387,12 +400,12 @@ export default function ContributionDetailPage() {
                     {processing ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        处理中...
+                        {tc.processing}
                       </>
                     ) : (
                       <>
                         <XCircle className="w-4 h-4 mr-2" />
-                        拒绝贡献
+                        {td.rejectButton}
                       </>
                     )}
                   </Button>
