@@ -61,7 +61,7 @@ export function FeatureSection({ t }) {
   });
 
   return (
-    <section className="relative overflow-hidden bg-[radial-gradient(circle_at_0%_0%,rgba(0,0,0,0.08),transparent_32%),radial-gradient(circle_at_100%_20%,rgba(0,0,0,0.06),transparent_30%),linear-gradient(180deg,#fafafa,#ffffff)] py-24">
+    <section className="relative overflow-hidden bg-white py-24">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-12 h-64 w-[32rem] -translate-x-1/2 rounded-full bg-black/5 blur-[140px]" />
         <div className="absolute -bottom-24 right-10 h-72 w-72 rounded-full bg-black/5 blur-[160px]" />

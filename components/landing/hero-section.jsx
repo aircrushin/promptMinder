@@ -105,7 +105,7 @@ export function HeroSection({ t }) {
   };
 
   return (
-    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-[radial-gradient(circle_at_12%_20%,rgba(0,0,0,0.08),transparent_38%),radial-gradient(circle_at_85%_15%,rgba(0,0,0,0.07),transparent_32%),linear-gradient(180deg,#f9fafb,#ffffff)]">
+    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         <div className="absolute -left-12 top-28 h-52 w-52 rounded-full bg-black/5 blur-[120px]" />

@@ -18,7 +18,7 @@ export function CTASection({ t }) {
   const translations = { ...fallback, ...(t || {}) };
   
   return (
-    <section className="relative overflow-hidden bg-[radial-gradient(circle_at_20%_10%,rgba(0,0,0,0.08),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(0,0,0,0.06),transparent_28%),linear-gradient(180deg,#f9fafb,#ffffff)] py-20">
+    <section className="relative overflow-hidden bg-white py-20">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="absolute top-6 left-1/4 -translate-x-1/2 w-[520px] h-[420px] opacity-30">
         <div className="absolute inset-0 rounded-full bg-gradient-radial from-black/10 via-black/5 to-transparent blur-[90px]" />
