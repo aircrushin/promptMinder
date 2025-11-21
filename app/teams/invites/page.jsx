@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -190,17 +190,6 @@ export default function TeamInvitesPage() {
               ))
             )}
           </CardContent>
-          <CardFooter className="flex justify-end bg-muted/10 rounded-b-lg">
-            <Button
-              variant="outline"
-              onClick={loadInvites}
-              disabled={loading}
-              className="transition-all duration-200 hover:bg-muted"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {tp.refreshList}
-            </Button>
-          </CardFooter>
         </Card>
       </div>
     </div>
