@@ -92,7 +92,7 @@ export function TeamSwitcher({ className }) {
               <div className="flex items-center justify-between gap-2">
                 <span>{membership.team.name}</span>
                 <Badge variant="secondary" className="capitalize">
-                  {membership.role}
+                  {safeT.teamsPage?.[membership.role.toLowerCase()] || membership.role}
                 </Badge>
               </div>
             </SelectItem>
