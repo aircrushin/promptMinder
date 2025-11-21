@@ -124,8 +124,8 @@ export default function Home() {
   return (
     <>
       {/* Header 现在从 Context 获取状态，无需 props */}
-      <Header /> 
-      <main className="flex min-h-screen flex-col pt-16">
+      <Header />
+      <main className="flex min-h-screen flex-col bg-[#f5f5f0] pt-16 text-neutral-900">
         {/* 将 Context 中的 t 传递给子组件 */}
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
           <HeroSection t={safeT.hero} />

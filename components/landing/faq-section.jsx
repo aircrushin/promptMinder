@@ -3,6 +3,26 @@
 import { useState } from "react";
 
 // 接收 t prop
+const FAQStripes = () => (
+  <svg
+    aria-hidden="true"
+    className="absolute right-8 top-12 h-32 w-32 text-black/5"
+    viewBox="0 0 120 120"
+  >
+    {[0, 20, 40, 60, 80, 100].map((y) => (
+      <line
+        key={y}
+        x1="0"
+        y1={y}
+        x2="120"
+        y2={y}
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+    ))}
+  </svg>
+);
+
 export function FAQSection({ t }) {
   const [openIndex, setOpenIndex] = useState(null);
   // 与其它区块保持一致：合并 props 与默认文案，确保健壮回退
@@ -19,50 +39,51 @@ export function FAQSection({ t }) {
   const translations = { ...fallback, ...(t || {}) };
   const faqs = Array.isArray(translations.items) ? translations.items : fallback.items;
 
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white py-24">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-20 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-indigo-400/15 blur-[140px]" />
-        <div className="absolute -right-20 bottom-8 h-72 w-72 rounded-full bg-blue-400/10 blur-[160px]" />
-      </div>
+    return (
+      <section className="relative overflow-hidden bg-white py-24">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+        <FAQStripes />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <div className="text-center mb-16">
+            <p className="text-sm font-mono uppercase tracking-[0.4em] text-neutral-500">
+              Answers
+            </p>
+            <h2 className="mt-4 text-4xl font-semibold leading-tight text-neutral-900 sm:text-5xl">
+              {translations.title}
+            </h2>
+            <p className="mt-4 text-lg text-neutral-600 max-w-3xl mx-auto">
+              {translations.description}
+            </p>
+          </div>
 
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl mb-4">
-            {translations.title}
-          </h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-            {translations.description}
-          </p>
-        </div>
-
-        <div className="max-w-5xl mx-auto">
-          {faqs.map((faq, index) => (
-            <div key={index} className="mb-4">
+          <div className="max-w-5xl mx-auto divide-y divide-black/10 border border-black/10 rounded-2xl bg-neutral-50">
+            {faqs.map((faq, index) => (
               <button
+                key={index}
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full text-left p-6 rounded-xl border border-gray-200 bg-white/90 backdrop-blur hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                className="w-full text-left px-6 py-5"
               >
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold text-gray-900">
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="text-lg font-semibold text-neutral-900">
                     {faq.question}
                   </h3>
-                  <span className="text-gray-600 text-xl">
+                  <span className="text-2xl font-light text-neutral-500">
                     {openIndex === index ? "−" : "+"}
                   </span>
                 </div>
-                {openIndex === index && (
-                  <div className="mt-4">
-                    <p className="text-gray-700 leading-relaxed">
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openIndex === index ? "mt-3 max-h-96" : "max-h-0"
+                  }`}
+                >
+                  <p className="text-base leading-relaxed text-neutral-600">
+                    {faq.answer}
+                  </p>
+                </div>
               </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  );
+      </section>
+    );
 } 

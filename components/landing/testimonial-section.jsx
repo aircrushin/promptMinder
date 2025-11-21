@@ -3,6 +3,23 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
+const QuoteMarks = () => (
+  <svg
+    aria-hidden="true"
+    className="absolute left-10 top-10 h-20 w-20 text-black/5"
+    viewBox="0 0 100 100"
+  >
+    <path
+      d="M20 20 h20 v20 h-10 v20 h-10z"
+      fill="currentColor"
+    />
+    <path
+      d="M60 20 h20 v20 h-10 v20 h-10z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export function TestimonialSection({ t }) {
   const translations =
     t || {
@@ -36,15 +53,15 @@ export function TestimonialSection({ t }) {
   }));
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white py-24">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-20 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-indigo-400/20 blur-[140px]" />
-        <div className="absolute -right-20 bottom-8 h-72 w-72 rounded-full bg-blue-400/15 blur-[160px]" />
-      </div>
-
+    <section className="relative overflow-hidden bg-neutral-50 py-24">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+      <QuoteMarks />
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+          <p className="text-sm font-mono uppercase tracking-[0.4em] text-neutral-500">
+            Voices
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold leading-tight text-neutral-900 sm:text-5xl">
             {translations.title}
           </h2>
         </div>
@@ -57,25 +74,25 @@ export function TestimonialSection({ t }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.45, delay: index * 0.08 }}
-              className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-white/50 bg-white/85 p-8 shadow-xl shadow-blue-200/40 backdrop-blur transition-transform duration-300 hover:-translate-y-2"
+              className="group relative flex h-full flex-col justify-between rounded-3xl border border-black/10 bg-white p-8 text-left shadow-[0_20px_45px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:-translate-y-1.5"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <p className="text-base leading-relaxed text-slate-700">
-                &ldquo;{testimonial.content}&rdquo;
+              <span className="text-6xl font-serif text-black/5">&rdquo;</span>
+              <p className="mt-4 text-base leading-relaxed text-neutral-700">
+                {testimonial.content}
               </p>
-              <div className="mt-8 flex items-center gap-4">
-                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-blue-100/70 bg-blue-50">
+              <div className="mt-8 flex items-center gap-4 border-t border-black/10 pt-6">
+                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-black/10 bg-neutral-100">
                   <Image
                     src={testimonial.avatar}
                     alt={testimonial.author}
                     fill
                     sizes="48px"
-                    className="object-cover"
+                    className="object-cover filter grayscale"
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{testimonial.author}</p>
-                  <p className="text-xs uppercase tracking-wide text-blue-600/80">{testimonial.title}</p>
+                  <p className="text-sm font-semibold text-neutral-900">{testimonial.author}</p>
+                  <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">{testimonial.title}</p>
                 </div>
               </div>
             </motion.div>

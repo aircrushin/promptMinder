@@ -4,6 +4,23 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 
+const Checkerboard = () => (
+  <svg
+    aria-hidden="true"
+    className="absolute inset-0 h-full w-full text-white/5"
+    viewBox="0 0 160 160"
+  >
+    <defs>
+      <pattern id="cta-checker" width="20" height="20" patternUnits="userSpaceOnUse">
+        <rect width="20" height="20" fill="currentColor" opacity="0.1" />
+        <rect width="10" height="10" fill="currentColor" opacity="0.35" />
+        <rect x="10" y="10" width="10" height="10" fill="currentColor" opacity="0.35" />
+      </pattern>
+    </defs>
+    <rect width="160" height="160" fill="url(#cta-checker)" />
+  </svg>
+);
+
 export function CTASection({ t }) {
   const { isSignedIn } = useAuth();
   
@@ -18,37 +35,36 @@ export function CTASection({ t }) {
   const translations = { ...fallback, ...(t || {}) };
   
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 -translate-x-1/2 w-[600px] h-[400px] opacity-30">
-        <div className="absolute inset-0 bg-gradient-radial from-purple-100 via-blue-50 to-transparent blur-[80px]" />
-      </div>
-      <div className="absolute bottom-0 right-1/4 translate-x-1/2 w-[500px] h-[300px] opacity-20">
-        <div className="absolute inset-0 bg-gradient-radial from-indigo-100 via-pink-50 to-transparent blur-[70px]" />
-      </div>
-      <div className="relative mx-auto max-w-6xl px-6 z-10">
+    <section className="relative overflow-hidden bg-black py-24 text-white">
+      <Checkerboard />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+      <div className="relative mx-auto max-w-5xl px-6 text-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto text-center"
+          className="space-y-8"
         >
-          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl mb-4">
+          <p className="text-sm font-mono uppercase tracking-[0.4em] text-white/60">
+            Commitment
+          </p>
+          <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
             {translations.title}
           </h2>
-          <p className="text-lg md:text-xl text-slate-600 mb-10">
+          <p className="text-lg md:text-xl text-white/70">
             {translations.description}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
             <Link
               href={isSignedIn ? "/prompts" : "/sign-up"}
-              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-             >
+              className="inline-flex min-w-[220px] items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-medium text-black transition-all hover:-translate-y-0.5 hover:bg-neutral-100"
+            >
               {isSignedIn ? translations.buttonLoggedIn : translations.buttonLoggedOut}
             </Link>
             <Link
               href="/public"
-              className="inline-flex items-center justify-center rounded-xl border border-blue-200/70 bg-white/70 px-8 py-4 text-lg font-semibold text-blue-700 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-200"
-             >
+              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/40 px-8 py-4 text-lg font-medium text-white transition-all hover:-translate-y-0.5 hover:border-white/70"
+            >
               {translations.promptCollections}
             </Link>
           </div>
