@@ -922,10 +922,10 @@
     },
     "leaveTeam": "退出团队",
     "leaveTeamDialog": {
-      "title": "退出团队",
-      "description": "你将失去对所有团队资源的访问权限。如果你是拥有者，必须先转移所有权。",
-      "leave": "退出团队",
-      "cancel": "取消"
+      "title": "离开团队",
+      "description": "确定要离开这个团队吗？",
+      "cancel": "取消",
+      "confirm": "确认离开"
     },
     "acceptInvite": "接受邀请",
     "declineInvite": "拒绝邀请",

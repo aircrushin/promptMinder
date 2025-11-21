@@ -38,7 +38,6 @@ import {
   UserMinus,
   UserPlus,
   ArrowRightLeft,
-  RefreshCw,
   Trash2,
   Mail,
 } from "lucide-react";
@@ -128,6 +127,12 @@ export default function TeamsPage() {
         confirmPlaceholder: "团队名称",
         cancel: "取消",
         delete: "删除团队"
+      },
+      leaveTeamDialog: {
+        title: "离开团队",
+        description: "确定要离开这个团队吗？",
+        cancel: "取消",
+        confirm: "确认离开"
       }
     }
   };
@@ -161,6 +166,8 @@ export default function TeamsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaveLoading, setLeaveLoading] = useState(false);
 
   const isManager = useMemo(() => {
     return (
@@ -425,9 +432,11 @@ export default function TeamsPage() {
   };
 
   const handleLeaveTeam = async () => {
+    setLeaveLoading(true);
     try {
       await leaveTeam(activeTeamId);
       toast({ description: safeT.teamsPage.leftTeam });
+      setLeaveOpen(false);
       setRefreshKey((prev) => prev + 1);
       refresh();
     } catch (error) {
@@ -436,6 +445,8 @@ export default function TeamsPage() {
         variant: "destructive",
         description: error.message || safeT.teamsPage.leaveTeamError,
       });
+    } finally {
+      setLeaveLoading(false);
     }
   };
 
@@ -498,16 +509,7 @@ export default function TeamsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => selectTeam(activeTeamId)} 
-              disabled={teamLoading}
-              className="transition-all duration-200 hover:bg-muted/50"
-            >
-              <RefreshCw className={cn("mr-2 h-4 w-4", teamLoading && "animate-spin")} />
-              {safeT.teamsPage.refresh}
-            </Button>
-            <Button 
+            <Button
               onClick={() => router.push("/teams/new")}
               className="transition-all duration-200 hover:shadow-md hover:scale-[1.02] bg-gradient-to-r from-primary to-primary/90"
             >
@@ -813,10 +815,31 @@ export default function TeamsPage() {
                 )}
 
                 {activeMembership && activeMembership.role !== "owner" && (
-                  <Button variant="destructive" onClick={handleLeaveTeam}>
-                    <UserMinus className="mr-2 h-4 w-4" />
-                    {safeT.teamsPage.leaveTeam}
-                  </Button>
+                  <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive">
+                        <UserMinus className="mr-2 h-4 w-4" />
+                        {safeT.teamsPage.leaveTeam}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{safeT.teamsPage.leaveTeamDialog.title}</DialogTitle>
+                        <DialogDescription>
+                          {safeT.teamsPage.leaveTeamDialog.description}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setLeaveOpen(false)} disabled={leaveLoading}>
+                          {safeT.teamsPage.leaveTeamDialog.cancel}
+                        </Button>
+                        <Button variant="destructive" onClick={handleLeaveTeam} disabled={leaveLoading}>
+                          {leaveLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {safeT.teamsPage.leaveTeamDialog.confirm}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </>

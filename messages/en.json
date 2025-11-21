@@ -901,9 +901,9 @@
     "leaveTeam": "Leave Team",
     "leaveTeamDialog": {
       "title": "Leave Team",
-      "description": "You will lose access to all team resources. If you are the owner, you must transfer ownership first.",
-      "leave": "Leave Team",
-      "cancel": "Cancel"
+      "description": "Are you sure you want to leave this team?",
+      "cancel": "Cancel",
+      "confirm": "Confirm Leave"
     },
     "acceptInvite": "Accept Invitation",
     "declineInvite": "Decline Invitation",
