@@ -179,6 +179,20 @@ export default function TeamsPage() {
   const isOwner = activeMembership?.role === "owner";
   const isPersonalTeam = activeTeam?.is_personal;
 
+  // 自动选择第一个team（如果没有选中team但有可用的teams）
+  useEffect(() => {
+    if (!teamLoading && !activeTeamId && teams.length > 0) {
+      // 优先选择第一个active状态的team
+      const activeTeams = teams.filter((membership) => membership.status === "active");
+      if (activeTeams.length > 0) {
+        selectTeam(activeTeams[0].team.id);
+      } else if (teams.length > 0) {
+        // 如果没有active的team，选择第一个
+        selectTeam(teams[0].team.id);
+      }
+    }
+  }, [teamLoading, activeTeamId, teams, selectTeam]);
+
   useEffect(() => {
     if (activeTeamId) {
       loadTeam(activeTeamId);
