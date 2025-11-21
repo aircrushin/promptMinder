@@ -473,7 +473,7 @@ export default function TeamsPage() {
     }
     const ownerMembership = teamDetails.members?.find((member) => member.role === "owner");
     if (ownerMembership) {
-      return ownerMembership.display_name || ownerMembership.email || ownerMembership.user_id || "团队拥有者";
+      return ownerMembership.display_name || ownerMembership.email || ownerMembership.user_id || safeT.teamsPage.defaultOwnerName;
     }
     if (teamDetails.team.owner_id === user?.id) {
       return currentUserDisplayName || teamDetails.team.owner_id;
@@ -482,8 +482,8 @@ export default function TeamsPage() {
   }, [teamDetails, user, currentUserDisplayName]);
 
   const formatMemberIdentifier = useCallback((member) => {
-    return member.display_name || member.email || member.user_id || "待邀请成员";
-  }, []);
+    return member.display_name || member.email || member.user_id || safeT.teamsPage.defaultPendingMember;
+  }, [safeT]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
@@ -825,11 +825,11 @@ export default function TeamsPage() {
           {teamDetails && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">团队成员</h2>
+                <h2 className="text-xl font-semibold">{safeT.teamsPage.teamMembers}</h2>
                 {membersLoading && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    正在加载
+                    {safeT.teamsPage.loading}
                   </div>
                 )}
               </div>
@@ -837,11 +837,11 @@ export default function TeamsPage() {
                 <table className="min-w-full divide-y divide-border text-sm">
                   <thead className="bg-muted/30">
                     <tr className="text-left text-muted-foreground">
-                      <th className="px-4 py-3 font-semibold">成员</th>
-                      <th className="px-4 py-3 font-semibold">角色</th>
-                      <th className="px-4 py-3 font-semibold">状态</th>
-                      <th className="px-4 py-3 font-semibold">加入时间</th>
-                      <th className="px-4 py-3 font-semibold">操作</th>
+                      <th className="px-4 py-3 font-semibold">{safeT.teamsPage.memberColumn}</th>
+                      <th className="px-4 py-3 font-semibold">{safeT.teamsPage.role}</th>
+                      <th className="px-4 py-3 font-semibold">{safeT.teamsPage.statusColumn}</th>
+                      <th className="px-4 py-3 font-semibold">{safeT.teamsPage.joinTimeColumn}</th>
+                      <th className="px-4 py-3 font-semibold">{safeT.teamsPage.actionsColumn}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-card/30">
@@ -862,9 +862,9 @@ export default function TeamsPage() {
                         </td>
                         <td className="px-4 py-3 capitalize">
                           {member.status === "active" ? (
-                            <Badge variant="outline" className="border-green-500/50 text-green-600 dark:text-green-400">已加入</Badge>
+                            <Badge variant="outline" className="border-green-500/50 text-green-600 dark:text-green-400">{safeT.teamsPage.statusActive}</Badge>
                           ) : member.status === "pending" ? (
-                            <Badge variant="secondary" className="border-amber-500/50 text-amber-600 dark:text-amber-400">待确认</Badge>
+                            <Badge variant="secondary" className="border-amber-500/50 text-amber-600 dark:text-amber-400">{safeT.teamsPage.statusPending}</Badge>
                           ) : (
                             member.status
                           )}
@@ -882,7 +882,7 @@ export default function TeamsPage() {
                                 variant="secondary"
                                 onClick={() => handleAcceptInvite(activeTeamId)}
                               >
-                                接受邀请
+                                {safeT.teamsPage.acceptInviteButton}
                               </Button>
                             )}
                             {isManager &&
@@ -897,7 +897,7 @@ export default function TeamsPage() {
                                         handleUpdateMember(member.user_id, { role: "admin" })
                                       }
                                     >
-                                      升级为管理员
+                                      {safeT.teamsPage.promoteToAdmin}
                                     </Button>
                                   )}
                                   {member.role === "admin" && (
@@ -908,7 +908,7 @@ export default function TeamsPage() {
                                         handleUpdateMember(member.user_id, { role: "member" })
                                       }
                                     >
-                                      降级为成员
+                                      {safeT.teamsPage.demoteToMember}
                                     </Button>
                                   )}
                                 </>
@@ -919,7 +919,7 @@ export default function TeamsPage() {
                                 variant="destructive"
                                 onClick={() => handleRemoveMember(member.user_id)}
                               >
-                                移除
+                                {safeT.teamsPage.removeButton}
                               </Button>
                             )}
                           </div>
@@ -938,19 +938,19 @@ export default function TeamsPage() {
               <>
                 <div className="text-center space-y-3">
                   <p className="text-muted-foreground text-base">
-                    你还没有任何团队，创建一个团队开始协作吧。
+                    {safeT.teamsPage.noTeamsCreate}
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => router.push("/teams/new")}
                     className="transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    创建团队
+                    {safeT.teamsPage.createTeamButton}
                   </Button>
                 </div>
               </>
             ) : (
-              <p className="text-muted-foreground text-base">请选择一个团队以查看详细信息。</p>
+              <p className="text-muted-foreground text-base">{safeT.teamsPage.selectTeamToView}</p>
             )}
           </CardFooter>
         )}
