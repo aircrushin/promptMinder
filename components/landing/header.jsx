@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import { Menu, FolderPlus, Library, LogOut, Languages, LayoutGrid } from "lucide-react"
+import { Library, LayoutGrid, Languages } from "lucide-react"
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -16,24 +16,23 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Header() {
   const pathname = usePathname();
-  const { language, toggleLanguage, t } = useLanguage();
+  const { toggleLanguage, t } = useLanguage();
 
   if (!t) return null;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/85 backdrop-blur-xl shadow-[0_18px_40px_-30px_rgba(0,0,0,0.35)]">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/20 bg-white/70 backdrop-blur-xl shadow-sm">
       <div className="mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-            {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-2">
             <OptimizedImage 
               src="/logo2.png" 
               alt="PromptMinder" 
-              width={56} 
-              height={56} 
+              width={40} 
+              height={40} 
               priority
-              className="rounded-lg"
+              className="rounded-xl"
             />
-            <span className="hidden sm:block text-xl font-bold [-webkit-background-clip:text] [background-clip:text] text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500">
+            <span className="hidden sm:block text-xl font-bold [-webkit-background-clip:text] [background-clip:text] text-transparent bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">
               PromptMinder
             </span>
           </Link>
@@ -43,15 +42,15 @@ export function Header() {
             {/* Center Navigation */}
             <SignedIn>
               <NavigationMenu className="hidden sm:flex">
-                <NavigationMenuList className="space-x-8">
+                <NavigationMenuList className="space-x-2">
                   <NavigationMenuItem>
                     <NavigationMenuLink
                       asChild
                       className={`${
                         pathname === '/prompts'
-                          ? 'text-primary font-semibold'
-                          : 'text-muted-foreground'
-                      } flex items-center gap-1`}
+                          ? 'bg-slate-100 text-slate-900'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      } flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors`}
                     >
                       <Link href="/prompts">
                         <Library className="h-4 w-4" />
@@ -64,9 +63,9 @@ export function Header() {
                       asChild
                       className={`${
                         pathname === '/public'
-                          ? 'text-primary font-semibold'
-                          : 'text-muted-foreground'
-                      } flex items-center gap-1`}
+                          ? 'bg-slate-100 text-slate-900'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      } flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors`}
                     >
                       <Link href="/public">
                         <LayoutGrid className="h-4 w-4" />
@@ -79,24 +78,28 @@ export function Header() {
             </SignedIn>
 
             {/* Right aligned auth buttons & Language Switcher */}
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="icon" onClick={toggleLanguage}>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={toggleLanguage} className="rounded-xl text-slate-600 hover:bg-slate-100">
                   <Languages className="h-5 w-5" />
               </Button>
               <SignedOut>
                 <Link href="/prompts">
-                  <button className="px-4 py-2 text-foreground/70 transition-colors hover:text-foreground">
+                  <button className="hidden px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 sm:block">
                     {t.auth.login}
                   </button>
                 </Link>
                 <Link href="/prompts">
-                  <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground shadow-[0_12px_30px_-16px_rgba(0,0,0,0.35)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-16px_rgba(0,0,0,0.45)]">
+                  <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30 hover:-translate-y-0.5">
                     {t.auth.signup}
                   </button>
                 </Link>
               </SignedOut>
               <SignedIn>
-                <UserButton afterSignOutUrl="/" />
+                <UserButton afterSignOutUrl="/" appearance={{
+                  elements: {
+                    avatarBox: "h-9 w-9"
+                  }
+                }}/>
               </SignedIn>
             </div>
           </div>

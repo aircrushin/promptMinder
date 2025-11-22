@@ -10,7 +10,6 @@ import {
   LightBulbIcon,
 } from "@heroicons/react/24/outline";
 
-// Base data for features, including icon components and default English text.
 const baseFeatureData = [
   {
     defaultTitle: "Smart Category Management",
@@ -19,7 +18,7 @@ const baseFeatureData = [
   },
   {
     defaultTitle: "Version Control",
-    defaultDescription: "Track every change. Revert to previous prompt versions easily with a single click.", // Corrected typo
+    defaultDescription: "Track every change. Revert to previous prompt versions easily with a single click.",
     IconComponent: ArrowPathIcon
   },
   {
@@ -61,16 +60,14 @@ export function FeatureSection({ t }) {
   });
 
   return (
-    <section className="relative overflow-hidden bg-white py-24">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-12 h-64 w-[32rem] -translate-x-1/2 rounded-full bg-black/5 blur-[140px]" />
-        <div className="absolute -bottom-24 right-10 h-72 w-72 rounded-full bg-black/5 blur-[160px]" />
-        <div className="absolute -left-16 bottom-20 h-56 w-56 rounded-full bg-black/5 blur-[120px]" />
-      </div>
+    <section className="relative overflow-hidden bg-slate-50/50 py-24">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="absolute left-0 top-0 -z-10 h-[500px] w-[500px] bg-indigo-500/5 blur-[100px]" />
+      <div className="absolute bottom-0 right-0 -z-10 h-[500px] w-[500px] bg-blue-500/5 blur-[100px]" />
 
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+          <h2 className="text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl">
             {sectionTitle}
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-slate-600">
@@ -82,23 +79,18 @@ export function FeatureSection({ t }) {
           {featuresToRender.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 28 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
-              className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-white/80 p-8 text-left shadow-[0_28px_80px_-56px_rgba(0,0,0,0.35)] backdrop-blur transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_32px_96px_-52px_rgba(0,0,0,0.45)]"
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-8 text-left shadow-xl shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 hover:bg-white/80"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <div className="flex items-center gap-4">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 text-white shadow-md shadow-black/10">
-                  <feature.Icon className="h-6 w-6" />
-                </span>
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+                <feature.Icon className="h-7 w-7" />
               </div>
 
-              <h3 className="mt-8 text-2xl font-semibold text-slate-900">{feature.title}</h3>
+              <h3 className="text-xl font-bold text-slate-900">{feature.title}</h3>
               <p className="mt-3 text-base leading-relaxed text-slate-600">{feature.description}</p>
-
-              <div className="mt-8 h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
             </motion.div>
           ))}
         </div>

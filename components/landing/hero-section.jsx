@@ -140,7 +140,7 @@ export function HeroSection({ t }) {
             </div>
 
             {/* Main Title */}
-            <h1 className="text-balance text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
+            <h1 className="text-balance text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl lg:leading-[1.1]">
               <ShinyText
                 text={heroCopy.mainTitle}
                 speed={3}

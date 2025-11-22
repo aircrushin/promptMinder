@@ -420,8 +420,8 @@ export default function PromptsPage() {
   const tp = t.promptsPage;
 
   return (
-    <div className="min-h-[80vh] bg-gradient-to-b from-background to-background/80">
-      <div className="container px-4 py-8 sm:py-16 mx-auto max-w-7xl">
+    <div className="min-h-[80vh] bg-white">
+      <div className="container px-4 py-10 sm:py-16 mx-auto max-w-7xl">
         <div className="space-y-8">
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

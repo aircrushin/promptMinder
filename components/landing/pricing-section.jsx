@@ -44,72 +44,81 @@ const plans = [
     cta: "联系销售",
     href: "/contact",
   },
-];
+  ];
 
 export function PricingSection() {
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <section className="relative overflow-hidden bg-slate-50/50 py-24">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+
+      <div className="relative container mx-auto px-4">
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-4xl font-extrabold text-slate-900 md:text-5xl">
             选择适合您的方案
           </h2>
-          <p className="text-gray-600">
+          <p className="text-lg text-slate-600">
             灵活的价格方案，满足不同规模团队的需求
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`p-8 rounded-xl border ${
+              className={`relative flex flex-col overflow-hidden rounded-[2rem] p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 ${
                 plan.popular
-                  ? "border-blue-500 bg-white shadow-lg"
-                  : "border-gray-200 bg-white hover:shadow-lg"
-              } transition-all`}
+                  ? "border-2 border-indigo-500 bg-white shadow-2xl shadow-indigo-500/20"
+                  : "border border-white/40 bg-white/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60"
+              }`}
             >
               {plan.popular && (
-                <span className="text-blue-500 text-sm font-medium mb-2 block">
+                <div className="absolute right-0 top-0 rounded-bl-2xl bg-indigo-500 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
                   最受欢迎
-                </span>
+                </div>
               )}
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+              
+              <h3 className="mb-2 text-xl font-bold text-slate-900">{plan.name}</h3>
+              <div className="mb-6 flex items-baseline">
+                <span className="text-4xl font-extrabold text-slate-900">{plan.price}</span>
                 {plan.period && (
-                  <span className="text-gray-600">{plan.period}</span>
+                  <span className="ml-1 text-slate-500">{plan.period}</span>
                 )}
               </div>
-              <ul className="space-y-4 mb-8">
+              
+              <ul className="mb-8 space-y-4 flex-1">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="text-gray-600 flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-green-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
+                  <li key={i} className="flex items-center gap-3 text-slate-600">
+                    <div className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                      plan.popular ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
+                    }`}>
+                      <svg
+                        className="h-3 w-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth={3}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
                     {feature}
                   </li>
                 ))}
               </ul>
+              
               <Link
                 href={plan.href}
-                className={`block text-center py-3 px-6 rounded-lg font-medium transition-all ${
+                className={`block w-full rounded-2xl py-4 text-center text-base font-semibold transition-all ${
                   plan.popular
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-900 text-white hover:bg-gray-800"
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40"
+                    : "bg-slate-900 text-white shadow-lg shadow-slate-900/10 hover:bg-slate-800 hover:shadow-slate-900/20"
                 }`}
                >
                 {plan.cta}
@@ -120,4 +129,4 @@ export function PricingSection() {
       </div>
     </section>
   );
-} 
+}

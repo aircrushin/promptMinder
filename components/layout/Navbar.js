@@ -49,19 +49,19 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="border-b">
+    <nav className="border-b border-white/20 bg-white/70 backdrop-blur-xl shadow-sm">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <Link href="/" className="flex items-center group">
+          <Link href="/" className="flex items-center gap-2">
             <OptimizedImage 
               src="/logo2.png" 
               alt="PromptMinder" 
-              width={56} 
-              height={56} 
+              width={40} 
+              height={40} 
               priority
-              className="rounded-lg"
+              className="rounded-xl"
             />
-            <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-primary/90 to-primary [-webkit-background-clip:text] [background-clip:text] text-transparent hover:from-primary hover:to-primary/90 transition-all duration-300">
+            <span className="hidden sm:block text-xl font-bold [-webkit-background-clip:text] [background-clip:text] text-transparent bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">
               PromptMinder
             </span>
           </Link>
