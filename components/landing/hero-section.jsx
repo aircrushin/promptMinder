@@ -11,14 +11,17 @@ const MotionDiv = dynamic(
   }
 );
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { TypeAnimation } from "react-type-animation";
 import { BoltIcon, GlobeAltIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import ShinyText from "../texts/ShinyText";
 import { GitHubStars } from "../ui/github-stars";
+import { ParticleButton } from "../ui/particle-button";
 
 export function HeroSection({ t }) {
   const { isSignedIn } = useAuth();
+  const router = useRouter();
 
   const fallback = {
     mainTitle: "Make AI Prompt Management Simpler",
@@ -105,136 +108,160 @@ export function HeroSection({ t }) {
   };
 
   return (
-    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-gradient-to-br from-white to-slate-50">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        <div className="absolute -left-12 top-28 h-52 w-52 rounded-full bg-black/5 blur-[120px]" />
-        <div className="absolute right-4 top-12 h-64 w-64 rounded-full bg-black/5 blur-[140px]" />
-        <div className="absolute left-1/2 bottom-6 h-64 w-[28rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-[rgba(0,0,0,0.07)] via-[rgba(0,0,0,0.03)] to-transparent blur-[160px]" />
+    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-slate-50/50">
+      {/* Dynamic background with mesh gradients */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-blue-400 opacity-20 blur-[100px]" />
+        <div className="absolute right-0 top-0 -z-10 h-[500px] w-[500px] bg-purple-500/10 blur-[120px]" />
+        <div className="absolute bottom-0 left-0 -z-10 h-[500px] w-[500px] bg-indigo-500/10 blur-[120px]" />
       </div>
-      <div className="relative mx-auto w-full max-w-6xl px-6 py-10 sm:px-10 lg:py-12">
-        <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+
+      <div className="relative mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 lg:py-20">
+        <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
           <MotionDiv
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="space-y-8 lg:col-span-6"
+            className="space-y-10 lg:col-span-6"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-2 text-sm font-medium text-primary shadow-sm backdrop-blur">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-50/50 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-indigo-100/50">
               <span>{heroCopy.subtitleStart}</span>
               <TypeAnimation
                 key={animationSignature}
                 sequence={animationSequence}
                 wrapper="span"
                 speed={44}
-                className="font-semibold text-primary"
+                className="font-bold text-indigo-600"
                 repeat={Infinity}
               />
               <span>{heroCopy.subtitleEnd}</span>
             </div>
 
-            <h1 className="text-balance text-5xl font-extrabold leading-tight text-slate-900 sm:text-6xl">
+            {/* Main Title */}
+            <h1 className="text-balance text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
               <ShinyText
                 text={heroCopy.mainTitle}
                 speed={3}
-                className="text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-500 [-webkit-background-clip:text] [background-clip:text]"
+                className="text-transparent bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 [-webkit-background-clip:text] [background-clip:text] drop-shadow-sm"
               />
             </h1>
 
+            {/* Description */}
             <p className="max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
               {heroCopy.description}
             </p>
 
+            {/* Buttons */}
             <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
-              <Link
-                href={isSignedIn ? "/prompts" : "/sign-up"}
-                className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-semibold text-primary-foreground shadow-[0_22px_70px_-42px_rgba(0,0,0,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_90px_-40px_rgba(0,0,0,0.6)]"
+              <ParticleButton
+                onClick={() => router.push(isSignedIn ? "/prompts" : "/sign-up")}
+                className="group relative inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 text-lg font-semibold text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-2xl hover:shadow-slate-900/30"
                >
                 {heroCopy.ctaButton}
-              </Link>
+              </ParticleButton>
               <Link
                 href="/public"
-                className="inline-flex items-center justify-center rounded-xl border border-border bg-white/70 px-8 py-4 text-lg font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_16px_60px_-46px_rgba(0,0,0,0.45)]"
+                className="inline-flex h-14 items-center justify-center rounded-2xl border border-slate-200 bg-white px-8 text-lg font-semibold text-slate-900 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300"
                >
                 {heroCopy.secondaryCta}
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-              <GitHubStars className="rounded-full border border-border bg-white/80 px-4 py-2 shadow-sm backdrop-blur" />
-              <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-border bg-white/70 px-5 py-4 shadow-sm backdrop-blur">
+            {/* Stats/Social Proof */}
+            <div className="flex flex-wrap items-center gap-8 pt-4">
+              <GitHubStars className="rounded-full border border-slate-200 bg-white/60 px-4 py-2 shadow-sm backdrop-blur transition-colors hover:bg-white/80" />
+              <div className="flex items-center gap-8 border-l border-slate-200 pl-8">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col text-left">
-                    <span className="text-lg font-semibold text-slate-900">{stat.value}</span>
-                    <span className="text-xs uppercase tracking-wide text-muted-foreground">{stat.label}</span>
+                  <div key={stat.label} className="flex flex-col">
+                    <span className="text-2xl font-bold text-slate-900">{stat.value}</span>
+                    <span className="text-xs font-medium uppercase tracking-wider text-slate-500">{stat.label}</span>
                   </div>
                 ))}
               </div>
             </div>
           </MotionDiv>
 
+          {/* Right Side Visuals */}
           <MotionDiv
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.1, ease: "easeOut" }}
-            className="relative lg:col-span-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            className="relative lg:col-span-6 perspective-[2000px]"
           >
-            <div className="relative mx-auto max-w-lg space-y-5">
-              <div className="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-br from-black/10 via-transparent to-transparent blur-3xl" />
-              <div className="absolute -bottom-12 -right-14 h-52 w-52 rounded-full bg-black/10 blur-[120px]" />
+            <div className="relative mx-auto max-w-lg transform-style-3d rotate-y-[-6deg] rotate-x-[6deg]">
+              {/* Glow effects behind cards */}
+              <div className="absolute -top-20 -right-20 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[100px]" />
+              <div className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-blue-500/10 blur-[100px]" />
 
+              {/* Main Card */}
               <MotionDiv
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25 }}
-                className="relative overflow-hidden rounded-3xl border border-border bg-white/80 p-8 shadow-[0_30px_90px_-60px_rgba(0,0,0,0.4)] backdrop-blur"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="relative z-10 overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl"
               >
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.26em] text-primary">
-                  <span>Prompt Minder</span>
-                  <span className="rounded-full bg-foreground/10 px-3 py-1 text-[11px] font-semibold text-foreground">Live</span>
-                </div>
-                <div className="mt-6 space-y-4 text-left">
-                  {quickHighlights.map(({ title, description, Icon }) => (
-                    <div key={title} className="flex items-start gap-4 rounded-2xl border border-border bg-white/70 p-3 shadow-sm">
-                      <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground/5">
-                        <Icon className="h-5 w-5 text-foreground" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-white/10" />
+                <div className="relative">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">Prompt Minder</span>
+                    <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 px-3 py-1 text-[11px] font-bold text-green-600">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                      LIVE
+                    </span>
+                  </div>
+                  <div className="mt-6 space-y-4">
+                    {quickHighlights.map(({ title, description, Icon }) => (
+                      <div key={title} className="group flex items-start gap-4 rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md hover:scale-[1.02]">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900">{title}</h3>
+                          <p className="text-sm text-slate-500">{description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-base font-semibold text-slate-900">{title}</p>
-                        <p className="text-sm text-slate-600">{description}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </MotionDiv>
 
+              {/* Floating Card */}
               <MotionDiv
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.45 }}
-                className="rounded-3xl border border-border bg-gradient-to-br from-white via-slate-50 to-white p-6 shadow-[0_28px_80px_-56px_rgba(0,0,0,0.35)] backdrop-blur"
+                initial={{ x: 40, y: 40, opacity: 0 }}
+                animate={{ x: -20, y: 20, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="absolute -bottom-12 -right-12 z-20 w-80 rounded-[2rem] border border-white/40 bg-white/80 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur-xl"
               >
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{snapshot.badge}</span>
-                  <span className="rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold text-foreground">{snapshot.status}</span>
-                </div>
-                <div className="space-y-4">
-                  <div className="rounded-2xl border border-border bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 p-4 text-primary-foreground shadow-lg">
-                    <p className="text-sm uppercase tracking-wide text-primary-foreground/80">{snapshot.promptLabel}</p>
-                    <p className="mt-2 text-lg font-semibold">&ldquo;{snapshot.promptText}&rdquo;</p>
+                 <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{snapshot.badge}</span>
+                    <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-bold text-indigo-600">{snapshot.status}</span>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-border bg-white/80 p-4 text-left shadow-sm">
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{snapshot.approvalLabel}</p>
-                      <p className="mt-1 text-base font-semibold text-slate-900">{snapshot.approvalValue}</p>
+                  
+                  <div className="space-y-4">
+                    <div className="rounded-xl bg-slate-900 p-4 text-white shadow-lg">
+                       <div className="flex items-center gap-2 opacity-50 mb-2">
+                          <div className="h-1.5 w-1.5 rounded-full bg-white"/>
+                          <span className="text-[10px] font-medium uppercase tracking-wider">{snapshot.promptLabel}</span>
+                       </div>
+                       <p className="font-medium leading-snug">&ldquo;{snapshot.promptText}&rdquo;</p>
                     </div>
-                    <div className="rounded-2xl border border-border bg-white/80 p-4 text-left shadow-sm">
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{snapshot.experimentsLabel}</p>
-                      <p className="mt-1 text-base font-semibold text-slate-900">{snapshot.experimentsValue}</p>
+                    
+                    <div className="flex gap-3">
+                      <div className="flex-1 rounded-xl bg-white p-3 shadow-sm border border-slate-100">
+                         <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">{snapshot.approvalLabel}</p>
+                         <p className="font-bold text-slate-900 text-sm">{snapshot.approvalValue}</p>
+                      </div>
+                      <div className="flex-1 rounded-xl bg-white p-3 shadow-sm border border-slate-100">
+                         <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">{snapshot.experimentsLabel}</p>
+                         <p className="font-bold text-slate-900 text-sm">{snapshot.experimentsValue}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
               </MotionDiv>
             </div>
           </MotionDiv>
