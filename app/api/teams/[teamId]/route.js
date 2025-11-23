@@ -43,82 +43,91 @@ export async function GET(_request, { params }) {
     const profileMap = new Map()
 
     if (uniqueUserIds.length > 0) {
-      // Check if clerkClient is available
-      if (!clerkClient || !clerkClient.users) {
-        console.warn(`[teams/${teamId}] Clerk client not available, using fallback user info`);
+      let clerk
+      try {
+        if (typeof clerkClient === 'function') {
+          clerk = await clerkClient()
+        } else {
+          clerk = clerkClient
+        }
+      } catch (clerkError) {
+        console.warn(`[teams/${teamId}] Failed to initialize Clerk client, falling back to basic info`, clerkError)
+      }
+
+      if (!clerk?.users) {
         // Fallback: use user IDs as display names
-        uniqueUserIds.forEach(id => {
+        uniqueUserIds.forEach((id) => {
           profileMap.set(id, {
             displayName: id,
             email: null,
-          });
-        });
+          })
+        })
       } else {
         try {
-        // 批量获取用户信息
-        const result = await clerkClient.users.getUserList({
-          userId: uniqueUserIds,
-          limit: uniqueUserIds.length,
-        });
+          // 批量获取用户信息
+          const result = await clerk.users.getUserList({
+            userId: uniqueUserIds,
+            limit: uniqueUserIds.length,
+          })
 
-        // 确保返回的数据是数组
-        const users = Array.isArray(result?.data) 
-          ? result.data 
-          : Array.isArray(result) 
-            ? result 
-            : [];
+          // 确保返回的数据是数组
+          const users = Array.isArray(result?.data)
+            ? result.data
+            : Array.isArray(result)
+              ? result
+              : []
 
-        // 处理批量获取的用户信息
-        users.forEach((user) => {
-          if (!user) return;
-          const primaryEmail = user.primaryEmailAddress?.emailAddress
-            || user.emailAddresses?.[0]?.emailAddress
-            || null;
-          profileMap.set(user.id, {
-            displayName: user.fullName || user.username || primaryEmail || user.id,
-            email: primaryEmail,
-          });
-        });
+          // 处理批量获取的用户信息
+          users.forEach((user) => {
+            if (!user) return
+            const primaryEmail = user.primaryEmailAddress?.emailAddress
+              || user.emailAddresses?.[0]?.emailAddress
+              || null
+            profileMap.set(user.id, {
+              displayName: user.fullName || user.username || primaryEmail || user.id,
+              email: primaryEmail,
+            })
+          })
 
-        // 检查是否有未获取到的用户
-        const missingUserIds = uniqueUserIds.filter(id => !profileMap.has(id));
-        if (missingUserIds.length > 0) {
-          console.warn(`[teams/${teamId}] Some users not found in batch fetch, falling back to individual fetch for ${missingUserIds.length} users`);
-          throw new Error('Incomplete batch fetch');
-        }
-      } catch (fetchError) {
-        console.error(`[teams/${teamId}] failed to load batch users`, fetchError);
-        // 单个获取用户信息作为后备方案
-        await Promise.all(
-          uniqueUserIds.map(async (id) => {
-            if (profileMap.has(id)) return;
-            try {
-              const user = await clerkClient.users.getUser(id);
-              if (!user) {
-                console.warn(`[teams/${teamId}] User not found: ${id}`);
+          // 检查是否有未获取到的用户
+          const missingUserIds = uniqueUserIds.filter((id) => !profileMap.has(id))
+          if (missingUserIds.length > 0) {
+            console.warn(`[teams/${teamId}] Some users not found in batch fetch, falling back to individual fetch for ${missingUserIds.length} users`)
+            throw new Error('Incomplete batch fetch')
+          }
+        } catch (fetchError) {
+          console.error(`[teams/${teamId}] failed to load batch users`, fetchError)
+          // 单个获取用户信息作为后备方案
+          await Promise.all(
+            uniqueUserIds.map(async (id) => {
+              if (profileMap.has(id)) return
+              try {
+                const user = await clerk.users.getUser(id)
+                if (!user) {
+                  console.warn(`[teams/${teamId}] User not found: ${id}`)
+                  profileMap.set(id, {
+                    displayName: id,
+                    email: null,
+                  })
+                  return
+                }
+                const primaryEmail = user.primaryEmailAddress?.emailAddress
+                  || user.emailAddresses?.[0]?.emailAddress
+                  || null
+                profileMap.set(id, {
+                  displayName: user.fullName || user.username || primaryEmail || id,
+                  email: primaryEmail,
+                })
+              } catch (singleError) {
+                console.error(`[teams/${teamId}] failed to load user ${id}`, singleError)
+                // 设置默认值，避免undefined
                 profileMap.set(id, {
                   displayName: id,
                   email: null,
-                });
-                return;
+                })
               }
-              const primaryEmail = user.primaryEmailAddress?.emailAddress
-                || user.emailAddresses?.[0]?.emailAddress
-                || null;
-              profileMap.set(id, {
-                displayName: user.fullName || user.username || primaryEmail || id,
-                email: primaryEmail,
-              });
-            } catch (singleError) {
-              console.error(`[teams/${teamId}] failed to load user ${id}`, singleError);
-              // 设置默认值，避免undefined
-              profileMap.set(id, {
-                displayName: id,
-                email: null,
-              });
-            }
-          })
-        )
+            })
+          )
         }
       }
     }

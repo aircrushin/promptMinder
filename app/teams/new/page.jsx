@@ -15,7 +15,7 @@ import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 export default function CreateTeamPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { refresh } = useTeam();
+  const { refresh, teams } = useTeam();
   const { t } = useLanguage();
 
   // 提供默认翻译对象作为后备
@@ -33,7 +33,9 @@ export default function CreateTeamPage() {
       descriptionPlaceholder: "请输入团队描述（可选）",
       cancel: "取消",
       creating: "创建中...",
-      create: "创建团队"
+      create: "创建团队",
+      limitReachedTitle: "无法创建团队",
+      limitReachedDesc: "您已达到创建团队的数量上限（最多2个）。请先删除现有团队或联系管理员。"
     }
   };
   const [form, setForm] = useState({
@@ -111,6 +113,20 @@ export default function CreateTeamPage() {
               {safeT.createTeamPage.subtitle}
             </p>
           </CardHeader>
+          
+          {teams.filter(m => m.role === 'owner').length >= 2 && (
+            <div className="px-8 pb-4">
+              <div className="rounded-md bg-destructive/15 p-4 text-sm text-destructive">
+                <p className="font-medium">
+                  {safeT.createTeamPage?.limitReachedTitle || '无法创建团队'}
+                </p>
+                <p className="mt-1">
+                  {safeT.createTeamPage?.limitReachedDesc || '您已达到创建团队的数量上限（最多2个）。请先删除现有团队或联系管理员。'}
+                </p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-8 px-8">
               <div className="space-y-3">
@@ -156,7 +172,7 @@ export default function CreateTeamPage() {
               </Button>
               <Button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || teams.filter(m => m.role === 'owner').length >= 2}
                 className="transition-all duration-200 hover:shadow-md hover:scale-[1.02] bg-gradient-to-r from-primary to-primary/90"
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

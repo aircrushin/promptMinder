@@ -36,15 +36,12 @@ export function TestimonialSection({ t }) {
   }));
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white py-24">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-20 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-indigo-400/20 blur-[140px]" />
-        <div className="absolute -right-20 bottom-8 h-72 w-72 rounded-full bg-blue-400/15 blur-[160px]" />
-      </div>
-
+    <section className="relative overflow-hidden bg-slate-50/50 py-24">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+          <h2 className="text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl">
             {translations.title}
           </h2>
         </div>
@@ -57,14 +54,13 @@ export function TestimonialSection({ t }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.45, delay: index * 0.08 }}
-              className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-white/50 bg-white/85 p-8 shadow-xl shadow-blue-200/40 backdrop-blur transition-transform duration-300 hover:-translate-y-2"
+              className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-xl shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 hover:bg-white/80"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <p className="text-base leading-relaxed text-slate-700">
+              <p className="text-lg leading-relaxed text-slate-700 font-medium">
                 &ldquo;{testimonial.content}&rdquo;
               </p>
               <div className="mt-8 flex items-center gap-4">
-                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-blue-100/70 bg-blue-50">
+                <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-indigo-50 shadow-sm">
                   <Image
                     src={testimonial.avatar}
                     alt={testimonial.author}
@@ -74,8 +70,8 @@ export function TestimonialSection({ t }) {
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{testimonial.author}</p>
-                  <p className="text-xs uppercase tracking-wide text-blue-600/80">{testimonial.title}</p>
+                  <p className="text-sm font-bold text-slate-900">{testimonial.author}</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-indigo-600/80">{testimonial.title}</p>
                 </div>
               </div>
             </motion.div>

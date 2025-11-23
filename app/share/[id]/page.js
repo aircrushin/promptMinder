@@ -1,232 +1,110 @@
-'use client';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
-import { Spinner } from '@/components/ui/Spinner';
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@clerk/nextjs';
-import { useToast } from "@/hooks/use-toast";
-import { apiClient } from '@/lib/api-client';
-import { useClipboard } from '@/lib/clipboard';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { createClient } from '@supabase/supabase-js';
+import SharePromptDetailClient from './SharePromptDetailClient';
+import { notFound } from 'next/navigation';
 
-export default function SharePromptDetail({ params }) {
-  const resolvedParams = use(params);
-  const { id } = resolvedParams;
-  const { language, t } = useLanguage();
-  const { isSignedIn, userId } = useAuth();
-  const { toast } = useToast();
-  const { copy, copied } = useClipboard();
-  const [prompt, setPrompt] = useState(null);
-  const [copyToWorkspaceLoading, setCopyToWorkspaceLoading] = useState(false);
-  const router = useRouter();
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-  useEffect(() => {
-    const fetchPrompt = async () => {
-      if (id) {
-        try {
-          const data = await apiClient.request(`/api/share/${id}`);
-          setPrompt({...data, tags: data.tags ? data.tags.split(',') : []});
-        } catch (error) {
-          console.error('Error fetching prompt:', error);
-        }
-      }
-    };
-    
-    fetchPrompt();
-  }, [id]);
+async function getPrompt(id) {
+  const { data: prompt, error } = await supabase
+    .from('prompts')
+    .select('*')
+    .eq('id', id)
+    .eq('is_public', true)
+    .single();
 
-  const handleVersionChange = (newId) => {
-    if (newId !== id) {
-      router.push(`/share/${newId}`);
-    }
-  };
-
-  if (!t) return <div className="flex justify-center items-center h-64"><Spinner /></div>;
-  const tp = t.sharePage;
-  if (!tp) return <div className="flex justify-center items-center h-64"><Spinner /></div>;
-
-  const handleCopy = async () => {
-    await copy(prompt.content);
-  };
-
-  const handleCopyToWorkspace = async () => {
-    if (!isSignedIn) {
-      router.push('/sign-in');
-      return;
-    }
-
-    setCopyToWorkspaceLoading(true);
-    try {
-      await apiClient.request('/api/prompts/copy', {
-        method: 'POST',
-        body: { sourceId: id },
-      });
-
-      toast({
-        title: tp.copyToWorkspaceSuccess,
-        description: '您可以在工作台中查看和编辑复制的提示词',
-      });
-
-    } catch (error) {
-      console.error('Failed to copy to workspace:', error);
-      
-      // Handle special case for copying own prompt
-      if (error.status === 400 && error.data?.error === 'Cannot copy your own prompt') {
-        router.push('/prompts');
-        return;
-      }
-
-      toast({
-        title: tp.copyToWorkspaceError,
-        description: error.message || tp.copyToWorkspaceError,
-        variant: "destructive",
-      });
-    } finally {
-      setCopyToWorkspaceLoading(false);
-    }
-  };
-
-  if (!prompt) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner />
-      </div>
-    );
+  if (error || !prompt) {
+    return null;
   }
 
+  // Fetch versions
+  const { data: versions } = await supabase
+    .from('prompts')
+    .select('id, version, created_at')
+    .eq('title', prompt.title)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false });
+
+  prompt.versions = versions || [];
+  
+  // Normalize tags to array
+  if (prompt.tags && typeof prompt.tags === 'string') {
+    prompt.tags = prompt.tags.split(',');
+  } else if (!Array.isArray(prompt.tags)) {
+    prompt.tags = [];
+  }
+
+  return prompt;
+}
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const prompt = await getPrompt(id);
+
+  if (!prompt) {
+    return {
+      title: 'Prompt Not Found',
+    };
+  }
+
+  const title = `${prompt.title} - Prompt Minder`;
+  const description = prompt.description || `Check out this AI prompt: ${prompt.title}`;
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com'}/share/${id}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      publishedTime: prompt.created_at,
+      authors: ['Prompt Minder User'],
+      tags: prompt.tags ? (Array.isArray(prompt.tags) ? prompt.tags : prompt.tags.split(',')) : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
+
+export default async function SharePromptPage({ params }) {
+  const { id } = await params;
+  const prompt = await getPrompt(id);
+
+  if (!prompt) {
+    notFound();
+  }
+
+  // Structured Data (JSON-LD)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: prompt.title,
+    description: prompt.description,
+    text: prompt.content,
+    dateCreated: prompt.created_at,
+    author: {
+      '@type': 'Person',
+      name: 'Prompt Minder User', 
+    },
+    url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com'}/share/${id}`,
+    keywords: prompt.tags ? (Array.isArray(prompt.tags) ? prompt.tags.join(',') : prompt.tags) : '',
+  };
+
   return (
-    <div className="bg-gradient-to-b from-background to-secondary/5 py-12">
-      <div className="mx-auto p-4 sm:p-6 max-w-4xl">
-        <Card className="border-none shadow-2xl backdrop-blur-sm bg-background/80">
-          <CardContent className="p-8">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary-foreground [-webkit-background-clip:text] [background-clip:text] text-transparent drop-shadow-sm">
-              {prompt.title}
-            </h1>
-            
-            <div className="space-y-8">
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground border-b border-border/50 pb-6">
-                <div className="flex items-center px-4 py-2 rounded-xl bg-primary/5 shadow-sm">
-                  <svg className="w-4 h-4 mr-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {new Date(prompt.created_at).toLocaleDateString()}
-                </div>
-                <div className="flex items-center">
-                  {prompt.versions && prompt.versions.length > 1 ? (
-                      <Select onValueChange={handleVersionChange} value={id}>
-                        <SelectTrigger className="w-full bg-primary/5 shadow-sm border-none rounded-xl px-4 py-2">
-                          <SelectValue placeholder="Select a version" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {prompt.versions.map((v) => (
-                            <SelectItem key={v.id} value={v.id}>
-                              <div className="flex items-center gap-2">
-                                <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                                <span className='pr-2'>Version {v.version}</span>
-                                {/* <span className="text-xs text-muted-foreground">({new Date(v.created_at).toLocaleDateString()})</span> */}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                  ) : (
-                    <div className="flex items-center px-4 py-2 rounded-xl bg-primary/5 shadow-sm">
-                      <svg className="w-4 h-4 mr-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      Version {prompt.version}
-                    </div>
-                  )}
-                </div>
-                {prompt.tags?.length > 0 && prompt.tags.map((tag) => (
-                  <Badge 
-                    key={tag} 
-                    variant="secondary"
-                    className="px-4 py-2 rounded-xl bg-primary/5 shadow-sm"
-                  >
-                    #{tag}
-                  </Badge>
-                ))}
-              </div>
-
-              <div className="space-y-6">
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {prompt.description}
-                </p>
-
-                <div className="relative">
-                  <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                  <div className="rounded-2xl border border-border/50 bg-secondary/5 backdrop-blur-sm overflow-hidden shadow-lg">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-secondary/10">
-                      <div className="text-sm font-medium text-muted-foreground">
-                        {tp.contentTitle}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={handleCopy}
-                          variant={copied ? "success" : "secondary"}
-                          className="relative px-4 py-2 text-sm font-medium"
-                          size="sm"
-                        >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-12a2 2 0 00-2-2h-2M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
-                          </svg>
-                          {copied ? tp.copyButtonSuccess : tp.copyButton}
-                        </Button>
-                        {/* 只有在用户已登录且不是自己的提示词时才显示复制到工作台按钮 */}
-                        {isSignedIn && prompt && prompt.user_id !== userId && (
-                          <Button
-                            onClick={handleCopyToWorkspace}
-                            disabled={copyToWorkspaceLoading}
-                            variant="default"
-                            className="relative px-4 py-2 text-sm font-medium"
-                            size="sm"
-                          >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                            {copyToWorkspaceLoading ? tp.copyToWorkspaceButtonLoading : tp.copyToWorkspaceButton}
-                          </Button>
-                        )}
-                        {/* 如果用户未登录，显示登录按钮 */}
-                        {!isSignedIn && (
-                          <Button
-                            onClick={() => router.push('/sign-in')}
-                            variant="default"
-                            className="relative px-4 py-2 text-sm font-medium"
-                            size="sm"
-                          >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                            {tp.copyToWorkspaceButton}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="p-6 max-h-[600px] overflow-y-auto bg-gradient-to-b from-transparent to-secondary/5">
-                      <p className="text-base leading-relaxed whitespace-pre-wrap font-mono selection:bg-primary/20">
-                        {prompt.content}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <SharePromptDetailClient initialPrompt={prompt} id={id} />
+    </>
   );
-} 
+}
+ 

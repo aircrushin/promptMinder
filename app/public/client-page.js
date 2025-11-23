@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Search, X, ChevronUp, Plus } from 'lucide-react';
+import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import Footer from '@/components/layout/Footer';
@@ -28,6 +29,18 @@ export default function PublicPromptsClient() {
         content: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // 分页状态
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(20);
+    const [pagination, setPagination] = useState({
+        total: 0,
+        totalPages: 0,
+        currentPage: 1,
+        pageSize: 20,
+        hasNextPage: false,
+        hasPreviousPage: false
+    });
     
     // 滚动监听器
     useEffect(() => {
@@ -58,8 +71,19 @@ export default function PublicPromptsClient() {
                 setLoading(true);
                 setError(null);
                 
-                const data = await apiClient.request(`/api/prompts/public?lang=${language}`);
+                const data = await apiClient.request(`/api/prompts/public?lang=${language}&page=${currentPage}&pageSize=${pageSize}`);
                 setPrompts(data.prompts || []);
+                setPagination(data.pagination || {
+                    total: 0,
+                    totalPages: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                    hasNextPage: false,
+                    hasPreviousPage: false
+                });
+                
+                // 滚动到顶部
+                scrollToTop();
             } catch (err) {
                 console.error('Error fetching prompts:', err);
                 setError(err.message);
@@ -69,9 +93,28 @@ export default function PublicPromptsClient() {
         };
         
         fetchPrompts();
-    }, [language]); // 当语言改变时重新获取数据
+    }, [language, currentPage, pageSize]); // 当语言或页码改变时重新获取数据
 
-    // 过滤后的提示词列表
+    // 分页导航函数
+    const goToPage = (page) => {
+        if (page >= 1 && page <= pagination.totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
+    const nextPage = () => {
+        if (pagination.hasNextPage) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const previousPage = () => {
+        if (pagination.hasPreviousPage) {
+            setCurrentPage(prev => prev - 1);
+        }
+    };
+
+    // 过滤后的提示词列表 (现在只用于客户端搜索显示)
     const filteredPrompts = useMemo(() => {
         if (!searchQuery.trim()) {
             return prompts;
@@ -171,7 +214,7 @@ export default function PublicPromptsClient() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground/70"></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-400">
                         {t && t.publicPage ? t.publicPage.loading || 'Loading...' : 'Loading...'}
                     </p>
@@ -192,7 +235,7 @@ export default function PublicPromptsClient() {
                     <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">{error}</p>
                     <button 
                         onClick={() => window.location.reload()} 
-                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                     >
                         {t && t.publicPage ? t.publicPage.retry || 'Retry' : 'Retry'}
                     </button>
@@ -206,7 +249,7 @@ export default function PublicPromptsClient() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground/70"></div>
                 </div>
             </div>
         );
@@ -215,7 +258,7 @@ export default function PublicPromptsClient() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
             {/* Background decoration */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/30 via-transparent to-purple-50/30 dark:from-blue-950/20 dark:to-purple-950/20 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-black/5 via-transparent to-black/5 dark:from-white/5 dark:to-white/5 pointer-events-none" />
             <div className="relative align-center justify-center">
                 <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:py-20">
                     {/* Enhanced header section */}
@@ -224,7 +267,7 @@ export default function PublicPromptsClient() {
                             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent leading-tight">
                                 {t.publicPage.title}
                             </h1>
-                            <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full" />
+                            <div className="h-1 w-24 bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 mx-auto rounded-full" />
                         </div>
                         
                         <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
@@ -234,7 +277,7 @@ export default function PublicPromptsClient() {
                         <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
                             <span className="px-4 bg-white/80 dark:bg-gray-900/80 rounded-full py-1">
-                                {t.publicPage.totalPrompts.replace('{count}', searchQuery ? filteredPrompts.length : prompts.length)}
+                                {t.publicPage.totalPrompts.replace('{count}', pagination.total)}
                             </span>
                             <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
                         </div>
@@ -251,7 +294,7 @@ export default function PublicPromptsClient() {
                                     placeholder={t.publicPage.searchPlaceholder}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-12 pr-12 h-12 text-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 shadow-lg transition-all duration-300"
+                                    className="pl-12 pr-12 h-12 text-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-border dark:border-gray-700 focus:border-foreground/30 dark:focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10 dark:focus:ring-foreground/20 shadow-lg transition-all duration-300"
                                 />
                                 {searchQuery && (
                                     <button
@@ -268,7 +311,7 @@ export default function PublicPromptsClient() {
                             <Dialog open={isContributeOpen} onOpenChange={setIsContributeOpen}>
                                 <DialogTrigger asChild>
                                     <Button 
-                                        className="h-12 px-6 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl whitespace-nowrap"
+                                        className="h-12 px-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-primary-foreground shadow-lg hover:shadow-xl whitespace-nowrap"
                                     >
                                         <Plus className="w-5 h-5 mr-2" />
                                         {t.publicPage.contributeButton}
@@ -337,7 +380,7 @@ export default function PublicPromptsClient() {
                                             <Button 
                                                 type="submit" 
                                                 disabled={isSubmitting}
-                                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                                                className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-primary-foreground"
                                             >
                                                 {isSubmitting ? t.publicPage.contributeSubmitting : t.publicPage.contributeSubmit}
                                             </Button>
@@ -374,13 +417,127 @@ export default function PublicPromptsClient() {
                                 {t.publicPage.tryOtherKeywords}{' '}
                                 <button 
                                     onClick={clearSearch}
-                                    className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                                    className="text-foreground underline hover:text-foreground/70 dark:text-white dark:hover:text-white/80"
                                 >
                                     {t.publicPage.clearSearch}
                                 </button>
                             </p>
                         </div>)
                     ) : null}
+
+                    {/* 分页控件 - 只在非搜索状态下显示 */}
+                    {!searchQuery && pagination.totalPages > 1 && (
+                        <div className="mt-12 flex justify-center items-center gap-2">
+                            {/* 上一页按钮 */}
+                            <button
+                                onClick={previousPage}
+                                disabled={!pagination.hasPreviousPage}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
+                                    ${pagination.hasPreviousPage
+                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700'
+                                        : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
+                                    }
+                                `}
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span className="hidden sm:inline">{t.publicPage.pagination.previous}</span>
+                            </button>
+
+                            {/* 页码按钮 */}
+                            <div className="flex items-center gap-2">
+                                {(() => {
+                                    const pages = [];
+                                    const totalPages = pagination.totalPages;
+                                    const current = pagination.currentPage;
+                                    
+                                    // 始终显示第一页
+                                    pages.push(1);
+                                    
+                                    // 计算显示范围
+                                    let startPage = Math.max(2, current - 1);
+                                    let endPage = Math.min(totalPages - 1, current + 1);
+                                    
+                                    // 如果当前页靠近开始，多显示后面的页
+                                    if (current <= 3) {
+                                        endPage = Math.min(totalPages - 1, 4);
+                                    }
+                                    
+                                    // 如果当前页靠近结束，多显示前面的页
+                                    if (current >= totalPages - 2) {
+                                        startPage = Math.max(2, totalPages - 3);
+                                    }
+                                    
+                                    // 添加省略号（如果需要）
+                                    if (startPage > 2) {
+                                        pages.push('ellipsis-start');
+                                    }
+                                    
+                                    // 添加中间页码
+                                    for (let i = startPage; i <= endPage; i++) {
+                                        pages.push(i);
+                                    }
+                                    
+                                    // 添加省略号（如果需要）
+                                    if (endPage < totalPages - 1) {
+                                        pages.push('ellipsis-end');
+                                    }
+                                    
+                                    // 始终显示最后一页（如果总页数大于1）
+                                    if (totalPages > 1) {
+                                        pages.push(totalPages);
+                                    }
+                                    
+                                    return pages.map((page, index) => {
+                                        if (typeof page === 'string') {
+                                            // 省略号
+                                            return (
+                                                <span
+                                                    key={page}
+                                                    className="px-2 text-gray-400 dark:text-gray-600"
+                                                >
+                                                    ...
+                                                </span>
+                                            );
+                                        }
+                                        
+                                        const isActive = page === current;
+                                        return (
+                                            <button
+                                                key={page}
+                                                onClick={() => goToPage(page)}
+                                                className={`
+                                                    min-w-[2.5rem] h-10 px-3 rounded-lg font-medium transition-all duration-300
+                                                    ${isActive
+                                                        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg scale-110'
+                                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700'
+                                                    }
+                                                `}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    });
+                                })()}
+                            </div>
+
+                            {/* 下一页按钮 */}
+                            <button
+                                onClick={nextPage}
+                                disabled={!pagination.hasNextPage}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
+                                    ${pagination.hasNextPage
+                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700'
+                                        : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
+                                    }
+                                `}
+                            >
+                                <span className="hidden sm:inline">{t.publicPage.pagination.next}</span>
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Footer */}
@@ -389,7 +546,7 @@ export default function PublicPromptsClient() {
             {showBackToTop && (
                 <button
                     onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 dark:from-blue-600 dark:to-purple-700 dark:hover:from-blue-700 dark:hover:to-purple-800 text-white rounded-full shadow-xl hover:shadow-2xl backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-4 focus:ring-blue-400/50 dark:focus:ring-blue-500/50"
+                    className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-white rounded-full shadow-xl hover:shadow-2xl backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-4 focus:ring-black/20 dark:focus:ring-white/20"
                     title="回到顶部/backtotop"
                     aria-label="Back to top"
                 >

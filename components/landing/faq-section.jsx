@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// 接收 t prop
 export function FAQSection({ t }) {
   const [openIndex, setOpenIndex] = useState(null);
-  // 与其它区块保持一致：合并 props 与默认文案，确保健壮回退
+  
   const fallback = {
     title: 'Frequently Asked Questions',
     description: 'Learn more about Prompt Minder',
@@ -20,44 +20,61 @@ export function FAQSection({ t }) {
   const faqs = Array.isArray(translations.items) ? translations.items : fallback.items;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white py-24">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-20 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-indigo-400/15 blur-[140px]" />
-        <div className="absolute -right-20 bottom-8 h-72 w-72 rounded-full bg-blue-400/10 blur-[160px]" />
-      </div>
-
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl mb-4">
+    <section className="relative overflow-hidden bg-slate-50/50 py-24">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      
+      <div className="relative mx-auto max-w-4xl px-6">
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl">
             {translations.title}
           </h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-slate-600">
             {translations.description}
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto">
+        <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <div key={index} className="mb-4">
+            <div key={index}>
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full text-left p-6 rounded-xl border border-gray-200 bg-white/90 backdrop-blur hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                className={`group w-full rounded-2xl border bg-white/60 p-6 text-left backdrop-blur-xl transition-all hover:shadow-lg ${
+                  openIndex === index 
+                    ? "border-indigo-200 shadow-md" 
+                    : "border-white/40 hover:border-indigo-200/50"
+                }`}
               >
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold text-gray-900">
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-lg font-bold transition-colors ${
+                    openIndex === index ? "text-indigo-600" : "text-slate-900"
+                  }`}>
                     {faq.question}
                   </h3>
-                  <span className="text-gray-600 text-xl">
-                    {openIndex === index ? "−" : "+"}
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all ${
+                    openIndex === index 
+                      ? "border-indigo-200 bg-indigo-50 text-indigo-600 rotate-180" 
+                      : "border-slate-200 bg-white text-slate-400 group-hover:border-indigo-200 group-hover:text-indigo-600"
+                  }`}>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </span>
                 </div>
-                {openIndex === index && (
-                  <div className="mt-4">
-                    <p className="text-gray-700 leading-relaxed">
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {openIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="mt-4 text-slate-600 leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </button>
             </div>
           ))}
