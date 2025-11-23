@@ -90,6 +90,7 @@ export default function TeamsPage() {
       noTeamsMessage: "暂无可管理的团队",
       refresh: "刷新",
       createTeam: "创建团队",
+      limitReached: "已达上限",
       inviteMember: "邀请成员",
       editTeam: "编辑团队",
       transferOwnership: "转移所有权",
@@ -525,10 +526,13 @@ export default function TeamsPage() {
           <div className="flex items-center gap-3">
             <Button
               onClick={() => router.push("/teams/new")}
+              disabled={teams.filter(m => m.role === 'owner').length >= 2}
+              title={teams.filter(m => m.role === 'owner').length >= 2 ? (safeT.teamsPage?.limitReached || '已达上限') : ''}
               className="transition-all duration-200 hover:shadow-md hover:scale-[1.02] bg-gradient-to-r from-primary to-primary/90"
             >
               <Plus className="mr-2 h-4 w-4" />
               {safeT.teamsPage.createTeam}
+              {teams.filter(m => m.role === 'owner').length >= 2 && ` (${safeT.teamsPage?.limitReached || '已达上限'})`}
             </Button>
           </div>
         </div>

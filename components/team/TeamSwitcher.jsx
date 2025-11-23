@@ -98,10 +98,15 @@ export function TeamSwitcher({ className }) {
             </SelectItem>
           ))}
           <SelectSeparator />
-          <SelectItem value={CREATE_TEAM_VALUE}>
+          <SelectItem value={CREATE_TEAM_VALUE} disabled={teams.filter(m => m.role === 'owner').length >= 2}>
             <div className="flex items-center gap-2 text-primary">
               <PlusCircle className="h-4 w-4" />
               <span>{safeT.teamsPage?.createTeam || '创建团队'}</span>
+              {teams.filter(m => m.role === 'owner').length >= 2 && (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  ({safeT.teamsPage?.limitReached || '已达上限'})
+                </span>
+              )}
             </div>
           </SelectItem>
         </SelectContent>
