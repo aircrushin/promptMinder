@@ -173,7 +173,7 @@ function PromptCardComponent({ prompt }) {
         </CardHeader>
         
         <CardContent className="relative z-10 pt-0 pb-6">
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300 line-clamp-10">
             {prompt.prompt}
           </p>
         </CardContent>
