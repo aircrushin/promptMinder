@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+build
+.cache
+.turbo
+pnpm-debug.log
+*.log
+.git
+.github
+/.idea
+.vscode
+coverage
+public/prompt-*.md
