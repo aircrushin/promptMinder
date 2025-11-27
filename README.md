@@ -33,7 +33,7 @@
 
 ### 技术特性
 
-- ⚡ **高性能** - Next.js 15 + React 18，极速加载
+- ⚡ **高性能** - Next.js 16 + React 19，极速加载
 - 🔐 **安全认证** - Clerk 提供企业级用户认证
 - 💾 **可靠存储** - Supabase + PostgreSQL 数据库
 - 🚀 **易部署** - 支持 Vercel、Zeabur 一键部署
@@ -42,7 +42,7 @@
 
 ### 环境要求
 
-- Node.js 18.0 或更高版本
+- Node.js 20.0 或更高版本
 - npm 或 pnpm 包管理器
 - Git
 
@@ -58,8 +58,7 @@ cd promptMinder
 2. **安装依赖**
 
 ```bash
-npm install
-# 或者使用 pnpm
+# 推荐使用 pnpm
 pnpm install
 ```
 
@@ -314,11 +313,6 @@ promptMinder/
 2. 获取 Canny URL
 3. 在应用的 Footer 组件中配置链接
 
-### 技术支持
-
-- 📖 查看 [文档](https://github.com/your-username/promptMinder/wiki)
-- 🐛 报告 [问题](https://github.com/your-username/promptMinder/issues)
-- 💬 加入 [讨论](https://github.com/your-username/promptMinder/discussions)
 
 ## 📄 许可证
 
