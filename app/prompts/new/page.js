@@ -354,17 +354,17 @@ export default function NewPrompt() {
       <Modal open={showOptimizeModal} onOpenChange={setShowOptimizeModal}>
         <ModalContent className="sm:max-w-2xl">
           <ModalHeader>
-            <ModalTitle>{tp.optimizeModalTitle}</ModalTitle>
+            <ModalTitle>{tp.optimizePreviewTitle}</ModalTitle>
           </ModalHeader>
           <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 text-sm leading-relaxed">
-            {optimizedContent || tp.optimizeProcessing}
+            {optimizedContent || tp.optimizePlaceholder}
           </div>
           <ModalFooter>
             <Button variant="outline" onClick={() => setShowOptimizeModal(false)}>
-              {tp.optimizeCancel}
+              {tp.cancel}
             </Button>
             <Button onClick={handleApplyOptimized} disabled={!optimizedContent.trim()}>
-              {tp.optimizeApply}
+              {tp.applyOptimization}
             </Button>
           </ModalFooter>
         </ModalContent>
