@@ -33,7 +33,7 @@ A professional prompt management platform that makes AI prompt management simple
 
 ### Technical Features
 
-- ⚡ **High Performance** - Next.js 15 + React 18, lightning-fast loading
+- ⚡ **High Performance** - Next.js 16 + React 19, lightning-fast loading
 - 🔐 **Secure Authentication** - Enterprise-grade user authentication with Clerk
 - 💾 **Reliable Storage** - Supabase + PostgreSQL database
 - 🚀 **Easy Deployment** - Support for one-click deployment with Vercel and Zeabur
@@ -42,7 +42,7 @@ A professional prompt management platform that makes AI prompt management simple
 
 ### Requirements
 
-- Node.js 18.0 or higher
+- Node.js 20.0 or higher
 - npm or pnpm package manager
 - Git
 
@@ -58,8 +58,7 @@ cd promptMinder
 2. **Install dependencies**
 
 ```bash
-npm install
-# or use pnpm
+# recommend using pnpm
 pnpm install
 ```
 
@@ -298,12 +297,6 @@ Use [Canny](https://canny.io) to collect user feedback and feature requests.
 1. Register for a Canny account and create a project
 2. Get the Canny URL
 3. Configure the link in the application's Footer component
-
-### Technical Support
-
-- 📖 View [Documentation](https://github.com/your-username/promptMinder/wiki)
-- 🐛 Report [Issues](https://github.com/your-username/promptMinder/issues)
-- 💬 Join [Discussions](https://github.com/your-username/promptMinder/discussions)
 
 ## 📄 License
 
