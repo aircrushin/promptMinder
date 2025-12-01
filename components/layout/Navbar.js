@@ -10,7 +10,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { Menu, Library, LayoutGrid, Languages } from "lucide-react";
+import { Menu, Library, LayoutGrid, Languages, FlaskConical } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -62,6 +62,11 @@ export default function Navbar() {
       href: '/prompts',
       label: translations.header?.manage || translations.navbar.manage,
       icon: Library
+    },
+    {
+      href: '/playground',
+      label: translations.header?.playground || 'Playground',
+      icon: FlaskConical
     },
     {
       href: '/public',
