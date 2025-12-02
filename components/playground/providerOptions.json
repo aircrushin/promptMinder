@@ -1,0 +1,54 @@
+[
+  {
+    "value": "openai",
+    "label": "OpenAI",
+    "description": "Use OpenAI compatible endpoints (GPT-4o, GPT-3.5, etc.).",
+    "baseURL": "https://api.openai.com/v1",
+    "endpoints": [
+      { "value": "openai-default", "label": "Default (OpenAI)", "url": "" },
+      { "value": "openai", "label": "OpenAI", "url": "https://api.openai.com/v1" }
+    ],
+    "models": [
+      { "value": "gpt-4o", "label": "GPT-4o" },
+      { "value": "gpt-4o-mini", "label": "GPT-4o Mini" },
+      { "value": "gpt-5", "label": "GPT-5" },
+      { "value": "gpt-5-mini", "label": "GPT-5 Mini" },
+      { "value": "gpt-4.1", "label": "GPT-4.1" },
+      { "value": "gpt-4.1-mini", "label": "GPT-4.1 Mini" }
+    ]
+  },
+  {
+    "value": "zhipu",
+    "label": "Zhipu AI",
+    "description": "Chinese provider GLM models.",
+    "baseURL": "https://open.bigmodel.cn/api/paas/v4",
+    "endpoints": [
+      { "value": "zhipu", "label": "Zhipu AI", "url": "https://open.bigmodel.cn/api/paas/v4" }
+    ],
+    "models": [
+      { "value": "glm-4v-flash", "label": "GLM-4V Flash" },
+      { "value": "glm-4-flash", "label": "GLM-4 Flash" }
+    ]
+  },
+  {
+    "value": "deepseek",
+    "label": "DeepSeek",
+    "description": "DeepSeek models.",
+    "baseURL": "https://api.deepseek.com/v1",
+    "endpoints": [
+      { "value": "deepseek", "label": "DeepSeek", "url": "https://api.deepseek.com/v1" }
+    ],
+    "models": [
+      { "value": "deepseek-chat", "label": "DeepSeek-V3" },
+      { "value": "deepseek-reasoner", "label": "DeepSeek-R1" }
+    ]
+  },
+  {
+    "value": "custom",
+    "label": "Custom Provider",
+    "description": "Use any OpenAI-compatible API by configuring the endpoint and key manually.",
+    "baseURL": "",
+    "endpoints": [{ "value": "custom", "label": "Custom Endpoint...", "url": "" }],
+    "models": []
+  }
+]

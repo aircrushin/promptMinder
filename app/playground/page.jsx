@@ -21,10 +21,13 @@ import {
 } from '@/components/ui/dialog';
 import { extractVariables, replaceVariables } from '@/lib/promptVariables';
 import { Play, Loader2, Sparkles, RotateCcw, Download, Search, FileText } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const LOCAL_STORAGE_KEY = 'playground_state';
 
 const DEFAULT_SETTINGS = {
+  provider: 'openai',
+  useStoredKey: false,
   baseURL: '',
   apiKey: '',
   model: 'gpt-3.5-turbo',
@@ -42,6 +45,17 @@ const DEFAULT_TEST_CASE = {
 export default function PlaygroundPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const pg = t?.playground || {};
+  const header = t?.header || {};
+
+  const formatMessage = useCallback((template, values = {}) => {
+    if (!template) return '';
+    return Object.entries(values).reduce(
+      (result, [key, value]) => result.replace(new RegExp(`\\{${key}\\}`, 'g'), value),
+      template
+    );
+  }, []);
 
   // Core state
   const [promptTemplate, setPromptTemplate] = useState('');
@@ -87,6 +101,8 @@ export default function PlaygroundPage() {
         promptTemplate,
         testCases,
         settings: {
+          provider: settings.provider,
+          useStoredKey: settings.useStoredKey,
           baseURL: settings.baseURL,
           model: settings.model,
           temperature: settings.temperature,
@@ -113,18 +129,18 @@ export default function PlaygroundPage() {
         const response = await fetch(`/api/prompts?${params.toString()}`);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData?.error || 'Unable to load prompts');
+          throw new Error(errorData?.error || pg.unableToLoadPrompts || 'Unable to load prompts');
         }
         const data = await response.json();
         setPromptResults(data?.prompts || []);
       } catch (error) {
         console.error('Failed to load prompts:', error);
-        setPromptsError(error.message || 'Unable to load prompts');
+        setPromptsError(error.message || pg.unableToLoadPrompts || 'Unable to load prompts');
       } finally {
         setIsLoadingPrompts(false);
       }
     },
-    []
+    [pg]
   );
 
   useEffect(() => {
@@ -139,28 +155,49 @@ export default function PlaygroundPage() {
     (prompt) => {
       if (!prompt?.content) {
         toast({
-          title: 'Import failed',
-          description: 'Selected prompt has no content',
+          title: pg.importFailedTitle || pg.error || 'Import failed',
+          description: pg.importFailedDescription || 'Selected prompt has no content',
           variant: 'destructive',
         });
         return;
       }
+      const promptTitle = prompt.title || pg.untitledPrompt || 'Untitled prompt';
       setPromptTemplate(prompt.content);
       setIsImportOpen(false);
       toast({
-        title: 'Prompt imported',
-        description: `"${prompt.title}" loaded into the template`,
+        title: pg.importSuccessTitle || 'Prompt imported',
+        description:
+          formatMessage(pg.importSuccessDescription, { title: promptTitle }) ||
+          `"${promptTitle}" loaded into the template`,
       });
     },
-    [toast]
+    [formatMessage, pg, toast]
   );
 
   // Run a single test case
   const runTestCase = useCallback(
     async (testCase) => {
       const resolvedPrompt = replaceVariables(promptTemplate, testCase.variables);
-
       const startTime = Date.now();
+      let output = '';
+      let usage = null;
+      let finishReason = null;
+
+      const updateStreamingResult = () => {
+        setResults((prev) => ({
+          ...prev,
+          [testCase.id]: {
+            id: testCase.id,
+            status: 'streaming',
+            output,
+            usage,
+            finishReason,
+            duration: Date.now() - startTime,
+            timestamp: new Date().toISOString(),
+          },
+        }));
+      };
+
       try {
         const response = await fetch('/api/playground/run', {
           method: 'POST',
@@ -168,6 +205,8 @@ export default function PlaygroundPage() {
           body: JSON.stringify({
             prompt: resolvedPrompt,
             settings: {
+              provider: settings.provider,
+              useStoredKey: settings.useStoredKey,
               baseURL: settings.baseURL,
               apiKey: settings.apiKey,
               model: settings.model,
@@ -175,39 +214,83 @@ export default function PlaygroundPage() {
               maxTokens: settings.maxTokens,
               topP: settings.topP,
             },
+            stream: true,
           }),
         });
 
-        const duration = Date.now() - startTime;
-
         if (!response.ok) {
           const error = await response.json();
-          return {
-            id: testCase.id,
-            status: 'error',
-            error: error.error || 'Request failed',
-            duration,
-            timestamp: new Date().toISOString(),
-          };
+          throw new Error(error.error || 'Request failed');
         }
 
-        const data = await response.json();
-        return {
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error('No response stream received');
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const events = buffer.split('\n\n');
+          buffer = events.pop() || '';
+
+          for (const event of events) {
+            const line = event.trim();
+            if (!line.startsWith('data:')) continue;
+            const payload = line.slice(5).trim();
+            if (!payload) continue;
+
+            let parsed;
+            try {
+              parsed = JSON.parse(payload);
+            } catch {
+              console.warn('Unable to parse stream chunk:', payload);
+              continue;
+            }
+
+            if (parsed.type === 'delta' && parsed.content) {
+              output += parsed.content;
+              updateStreamingResult();
+            } else if (parsed.type === 'final') {
+              usage = parsed.usage;
+              finishReason = parsed.finishReason;
+              if (!output && parsed.output) {
+                output = parsed.output;
+              }
+            } else if (parsed.type === 'error') {
+              throw new Error(parsed.error || 'Request failed');
+            }
+          }
+        }
+
+        const duration = Date.now() - startTime;
+        const result = {
           id: testCase.id,
           status: 'success',
-          output: data.output,
-          usage: data.usage,
+          output,
+          usage,
           duration,
           timestamp: new Date().toISOString(),
+          finishReason,
         };
+        setResults((prev) => ({ ...prev, [testCase.id]: result }));
+        return result;
       } catch (error) {
-        return {
+        const duration = Date.now() - startTime;
+        const result = {
           id: testCase.id,
           status: 'error',
           error: error.message || 'Network error',
-          duration: Date.now() - startTime,
+          duration,
           timestamp: new Date().toISOString(),
         };
+        setResults((prev) => ({ ...prev, [testCase.id]: result }));
+        return result;
       }
     },
     [promptTemplate, settings]
@@ -217,17 +300,17 @@ export default function PlaygroundPage() {
   const runAllTestCases = useCallback(async () => {
     if (!promptTemplate.trim()) {
       toast({
-        title: 'Error',
-        description: 'Please enter a prompt template',
+        title: pg.error || 'Error',
+        description: pg.errorPromptRequired || 'Please enter a prompt template',
         variant: 'destructive',
       });
       return;
     }
 
-    if (!settings.apiKey && !settings.baseURL) {
+    if (!settings.useStoredKey && !settings.apiKey) {
       toast({
-        title: 'Error',
-        description: 'Please configure API settings',
+        title: pg.error || 'Error',
+        description: pg.errorApiKeyRequired || 'Please provide an API key or enable a stored credential',
         variant: 'destructive',
       });
       return;
@@ -242,46 +325,31 @@ export default function PlaygroundPage() {
     // Run all test cases in parallel with throttling
     const CONCURRENCY = 3;
     const queue = [...testCases];
-    const running = [];
-
-    while (queue.length > 0 || running.length > 0) {
-      // Start new tasks up to concurrency limit
-      while (running.length < CONCURRENCY && queue.length > 0) {
+    const worker = async () => {
+      while (queue.length > 0) {
         const testCase = queue.shift();
-        const promise = runTestCase(testCase).then((result) => {
-          setResults((prev) => ({ ...prev, [testCase.id]: result }));
-          setRunningCases((prev) => {
-            const next = new Set(prev);
-            next.delete(testCase.id);
-            return next;
-          });
-          return result;
+        await runTestCase(testCase);
+        setRunningCases((prev) => {
+          const next = new Set(prev);
+          next.delete(testCase.id);
+          return next;
         });
-        running.push(promise);
       }
+    };
 
-      // Wait for at least one to complete
-      if (running.length > 0) {
-        await Promise.race(running);
-        // Remove completed promises
-        for (let i = running.length - 1; i >= 0; i--) {
-          const status = await Promise.race([
-            running[i].then(() => 'done'),
-            Promise.resolve('pending'),
-          ]);
-          if (status === 'done') {
-            running.splice(i, 1);
-          }
-        }
-      }
-    }
+    await Promise.all(
+      Array.from({ length: Math.min(CONCURRENCY, queue.length) }, () => worker())
+    );
 
+    setRunningCases(new Set());
     setIsRunning(false);
     toast({
-      title: 'Completed',
-      description: `Finished running ${testCases.length} test case(s)`,
+      title: pg.completed || 'Completed',
+      description:
+        formatMessage(pg.finishedRunning, { count: testCases.length }) ||
+        `Finished running ${testCases.length} test case(s)`,
     });
-  }, [promptTemplate, testCases, settings, runTestCase, toast]);
+  }, [formatMessage, pg, promptTemplate, runTestCase, settings, testCases, toast]);
 
   // Reset everything
   const handleReset = useCallback(() => {
@@ -290,10 +358,24 @@ export default function PlaygroundPage() {
     setResults({});
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     toast({
-      title: 'Reset',
-      description: 'Playground has been reset',
+      title: pg.reset || 'Reset',
+      description: pg.resetComplete || 'Playground has been reset',
     });
-  }, [toast]);
+  }, [pg, toast]);
+
+  const completedCount = Object.keys(results).length;
+  const runAllLabel =
+    formatMessage(pg.runAllWithCount, { count: testCases.length }) ||
+    `Run All (${testCases.length})`;
+  const runningLabel =
+    formatMessage(pg.runningWithCount, { count: testCases.length }) ||
+    `Running ${testCases.length}`;
+  const configuredLabel =
+    formatMessage(pg.configuredCount, { count: testCases.length }) ||
+    `${testCases.length} configured`;
+  const completedLabel =
+    formatMessage(pg.completedCount, { count: completedCount }) ||
+    `${completedCount} completed`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/50">
@@ -304,20 +386,20 @@ export default function PlaygroundPage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Playground
+                {header.playground || 'Playground'}
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mt-2">
-                Prompt Experiment Console
+                {pg.title || 'Prompt Experiment Console'}
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                A workspace aligned with the prompt detail page so you can import templates, tweak variables,
-                and visually compare results for multiple scenarios.
+                {pg.subtitle ||
+                  'A workspace aligned with the prompt detail page so you can import templates, tweak variables, and visually compare results for multiple scenarios.'}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" className="gap-2" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4" />
-                Reset Workspace
+                {pg.resetWorkspace || 'Reset Workspace'}
               </Button>
               <Button
                 onClick={runAllTestCases}
@@ -327,12 +409,12 @@ export default function PlaygroundPage() {
                 {isRunning ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Running {testCases.length}
+                    {runningLabel}
                   </>
                 ) : (
                   <>
                     <Play className="h-4 w-4" />
-                    Run All ({testCases.length})
+                    {runAllLabel}
                   </>
                 )}
               </Button>
@@ -346,16 +428,17 @@ export default function PlaygroundPage() {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-indigo-500" />
-                  Prompt Template
+                  {pg.promptTemplate || 'Prompt Template'}
                 </CardTitle>
                 <CardDescription className="text-sm">
-                  Same editing experience as the prompt detail page with quick imports from your library.
+                  {pg.promptTemplateDescription ||
+                    'Same editing experience as the prompt detail page with quick imports from your library.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Template Source
+                    {pg.templateSource || 'Template Source'}
                   </span>
                   <Button
                     variant="outline"
@@ -367,16 +450,16 @@ export default function PlaygroundPage() {
                     }}
                   >
                     <Download className="h-4 w-4" />
-                    Import from Prompts
+                    {pg.importFromPrompts || 'Import from Prompts'}
                   </Button>
                 </div>
                 <Textarea
                   value={promptTemplate}
                   onChange={(e) => setPromptTemplate(e.target.value)}
-                  placeholder="Enter your prompt template here...
-
-Example:
-Write a {{tone}} email to {{recipient}} about {{topic}}."
+                  placeholder={
+                    pg.promptTemplatePlaceholder ||
+                    'Enter your prompt template here...\n\nExample:\nWrite a {{tone}} email to {{recipient}} about {{topic}}.'
+                  }
                   className="min-h-[200px] font-mono text-sm resize-none"
                 />
                 {variables.length > 0 && (
@@ -396,9 +479,12 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
 
             <Card className="border-none shadow-lg">
               <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50">
-                <CardTitle className="text-base">Model & API Settings</CardTitle>
+                <CardTitle className="text-base">
+                  {pg.modelApiSettings || 'Model & API Settings'}
+                </CardTitle>
                 <CardDescription>
-                  Mirror the testing controls from prompt details with reusable presets.
+                  {pg.modelApiSettingsDescription ||
+                    'Mirror the testing controls from prompt details with reusable presets.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -412,13 +498,14 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
               <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-base">Test Cases</CardTitle>
+                    <CardTitle className="text-base">{pg.testCases || 'Test Cases'}</CardTitle>
                     <CardDescription>
-                      Configure variable sets similar to the variable panel on the prompt page.
+                      {pg.testCasesDescription ||
+                        'Configure variable sets similar to the variable panel on the prompt page.'}
                     </CardDescription>
                   </div>
                   <span className="text-xs font-semibold text-muted-foreground">
-                    {testCases.length} configured
+                    {configuredLabel}
                   </span>
                 </div>
               </CardHeader>
@@ -436,13 +523,16 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
               <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-base">Result Comparison</CardTitle>
+                    <CardTitle className="text-base">
+                      {pg.resultComparisonTitle || 'Result Comparison'}
+                    </CardTitle>
                     <CardDescription>
-                      Inspect resolved prompts, completions, timing, and usage for every test case.
+                      {pg.resultComparisonDescription ||
+                        'Inspect resolved prompts, completions, timing, and usage for every test case.'}
                     </CardDescription>
                   </div>
                   <span className="text-xs font-semibold text-muted-foreground text-right">
-                    {Object.keys(results).length} completed
+                    {completedLabel}
                   </span>
                 </div>
               </CardHeader>
@@ -462,16 +552,17 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Import from Prompt Library</DialogTitle>
+            <DialogTitle>{pg.importDialogTitle || 'Import from Prompt Library'}</DialogTitle>
             <DialogDescription>
-              Choose an existing prompt from your workspace and load its content into the playground.
+              {pg.importDialogDescription ||
+                'Choose an existing prompt from your workspace and load its content into the playground.'}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="relative">
               <Input
-                placeholder="Search prompts by title or description..."
+                placeholder={pg.searchPlaceholder || 'Search prompts by title or description...'}
                 value={promptSearch}
                 onChange={(e) => setPromptSearch(e.target.value)}
                 className="pl-9"
@@ -483,7 +574,7 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
               {isLoadingPrompts ? (
                 <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Loading prompts...
+                  {pg.loadingPrompts || 'Loading prompts...'}
                 </div>
               ) : promptsError ? (
                 <div className="py-10 text-center text-sm text-red-500">
@@ -491,7 +582,7 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
                 </div>
               ) : promptResults.length === 0 ? (
                 <div className="py-10 text-center text-sm text-muted-foreground">
-                  No prompts found. Try adjusting your search.
+                  {pg.noPromptsFound || 'No prompts found. Try adjusting your search.'}
                 </div>
               ) : (
                 promptResults.map((prompt) => (
@@ -508,7 +599,7 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <h4 className="font-medium text-slate-900 line-clamp-1">
-                            {prompt.title || 'Untitled prompt'}
+                            {prompt.title || pg.untitledPrompt || 'Untitled prompt'}
                           </h4>
                           <span className="text-xs text-muted-foreground">
                             {prompt.version || 'v1'}
@@ -529,7 +620,13 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
                           )}
                           <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
                           <span>
-                            Updated {new Date(prompt.updated_at || prompt.created_at).toLocaleDateString()}
+                            {(() => {
+                              const updatedDate = new Date(prompt.updated_at || prompt.created_at).toLocaleDateString();
+                              return (
+                                formatMessage(pg.updatedAt, { date: updatedDate }) ||
+                                `Updated ${updatedDate}`
+                              );
+                            })()}
                           </span>
                         </div>
                       </div>
@@ -542,7 +639,7 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
 
           <DialogFooter className="justify-start">
             <p className="text-xs text-muted-foreground">
-              Only prompts you have access to in the console are shown here.
+              {pg.importAccessNote || 'Only prompts you have access to in the console are shown here.'}
             </p>
           </DialogFooter>
         </DialogContent>
@@ -550,5 +647,3 @@ Write a {{tone}} email to {{recipient}} about {{topic}}."
     </div>
   );
 }
-
-

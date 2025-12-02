@@ -36,6 +36,8 @@ function formatDuration(ms) {
 function ResultCard({ testCase, result, promptTemplate, isRunning }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const isStreaming = isRunning && !!result?.output;
+  const showLoader = isRunning && !result?.output;
 
   const resolvedPrompt = useMemo(
     () => replaceVariables(promptTemplate, testCase.variables),
@@ -153,9 +155,9 @@ function ResultCard({ testCase, result, promptTemplate, isRunning }) {
           {/* Output */}
           <div>
             <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              Output
+              Output {isStreaming ? <span className="ml-2 text-[11px] text-indigo-500">(streaming)</span> : null}
             </div>
-            {isRunning ? (
+            {showLoader ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 text-indigo-500 animate-spin" />
                 <span className="ml-2 text-sm text-slate-500">Running...</span>
@@ -291,5 +293,4 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
     </Card>
   );
 }
-
 
