@@ -19,9 +19,24 @@ import {
 import { getVariableType, getVariablePlaceholder, generateVariableExamples } from '@/lib/promptVariables';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function TestCaseList({ testCases, variables, onChange, runningCases }) {
-  const [expandedCases, setExpandedCases] = useState(new Set([testCases[0]?.id]));
+  const { t } = useLanguage();
+  const pg = t?.playground || {
+    testCases: 'Test Cases',
+    addCase: 'Add Case',
+    variables: 'Variables',
+    fillExamples: 'Fill Examples',
+    noVariables: 'No variables detected. Add {{variableName}} to your prompt template.',
+    testCaseNamePlaceholder: 'Test case name...',
+    noTestCases: 'No test cases yet',
+    addFirstTestCase: 'Add First Test Case',
+  };
+  const [expandedCases, setExpandedCases] = useState(() => {
+    const firstId = testCases[0]?.id;
+    return new Set(firstId ? [firstId] : []);
+  });
 
   const toggleExpanded = (id) => {
     setExpandedCases((prev) => {
@@ -38,7 +53,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
   const addTestCase = useCallback(() => {
     const newCase = {
       id: crypto.randomUUID(),
-      name: `Test Case ${testCases.length + 1}`,
+      name: '',
       variables: {},
     };
     onChange([...testCases, newCase]);
@@ -114,14 +129,14 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <TestTube className="h-5 w-5 text-emerald-500" />
-            Test Cases
+            {pg.testCases}
             <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full">
               {testCases.length}
             </span>
           </CardTitle>
           <Button onClick={addTestCase} variant="outline" size="sm">
             <Plus className="h-4 w-4 mr-1" />
-            Add Case
+            {pg.addCase}
           </Button>
         </div>
       </CardHeader>
@@ -158,7 +173,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                   }}
                   onClick={(e) => e.stopPropagation()}
                   className="flex-1 border-0 bg-transparent font-medium text-slate-900 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                  placeholder="Test case name..."
+                  placeholder={pg.testCaseNamePlaceholder}
                 />
 
                 <div className="flex items-center gap-1">
@@ -201,13 +216,13 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                 <div className="px-4 pb-4 pt-0 border-t border-slate-100">
                   {variables.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
-                      No variables detected. Add {'{{variableName}}'} to your prompt template.
+                      {pg.noVariables}
                     </p>
                   ) : (
                     <div className="space-y-4 pt-4">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                          Variables ({variables.length})
+                          {pg.variables} ({variables.length})
                         </span>
                         <Button
                           variant="ghost"
@@ -215,7 +230,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                           className="text-xs h-7"
                           onClick={() => fillExamples(testCase.id)}
                         >
-                          Fill Examples
+                          {pg.fillExamples}
                         </Button>
                       </div>
                       <div className="grid gap-4">
@@ -268,10 +283,10 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
 
         {testCases.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No test cases yet</p>
+            <p className="text-muted-foreground mb-4">{pg.noTestCases}</p>
             <Button onClick={addTestCase} variant="outline">
               <Plus className="h-4 w-4 mr-2" />
-              Add First Test Case
+              {pg.addFirstTestCase}
             </Button>
           </div>
         )}
@@ -279,5 +294,3 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
     </Card>
   );
 }
-
-

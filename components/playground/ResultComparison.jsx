@@ -27,17 +27,19 @@ import { replaceVariables } from '@/lib/promptVariables';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 function formatDuration(ms) {
   if (ms < 1000) return `${ms}ms`;
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
-function ResultCard({ testCase, result, promptTemplate, isRunning }) {
+function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const isStreaming = isRunning && !!result?.output;
   const showLoader = isRunning && !result?.output;
+  const streamingLabel = pg.streaming || 'streaming';
 
   const resolvedPrompt = useMemo(
     () => replaceVariables(promptTemplate, testCase.variables),
@@ -93,7 +95,7 @@ function ResultCard({ testCase, result, promptTemplate, isRunning }) {
                   <Clock className="h-3.5 w-3.5" />
                   {formatDuration(result.duration)}
                 </TooltipTrigger>
-                <TooltipContent>Response time</TooltipContent>
+                <TooltipContent>{pg.responseTime || 'Response time'}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
@@ -105,7 +107,9 @@ function ResultCard({ testCase, result, promptTemplate, isRunning }) {
                     {result.usage.totalTokens}
                   </TooltipTrigger>
                   <TooltipContent>
-                    Total tokens ({result.usage.promptTokens} prompt + {result.usage.completionTokens} completion)
+                    {(pg.totalTokensTooltip || 'Total tokens ({promptTokens} prompt + {completionTokens} completion)')
+                      .replace('{promptTokens}', result.usage.promptTokens)
+                      .replace('{completionTokens}', result.usage.completionTokens)}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -145,29 +149,29 @@ function ResultCard({ testCase, result, promptTemplate, isRunning }) {
           {/* Resolved Prompt Preview */}
           <div className="pt-4">
             <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              Resolved Prompt
+              {pg.resolvedPrompt || 'Resolved Prompt'}
             </div>
             <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
-              {resolvedPrompt || 'No prompt template'}
+              {resolvedPrompt || pg.noPromptTemplate || 'No prompt template'}
             </div>
           </div>
 
           {/* Output */}
           <div>
             <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              Output {isStreaming ? <span className="ml-2 text-[11px] text-indigo-500">(streaming)</span> : null}
+              {pg.output || 'Output'} {isStreaming ? <span className="ml-2 text-[11px] text-indigo-500">({streamingLabel})</span> : null}
             </div>
             {showLoader ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 text-indigo-500 animate-spin" />
-                <span className="ml-2 text-sm text-slate-500">Running...</span>
+                <span className="ml-2 text-sm text-slate-500">{`${pg.running || 'Running'}...`}</span>
               </div>
             ) : result?.status === 'error' ? (
               <div className="p-4 bg-red-50 rounded-lg border border-red-200">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <div className="font-medium text-red-700">Error</div>
+                    <div className="font-medium text-red-700">{pg.error || 'Error'}</div>
                     <div className="text-sm text-red-600 mt-1">{result.error}</div>
                   </div>
                 </div>
@@ -180,7 +184,7 @@ function ResultCard({ testCase, result, promptTemplate, isRunning }) {
               </ScrollArea>
             ) : (
               <div className="p-8 text-center text-slate-400 text-sm">
-                Click "Run All Tests" to see results
+                {pg.clickToRun || 'Click "Run All Tests" to see results'}
               </div>
             )}
           </div>
@@ -191,6 +195,26 @@ function ResultCard({ testCase, result, promptTemplate, isRunning }) {
 }
 
 export function ResultComparison({ testCases, results, promptTemplate, runningCases }) {
+  const { t } = useLanguage();
+  const pg = t?.playground || {
+    results: 'Results',
+    resolvedPrompt: 'Resolved Prompt',
+    noPromptTemplate: 'No prompt template',
+    output: 'Output',
+    streaming: 'streaming',
+    running: 'Running',
+    error: 'Error',
+    passed: 'passed',
+    failed: 'failed',
+    avgTime: 'Avg',
+    tokens: 'tokens',
+    clickToRun: 'Click "Run All Tests" to see results',
+    addTestCases: 'Add test cases to see comparison results',
+    runTestsToCompare: 'Run tests to see comparison results',
+    responseTime: 'Response time',
+    totalTokensTooltip: 'Total tokens ({promptTokens} prompt + {completionTokens} completion)',
+  };
+
   const hasResults = Object.keys(results).length > 0;
   const hasRunningCases = runningCases.size > 0;
 
@@ -227,7 +251,7 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <BarChart3 className="h-5 w-5 text-blue-500" />
-            Results
+            {pg.results}
             {hasResults && (
               <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full">
                 {Object.keys(results).length} / {testCases.length}
@@ -241,24 +265,24 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
           <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t">
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <span className="text-slate-600">{stats.successful} passed</span>
+              <span className="text-slate-600">{stats.successful} {pg.passed || 'passed'}</span>
             </div>
             {stats.failed > 0 && (
               <div className="flex items-center gap-2 text-sm">
                 <XCircle className="h-4 w-4 text-red-500" />
-                <span className="text-slate-600">{stats.failed} failed</span>
+                <span className="text-slate-600">{stats.failed} {pg.failed || 'failed'}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-slate-400" />
               <span className="text-slate-600">
-                Avg: {formatDuration(Math.round(stats.avgDuration))}
+                {(pg.avgTime || 'Avg')}: {formatDuration(Math.round(stats.avgDuration))}
               </span>
             </div>
             {stats.totalTokens > 0 && (
               <div className="flex items-center gap-2 text-sm">
                 <Coins className="h-4 w-4 text-slate-400" />
-                <span className="text-slate-600">{stats.totalTokens} tokens</span>
+                <span className="text-slate-600">{stats.totalTokens} {pg.tokens || 'tokens'}</span>
               </div>
             )}
           </div>
@@ -269,12 +293,12 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
         {testCases.length === 0 ? (
           <div className="text-center py-12 text-slate-400">
             <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Add test cases to see comparison results</p>
+            <p>{pg.addTestCases}</p>
           </div>
         ) : !hasResults && !hasRunningCases ? (
           <div className="text-center py-12 text-slate-400">
             <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Run tests to see comparison results</p>
+            <p>{pg.runTestsToCompare}</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -285,6 +309,7 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
                 result={results[testCase.id]}
                 promptTemplate={promptTemplate}
                 isRunning={runningCases.has(testCase.id)}
+                pg={pg}
               />
             ))}
           </div>
@@ -293,4 +318,3 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
     </Card>
   );
 }
-

@@ -36,11 +36,11 @@ const DEFAULT_SETTINGS = {
   topP: 0.7,
 };
 
-const DEFAULT_TEST_CASE = {
+const createEmptyTestCase = () => ({
   id: crypto.randomUUID(),
-  name: 'Test Case 1',
+  name: '',
   variables: {},
-};
+});
 
 export default function PlaygroundPage() {
   const searchParams = useSearchParams();
@@ -59,7 +59,7 @@ export default function PlaygroundPage() {
 
   // Core state
   const [promptTemplate, setPromptTemplate] = useState('');
-  const [testCases, setTestCases] = useState([DEFAULT_TEST_CASE]);
+  const [testCases, setTestCases] = useState(() => [createEmptyTestCase()]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [results, setResults] = useState({});
   const [isRunning, setIsRunning] = useState(false);
@@ -354,7 +354,7 @@ export default function PlaygroundPage() {
   // Reset everything
   const handleReset = useCallback(() => {
     setPromptTemplate('');
-    setTestCases([{ ...DEFAULT_TEST_CASE, id: crypto.randomUUID() }]);
+    setTestCases([createEmptyTestCase()]);
     setResults({});
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     toast({
