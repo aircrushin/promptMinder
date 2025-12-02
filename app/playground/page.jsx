@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { Suspense, useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TestCaseList } from '@/components/playground/TestCaseList';
 import { ResultComparison } from '@/components/playground/ResultComparison';
@@ -42,7 +42,7 @@ const createEmptyTestCase = () => ({
   variables: {},
 });
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -645,5 +645,20 @@ export default function PlaygroundPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function PlaygroundPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-muted-foreground gap-2">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Loading playground...</span>
+        </div>
+      }
+    >
+      <PlaygroundContent />
+    </Suspense>
   );
 }
