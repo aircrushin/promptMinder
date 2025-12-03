@@ -8,6 +8,7 @@ export default async function sitemap() {
     '/',
     '/prompts',
     '/public',
+    '/playground',
     '/tags',
     '/privacy',
     '/terms',

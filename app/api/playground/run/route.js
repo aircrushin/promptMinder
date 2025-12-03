@@ -33,11 +33,11 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { prompt, settings = {}, stream = true } = body;
+    const { prompt, systemPrompt, userPrompt, settings = {}, stream = true } = body;
 
-    if (!prompt || typeof prompt !== 'string') {
+    if (!prompt && !systemPrompt && !userPrompt) {
       return NextResponse.json(
-        { error: 'Prompt is required and must be a string' },
+        { error: 'Prompt is required' },
         { status: 400 }
       );
     }
@@ -90,12 +90,17 @@ export async function POST(request) {
     });
 
     // Prepare messages for chat completion
-    const messages = [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ];
+    const messages = [];
+    if (systemPrompt) {
+      messages.push({ role: 'system', content: systemPrompt });
+    }
+    if (userPrompt) {
+      messages.push({ role: 'user', content: userPrompt });
+    }
+    // Fallback for backward compatibility or simple prompt usage
+    if (prompt && !systemPrompt && !userPrompt) {
+      messages.push({ role: 'user', content: prompt });
+    }
 
     // Streamed response
     if (stream) {

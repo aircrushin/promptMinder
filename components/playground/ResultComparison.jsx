@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Tooltip,
   TooltipContent,
@@ -146,15 +145,27 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
       {/* Content */}
       {expanded && (
         <div className="px-4 pb-4 space-y-4 border-t border-slate-100">
-          {/* Resolved Prompt Preview */}
+          {/* System Prompt (Resolved) */}
           <div className="pt-4">
             <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              {pg.resolvedPrompt || 'Resolved Prompt'}
+              {pg.systemPrompt || 'System Prompt (Resolved)'}
             </div>
             <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
-              {resolvedPrompt || pg.noPromptTemplate || 'No prompt template'}
+              {resolvedPrompt || pg.noPromptTemplate || 'No system prompt'}
             </div>
           </div>
+
+          {/* User Prompt */}
+          {testCase.userPrompt && (
+            <div className="pt-4">
+              <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+                {pg.userPrompt || 'User Prompt'}
+              </div>
+              <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
+                {testCase.userPrompt}
+              </div>
+            </div>
+          )}
 
           {/* Output */}
           <div>
@@ -177,11 +188,9 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
                 </div>
               </div>
             ) : result?.output ? (
-              <ScrollArea className="max-h-[300px]">
-                <div className="p-4 bg-white rounded-lg border border-slate-200 prose prose-sm max-w-none">
-                  <ReactMarkdown>{result.output}</ReactMarkdown>
-                </div>
-              </ScrollArea>
+              <div className="max-h-[300px] overflow-y-auto p-4 bg-white rounded-lg border border-slate-200 prose prose-sm max-w-none">
+                <ReactMarkdown>{result.output}</ReactMarkdown>
+              </div>
             ) : (
               <div className="p-8 text-center text-slate-400 text-sm">
                 {pg.clickToRun || 'Click "Run All Tests" to see results'}

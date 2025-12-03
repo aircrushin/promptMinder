@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS = {
   useStoredKey: false,
   baseURL: '',
   apiKey: '',
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o',
   temperature: 0.7,
   maxTokens: 2000,
   topP: 0.7,
@@ -38,8 +38,9 @@ const DEFAULT_SETTINGS = {
 
 const createEmptyTestCase = () => ({
   id: crypto.randomUUID(),
-  name: '',
+  name: 'Test Case 1',
   variables: {},
+  userPrompt: '',
 });
 
 function PlaygroundContent() {
@@ -177,7 +178,7 @@ function PlaygroundContent() {
   // Run a single test case
   const runTestCase = useCallback(
     async (testCase) => {
-      const resolvedPrompt = replaceVariables(promptTemplate, testCase.variables);
+      const resolvedSystemPrompt = replaceVariables(promptTemplate, testCase.variables);
       const startTime = Date.now();
       let output = '';
       let usage = null;
@@ -203,7 +204,8 @@ function PlaygroundContent() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            prompt: resolvedPrompt,
+            systemPrompt: resolvedSystemPrompt,
+            userPrompt: testCase.userPrompt || '',
             settings: {
               provider: settings.provider,
               useStoredKey: settings.useStoredKey,

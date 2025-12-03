@@ -50,10 +50,10 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
     });
   };
 
-  const addTestCase = useCallback(() => {
+  const addTestCase = useCallback((index = 0) => {
     const newCase = {
       id: crypto.randomUUID(),
-      name: '',
+      name: `Test Case ${index + 1}`,
       variables: {},
     };
     onChange([...testCases, newCase]);
@@ -134,13 +134,13 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
               {testCases.length}
             </span>
           </CardTitle>
-          <Button onClick={addTestCase} variant="outline" size="sm">
+          <Button onClick={() => addTestCase(testCases.length)} variant="outline" size="sm">
             <Plus className="h-4 w-4 mr-1" />
             {pg.addCase}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 overflow-y-auto">
         {testCases.map((testCase, index) => {
           const isRunning = runningCases.has(testCase.id);
           const isExpanded = expandedCases.has(testCase.id);
@@ -214,6 +214,20 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
               {/* Variables */}
               {isExpanded && (
                 <div className="px-4 pb-4 pt-0 border-t border-slate-100">
+                  <div className="pt-4 space-y-1.5">
+                    <Label className="text-sm font-medium text-slate-700">
+                      {pg.userPrompt || 'User Prompt'}
+                    </Label>
+                    <Textarea
+                      value={testCase.userPrompt || ''}
+                      onChange={(e) =>
+                        updateTestCase(testCase.id, { userPrompt: e.target.value })
+                      }
+                      placeholder={pg.userPromptPlaceholder || 'Enter user message...'}
+                      className="min-h-[80px] text-sm resize-none"
+                    />
+                  </div>
+
                   {variables.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
                       {pg.noVariables}
@@ -284,7 +298,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
         {testCases.length === 0 && (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">{pg.noTestCases}</p>
-            <Button onClick={addTestCase} variant="outline">
+            <Button onClick={() => addTestCase(0)} variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               {pg.addFirstTestCase}
             </Button>

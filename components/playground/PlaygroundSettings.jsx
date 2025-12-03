@@ -176,8 +176,22 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
 
   const handleProviderChange = (value) => {
     setCustomEndpoint('');
-    updateSetting('provider', value);
-    updateSetting('useStoredKey', false);
+    
+    // Find the configuration for the new provider
+    const newProviderConfig = PROVIDER_OPTIONS.find((option) => option.value === value);
+    
+    // Automatically select the first model if available
+    let newModel = settings.model;
+    if (newProviderConfig?.models?.length > 0) {
+      newModel = newProviderConfig.models[0].value;
+    }
+
+    onSettingsChange((prev) => ({
+      ...prev,
+      provider: value,
+      model: newModel,
+      useStoredKey: false
+    }));
   };
 
   const handleSaveProviderKey = async () => {

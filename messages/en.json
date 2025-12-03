@@ -1074,6 +1074,9 @@
     "importFailedDescription": "Selected prompt has no content",
     "importSuccessTitle": "Prompt imported",
     "importSuccessDescription": "\"{title}\" loaded into the template",
-    "unableToLoadPrompts": "Unable to load prompts"
+    "unableToLoadPrompts": "Unable to load prompts",
+    "systemPrompt": "System Prompt (Resolved)",
+    "userPrompt": "User Prompt",
+    "userPromptPlaceholder": "Enter user message..."
   }
 }
