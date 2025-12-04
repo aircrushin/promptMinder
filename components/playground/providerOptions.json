@@ -2,32 +2,120 @@
   {
     "value": "openai",
     "label": "OpenAI",
-    "description": "Use OpenAI compatible endpoints (GPT-4o, GPT-3.5, etc.).",
+    "description": "Use OpenAI compatible endpoints (GPT-4o, GPT-5, etc.).",
     "baseURL": "https://api.openai.com/v1",
     "endpoints": [
-      { "value": "openai-default", "label": "Default (OpenAI)", "url": "" },
-      { "value": "openai", "label": "OpenAI", "url": "https://api.openai.com/v1" }
+      {
+        "value": "openai-default",
+        "label": "Default (OpenAI)",
+        "url": ""
+      },
+      {
+        "value": "openai",
+        "label": "OpenAI",
+        "url": "https://api.openai.com/v1"
+      }
     ],
     "models": [
-      { "value": "gpt-4o", "label": "GPT-4o" },
-      { "value": "gpt-4o-mini", "label": "GPT-4o Mini" },
-      { "value": "gpt-5", "label": "GPT-5" },
-      { "value": "gpt-5-mini", "label": "GPT-5 Mini" },
-      { "value": "gpt-4.1", "label": "GPT-4.1" },
-      { "value": "gpt-4.1-mini", "label": "GPT-4.1 Mini" }
+      {
+        "value": "gpt-4o",
+        "label": "GPT-4o"
+      },
+      {
+        "value": "gpt-4o-mini",
+        "label": "GPT-4o Mini"
+      },
+      {
+        "value": "gpt-5",
+        "label": "GPT-5"
+      },
+      {
+        "value": "gpt-5-mini",
+        "label": "GPT-5 Mini"
+      },
+      {
+        "value": "gpt-5-nano",
+        "label": "GPT-5 Nano"
+      },
+      {
+        "value": "gpt-4.1",
+        "label": "GPT-4.1"
+      },
+      {
+        "value": "gpt-4.1-mini",
+        "label": "GPT-4.1 Mini"
+      },
+      {
+        "value": "gpt-4.1-nano",
+        "label": "GPT-4.1 Nano"
+      },
+      {
+        "value": "gpt-4-mini",
+        "label": "GPT-O4 Mini"
+      }
     ]
   },
   {
     "value": "zhipu",
-    "label": "Zhipu AI",
+    "label": "Zhipu AI (GLM)",
     "description": "Chinese provider GLM models.",
     "baseURL": "https://open.bigmodel.cn/api/paas/v4",
     "endpoints": [
-      { "value": "zhipu", "label": "Zhipu AI", "url": "https://open.bigmodel.cn/api/paas/v4" }
+      {
+        "value": "zhipu",
+        "label": "Zhipu AI",
+        "url": "https://open.bigmodel.cn/api/paas/v4"
+      }
     ],
     "models": [
-      { "value": "glm-4v-flash", "label": "GLM-4V Flash" },
-      { "value": "glm-4-flash", "label": "GLM-4 Flash" }
+      {
+        "value": "glm-4v-flash",
+        "label": "GLM-4V Flash"
+      },
+      {
+        "value": "glm-4-flash",
+        "label": "GLM-4 Flash"
+      },
+      {
+        "value": "glm-4.5v",
+        "label": "GLM-4.5V"
+      },
+      {
+        "value": "glm-4.6",
+        "label": "GLM-4.6"
+      },
+      {
+        "value": "glm-4.5",
+        "label": "GLM-4.5"
+      },
+      {
+        "value": "glm-4.5-x",
+        "label": "GLM-4.5-x"
+      },
+      {
+        "value": "glm-4.5-air",
+        "label": "GLM-4.5-air"
+      },
+      {
+        "value": "glm-4.5-airx",
+        "label": "GLM-4.5-airx"
+      },
+      {
+        "value": "glm-4.5-flash",
+        "label": "GLM-4.5-flash"
+      },
+      {
+        "value": "glm-z1-airx",
+        "label": "GLM-Z1-airx"
+      },
+      {
+        "value": "glm-4.1v-thinking-flash",
+        "label": "GLM-4.1v-thinking-flash"
+      },
+      {
+        "value": "glm-4-plus",
+        "label": "GLM-4-plus"
+      }
     ]
   },
   {
@@ -36,19 +124,49 @@
     "description": "DeepSeek models.",
     "baseURL": "https://api.deepseek.com/v1",
     "endpoints": [
-      { "value": "deepseek", "label": "DeepSeek", "url": "https://api.deepseek.com/v1" }
+      {
+        "value": "deepseek",
+        "label": "DeepSeek",
+        "url": "https://api.deepseek.com/v1"
+      }
     ],
     "models": [
-      { "value": "deepseek-chat", "label": "DeepSeek-V3" },
-      { "value": "deepseek-reasoner", "label": "DeepSeek-R1" }
+      {
+        "value": "deepseek-chat",
+        "label": "DeepSeek-V3"
+      },
+      {
+        "value": "deepseek-reasoner",
+        "label": "DeepSeek-R1"
+      }
     ]
+  },
+  {
+    "value": "openrouter",
+    "label": "OpenRouter",
+    "description": "OpenRouter models.",
+    "baseURL": "https://api.openrouter.ai/v1",
+    "endpoints": [
+      {
+        "value": "openrouter",
+        "label": "OpenRouter",
+        "url": "https://api.openrouter.ai/v1"
+      }
+    ],
+    "models": []
   },
   {
     "value": "custom",
     "label": "Custom Provider",
     "description": "Use any OpenAI-compatible API by configuring the endpoint and key manually.",
     "baseURL": "",
-    "endpoints": [{ "value": "custom", "label": "Custom Endpoint...", "url": "" }],
+    "endpoints": [
+      {
+        "value": "custom",
+        "label": "Custom Endpoint...",
+        "url": ""
+      }
+    ],
     "models": []
   }
 ]
