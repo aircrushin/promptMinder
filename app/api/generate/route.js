@@ -12,7 +12,7 @@ export async function POST(req) {
 
     // 使用 OpenAI SDK 发送请求
     const completion = await openai.chat.completions.create({
-      model: 'glm-4-flash',
+      model: 'glm-4.5-flash',
       messages: [
         {
           role: "system",
@@ -37,7 +37,6 @@ export async function POST(req) {
 ## Constrains:
 1. 你将分析下面这些信息，确保所有内容符合各个学科的最佳实践。
     - Role: 分析用户的Prompt，思考最适合扮演的1个或多个角色，该角色是这个领域最资深的专家，也最适合解决我的问题。
-    - Background：分析用户的Prompt，思考用户为什么会提出这个问题，陈述这个角色的背景和上下文。
     - Profile：基于你扮演的角色，简单描述该角色。
     - Skills：基于你扮演的角色，思考应该具备什么样的能力来完成任务。
     - Goals：分析用户的Prompt，思考用户需要的任务清单，完成这些任务，便可以解决问题。
@@ -50,7 +49,7 @@ export async function POST(req) {
 
 ## Workflow:
 1. 分析用户输入的Prompt，提取关键信息。
-2. 按照Constrains中定义的Role、Background、Attention、Profile、Skills、Goals、Constrains、OutputFormat、Workflow进行全面的信息��析。
+2. 按照Constrains中定义的Role、Profile、Skills、Goals、Constrains、OutputFormat、Workflow进行全面的信息��析。
 3. 将分析的信息按照<OutputFormat>输出。
 4. 以markdown语法输出，用代码块表达。
 
@@ -67,8 +66,6 @@ export async function POST(req) {
 ## OutputFormat:
     \`\`\`
     # Role：Your_Role_Name
-    
-    ## Background：Role Background.
     
     ## Profile：
     - Description: Describe your role. Give an overview of the character's characteristics and skills.
