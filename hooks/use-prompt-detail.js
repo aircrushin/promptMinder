@@ -22,12 +22,7 @@ export function usePromptDetail(id) {
       setIsLoading(true);
 
       try {
-        const response = await fetch(`/api/prompts/${id}`);
-        if (!response.ok) {
-          throw new Error(`Failed to load prompt ${id}`);
-        }
-
-        const data = await response.json();
+        const data = await apiClient.getPrompt(id);
         if (cancelled) return;
 
         const normalizedPrompt = {
