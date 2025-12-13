@@ -10,6 +10,7 @@ const PROVIDER_BASE_URLS = {
   openai: 'https://api.openai.com/v1',
   deepseek: 'https://api.deepseek.com/v1',
   zhipu: 'https://open.bigmodel.cn/api/paas/v4',
+  gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 };
 
 async function getStoredProviderKey(userId, provider) {
