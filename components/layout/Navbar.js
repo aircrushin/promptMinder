@@ -18,6 +18,7 @@ import { TeamSwitcher } from '@/components/team/TeamSwitcher';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const showTeamSwitcher = pathname?.startsWith('/prompts');
   const { toggleLanguage, t } = useLanguage();
 
   useEffect(() => {
@@ -133,13 +134,17 @@ export default function Navbar() {
 
               <div className="flex flex-col gap-6 mt-6">
                 <SignedIn>
-                  <div className="space-y-2">
-                    <div className="text-xs font-medium text-muted-foreground px-2">
-                      {translations.navbar.teamSection}
-                    </div>
-                    <TeamSwitcher className="w-full" />
-                  </div>
-                  <div className="border-t"></div>
+                  {showTeamSwitcher && (
+                    <>
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground px-2">
+                          {translations.navbar.teamSection}
+                        </div>
+                        <TeamSwitcher className="w-full" />
+                      </div>
+                      <div className="border-t"></div>
+                    </>
+                  )}
                 </SignedIn>
 
                 <nav className="space-y-1">
@@ -184,7 +189,7 @@ export default function Navbar() {
           </Sheet>
 
           <SignedIn>
-            <TeamSwitcher className="hidden lg:block" />
+            {showTeamSwitcher && <TeamSwitcher className="hidden lg:block" />}
           </SignedIn>
 
           <Button
