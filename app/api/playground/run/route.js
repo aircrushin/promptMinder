@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { requireUserId } from '@/lib/auth';
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
 
@@ -11,6 +12,7 @@ const PROVIDER_BASE_URLS = {
   deepseek: 'https://api.deepseek.com/v1',
   zhipu: 'https://open.bigmodel.cn/api/paas/v4',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+  claude: 'https://api.anthropic.com/v1',
 };
 
 async function getStoredProviderKey(userId, provider) {
@@ -27,6 +29,125 @@ async function getStoredProviderKey(userId, provider) {
   }
 
   return data?.api_key || null;
+}
+
+// Handle Claude API streaming
+async function handleClaudeStream(anthropic, model, systemPrompt, userPrompt, temperature, maxTokens, topP, startTime, controller, send) {
+  try {
+    const messages = [];
+    if (userPrompt) {
+      messages.push({ role: 'user', content: userPrompt });
+    }
+
+    const streamParams = {
+      model,
+      max_tokens: maxTokens,
+      temperature,
+      top_p: topP,
+      messages,
+    };
+
+    // Add system prompt if provided
+    if (systemPrompt) {
+      streamParams.system = systemPrompt;
+    }
+
+    const stream = await anthropic.messages.stream(streamParams);
+
+    let fullText = '';
+    let usage = null;
+    let finishReason = null;
+
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+        const delta = event.delta.text;
+        fullText += delta;
+        send({ type: 'delta', content: delta });
+      } else if (event.type === 'message_stop') {
+        finishReason = 'end_turn';
+      } else if (event.type === 'message_delta' && event.usage) {
+        usage = event.usage;
+      }
+    }
+
+    const finalMessage = await stream.finalMessage();
+    if (finalMessage.usage) {
+      usage = finalMessage.usage;
+    }
+
+    const duration = Date.now() - startTime;
+
+    send({
+      type: 'final',
+      output: fullText,
+      usage: {
+        promptTokens: usage?.input_tokens || 0,
+        completionTokens: usage?.output_tokens || 0,
+        totalTokens: (usage?.input_tokens || 0) + (usage?.output_tokens || 0),
+      },
+      model,
+      duration,
+      finishReason: finishReason || 'end_turn',
+    });
+  } catch (error) {
+    console.error('Claude stream error:', error);
+    send({
+      type: 'error',
+      error: error.message || 'An unexpected error occurred',
+    });
+  } finally {
+    controller.close();
+  }
+}
+
+// Handle OpenAI-compatible API streaming
+async function handleOpenAIStream(openai, model, messages, temperature, maxTokens, topP, startTime, controller, send) {
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages,
+      temperature,
+      max_tokens: maxTokens,
+      top_p: topP,
+      stream: true,
+    });
+
+    let fullText = '';
+    let finishReason = null;
+
+    for await (const part of completion) {
+      const delta = part.choices?.[0]?.delta?.content || '';
+      if (delta) {
+        fullText += delta;
+        send({ type: 'delta', content: delta });
+      }
+      finishReason = part.choices?.[0]?.finish_reason || finishReason;
+    }
+
+    const usage = completion.finalUsage || {};
+    const duration = Date.now() - startTime;
+
+    send({
+      type: 'final',
+      output: fullText,
+      usage: {
+        promptTokens: usage.prompt_tokens,
+        completionTokens: usage.completion_tokens,
+        totalTokens: usage.total_tokens,
+      },
+      model,
+      duration,
+      finishReason,
+    });
+  } catch (error) {
+    console.error('OpenAI stream error:', error);
+    send({
+      type: 'error',
+      error: error.message || 'An unexpected error occurred',
+    });
+  } finally {
+    controller.close();
+  }
 }
 
 export async function POST(request) {
@@ -84,26 +205,34 @@ export async function POST(request) {
       );
     }
 
-    // Create OpenAI-compatible client
-    const openai = new OpenAI({
-      apiKey: finalApiKey,
-      baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
-    });
+    // Determine if using Claude or OpenAI-compatible API
+    const isClaude = normalizedProvider === 'claude';
 
     // Prepare messages for chat completion
     const messages = [];
-    if (systemPrompt) {
-      messages.push({ role: 'system', content: systemPrompt });
-    }
-    if (userPrompt) {
-      messages.push({ role: 'user', content: userPrompt });
-    }
-    // Fallback for backward compatibility or simple prompt usage
-    if (prompt && !systemPrompt && !userPrompt) {
-      messages.push({ role: 'user', content: prompt });
+    let systemMessage = systemPrompt;
+    let userMessage = userPrompt;
+
+    if (!isClaude) {
+      // OpenAI format: system and user as message objects
+      if (systemPrompt) {
+        messages.push({ role: 'system', content: systemPrompt });
+      }
+      if (userPrompt) {
+        messages.push({ role: 'user', content: userPrompt });
+      }
+      // Fallback for backward compatibility
+      if (prompt && !systemPrompt && !userPrompt) {
+        messages.push({ role: 'user', content: prompt });
+      }
+    } else {
+      // Claude format: separate system and user messages
+      if (prompt && !systemPrompt && !userPrompt) {
+        userMessage = prompt;
+      }
     }
 
-    // Streamed response
+    // Streaming response
     if (stream) {
       const encoder = new TextEncoder();
       const streamBody = new ReadableStream({
@@ -111,51 +240,40 @@ export async function POST(request) {
           const send = (payload) =>
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
 
-          try {
-            const completion = await openai.chat.completions.create({
+          if (isClaude) {
+            // Use Anthropic SDK for Claude
+            const anthropic = new Anthropic({
+              apiKey: finalApiKey,
+            });
+            await handleClaudeStream(
+              anthropic,
+              model,
+              systemMessage,
+              userMessage,
+              temperature,
+              maxTokens,
+              topP,
+              startTime,
+              controller,
+              send
+            );
+          } else {
+            // Use OpenAI SDK for other providers
+            const openai = new OpenAI({
+              apiKey: finalApiKey,
+              baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
+            });
+            await handleOpenAIStream(
+              openai,
               model,
               messages,
               temperature,
-              max_tokens: maxTokens,
-              top_p: topP,
-              stream: true,
-            });
-
-            let fullText = '';
-            let finishReason = null;
-
-            for await (const part of completion) {
-              const delta = part.choices?.[0]?.delta?.content || '';
-              if (delta) {
-                fullText += delta;
-                send({ type: 'delta', content: delta });
-              }
-              finishReason = part.choices?.[0]?.finish_reason || finishReason;
-            }
-
-            const usage = completion.finalUsage || {};
-            const duration = Date.now() - startTime;
-
-            send({
-              type: 'final',
-              output: fullText,
-              usage: {
-                promptTokens: usage.prompt_tokens,
-                completionTokens: usage.completion_tokens,
-                totalTokens: usage.total_tokens,
-              },
-              model,
-              duration,
-              finishReason,
-            });
-          } catch (error) {
-            console.error('Playground run stream error:', error);
-            send({
-              type: 'error',
-              error: error.message || 'An unexpected error occurred',
-            });
-          } finally {
-            controller.close();
+              maxTokens,
+              topP,
+              startTime,
+              controller,
+              send
+            );
           }
         },
       });
@@ -169,32 +287,73 @@ export async function POST(request) {
       });
     }
 
-    // Fallback to non-streaming for clients that need full response
-    const completion = await openai.chat.completions.create({
-      model: model,
-      messages: messages,
-      temperature: temperature,
-      max_tokens: maxTokens,
-      top_p: topP,
-    });
+    // Non-streaming response
+    if (isClaude) {
+      // Use Anthropic SDK for Claude
+      const anthropic = new Anthropic({
+        apiKey: finalApiKey,
+      });
 
-    const duration = Date.now() - startTime;
+      const messageParams = {
+        model,
+        max_tokens: maxTokens,
+        temperature,
+        top_p: topP,
+        messages: [{ role: 'user', content: userMessage }],
+      };
 
-    // Extract the response
-    const output = completion.choices?.[0]?.message?.content || '';
-    const usage = completion.usage || {};
+      if (systemMessage) {
+        messageParams.system = systemMessage;
+      }
 
-    return NextResponse.json({
-      output,
-      usage: {
-        promptTokens: usage.prompt_tokens,
-        completionTokens: usage.completion_tokens,
-        totalTokens: usage.total_tokens,
-      },
-      model: completion.model,
-      duration,
-      finishReason: completion.choices?.[0]?.finish_reason,
-    });
+      const response = await anthropic.messages.create(messageParams);
+
+      const duration = Date.now() - startTime;
+      const output = response.content?.[0]?.text || '';
+      const usage = response.usage || {};
+
+      return NextResponse.json({
+        output,
+        usage: {
+          promptTokens: usage.input_tokens || 0,
+          completionTokens: usage.output_tokens || 0,
+          totalTokens: (usage.input_tokens || 0) + (usage.output_tokens || 0),
+        },
+        model: response.model,
+        duration,
+        finishReason: response.stop_reason,
+      });
+    } else {
+      // Use OpenAI SDK for other providers
+      const openai = new OpenAI({
+        apiKey: finalApiKey,
+        baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
+      });
+
+      const completion = await openai.chat.completions.create({
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+        top_p: topP,
+      });
+
+      const duration = Date.now() - startTime;
+      const output = completion.choices?.[0]?.message?.content || '';
+      const usage = completion.usage || {};
+
+      return NextResponse.json({
+        output,
+        usage: {
+          promptTokens: usage.prompt_tokens,
+          completionTokens: usage.completion_tokens,
+          totalTokens: usage.total_tokens,
+        },
+        model: completion.model,
+        duration,
+        finishReason: completion.choices?.[0]?.finish_reason,
+      });
+    }
   } catch (error) {
     console.error('Playground run error:', error);
 

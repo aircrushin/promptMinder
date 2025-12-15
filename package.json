@@ -21,6 +21,7 @@
     "build:optimized": "npm run css:optimize && next build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@clerk/localizations": "^3.9.5",
     "@clerk/nextjs": "^6.23.3",
     "@clerk/themes": "^2.2.3",

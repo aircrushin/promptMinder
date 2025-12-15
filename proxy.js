@@ -5,6 +5,13 @@ const isProtectedRoute = createRouteMatcher(['/prompts(.*)', '/playground(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) await auth.protect()
+
+  const { userId } = auth()
+  if (userId && req.nextUrl.pathname === '/') {
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = '/prompts'
+    return NextResponse.redirect(redirectUrl)
+  }
   
   const response = NextResponse.next()
   
