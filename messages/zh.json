@@ -513,7 +513,10 @@
       "currentPromptPrefix": "当前使用",
       "currentPromptSuffix": "提示进行对话",
       "defaultInputHint": "输入消息开始对话",
-      "variablesRequiredError": "测试前请先填写所有必需的变量字段。"
+      "variablesRequiredError": "测试前请先填写所有必需的变量字段。",
+      "copyTooltip": "复制",
+      "copied": "已复制",
+      "regenerateTooltip": "重新生成"
     }
   },
   "chatTest": {
@@ -547,10 +550,15 @@
     "apiKeyTooltip": "输入您的 API Key 以使用自定义设置。兼容 OpenAI 格式的 API。",
     "useDefaultKeyButton": "使用默认 Key",
     "useCustomKeyButton": "使用自定义 Key",
+    "providerLabel": "服务商",
+    "selectProviderPlaceholder": "选择服务商",
+    "endpointLabel": "API 端点",
+    "selectEndpointPlaceholder": "选择端点",
+    "selectModelPlaceholder": "选择模型",
     "modelLabel": "模型",
     "modelPlaceholder": "输入模型名称 (例如: gpt-3.5-turbo)",
     "baseURLabel": "Base URL",
-    "baseURLPlaceholder": "BaseURL 默认: https://open.bigmodel.cn/api/paas/v4",
+    "baseURLPlaceholder": "https://api.example.com/v1",
     "selectModelLabel": "选择模型",
     "glm4FlashModelFree": "GLM-4-Flash (免费)",
     "modelParametersLabel": "模型参数",

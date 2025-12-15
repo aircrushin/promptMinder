@@ -1,10 +1,10 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Settings2, Send, Check, Copy, HelpCircle, Trash2, User, Bot, Edit3 } from "lucide-react"
+import { Settings2, Send, Check, Copy, HelpCircle, Trash2, User, Bot, Edit3, RotateCw } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -29,6 +29,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { replaceVariables } from '@/lib/promptVariables';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import providerOptions from '@/components/playground/providerOptions.json';
 
 // Message loading animation component
 function MessageLoading() {
@@ -77,6 +78,24 @@ function MessageLoading() {
 }
 
 const STORAGE_KEY = 'chat_settings';
+const PROVIDER_OPTIONS = providerOptions;
+const CUSTOM_MODEL_OPTION = { value: 'custom', label: 'Custom Model...' };
+const CUSTOM_ENDPOINT_OPTION = { value: 'custom', label: 'Custom Endpoint...', url: '' };
+
+// Helper to get saved settings
+const getSavedSettings = () => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+  return null;
+};
 
 export default function ChatTest({ prompt, variableValues = {}, hasVariables = false }) {
   const { t } = useLanguage();
@@ -85,14 +104,27 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
   const [inputMessage, setInputMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem(STORAGE_KEY);
-      return savedSettings ? JSON.parse(savedSettings).apiKey : '';
-    }
-    return '';
+  
+  // Provider-related state
+  const [selectedProvider, setSelectedProvider] = useState(() => {
+    const saved = getSavedSettings();
+    return saved?.provider || 'zhipu';
   });
-  const [selectedModel, setSelectedModel] = useState('glm-4-flash');
+  const [selectedModel, setSelectedModel] = useState(() => {
+    const saved = getSavedSettings();
+    return saved?.model || 'glm-4-flash';
+  });
+  const [baseURL, setBaseURL] = useState(() => {
+    const saved = getSavedSettings();
+    return saved?.baseURL || 'https://open.bigmodel.cn/api/paas/v4';
+  });
+  const [apiKey, setApiKey] = useState(() => {
+    const saved = getSavedSettings();
+    return saved?.apiKey || '';
+  });
+  const [customModel, setCustomModel] = useState('');
+  const [customEndpoint, setCustomEndpoint] = useState('');
+  
   const [isLoading, setIsLoading] = useState(false);
   const [useCustomKey, setUseCustomKey] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
@@ -102,73 +134,49 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [tempEditingContent, setTempEditingContent] = useState("");
-  const [customModel, setCustomModel] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem(STORAGE_KEY);
-      return savedSettings ? JSON.parse(savedSettings).model : 'glm-4-flash';
-    }
-    return 'glm-4-flash';
-  });
-  const [baseURL, setBaseURL] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem(STORAGE_KEY);
-      return savedSettings ? JSON.parse(savedSettings).baseURL : 'https://open.bigmodel.cn/api/paas/v4';
-    }
-    return 'https://open.bigmodel.cn/api/paas/v4';
-  });
-const presets = [
-  /* ---------- OpenAI ---------- */
-  { label: 'OpenAI GPT-4o-mini',      value: 'openai-gpt4omini',   baseURL: 'https://api.openai.com/v1',               model: 'gpt-4o-mini' },
-  { label: 'OpenAI GPT-4o',           value: 'openai-gpt4o',       baseURL: 'https://api.openai.com/v1',               model: 'gpt-4o' },
-  { label: 'OpenAI GPT-4-turbo',      value: 'openai-gpt4turbo',   baseURL: 'https://api.openai.com/v1',               model: 'gpt-4-turbo' },
-  { label: 'OpenAI GPT-3.5-turbo',    value: 'openai-gpt35turbo',  baseURL: 'https://api.openai.com/v1',               model: 'gpt-3.5-turbo' },
 
-  /* ---------- Anthropic ---------- */
-  { label: 'Anthropic Claude 3.5 Sonnet', value: 'claude-35-sonnet', baseURL: 'https://api.anthropic.com/v1',         model: 'claude-3-5-sonnet-20240620' },
-  { label: 'Anthropic Claude 3 Opus',     value: 'claude-3-opus',    baseURL: 'https://api.anthropic.com/v1',         model: 'claude-3-opus-20240229' },
-  { label: 'Anthropic Claude 3 Haiku',    value: 'claude-3-haiku',   baseURL: 'https://api.anthropic.com/v1',         model: 'claude-3-haiku-20240307' },
+  // Compute provider config
+  const selectedProviderConfig = useMemo(() => {
+    return PROVIDER_OPTIONS.find(p => p.value === selectedProvider) || PROVIDER_OPTIONS[0];
+  }, [selectedProvider]);
 
-  /* ---------- Google Gemini ---------- */
-  { label: 'Google Gemini 1.5 Flash', value: 'gemini-1-5-flash', baseURL: 'https://generativelanguage.googleapis.com/v1beta', model: 'models/gemini-1.5-flash' },
-  { label: 'Google Gemini 1.5 Pro',   value: 'gemini-1-5-pro',   baseURL: 'https://generativelanguage.googleapis.com/v1beta', model: 'models/gemini-1.5-pro' },
-  { label: 'Google Gemini 2.5 Flash', value: 'gemini-2-5-flash', baseURL: 'https://generativelanguage.googleapis.com/v1beta', model: 'models/gemini-2.5-flash' },
-  { label: 'Google Gemini 2.5 Pro',   value: 'gemini-2-5-pro',   baseURL: 'https://generativelanguage.googleapis.com/v1beta', model: 'models/gemini-2.5-pro' },
+  // Compute endpoint options
+  const endpointOptions = useMemo(() => {
+    const endpoints = selectedProviderConfig?.endpoints || [];
+    const hasCustom = endpoints.some(e => e.value === 'custom');
+    return hasCustom ? endpoints : [...endpoints, CUSTOM_ENDPOINT_OPTION];
+  }, [selectedProviderConfig]);
 
-  /* ---------- Moonshot ---------- */
-  { label: 'Moonshot Kimi 8k',  value: 'moonshot-8k',  baseURL: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
-  { label: 'Moonshot Kimi 32k', value: 'moonshot-32k', baseURL: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-32k' },
-  { label: 'Moonshot Kimi 128k',value: 'moonshot-128k',baseURL: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-128k' },
+  // Compute model options
+  const modelOptions = useMemo(() => {
+    const models = selectedProviderConfig?.models || [];
+    return [...models, CUSTOM_MODEL_OPTION];
+  }, [selectedProviderConfig]);
 
-  /* ---------- DeepSeek ---------- */
-  { label: 'DeepSeek Chat',   value: 'deepseek-chat',   baseURL: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
-  { label: 'DeepSeek Coder',  value: 'deepseek-coder',  baseURL: 'https://api.deepseek.com/v1', model: 'deepseek-coder' },
+  // Determine if using custom model
+  const isCustomModel = useMemo(() => {
+    if (customModel !== '') return true;
+    const providerModels = selectedProviderConfig?.models || [];
+    return !selectedModel || !providerModels.some(m => m.value === selectedModel);
+  }, [customModel, selectedModel, selectedProviderConfig]);
 
-  /* ---------- 通义千问(Qwen) ---------- */
-  { label: 'Qwen Turbo',   value: 'qwen-turbo',   baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-turbo' },
-  { label: 'Qwen Plus',    value: 'qwen-plus',    baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
-  { label: 'Qwen Max',     value: 'qwen-max',     baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-max' },
+  // Determine if using custom endpoint
+  const isCustomEndpoint = useMemo(() => {
+    if (customEndpoint !== '') return true;
+    const preset = endpointOptions.find(
+      e => e.url === baseURL && e.value !== 'custom'
+    );
+    return !preset;
+  }, [customEndpoint, baseURL, endpointOptions]);
 
-  /* ---------- 智谱 GLM ---------- */
-  { label: 'GLM-4',      value: 'glm-4',      baseURL: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4' },
-  { label: 'GLM-4-Air',  value: 'glm-4-air',  baseURL: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-air' },
-  { label: 'GLM-4-Flash',value: 'glm-4-flash',baseURL: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' },
-
-  /* ---------- Baichuan ---------- */
-  { label: 'Baichuan 4',     value: 'baichuan-4',     baseURL: 'https://api.baichuan-ai.com/v1', model: 'Baichuan4' },
-  { label: 'Baichuan 3-Turbo',value: 'baichuan-3-turbo',baseURL: 'https://api.baichuan-ai.com/v1', model: 'Baichuan3-Turbo' },
-
-  /* ---------- StepFun ---------- */
-  { label: 'StepFun 1v', value: 'step-1v', baseURL: 'https://api.stepfun.com/v1', model: 'step-1v-8k' },
-  { label: 'StepFun 1',  value: 'step-1',  baseURL: 'https://api.stepfun.com/v1', model: 'step-1-8k' },
-
-  /* ---------- 零一万物 01.AI ---------- */
-  { label: 'Yi-Large',       value: 'yi-large',       baseURL: 'https://api.lingyiwanwu.com/v1', model: 'yi-large' },
-  { label: 'Yi-Large-Turbo', value: 'yi-large-turbo', baseURL: 'https://api.lingyiwanwu.com/v1', model: 'yi-large-turbo' },
-
-  /* ---------- Custom ---------- */
-  { label: 'Custom', value: 'custom', baseURL: '', model: '' },
-];
-  const [selectedPreset, setSelectedPreset] = useState('');
+  // Get endpoint select value
+  const endpointSelectValue = useMemo(() => {
+    if (customEndpoint !== '') return 'custom';
+    const preset = endpointOptions.find(
+      e => e.url === baseURL && e.value !== 'custom'
+    );
+    return preset?.value || 'custom';
+  }, [customEndpoint, baseURL, endpointOptions]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -178,7 +186,107 @@ const presets = [
     scrollToBottom();
   }, [messages]);
 
-  if (!t) return null; // Moved loading state for translations
+  // Save settings when they change
+  const saveSettings = useCallback((settings) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  }, []);
+
+  // Handle provider change
+  const handleProviderChange = useCallback((value) => {
+    setSelectedProvider(value);
+    setCustomEndpoint('');
+    setCustomModel('');
+    
+    const newProviderConfig = PROVIDER_OPTIONS.find(p => p.value === value);
+    const newBaseURL = newProviderConfig?.baseURL || newProviderConfig?.endpoints?.[0]?.url || '';
+    const newModel = newProviderConfig?.models?.[0]?.value || '';
+    
+    setBaseURL(newBaseURL);
+    setSelectedModel(newModel);
+    
+    saveSettings({
+      provider: value,
+      model: newModel,
+      baseURL: newBaseURL,
+      apiKey: apiKey
+    });
+  }, [apiKey, saveSettings]);
+
+  // Handle endpoint change
+  const handleEndpointChange = useCallback((value) => {
+    if (value === 'custom') {
+      setCustomEndpoint(baseURL || '');
+      return;
+    }
+    
+    setCustomEndpoint('');
+    const preset = endpointOptions.find(e => e.value === value);
+    const newBaseURL = preset?.url || '';
+    setBaseURL(newBaseURL);
+    
+    saveSettings({
+      provider: selectedProvider,
+      model: selectedModel,
+      baseURL: newBaseURL,
+      apiKey: apiKey
+    });
+  }, [baseURL, endpointOptions, selectedProvider, selectedModel, apiKey, saveSettings]);
+
+  // Handle model change
+  const handleModelChange = useCallback((value) => {
+    if (value === 'custom') {
+      setCustomModel(selectedModel);
+      return;
+    }
+    
+    setCustomModel('');
+    setSelectedModel(value);
+    
+    saveSettings({
+      provider: selectedProvider,
+      model: value,
+      baseURL: baseURL,
+      apiKey: apiKey
+    });
+  }, [selectedModel, selectedProvider, baseURL, apiKey, saveSettings]);
+
+  // Handle API key change
+  const handleApiKeyChange = useCallback((e) => {
+    const newApiKey = e.target.value;
+    setApiKey(newApiKey);
+    saveSettings({
+      provider: selectedProvider,
+      model: selectedModel,
+      baseURL: baseURL,
+      apiKey: newApiKey
+    });
+  }, [selectedProvider, selectedModel, baseURL, saveSettings]);
+
+  // Handle base URL change (for custom endpoint)
+  const handleBaseURLChange = useCallback((e) => {
+    const newBaseURL = e.target.value;
+    setBaseURL(newBaseURL);
+    saveSettings({
+      provider: selectedProvider,
+      model: selectedModel,
+      baseURL: newBaseURL,
+      apiKey: apiKey
+    });
+  }, [selectedProvider, selectedModel, apiKey, saveSettings]);
+
+  // Handle custom model input change
+  const handleCustomModelChange = useCallback((e) => {
+    const newModel = e.target.value;
+    setSelectedModel(newModel);
+    saveSettings({
+      provider: selectedProvider,
+      model: newModel,
+      baseURL: baseURL,
+      apiKey: apiKey
+    });
+  }, [selectedProvider, baseURL, apiKey, saveSettings]);
+
+  if (!t) return null;
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || (useCustomKey && !apiKey)) return;
@@ -223,7 +331,83 @@ const presets = [
         })),
         {
           apiKey: useCustomKey ? apiKey : undefined,
-          model: useCustomKey ? customModel : selectedModel,
+          model: useCustomKey ? selectedModel : 'glm-4-flash',
+          baseURL: useCustomKey ? baseURL : undefined,
+          systemPrompt: hasVariables ? replaceVariables(prompt.content, variableValues) : prompt.content,
+          temperature: temperature,
+          max_tokens: maxTokens,
+          top_p: topP
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || t?.promptDetailPage?.chatTest?.sendMessageErrorDefault || '请求失败，请检查 API Key 是否正确');
+      }
+
+      const decoder = new TextDecoder();
+      const reader = response.body.getReader();
+      let accumulatedContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedContent += chunk;
+
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (lastMessage.role === 'assistant') {
+            lastMessage.content = accumulatedContent;
+          }
+          return newMessages;
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage = t?.promptDetailPage?.chatTest?.sendMessageErrorPrefix?.replace('{errorMessage}', error.message) || 
+                          `错误：${error.message || t?.promptDetailPage?.chatTest?.sendMessageErrorNetwork || '请求失败，请检查 API Key 是否正确以及网络连接是否正常'}`;
+      setMessages(prev => {
+        const newMessages = [...prev];
+        const lastMessage = newMessages[newMessages.length - 1];
+        if (lastMessage.role === 'assistant') {
+          lastMessage.content = errorMessage;
+        }
+        return newMessages;
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegenerate = async (messageIndex) => {
+    if (useCustomKey && !apiKey) return;
+    
+    setIsLoading(true);
+    
+    // Get current messages before the AI response
+    const messagesBeforeAI = messages.slice(0, messageIndex);
+    
+    // Remove the current AI message and add a new empty one
+    const aiMessage = {
+      role: 'assistant',
+      content: '',
+      timestamp: new Date().toISOString()
+    };
+    
+    setMessages([...messagesBeforeAI, aiMessage]);
+    
+    try {
+      const response = await apiClient.chat(
+        messagesBeforeAI.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        {
+          apiKey: useCustomKey ? apiKey : undefined,
+          model: useCustomKey ? selectedModel : 'glm-4-flash',
           baseURL: useCustomKey ? baseURL : undefined,
           systemPrompt: hasVariables ? replaceVariables(prompt.content, variableValues) : prompt.content,
           temperature: temperature,
@@ -288,40 +472,6 @@ const presets = [
     }
   };
 
-  const saveSettings = (settings) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  };
-
-  const handleApiKeyChange = (e) => {
-    const newApiKey = e.target.value;
-    setApiKey(newApiKey);
-    saveSettings({
-      apiKey: newApiKey,
-      model: customModel,
-      baseURL: baseURL
-    });
-  };
-
-  const handleModelChange = (e) => {
-    const newModel = e.target.value;
-    setCustomModel(newModel);
-    saveSettings({
-      apiKey: apiKey,
-      model: newModel,
-      baseURL: baseURL
-    });
-  };
-
-  const handleBaseURLChange = (e) => {
-    const newBaseURL = e.target.value;
-    setBaseURL(newBaseURL);
-    saveSettings({
-      apiKey: apiKey,
-      model: customModel,
-      baseURL: newBaseURL
-    });
-  };
-
   const clearChat = () => {
     setMessages([]);
   };
@@ -360,7 +510,7 @@ const presets = [
         updatedMessages.map(msg => ({role: msg.role, content: msg.content})),
         {
           apiKey: useCustomKey ? apiKey : undefined,
-          model: useCustomKey ? customModel : selectedModel,
+          model: useCustomKey ? selectedModel : 'glm-4-flash',
           baseURL: useCustomKey ? baseURL : undefined,
           systemPrompt: prompt.content,
           temperature: temperature,
@@ -490,28 +640,53 @@ const presets = [
               </div>
               {useCustomKey && (
                 <div className="space-y-3 rounded-md bg-background p-3 border border-border/30">
+                  {/* Provider Selection */}
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1.5">预制</p>
-                    <Select value={selectedPreset} onValueChange={(value) => {
-                      setSelectedPreset(value);
-                      const preset = presets.find(p => p.value === value);
-                      if (preset) {
-                        setBaseURL(preset.baseURL);
-                        setCustomModel(preset.model);
-                      }
-                    }}>
+                    <p className="text-xs text-muted-foreground mb-1.5">{t.chatTest.providerLabel || '服务商'}</p>
+                    <Select value={selectedProvider} onValueChange={handleProviderChange}>
                       <SelectTrigger className="h-8 text-sm">
-                        <SelectValue placeholder="Select preset" />
+                        <SelectValue placeholder={t.chatTest.selectProviderPlaceholder || 'Select provider'} />
                       </SelectTrigger>
                       <SelectContent className="max-h-60 overflow-y-auto">
-                        {presets.map(p => (
-                          <SelectItem key={p.value} value={p.value}>
-                            {p.label}
+                        {PROVIDER_OPTIONS.map(provider => (
+                          <SelectItem key={provider.value} value={provider.value}>
+                            {provider.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedProviderConfig?.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{selectedProviderConfig.description}</p>
+                    )}
                   </div>
+                  
+                  {/* Endpoint Selection */}
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1.5">{t.chatTest.endpointLabel || 'API 端点'}</p>
+                    <Select value={endpointSelectValue} onValueChange={handleEndpointChange}>
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue placeholder={t.chatTest.selectEndpointPlaceholder || 'Select endpoint'} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {endpointOptions.map(endpoint => (
+                          <SelectItem key={endpoint.value} value={endpoint.value}>
+                            {endpoint.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isCustomEndpoint && (
+                      <Input
+                        type="text"
+                        value={baseURL}
+                        onChange={handleBaseURLChange}
+                        placeholder={t.chatTest.baseURLPlaceholder || 'https://api.example.com/v1'}
+                        className="font-mono text-xs h-8 mt-2"
+                      />
+                    )}
+                  </div>
+
+                  {/* API Key */}
                   <div>
                     <p className="text-xs text-muted-foreground mb-1.5">{t.chatTest.apiKeyLabel}</p>
                     <Input
@@ -522,25 +697,34 @@ const presets = [
                       className="font-mono text-xs h-8"
                     />
                   </div>
+                  
+                  {/* Model Selection */}
                   <div>
                     <p className="text-xs text-muted-foreground mb-1.5">{t.chatTest.modelLabel}</p>
-                    <Input
-                      type="text"
-                      value={customModel}
-                      onChange={handleModelChange}
-                      placeholder={t.chatTest.modelPlaceholder}
-                      className="font-mono text-xs h-8"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1.5">{t.chatTest.baseURLabel}</p>
-                    <Input
-                      type="text"
-                      value={baseURL}
-                      onChange={handleBaseURLChange}
-                      placeholder={t.chatTest.baseURLPlaceholder}
-                      className="font-mono text-xs h-8"
-                    />
+                    <Select 
+                      value={isCustomModel ? 'custom' : selectedModel} 
+                      onValueChange={handleModelChange}
+                    >
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue placeholder={t.chatTest.selectModelPlaceholder || 'Select model'} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {modelOptions.map(model => (
+                          <SelectItem key={model.value} value={model.value}>
+                            {model.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isCustomModel && (
+                      <Input
+                        type="text"
+                        value={selectedModel}
+                        onChange={handleCustomModelChange}
+                        placeholder={t.chatTest.modelPlaceholder || 'model-name'}
+                        className="font-mono text-xs h-8 mt-2"
+                      />
+                    )}
                   </div>
                 </div>
               )}
@@ -837,18 +1021,45 @@ const presets = [
 
                     {message.role === 'assistant' && message.content && !isEditing && (
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-full"
-                          onClick={() => handleCopyMessage(message.content, index)}
-                        >
-                          {copiedMessageId === index ? (
-                            <Check className="h-3.5 w-3.5 text-green-500" />
-                          ) : (
-                            <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                          )}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-full"
+                                onClick={() => handleCopyMessage(message.content, index)}
+                              >
+                                {copiedMessageId === index ? (
+                                  <Check className="h-3.5 w-3.5 text-green-500" />
+                                ) : (
+                                  <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <p>{copiedMessageId === index ? (t.chatTest.copied || '已复制') : (t.chatTest.copyTooltip || '复制')}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-full"
+                                onClick={() => handleRegenerate(index)}
+                                disabled={isLoading}
+                              >
+                                <RotateCw className={`h-3.5 w-3.5 text-muted-foreground ${isLoading ? 'animate-spin' : ''}`} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <p>{t.chatTest.regenerateTooltip || '重新生成'}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     )}
                   </div>
