@@ -258,7 +258,7 @@ export default function PublicPromptsClient() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
             {/* Background decoration */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-black/5 via-transparent to-black/5 dark:from-white/5 dark:to-white/5 pointer-events-none" />
+            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-black/5 via-transparent to-black/5 dark:from-white/5 dark:to-white/5 pointer-events-none -z-10" />
             <div className="relative align-center justify-center">
                 <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:py-20">
                     {/* Enhanced header section */}
@@ -541,7 +541,7 @@ export default function PublicPromptsClient() {
                 </div>
             </div>
             {/* Footer */}
-            <Footer t={t.footer} />
+            <Footer t={t.footer} variant="transparent" />
             {/* 回到顶部按钮 */}
             {showBackToTop && (
                 <button
