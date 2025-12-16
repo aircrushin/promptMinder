@@ -1,73 +1,110 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Shield, LayoutDashboard, ArrowLeft, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminAuth, { useAdminAuth } from "@/components/admin/AdminAuth";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+  SidebarRail,
+  SidebarSeparator,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 
-function AdminLayoutContent({ children }) {
+function AdminSidebar() {
+  const pathname = usePathname();
   const { email, logout } = useAdminAuth();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* 管理后台头部 */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                返回首页
-              </Link>
-              <div className="h-6 w-px bg-border" />
-              <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                <h1 className="text-lg font-semibold">管理后台</h1>
-              </div>
-            </div>
-
-            {/* 导航菜单 */}
-            <nav className="flex items-center gap-2">
-              <Link href="/admin/contributions">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted transition-colors text-sm font-medium">
-                  <LayoutDashboard className="w-4 h-4" />
-                  贡献审核
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/admin">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Shield className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Prompt Manage</span>
+                  <span className="truncate text-xs">Admin Dashboard</span>
                 </div>
               </Link>
-              
-              {/* 管理员信息和登出 */}
-              <div className="flex items-center gap-2 ml-4 pl-4 border-l">
-                <span className="text-sm text-muted-foreground">{email}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={logout}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <LogOut className="w-4 h-4 mr-1" />
-                  退出
-                </Button>
-              </div>
-            </nav>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname?.startsWith("/admin/contributions")} tooltip="贡献审核">
+                  <Link href="/admin/contributions">
+                    <LayoutDashboard />
+                    <span>贡献审核</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="返回首页">
+              <Link href="/">
+                <ArrowLeft />
+                <span>返回首页</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <SidebarSeparator />
+        <div className="flex items-center justify-between p-2 group-data-[collapsible=icon]:hidden">
+           <div className="flex flex-col px-2 overflow-hidden">
+               <span className="text-xs text-muted-foreground truncate" title={email}>{email}</span>
+           </div>
+           <Button variant="ghost" size="icon" onClick={logout} className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0">
+               <LogOut className="h-4 w-4" />
+               <span className="sr-only">退出</span>
+           </Button>
+        </div>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
+
+function AdminLayoutContent({ children }) {
+  return (
+    <SidebarProvider>
+      <AdminSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+             <span>管理后台</span>
           </div>
+        </header>
+        <div className="flex-1 p-4 pt-0">
+            {children}
         </div>
-      </div>
-
-      {/* 权限提示横幅 */}
-      <div className="bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-900">
-        <div className="container mx-auto px-4 py-2">
-          <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            您正在访问管理后台，请谨慎操作
-          </p>
-        </div>
-      </div>
-
-      {/* 主内容区 */}
-      <main>{children}</main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
