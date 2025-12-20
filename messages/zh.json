@@ -36,6 +36,7 @@
     "promptGuide": "PromptGuide - 提示词指南",
     "aiShort": "AIshort - 优秀 Prompt 集合",
     "promptate": "Promptate - Prompt生成器",
+    "llmReadify": "LLM Readify - 网页转文本工具",
     "copyright": "© {year} PromptMinder. 版权所有"
   },
   "hero": {

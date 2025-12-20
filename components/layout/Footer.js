@@ -15,6 +15,7 @@ export default function Footer({ t }) {
     promptGuide: 'PromptGuide - Prompt Guide',
     aiShort: 'AIshort - Excellent Prompt Collection',
     promptate: 'Promptate - Prompt Generator',
+    llmReadify: 'LLM Readify - Web to Text Tool',
     copyright: '© {year} PromptMinder. All rights reserved'
   };
   const currentYear = new Date().getFullYear();
@@ -154,6 +155,15 @@ export default function Footer({ t }) {
                     className="text-sm text-muted-foreground hover:text-foreground"
                    >
                     {translations.promptate}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="https://llm-readify.vercel.app/"
+                    target="_blank"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                   >
+                    {translations.llmReadify}
                   </Link>
                 </li>
               </ul>
