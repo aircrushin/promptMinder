@@ -167,7 +167,7 @@ export default function Footer({ t }) {
                   </Link>
                 </li>
               </ul>
-            </div>
+x          </div>
           </div>
         </div>
 

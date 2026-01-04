@@ -17,6 +17,7 @@ A professional prompt management platform that makes AI prompt management simple
 ### Core Functions
 
 - ✅ **Prompt Version Management** - Support for version history and rollback
+- ✅ **Version Diff Comparison** - Git-like side-by-side diff view to quickly identify prompt changes
 - ✅ **Tag Management** - Custom tags for quick categorization and retrieval
 - ✅ **Public/Private Mode** - Support for private prompts and public sharing
 - ✅ **AI Smart Generation** - Integrated AI models for generating quality prompts

@@ -58,7 +58,7 @@ export default function PromptDetail({ params }) {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
-      <div className="flex items-center space-x-2 mb-6">
+      <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"
           className="text-muted-foreground hover:bg-secondary"
@@ -67,6 +67,18 @@ export default function PromptDetail({ params }) {
           <ArrowLeft className="h-4 w-4 mr-2" />
           {tp.backToList}
         </Button>
+        {versions.length > 1 && (
+          <Button
+            variant="outline"
+            className="text-sm"
+            onClick={() => router.push(`/prompts/${id}/diff`)}
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+            </svg>
+            {tp.viewDiffButton || "查看差异"}
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

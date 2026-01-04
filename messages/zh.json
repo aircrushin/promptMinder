@@ -459,6 +459,8 @@
     "shareSuccessTitle": "分享成功",
     "shareSuccessDescription": "分享链接已复制到剪贴板",
     "saveError": "保存失败，请重试",
+    "viewDiffTooltip": "查看差异",
+    "viewDiffButton": "查看差异",
     "chatTest": {
       "sendMessageErrorDefault": "请求失败，请检查 API Key 是否正确",
       "sendMessageErrorPrefix": "错误：{errorMessage}",
@@ -519,6 +521,18 @@
       "copied": "已复制",
       "regenerateTooltip": "重新生成"
     }
+  },
+  "promptDiffPage": {
+    "title": "版本差异对比",
+    "backToDetail": "返回详情",
+    "leftVersionLabel": "左侧版本（旧版本）",
+    "rightVersionLabel": "右侧版本（新版本）",
+    "selectVersionPlaceholder": "选择版本",
+    "loading": "加载中...",
+    "noVersions": "未找到版本信息",
+    "noChanges": "两个版本内容完全相同",
+    "oldVersionLabel": "旧版本",
+    "newVersionLabel": "新版本"
   },
   "chatTest": {
     "sendMessageErrorDefault": "请求失败，请检查 API Key 是否正确",
