@@ -16,6 +16,7 @@ export default function Footer({ t }) {
     aiShort: 'AIshort - Excellent Prompt Collection',
     promptate: 'Promptate - Prompt Generator',
     llmReadify: 'LLM Readify - Web to Text Tool',
+    julebu: 'promptminder × julebu - An addictive English learning tool',
     copyright: '© {year} PromptMinder. All rights reserved'
   };
   const currentYear = new Date().getFullYear();
@@ -166,8 +167,18 @@ export default function Footer({ t }) {
                     {translations.llmReadify}
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="https://julebu.co/aff/RQH6MRYL"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                   >
+                    {translations.julebu}
+                  </Link>
+                </li>
               </ul>
-x          </div>
+            </div>
           </div>
         </div>
 
