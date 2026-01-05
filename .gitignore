@@ -44,3 +44,5 @@ next-env.d.ts
 .codebuddy
 .swc
 .vscode
+# clerk configuration (can include secrets)
+/.clerk/

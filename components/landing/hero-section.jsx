@@ -118,6 +118,34 @@ export function HeroSection({ t }) {
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 lg:py-20">
+        {/* Advertisement Banner */}
+        <MotionDiv
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex justify-center mb-10"
+        >
+          <Link
+            href="https://julebu.co/aff/RQH6MRYL"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative inline-flex items-center gap-2.5 rounded-full border-2 border-purple-200/60 bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 px-5 py-2.5 text-sm shadow-lg shadow-purple-200/50 backdrop-blur-sm transition-all duration-300 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-300/50 hover:scale-105 hover:-translate-y-0.5 min-w-fit whitespace-nowrap"
+          >
+            {/* Special Offer Badge */}
+            <span className="absolute -top-2 -right-2 inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-md">
+              Special Offer
+            </span>
+            
+            {/* Animated gradient overlay */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400/0 via-purple-400/10 to-purple-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            {/* Content */}
+            <span className="relative text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">julebu</span>
+            <span className="relative text-sm font-medium text-slate-700">让你上瘾的 英语学习工具</span>
+            <ArrowTopRightOnSquareIcon className="relative h-4 w-4 text-purple-500 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-purple-600 group-hover:scale-110" />
+          </Link>
+        </MotionDiv>
+
         <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
           <MotionDiv
             initial={{ opacity: 0, y: 40 }}
@@ -168,31 +196,6 @@ export function HeroSection({ t }) {
                 {heroCopy.secondaryCta}
               </Link>
             </div>
-
-            {/* Advertisement Banner */}
-            <MotionDiv
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Link
-                href="https://julebu.co/aff/RQH6MRYL"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-indigo-200/50 bg-gradient-to-r from-indigo-50/80 via-purple-50/80 to-indigo-50/80 px-5 py-3.5 shadow-sm backdrop-blur-sm transition-all hover:border-indigo-300/70 hover:shadow-md hover:scale-[1.02]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-indigo-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
-                <div className="relative flex items-center gap-3 w-full">
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="text-sm font-bold text-indigo-700">promptminder</span>
-                    <span className="text-sm text-slate-500">×</span>
-                    <span className="text-sm font-bold text-purple-700">julebu</span>
-                  </div>
-                  <p className="text-sm text-slate-700 font-medium flex-1">让你上瘾的 英语学习工具</p>
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-indigo-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </div>
-              </Link>
-            </MotionDiv>
 
             {/* Stats/Social Proof */}
             <div className="flex flex-wrap items-center gap-8 pt-4">

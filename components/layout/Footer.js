@@ -16,7 +16,7 @@ export default function Footer({ t }) {
     aiShort: 'AIshort - Excellent Prompt Collection',
     promptate: 'Promptate - Prompt Generator',
     llmReadify: 'LLM Readify - Web to Text Tool',
-    julebu: 'promptminder × julebu - An addictive English learning tool',
+    julebu: 'julebu - An addictive English learning tool',
     copyright: '© {year} PromptMinder. All rights reserved'
   };
   const currentYear = new Date().getFullYear();
