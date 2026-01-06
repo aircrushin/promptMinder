@@ -12,7 +12,7 @@ export async function POST(req) {
 
     // 使用 OpenAI SDK 发送请求
     const completion = await openai.chat.completions.create({
-      model: 'glm-4.5-flash',
+      model: 'glm-4.5',
       messages: [
         {
           role: "system",

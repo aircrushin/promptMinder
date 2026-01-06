@@ -8,7 +8,7 @@ global.Request = class Request {
     this.headers = new Map(Object.entries(options.headers || {}))
     this.body = options.body
   }
-  
+
   async json() {
     return JSON.parse(this.body || '{}')
   }
@@ -20,7 +20,18 @@ global.Response = class Response {
     this.status = options.status || 200
     this.headers = new Map(Object.entries(options.headers || {}))
   }
-  
+
+  static json(data, init = {}) {
+    const body = JSON.stringify(data)
+    return new global.Response(body, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...init.headers,
+      },
+    })
+  }
+
   async json() {
     return JSON.parse(this.body || '{}')
   }
@@ -107,6 +118,17 @@ jest.mock('@supabase/supabase-js', () => ({
     })),
     auth: {
       getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+    },
+  })),
+}))
+
+// Mock OpenAI
+jest.mock('openai', () => ({
+  default: jest.fn().mockImplementation(() => ({
+    chat: {
+      completions: {
+        create: jest.fn(),
+      },
     },
   })),
 }))
