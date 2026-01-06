@@ -21,6 +21,7 @@
     "build:optimized": "npm run css:optimize && next build"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.76",
     "@anthropic-ai/sdk": "^0.32.1",
     "@clerk/localizations": "^3.9.5",
     "@clerk/nextjs": "^6.23.3",
@@ -47,6 +48,7 @@
     "@vercel/analytics": "^1.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "diff": "^5.1.0",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.294.0",
     "motion": "^12.23.12",
@@ -63,8 +65,7 @@
     "sharp": "^0.33.5",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7",
-    "diff": "^5.1.0"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "16.0.7",
