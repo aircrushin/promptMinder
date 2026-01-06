@@ -52,6 +52,7 @@
     "subtitleEnd": "打造",
     "description": "支持版本控制、团队协作、智能分类等功能",
     "ctaButton": "免费开始使用",
+    "ctaButtonLoggedIn": "进入控制台",
     "secondaryCta": "浏览提示词合集",
     "quickHighlights": [
       {

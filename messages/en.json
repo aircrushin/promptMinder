@@ -52,6 +52,7 @@
     "subtitleEnd": "",
     "description": "Supports version control, team collaboration, smart categorization, and more.",
     "ctaButton": "Start Exploring",
+    "ctaButtonLoggedIn": "Go to Console",
     "secondaryCta": "Prompt gallery",
     "quickHighlights": [
       {

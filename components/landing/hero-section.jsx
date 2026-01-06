@@ -31,6 +31,7 @@ export function HeroSection({ t }) {
     description:
       "Supports version control, team collaboration, smart categorization, and more. Streamline your workflow and unlock the full potential of your AI prompts.",
     ctaButton: "Get Started for Free",
+    ctaButtonLoggedIn: "Go to Console",
     secondaryCta: "Explore prompt gallery",
     quickHighlights: [
       {
@@ -200,7 +201,7 @@ export function HeroSection({ t }) {
                 onClick={() => router.push(isSignedIn ? "/prompts" : "/sign-up")}
                 className="group relative inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 text-lg font-semibold text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-2xl hover:shadow-slate-900/30"
                >
-                {heroCopy.ctaButton}
+                {isSignedIn ? (heroCopy.ctaButtonLoggedIn || heroCopy.ctaButton) : heroCopy.ctaButton}
               </ParticleButton>
               <Link
                 href="/public"
