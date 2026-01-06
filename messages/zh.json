@@ -90,6 +90,11 @@
       "approvalValue": "2 位审阅者已反馈",
       "experimentsLabel": "实验",
       "experimentsValue": "成功率 92%"
+    },
+    "advertisement": {
+      "brand": "julebu",
+      "description": "让你上瘾的英语学习工具",
+      "specialOffer": "特别优惠"
     }
   },
   "features": {

@@ -61,6 +61,11 @@ export function HeroSection({ t }) {
       experimentsLabel: "Experiments",
       experimentsValue: "92% success rate",
     },
+    advertisement: {
+      brand: "julebu",
+      description: "An addictive English learning tool",
+      specialOffer: "SPECIAL OFFER",
+    },
   };
 
   const heroCopy = { ...fallback, ...(t || {}) };
@@ -107,6 +112,12 @@ export function HeroSection({ t }) {
     experimentsValue: heroCopy.snapshot?.experimentsValue || fallback.snapshot.experimentsValue,
   };
 
+  const advertisement = {
+    brand: heroCopy.advertisement?.brand || fallback.advertisement.brand,
+    description: heroCopy.advertisement?.description || fallback.advertisement.description,
+    specialOffer: heroCopy.advertisement?.specialOffer || fallback.advertisement.specialOffer,
+  };
+
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-slate-50/50">
       {/* Dynamic background with mesh gradients */}
@@ -131,17 +142,19 @@ export function HeroSection({ t }) {
             rel="noopener noreferrer"
             className="group relative inline-flex items-center gap-2.5 rounded-full border-2 border-purple-200/60 bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 px-5 py-2.5 text-sm shadow-lg shadow-purple-200/50 backdrop-blur-sm transition-all duration-300 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-300/50 hover:scale-105 hover:-translate-y-0.5 min-w-fit whitespace-nowrap"
           >
-            {/* Special Offer Badge */}
-            <span className="absolute -top-2 -right-2 inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-md">
-              Special Offer
+            <span className="absolute -top-3 -right-3 inline-flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500 px-2 py-1 text-[9px] font-extrabold text-white shadow-lg transform -rotate-6 skew-x-6 border-2 border-white/30">
+              <span className="transform rotate-6 skew-x-0">{advertisement.specialOffer}</span>
+              {/* Coupon notch effect */}
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-1 bg-white"></div>
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-1 bg-white"></div>
             </span>
             
             {/* Animated gradient overlay */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400/0 via-purple-400/10 to-purple-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             {/* Content */}
-            <span className="relative text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">julebu</span>
-            <span className="relative text-sm font-medium text-slate-700">让你上瘾的 英语学习工具</span>
+            <span className="relative text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">{advertisement.brand}</span>
+            <span className="relative text-sm font-medium text-slate-700">{advertisement.description}</span>
             <ArrowTopRightOnSquareIcon className="relative h-4 w-4 text-purple-500 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-purple-600 group-hover:scale-110" />
           </Link>
         </MotionDiv>

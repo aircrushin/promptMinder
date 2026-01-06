@@ -90,6 +90,11 @@
       "approvalValue": "2 reviewers left feedback",
       "experimentsLabel": "Experiments",
       "experimentsValue": "92% success rate"
+    },
+    "advertisement": {
+      "brand": "julebu",
+      "description": "An addictive English learning tool",
+      "specialOffer": "SPECIAL OFFER"
     }
   },
   "features": {
