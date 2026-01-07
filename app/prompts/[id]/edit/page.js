@@ -167,10 +167,7 @@ export default function EditPrompt({ params }) {
     },
     onCreateOption: async (inputValue) => {
       try {
-        if (!activeTeamId) {
-          throw new Error('请选择团队后再创建标签');
-        }
-        await apiClient.createTag({ name: inputValue }, { teamId: activeTeamId });
+        await apiClient.createTag({ name: inputValue }, activeTeamId ? { teamId: activeTeamId } : {});
         const newOption = { value: inputValue, label: inputValue };
         setTagOptions((prev) => [...prev, newOption]);
 

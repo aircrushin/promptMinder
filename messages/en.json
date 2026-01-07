@@ -536,7 +536,12 @@
     "noVersions": "No version information found",
     "noChanges": "Both versions have identical content",
     "oldVersionLabel": "Old Version",
-    "newVersionLabel": "New Version"
+    "newVersionLabel": "New Version",
+    "selectVersionsToCompare": "Select versions to compare",
+    "compareDifferences": "Compare differences between two versions",
+    "latestBadge": "Latest",
+    "loadingVersionContent": "Loading version content...",
+    "versionComparison": "Version Comparison"
   },
   "tagsPage": {
     "fetchError": "Failed to fetch tags",
