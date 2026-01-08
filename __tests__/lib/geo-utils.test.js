@@ -193,6 +193,13 @@ describe('GEO Utils', () => {
       expect(description).not.toContain('*');
       expect(description).not.toContain('_');
     });
+
+    it('应该安全处理null或undefined内容', () => {
+      expect(() => generateGEODescription(null)).not.toThrow();
+      expect(() => generateGEODescription(undefined)).not.toThrow();
+      expect(generateGEODescription(null)).toBe('');
+      expect(generateGEODescription(undefined)).toBe('');
+    });
   });
 
   describe('generateGEOKeywords', () => {
