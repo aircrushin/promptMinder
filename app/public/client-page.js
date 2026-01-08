@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useToast } from '@/hooks/use-toast';
 import Footer from '@/components/layout/Footer';
 import { apiClient } from '@/lib/api-client';
+import { generatePromptListSchema, generateBreadcrumbSchema, generateSchemaGraph } from '@/lib/geo-utils';
 
 export default function PublicPromptsClient() {
     const { language, t } = useLanguage();
@@ -255,8 +256,51 @@ export default function PublicPromptsClient() {
         );
     }
 
+    // 生成GEO优化的结构化数据
+    const structuredData = useMemo(() => {
+        if (!prompts.length) return null;
+        
+        return generateSchemaGraph([
+            // ItemList结构化数据 - 列出所有提示词
+            generatePromptListSchema(prompts, {
+                name: language === 'zh' ? 'AI提示词合集' : 'AI Prompt Collection',
+                description: language === 'zh' 
+                    ? '精选的AI提示词集合，支持ChatGPT、Claude等模型'
+                    : 'Curated collection of AI prompts for ChatGPT, Claude, and more',
+                url: '/public',
+            }),
+            // 面包屑导航
+            generateBreadcrumbSchema([
+                { name: language === 'zh' ? '首页' : 'Home', url: '/' },
+                { name: language === 'zh' ? '提示词合集' : 'Prompt Collection', url: '/public' },
+            ]),
+            // CollectionPage结构化数据
+            {
+                "@type": "CollectionPage",
+                "@id": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com'}/public#collection`,
+                name: language === 'zh' ? 'AI提示词合集' : 'AI Prompt Collection',
+                description: language === 'zh' 
+                    ? '浏览社区贡献的优质AI提示词'
+                    : 'Browse quality AI prompts contributed by the community',
+                numberOfItems: pagination.total,
+                hasPart: prompts.slice(0, 10).map(p => ({
+                    "@type": "CreativeWork",
+                    name: p.title || p.role,
+                    description: p.content?.substring(0, 100),
+                })),
+            },
+        ]);
+    }, [prompts, pagination.total, language]);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
+            {/* GEO优化：提示词合集结构化数据 */}
+            {structuredData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+                />
+            )}
             {/* Background decoration */}
             <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-black/5 via-transparent to-black/5 dark:from-white/5 dark:to-white/5 pointer-events-none -z-10" />
             <div className="relative align-center justify-center">
