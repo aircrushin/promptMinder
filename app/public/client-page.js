@@ -127,6 +127,44 @@ export default function PublicPromptsClient() {
         );
     }, [prompts, searchQuery]);
 
+    // 生成GEO优化的结构化数据
+    // 注意：Hooks 必须在所有条件 return 之前调用，避免 Hook 顺序变化导致崩溃
+    const structuredData = useMemo(() => {
+        const promptList = Array.isArray(prompts) ? prompts : [];
+        if (!promptList.length) return null;
+        
+        return generateSchemaGraph([
+            // ItemList结构化数据 - 列出所有提示词
+            generatePromptListSchema(promptList, {
+                name: language === 'zh' ? 'AI提示词合集' : 'AI Prompt Collection',
+                description: language === 'zh' 
+                    ? '精选的AI提示词集合，支持ChatGPT、Claude等模型'
+                    : 'Curated collection of AI prompts for ChatGPT, Claude, and more',
+                url: '/public',
+            }),
+            // 面包屑导航
+            generateBreadcrumbSchema([
+                { name: language === 'zh' ? '首页' : 'Home', url: '/' },
+                { name: language === 'zh' ? '提示词合集' : 'Prompt Collection', url: '/public' },
+            ]),
+            // CollectionPage结构化数据
+            {
+                "@type": "CollectionPage",
+                "@id": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com'}/public#collection`,
+                name: language === 'zh' ? 'AI提示词合集' : 'AI Prompt Collection',
+                description: language === 'zh' 
+                    ? '浏览社区贡献的优质AI提示词'
+                    : 'Browse quality AI prompts contributed by the community',
+                numberOfItems: pagination.total,
+                hasPart: promptList.slice(0, 10).map(p => ({
+                    "@type": "CreativeWork",
+                    name: p.title || p.role,
+                    description: p.content?.substring(0, 100),
+                })),
+            },
+        ]);
+    }, [prompts, pagination.total, language]);
+
     // 清空搜索
     const clearSearch = () => {
         setSearchQuery('');
@@ -255,42 +293,6 @@ export default function PublicPromptsClient() {
             </div>
         );
     }
-
-    // 生成GEO优化的结构化数据
-    const structuredData = useMemo(() => {
-        if (!prompts.length) return null;
-        
-        return generateSchemaGraph([
-            // ItemList结构化数据 - 列出所有提示词
-            generatePromptListSchema(prompts, {
-                name: language === 'zh' ? 'AI提示词合集' : 'AI Prompt Collection',
-                description: language === 'zh' 
-                    ? '精选的AI提示词集合，支持ChatGPT、Claude等模型'
-                    : 'Curated collection of AI prompts for ChatGPT, Claude, and more',
-                url: '/public',
-            }),
-            // 面包屑导航
-            generateBreadcrumbSchema([
-                { name: language === 'zh' ? '首页' : 'Home', url: '/' },
-                { name: language === 'zh' ? '提示词合集' : 'Prompt Collection', url: '/public' },
-            ]),
-            // CollectionPage结构化数据
-            {
-                "@type": "CollectionPage",
-                "@id": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com'}/public#collection`,
-                name: language === 'zh' ? 'AI提示词合集' : 'AI Prompt Collection',
-                description: language === 'zh' 
-                    ? '浏览社区贡献的优质AI提示词'
-                    : 'Browse quality AI prompts contributed by the community',
-                numberOfItems: pagination.total,
-                hasPart: prompts.slice(0, 10).map(p => ({
-                    "@type": "CreativeWork",
-                    name: p.title || p.role,
-                    description: p.content?.substring(0, 100),
-                })),
-            },
-        ]);
-    }, [prompts, pagination.total, language]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
