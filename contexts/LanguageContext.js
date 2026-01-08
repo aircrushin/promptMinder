@@ -26,15 +26,24 @@ export function LanguageProvider({ children }) {
 
     setMounted(true);
 
-    // 组件挂载时，尝试从 localStorage 读取语言设置
-    const savedLanguage = localStorage.getItem('language');
-    if (savedLanguage && translations[savedLanguage]) {
-      setLanguage(savedLanguage);
-      document.documentElement.lang = savedLanguage;
-    } else {
-      // 如果 localStorage 没有或无效，则设置默认语言的 lang 属性
-      document.documentElement.lang = 'zh';
-    }
+    const normalize = (value) => (value === 'en' ? 'en' : value === 'zh' ? 'zh' : null);
+
+    // 优先级：URL 参数 > localStorage > cookie > 默认
+    const params = new URLSearchParams(window.location.search);
+    const langFromQuery = normalize(params.get('lang'));
+    const langFromStorage = normalize(localStorage.getItem('language'));
+    const langFromCookie = normalize(
+      document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('language='))
+        ?.split('=')[1]
+    );
+
+    const resolved = langFromQuery || langFromStorage || langFromCookie || 'zh';
+    setLanguage(resolved);
+    localStorage.setItem('language', resolved);
+    document.cookie = `language=${resolved}; path=/; max-age=31536000; samesite=lax`;
+    document.documentElement.lang = resolved === 'en' ? 'en' : 'zh-CN';
   }, []); // 空依赖数组，只在挂载时运行一次
 
   const toggleLanguage = useCallback(() => {
@@ -44,8 +53,10 @@ export function LanguageProvider({ children }) {
       const newLanguage = prevLanguage === 'en' ? 'zh' : 'en';
       // 保存到 localStorage
       localStorage.setItem('language', newLanguage);
+      // 保存到 cookie（便于首访/地域默认）
+      document.cookie = `language=${newLanguage}; path=/; max-age=31536000; samesite=lax`;
       // 更新 HTML lang 属性
-      document.documentElement.lang = newLanguage;
+      document.documentElement.lang = newLanguage === 'en' ? 'en' : 'zh-CN';
       return newLanguage;
     });
   }, []);

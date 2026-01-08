@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
+import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -22,6 +23,12 @@ export const metadata = {
     "AI助手",
     "提示词管理",
   ],
+  applicationName: "Prompt Minder",
+  category: "productivity",
+  creator: "Prompt Minder",
+  publisher: "Prompt Minder",
+  formatDetection: { email: false, address: false, telephone: false },
+  manifest: "/manifest.webmanifest",
   // Do not set a global canonical to avoid incorrect canonical on nested routes
   robots: {
     index: true,
@@ -41,6 +48,8 @@ export const metadata = {
     description:
       "为AI从业者打造的提示词管理工具，支持版本控制、团队协作、智能分类等功能",
     siteName: "Prompt Minder",
+    locale: "zh_CN",
+    alternateLocale: ["en_US"],
     images: [
       {
         url: "/main-page.png",
@@ -59,6 +68,11 @@ export const metadata = {
   },
   icons: {
     icon: "/favicon.ico",
+  },
+  other: {
+    // 非标准但常见的地域信号（尽量保守，不做过度“硬定位”）
+    "geo.region": "CN",
+    "og:locale:alternate": "en_US",
   },
 };
 
@@ -86,8 +100,11 @@ const structuredData = {
 };
 
 export default function RootLayout({ children }) {
+  const cookieStore = cookies();
+  const lang = cookieStore.get("language")?.value === "en" ? "en" : "zh-CN";
+
   return (
-    <html lang="zh">
+    <html lang={lang}>
       <head>
         <script
           type="application/ld+json"

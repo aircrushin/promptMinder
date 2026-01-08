@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -84,6 +84,8 @@
     "postcss": "^8",
     "supertest": "^7.1.4",
     "tailwindcss": "^3.4.1",
+    "typescript": "^5.9.3",
+    "undici": "^7.18.2",
     "webpack-bundle-analyzer": "^4.10.2"
   }
 }

@@ -6,17 +6,15 @@ export default async function sitemap() {
 
   const staticRoutes = [
     '/',
-    '/prompts',
     '/public',
     '/playground',
-    '/tags',
     '/privacy',
     '/terms',
-    '/sign-in',
-    '/sign-up',
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: now,
+    changeFrequency: route === '/' ? 'daily' : 'weekly',
+    priority: route === '/' ? 1.0 : 0.6,
   }));
 
   // Optional dynamic routes
@@ -32,6 +30,8 @@ export default async function sitemap() {
           dynamicRoutes.push({
             url: `${BASE_URL}/share/${p.id}`,
             lastModified: p.updated_at || now,
+            changeFrequency: 'weekly',
+            priority: 0.5,
           });
         }
       }

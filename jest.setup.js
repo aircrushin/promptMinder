@@ -1,41 +1,48 @@
-import '@testing-library/jest-dom'
+const React = require('react');
+require('@testing-library/jest-dom');
 
-// Mock Next.js Request and Response
+// Mock Next.js Request and Response（避免破坏 NextRequest：不要用 this.url = ... 这种写法）
 global.Request = class Request {
   constructor(url, options = {}) {
-    this.url = url
-    this.method = options.method || 'GET'
-    this.headers = new Map(Object.entries(options.headers || {}))
-    this.body = options.body
+    Object.defineProperty(this, 'url', { value: url, enumerable: true });
+    Object.defineProperty(this, 'method', { value: options.method || 'GET', enumerable: true });
+    Object.defineProperty(this, 'headers', {
+      value: new Map(Object.entries(options.headers || {})),
+      enumerable: true,
+    });
+    Object.defineProperty(this, 'body', { value: options.body, enumerable: true });
   }
 
   async json() {
-    return JSON.parse(this.body || '{}')
+    return JSON.parse(this.body || '{}');
   }
-}
+};
 
 global.Response = class Response {
   constructor(body, options = {}) {
-    this.body = body
-    this.status = options.status || 200
-    this.headers = new Map(Object.entries(options.headers || {}))
+    Object.defineProperty(this, 'body', { value: body, enumerable: true });
+    Object.defineProperty(this, 'status', { value: options.status || 200, enumerable: true });
+    Object.defineProperty(this, 'headers', {
+      value: new Map(Object.entries(options.headers || {})),
+      enumerable: true,
+    });
   }
 
   static json(data, init = {}) {
-    const body = JSON.stringify(data)
+    const body = JSON.stringify(data);
     return new global.Response(body, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
         ...init.headers,
       },
-    })
+    });
   }
 
   async json() {
-    return JSON.parse(this.body || '{}')
+    return JSON.parse(this.body || '{}');
   }
-}
+};
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
