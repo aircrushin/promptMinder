@@ -20,8 +20,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { extractVariables, replaceVariables } from '@/lib/promptVariables';
-import { Play, Loader2, Sparkles, RotateCcw, Download, Search, FileText } from 'lucide-react';
+import { Play, Loader2, Sparkles, RotateCcw, Download, Search, FileText, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const LOCAL_STORAGE_KEY = 'playground_state';
 
@@ -70,6 +77,33 @@ function PlaygroundContent() {
   const [promptResults, setPromptResults] = useState([]);
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false);
   const [promptsError, setPromptsError] = useState('');
+  const [selectedVersions, setSelectedVersions] = useState({});
+
+  // Group prompts by title, keeping all versions for each unique title
+  const groupedPrompts = promptResults.reduce((groups, prompt) => {
+    const title = prompt.title || 'Untitled';
+    if (!groups[title]) {
+      groups[title] = [];
+    }
+    groups[title].push(prompt);
+    return groups;
+  }, {});
+
+  // Sort versions within each group by version number (descending)
+  Object.keys(groupedPrompts).forEach((title) => {
+    groupedPrompts[title].sort((a, b) => {
+      const versionA = parseInt((a.version || 'v1').replace('v', ''), 10) || 1;
+      const versionB = parseInt((b.version || 'v1').replace('v', ''), 10) || 1;
+      return versionB - versionA;
+    });
+  });
+
+  // Get the currently selected prompt for each group
+  const getSelectedPrompt = (title) => {
+    const prompts = groupedPrompts[title];
+    const selectedId = selectedVersions[title];
+    return prompts.find((p) => p.id === selectedId) || prompts[0];
+  };
 
   // Extract variables from prompt template
   const variables = extractVariables(promptTemplate);
@@ -582,59 +616,106 @@ function PlaygroundContent() {
                 <div className="py-10 text-center text-sm text-red-500">
                   {promptsError}
                 </div>
-              ) : promptResults.length === 0 ? (
+              ) : Object.keys(groupedPrompts).length === 0 ? (
                 <div className="py-10 text-center text-sm text-muted-foreground">
                   {pg.noPromptsFound || 'No prompts found. Try adjusting your search.'}
                 </div>
               ) : (
-                promptResults.map((prompt) => (
-                  <button
-                    key={prompt.id}
-                    type="button"
-                    onClick={() => handleImportPrompt(prompt)}
-                    className="w-full text-left p-4 hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-slate-900 line-clamp-1">
-                            {prompt.title || pg.untitledPrompt || 'Untitled prompt'}
-                          </h4>
-                          <span className="text-xs text-muted-foreground">
-                            {prompt.version || 'v1'}
-                          </span>
+                Object.keys(groupedPrompts).map((title) => {
+                  const prompts = groupedPrompts[title];
+                  const selectedPrompt = getSelectedPrompt(title);
+                  const hasMultipleVersions = prompts.length > 1;
+                  
+                  return (
+                    <div
+                      key={title}
+                      className="w-full text-left p-4 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+                          <FileText className="h-5 w-5" />
                         </div>
-                        {prompt.description && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                            {prompt.description}
-                          </p>
-                        )}
-                        <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
-                          {prompt.tags && (
-                            <span className="inline-flex items-center gap-1">
-                              {Array.isArray(prompt.tags)
-                                ? prompt.tags.join(', ')
-                                : prompt.tags}
-                            </span>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="font-medium text-slate-900 line-clamp-1 flex-1">
+                              {title || pg.untitledPrompt || 'Untitled prompt'}
+                            </h4>
+                            <div className="flex items-center gap-2">
+                              {hasMultipleVersions ? (
+                                <Select
+                                  value={selectedPrompt.id}
+                                  onValueChange={(value) => {
+                                    setSelectedVersions((prev) => ({
+                                      ...prev,
+                                      [title]: value,
+                                    }));
+                                  }}
+                                >
+                                  <SelectTrigger className="h-7 w-auto min-w-[70px] text-xs">
+                                    <SelectValue>
+                                      {selectedPrompt.version || 'v1'}
+                                    </SelectValue>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {prompts.map((p) => (
+                                      <SelectItem key={p.id} value={p.id}>
+                                        {p.version || 'v1'}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">
+                                  {selectedPrompt.version || 'v1'}
+                                </span>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={() => handleImportPrompt(selectedPrompt)}
+                              >
+                                {pg.importButton || 'Import'}
+                              </Button>
+                            </div>
+                          </div>
+                          {selectedPrompt.description && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              {selectedPrompt.description}
+                            </p>
                           )}
-                          <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
-                          <span>
-                            {(() => {
-                              const updatedDate = new Date(prompt.updated_at || prompt.created_at).toLocaleDateString();
-                              return (
-                                formatMessage(pg.updatedAt, { date: updatedDate }) ||
-                                `Updated ${updatedDate}`
-                              );
-                            })()}
-                          </span>
+                          <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
+                            {selectedPrompt.tags && (
+                              <span className="inline-flex items-center gap-1">
+                                {Array.isArray(selectedPrompt.tags)
+                                  ? selectedPrompt.tags.join(', ')
+                                  : selectedPrompt.tags}
+                              </span>
+                            )}
+                            {selectedPrompt.tags && <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />}
+                            <span>
+                              {(() => {
+                                const updatedDate = new Date(selectedPrompt.updated_at || selectedPrompt.created_at).toLocaleDateString();
+                                return (
+                                  formatMessage(pg.updatedAt, { date: updatedDate }) ||
+                                  `Updated ${updatedDate}`
+                                );
+                              })()}
+                            </span>
+                            {hasMultipleVersions && (
+                              <>
+                                <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
+                                <span className="text-indigo-600">
+                                  {prompts.length} {pg.versions || 'versions'}
+                                </span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </button>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

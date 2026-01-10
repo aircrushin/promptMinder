@@ -1134,6 +1134,8 @@
     "unableToLoadPrompts": "无法加载提示词",
     "systemPrompt": "系统提示词 (解析后)",
     "userPrompt": "用户提示词",
-    "userPromptPlaceholder": "输入用户消息..."
+    "userPromptPlaceholder": "输入用户消息...",
+    "importButton": "导入",
+    "versions": "个版本"
   }
 }

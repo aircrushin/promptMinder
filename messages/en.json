@@ -1112,6 +1112,8 @@
     "unableToLoadPrompts": "Unable to load prompts",
     "systemPrompt": "System Prompt (Resolved)",
     "userPrompt": "User Prompt",
-    "userPromptPlaceholder": "Enter user message..."
+    "userPromptPlaceholder": "Enter user message...",
+    "importButton": "Import",
+    "versions": "versions"
   }
 }
