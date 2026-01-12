@@ -1020,6 +1020,15 @@
     "goTo": "跳至",
     "page": "页"
   },
+  "favorites": {
+    "title": "收藏夹",
+    "addSuccess": "已添加到收藏夹",
+    "removeSuccess": "已从收藏夹移除",
+    "addError": "添加收藏失败",
+    "removeError": "移除收藏失败",
+    "empty": "暂无收藏的提示词",
+    "emptyDescription": "点击提示词卡片上的收藏按钮来收藏喜欢的提示词"
+  },
   "playground": {
     "title": "提示词实验台",
     "subtitle": "与提示词详情页保持一致的工作台，可导入模板、调整变量并直观对比多种场景下的结果。",

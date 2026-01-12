@@ -998,6 +998,15 @@
     "goTo": "Go to",
     "page": "page"
   },
+  "favorites": {
+    "title": "Favorites",
+    "addSuccess": "Added to favorites",
+    "removeSuccess": "Removed from favorites",
+    "addError": "Failed to add to favorites",
+    "removeError": "Failed to remove from favorites",
+    "empty": "No favorite prompts yet",
+    "emptyDescription": "Click the favorite button on prompt cards to save your favorite prompts"
+  },
   "playground": {
     "title": "Prompt Experiment Console",
     "subtitle": "A workspace aligned with the prompt detail page so you can import templates, tweak variables, and visually compare results for multiple scenarios.",

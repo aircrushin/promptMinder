@@ -27,7 +27,8 @@ import { debounce } from "@/lib/debounce-utils";
 import { PromptGrid, PromptGridSkeleton } from "@/components/prompt/PromptGrid";
 import { NewPromptDialog } from "@/components/prompt/NewPromptDialog";
 import { OptimizePromptDialog } from "@/components/prompt/OptimizePromptDialog";
-import { Search, Tags, ChevronDown } from "lucide-react";
+import { Search, Tags, ChevronDown, Heart } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TagFilter = dynamic(() => import("@/components/prompt/TagFilter"), {
   loading: () => <Skeleton className="h-10 w-32" />,
@@ -62,6 +63,16 @@ export default function PromptsPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
+  const [activeTab, setActiveTab] = useState("all");
+  const [favoriteStatus, setFavoriteStatus] = useState({});
+  const [favorites, setFavorites] = useState([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [favoritesPagination, setFavoritesPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0
+  });
   
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -373,9 +384,115 @@ export default function PromptsPage() {
     setShowOptimizeModal(false);
   }, [optimizedContent]);
 
+  const fetchFavorites = useCallback(async () => {
+    try {
+      setFavoritesLoading(true);
+      const data = await apiClient.getFavorites({
+        page: favoritesPagination.page,
+        limit: favoritesPagination.limit
+      });
+      
+      const normalizePrompt = (prompt) => ({
+        ...prompt,
+        version: prompt.version || "1.0",
+        cover_img: prompt.cover_img || "/default-cover.jpg",
+        tags: Array.isArray(prompt.tags)
+          ? prompt.tags
+          : (prompt.tags || "").split(",").filter(Boolean),
+      });
+      
+      if (data.prompts) {
+        setFavorites(data.prompts.map(normalizePrompt));
+        setFavoritesPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  }, [favoritesPagination.page, favoritesPagination.limit]);
+
+  const checkFavoriteStatus = useCallback(async (promptIds) => {
+    if (!promptIds || promptIds.length === 0) return;
+    try {
+      const { favorites } = await apiClient.checkFavorites(promptIds);
+      setFavoriteStatus(prev => ({ ...prev, ...favorites }));
+    } catch (error) {
+      console.error("Error checking favorites:", error);
+    }
+  }, []);
+
+  const handleToggleFavorite = useCallback(async (promptId, currentStatus) => {
+    if (!t?.favorites) return;
+    
+    const newStatus = !currentStatus;
+    
+    setFavoriteStatus(prev => ({ ...prev, [promptId]: newStatus }));
+    
+    let removedPrompt = null;
+    let removedIndex = -1;
+    if (currentStatus && activeTab === "favorites") {
+      removedIndex = favorites.findIndex(p => p.id === promptId);
+      if (removedIndex !== -1) {
+        removedPrompt = favorites[removedIndex];
+      }
+      setFavorites(prev => prev.filter(p => p.id !== promptId));
+      setFavoritesPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+    }
+    
+    try {
+      if (currentStatus) {
+        await apiClient.removeFavorite(promptId);
+        toast({
+          description: t.favorites.removeSuccess,
+          duration: 2000,
+        });
+      } else {
+        await apiClient.addFavorite(promptId);
+        toast({
+          description: t.favorites.addSuccess,
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      
+      setFavoriteStatus(prev => ({ ...prev, [promptId]: currentStatus }));
+      
+      if (removedPrompt && activeTab === "favorites") {
+        setFavorites(prev => {
+          const newFavorites = [...prev];
+          newFavorites.splice(removedIndex, 0, removedPrompt);
+          return newFavorites;
+        });
+        setFavoritesPagination(prev => ({ ...prev, total: prev.total + 1 }));
+      }
+      
+      toast({
+        variant: "destructive",
+        description: currentStatus ? t.favorites.removeError : t.favorites.addError,
+        duration: 2000,
+      });
+    }
+  }, [toast, t?.favorites, activeTab, favorites]);
+
+  const handleTabChange = useCallback((value) => {
+    setActiveTab(value);
+    if (value === "favorites") {
+      fetchFavorites();
+    }
+  }, [fetchFavorites]);
+
   useEffect(() => {
     fetchPrompts();
   }, [fetchPrompts]);
+
+  useEffect(() => {
+    if (prompts.length > 0) {
+      const promptIds = prompts.map(p => p.id);
+      checkFavoriteStatus(promptIds);
+    }
+  }, [prompts, checkFavoriteStatus]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -423,6 +540,7 @@ export default function PromptsPage() {
     <div className="min-h-[80vh] bg-white">
       <div className="container px-4 py-10 sm:py-16 mx-auto max-w-7xl">
         <div className="space-y-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-8">
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <h1 className="text-3xl font-bold tracking-tight">{tp.title}</h1>
@@ -443,7 +561,7 @@ export default function PromptsPage() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3 md:gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="relative w-full md:w-[320px]">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
                   <Search className="h-4 w-4" />
@@ -455,72 +573,158 @@ export default function PromptsPage() {
                   className="w-full h-10 pl-9 pr-4 transition-all duration-200 ease-in-out border rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary"
                 />
               </div>
-              {!isLoading && (
-                <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:gap-4">
-                  <TagFilter
-                    allTags={allTags}
-                    selectedTags={selectedTags}
-                    onTagSelect={setSelectedTags}
-                    className="touch-manipulation w-full md:w-auto"
-                    t={t}
-                  />
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="group px-3 self-start md:self-auto"
-                  >
-                    <Link href="/tags">
-                      <Tags className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
-                      <span className="group-hover:text-primary transition-colors">
-                        {tp.manageTags}
-                      </span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
+              
+              <TabsList className="h-10 p-1 bg-secondary/20">
+                <TabsTrigger value="all" className="gap-2 h-8">
+                  <Tags className="h-3.5 w-3.5" />
+                  <span className="text-sm font-medium">{tp.title}</span>
+                </TabsTrigger>
+                <TabsTrigger value="favorites" className="gap-2 h-8">
+                  <Heart className="h-3.5 w-3.5" />
+                  <span className="text-sm font-medium">{t.favorites?.title || "收藏夹"}</span>
+                </TabsTrigger>
+              </TabsList>
             </div>
+
+            {!isLoading && (
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                <TagFilter
+                  allTags={allTags}
+                  selectedTags={selectedTags}
+                  onTagSelect={setSelectedTags}
+                  className="touch-manipulation w-full md:w-auto"
+                  t={t}
+                />
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="group px-3 self-start md:self-auto"
+                >
+                  <Link href="/tags">
+                    <Tags className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
+                    <span className="group-hover:text-primary transition-colors">
+                      {tp.manageTags}
+                    </span>
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
 
-          {isLoading ? (
-            <div className="mt-8">
-              <PromptGridSkeleton />
-            </div>
-          ) : (
-            <>
-              <PromptGrid
-                groups={groupedPrompts}
-                onCreatePrompt={() => setShowNewPromptDialog(true)}
-                onCopyPrompt={handleCopy}
-                onSharePrompt={handleShare}
-                onDeletePrompt={handleDelete}
-                onOpenVersions={showVersions}
-                onOpenPrompt={handleOpenPrompt}
-                translations={t}
-                user={user}
-                role={activeMembership?.role}
-                isPersonal={isPersonal}
-              />
+          <div className="w-full">
+            {activeTab === "all" && (
+              <>
+                {isLoading ? (
+                  <div className="mt-8">
+                    <PromptGridSkeleton />
+                  </div>
+                ) : (
+                  <>
+                    <PromptGrid
+                      groups={groupedPrompts}
+                      onCreatePrompt={() => setShowNewPromptDialog(true)}
+                      onCopyPrompt={handleCopy}
+                      onSharePrompt={handleShare}
+                      onDeletePrompt={handleDelete}
+                      onOpenVersions={showVersions}
+                      onOpenPrompt={handleOpenPrompt}
+                      onToggleFavorite={handleToggleFavorite}
+                      favoriteStatus={favoriteStatus}
+                      translations={t}
+                      user={user}
+                      role={activeMembership?.role}
+                      isPersonal={isPersonal}
+                    />
 
-              {pagination.totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <Pagination
-                    currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
-                    total={pagination.total}
-                    pageSize={pagination.limit}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                    showSizeChanger={true}
-                    pageSizeOptions={[10, 20, 50]}
-                    className="w-full"
-                    t={t}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+                    {pagination.totalPages > 1 && (
+                      <div className="mt-8 flex justify-center">
+                        <Pagination
+                          currentPage={pagination.page}
+                          totalPages={pagination.totalPages}
+                          total={pagination.total}
+                          pageSize={pagination.limit}
+                          onPageChange={handlePageChange}
+                          onPageSizeChange={handlePageSizeChange}
+                          showSizeChanger={true}
+                          pageSizeOptions={[10, 20, 50]}
+                          className="w-full"
+                          t={t}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {activeTab === "favorites" && (
+              <>
+                {favoritesLoading ? (
+                  <div className="mt-8">
+                    <PromptGridSkeleton />
+                  </div>
+                ) : favorites.length === 0 ? (
+                  <div className="mt-8 flex flex-col items-center justify-center py-16 text-center">
+                    <div className="bg-secondary/30 p-4 rounded-full mb-4">
+                      <Heart className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      {t.favorites?.empty || "暂无收藏的提示词"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      {t.favorites?.emptyDescription || "点击提示词卡片上的收藏按钮来收藏喜欢的提示词"}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <PromptGrid
+                      groups={favorites.reduce((acc, prompt) => {
+                        const title = prompt.title || "Untitled";
+                        const existing = acc.find(g => g.title === title);
+                        if (existing) {
+                          existing.versions.push(prompt);
+                        } else {
+                          acc.push({ title, versions: [prompt] });
+                        }
+                        return acc;
+                      }, [])}
+                      onCreatePrompt={() => setShowNewPromptDialog(true)}
+                      onCopyPrompt={handleCopy}
+                      onSharePrompt={handleShare}
+                      onDeletePrompt={handleDelete}
+                      onOpenVersions={showVersions}
+                      onOpenPrompt={handleOpenPrompt}
+                      onToggleFavorite={handleToggleFavorite}
+                      favoriteStatus={favorites.reduce((acc, p) => ({ ...acc, [p.id]: true }), {})}
+                      translations={t}
+                      user={user}
+                      role={activeMembership?.role}
+                      isPersonal={isPersonal}
+                    />
+
+                    {favoritesPagination.totalPages > 1 && (
+                      <div className="mt-8 flex justify-center">
+                        <Pagination
+                          currentPage={favoritesPagination.page}
+                          totalPages={favoritesPagination.totalPages}
+                          total={favoritesPagination.total}
+                          pageSize={favoritesPagination.limit}
+                          onPageChange={(page) => setFavoritesPagination(prev => ({ ...prev, page }))}
+                          onPageSizeChange={(size) => setFavoritesPagination(prev => ({ ...prev, limit: size, page: 1 }))}
+                          showSizeChanger={true}
+                          pageSizeOptions={[10, 20, 50]}
+                          className="w-full"
+                          t={t}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </Tabs>
       </div>
       <Dialog
         open={!!selectedVersions}
@@ -620,5 +824,6 @@ export default function PromptsPage() {
         }}
       />
     </div>
-  );
+  </div>
+);
 } 

@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Share2, Trash2, Clock, PlusCircle } from "lucide-react";
+import { Copy, Share2, Trash2, Clock, PlusCircle, Heart } from "lucide-react";
 import { extractVariables } from "@/lib/promptVariables";
 
 const PromptCardSkeleton = () => (
@@ -66,6 +66,8 @@ export function PromptGrid({
   onDeletePrompt,
   onOpenVersions,
   onOpenPrompt,
+  onToggleFavorite,
+  favoriteStatus = {},
   translations,
   user,
   role,
@@ -93,6 +95,7 @@ export function PromptGrid({
         const isCreator = latestPrompt.created_by === user?.id || latestPrompt.user_id === user?.id;
         const isManager = role === 'admin' || role === 'owner';
         const canManage = isPersonal || isCreator || isManager;
+        const isFavorited = favoriteStatus[latestPrompt.id] || false;
 
         const handleCardClick = () => {
           if (versions.length > 1) {
@@ -123,6 +126,17 @@ export function PromptGrid({
                 </div>
                 <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 bg-background/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
                   <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onToggleFavorite?.(latestPrompt.id, isFavorited);
+                      }}
+                      className={`h-8 w-8 ${isFavorited ? 'text-red-500 hover:text-red-600' : 'hover:text-red-500'}`}
+                    >
+                      <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
