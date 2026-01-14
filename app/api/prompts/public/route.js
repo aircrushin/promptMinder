@@ -63,13 +63,30 @@ export async function GET(request) {
             allPrompts = parsePromptsFromFile(filePath, language);
         }
 
-        // 2. 从数据库获取已发布的贡献提示词
+        // 2. 从数据库获取数据
         try {
             const supabase = createClient(
                 process.env.SUPABASE_URL,
                 process.env.SUPABASE_ANON_KEY
             );
 
+            // 2.1 从 public_prompts 表获取管理员添加的公开提示词
+            const { data: publicPrompts, error: publicError } = await supabase
+                .from('public_prompts')
+                .select('title, role_category, content, category')
+                .eq('language', language)
+                .order('created_at', { ascending: false });
+
+            if (!publicError && publicPrompts) {
+                const dbPrompts = publicPrompts.map(p => ({
+                    category: p.category || (language === 'zh' ? '通用' : 'General'),
+                    role: p.role_category || p.title,
+                    prompt: p.content
+                }));
+                allPrompts = [...dbPrompts, ...allPrompts];
+            }
+
+            // 2.2 从已发布的贡献提示词获取
             const { data: publishedContributions, error } = await supabase
                 .from('prompt_contributions')
                 .select('title, role_category, content')
@@ -88,7 +105,7 @@ export async function GET(request) {
                 allPrompts = [...allPrompts, ...contributionPrompts];
             }
         } catch (dbError) {
-            console.error('Error fetching published contributions:', dbError);
+            console.error('Error fetching prompts from database:', dbError);
             // 即使数据库查询失败，仍然返回 markdown 文件中的提示词
         }
 
