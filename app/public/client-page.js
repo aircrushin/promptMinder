@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +30,10 @@ export default function PublicPromptsClient() {
         content: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // 分类筛选状态
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
     
     // 分页状态
     const [currentPage, setCurrentPage] = useState(1);
@@ -72,8 +76,18 @@ export default function PublicPromptsClient() {
                 setLoading(true);
                 setError(null);
                 
-                const data = await apiClient.request(`/api/prompts/public?lang=${language}&page=${currentPage}&pageSize=${pageSize}`);
+                const params = new URLSearchParams({
+                    lang: language,
+                    page: currentPage.toString(),
+                    pageSize: pageSize.toString()
+                });
+                if (selectedCategory) {
+                    params.set('category', selectedCategory);
+                }
+                
+                const data = await apiClient.request(`/api/prompts/public?${params.toString()}`);
                 setPrompts(data.prompts || []);
+                setCategories(data.categories || []);
                 setPagination(data.pagination || {
                     total: 0,
                     totalPages: 0,
@@ -94,7 +108,13 @@ export default function PublicPromptsClient() {
         };
         
         fetchPrompts();
-    }, [language, currentPage, pageSize]); // 当语言或页码改变时重新获取数据
+    }, [language, currentPage, pageSize, selectedCategory]); // 当语言、页码或分类改变时重新获取数据
+    
+    // 切换分类时重置页码
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
+        setCurrentPage(1);
+    };
 
     // 分页导航函数
     const goToPage = (page) => {
@@ -435,6 +455,35 @@ export default function PublicPromptsClient() {
                                 </DialogContent>
                             </Dialog>
                         </div>
+                        
+                        {/* 分类筛选器 */}
+                        {categories.length > 0 && (
+                            <div className="flex flex-wrap gap-2 justify-center mt-6">
+                                <button
+                                    onClick={() => handleCategoryChange('')}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                        selectedCategory === ''
+                                            ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    {language === 'zh' ? '全部' : 'All'}
+                                </button>
+                                {categories.map((category) => (
+                                    <button
+                                        key={category}
+                                        onClick={() => handleCategoryChange(category)}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                            selectedCategory === category
+                                                ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
+                                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Masonry/Waterfall layout */}
