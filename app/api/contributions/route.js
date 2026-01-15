@@ -5,7 +5,7 @@ export async function POST(request) {
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
-    const { title, role, content, contributorEmail, contributorName } = await request.json();
+    const { title, role, content, language, contributorEmail, contributorName } = await request.json();
 
     // 验证必填字段
     if (!title || !title.trim()) {
@@ -26,6 +26,7 @@ export async function POST(request) {
       title: title.trim(),
       role_category: role.trim(),
       content: content.trim(),
+      language: language || 'zh',
       contributor_email: contributorEmail?.trim() || null,
       contributor_name: contributorName?.trim() || null,
       status: 'pending',

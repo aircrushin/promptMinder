@@ -65,28 +65,28 @@ export async function PATCH(request, { params }) {
     // 如果状态是approved且需要发布到公共提示词库
     let publishedPromptId = null;
     if (status === 'approved' && publishToPrompts) {
-      // 创建新的公共提示词
-      const promptData = {
+      // 创建新的公共提示词到 public_prompts 表
+      const contributionLanguage = existingContribution.language || 'zh';
+      const publicPromptData = {
         id: crypto.randomUUID(),
         title: existingContribution.title,
+        role_category: existingContribution.role_category,
         content: existingContribution.content,
-        description: `Contributed by community. Category: ${existingContribution.role_category}`,
-        tags: existingContribution.role_category,
-        version: '1.0.0',
-        is_public: true,
-        user_id: null, // 公共提示词没有特定用户
+        category: contributionLanguage === 'zh' ? '社区贡献' : 'Community',
+        language: contributionLanguage,
+        created_by: existingContribution.contributor_email || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
       const { data: newPrompt, error: promptError } = await supabase
-        .from('prompts')
-        .insert([promptData])
+        .from('public_prompts')
+        .insert([publicPromptData])
         .select()
         .single();
 
       if (promptError) {
-        console.error('Failed to create prompt:', promptError);
+        console.error('Failed to create public prompt:', promptError);
         return NextResponse.json({ error: 'Failed to publish prompt' }, { status: 500 });
       }
 

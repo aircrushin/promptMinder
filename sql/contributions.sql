@@ -6,6 +6,7 @@ CREATE TABLE prompt_contributions (
     title TEXT NOT NULL,
     role_category TEXT NOT NULL, -- 角色/类别
     content TEXT NOT NULL,
+    language TEXT DEFAULT 'zh', -- 语言 (zh/en)
     contributor_email TEXT, -- 贡献者邮箱（可选）
     contributor_name TEXT, -- 贡献者姓名（可选）
     status TEXT NOT NULL DEFAULT 'pending', -- 状态: pending, approved, rejected
@@ -15,6 +16,7 @@ CREATE TABLE prompt_contributions (
     reviewed_at TIMESTAMPTZ, -- 审核时间
     reviewed_by TEXT, -- 审核人员ID
     published_prompt_id UUID, -- 发布后对应的prompt ID（如果审核通过）
+    
     
     -- 添加约束
     CONSTRAINT valid_status CHECK (status IN ('pending', 'approved', 'rejected'))

@@ -27,7 +27,8 @@ export default function PublicPromptsClient() {
     const [contributeForm, setContributeForm] = useState({
         title: '',
         role: '',
-        content: ''
+        content: '',
+        language: 'zh'
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     
@@ -228,7 +229,8 @@ export default function PublicPromptsClient() {
                 body: {
                     title: contributeForm.title.trim(),
                     role: contributeForm.role.trim(),
-                    content: contributeForm.content.trim()
+                    content: contributeForm.content.trim(),
+                    language: contributeForm.language
                 },
             });
             
@@ -243,7 +245,8 @@ export default function PublicPromptsClient() {
             setContributeForm({
                 title: '',
                 role: '',
-                content: ''
+                content: '',
+                language: 'zh'
             });
             
             // 关闭弹窗
@@ -431,6 +434,37 @@ export default function PublicPromptsClient() {
                                                 disabled={isSubmitting}
                                                 className="resize-none"
                                             />
+                                        </div>
+                                        
+                                        {/* 语言选择 */}
+                                        <div className="space-y-2">
+                                            <Label>{language === 'zh' ? '语言' : 'Language'}</Label>
+                                            <div className="flex gap-4">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="contribute-language"
+                                                        value="zh"
+                                                        checked={contributeForm.language === 'zh'}
+                                                        onChange={(e) => handleContributeInputChange('language', e.target.value)}
+                                                        disabled={isSubmitting}
+                                                        className="w-4 h-4 text-slate-900"
+                                                    />
+                                                    <span className="text-sm">中文</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="contribute-language"
+                                                        value="en"
+                                                        checked={contributeForm.language === 'en'}
+                                                        onChange={(e) => handleContributeInputChange('language', e.target.value)}
+                                                        disabled={isSubmitting}
+                                                        className="w-4 h-4 text-slate-900"
+                                                    />
+                                                    <span className="text-sm">English</span>
+                                                </label>
+                                            </div>
                                         </div>
                                         
                                         {/* 按钮 */}
