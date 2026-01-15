@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shield, LayoutDashboard, ArrowLeft, LogOut } from "lucide-react";
+import { Shield, LayoutDashboard, ArrowLeft, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminAuth, { useAdminAuth } from "@/components/admin/AdminAuth";
 import {
@@ -54,6 +54,14 @@ function AdminSidebar() {
                   <Link href="/admin/contributions">
                     <LayoutDashboard />
                     <span>贡献审核</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname?.startsWith("/admin/public-prompts")} tooltip="公开提示词">
+                  <Link href="/admin/public-prompts">
+                    <Globe />
+                    <span>公开提示词</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
