@@ -142,54 +142,98 @@ Visit [http://localhost:3000](http://localhost:3000) to view the application.
    Execute the following SQL statements to create the required data tables:
 
 ```sql
--- Create prompts table
-CREATE TABLE prompts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    description TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    is_public BOOLEAN DEFAULT false,
-    user_id TEXT,
-    version TEXT,
-    tags TEXT,
-    cover_img TEXT,
-    team_id UUID REFERENCES teams(id) ON DELETE CASCADE
-);
-
--- Create tags table
-CREATE TABLE tags (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    user_id TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
-    UNIQUE(name, user_id)
-);
-
 -- Create teams table
 CREATE TABLE teams (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by TEXT NOT NULL,
     avatar_url TEXT,
-    is_personal BOOLEAN DEFAULT false
+    is_personal BOOLEAN NOT NULL DEFAULT false,
+    created_by TEXT NOT NULL,
+    owner_id TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create team member relationship table
-CREATE TABLE team_user_relation (
+-- Create team members table
+CREATE TABLE team_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID,
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
     user_id TEXT NOT NULL,
+    email TEXT,
     role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'left', 'removed', 'blocked')),
+    invited_by TEXT,
+    invited_at TIMESTAMPTZ,
+    joined_at TIMESTAMPTZ,
+    left_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by TEXT,
     UNIQUE(team_id, user_id)
+);
+
+-- Create projects table
+CREATE TABLE projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_by TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Create prompts table
+CREATE TABLE prompts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+    project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    description TEXT,
+    created_by TEXT NOT NULL,
+    user_id TEXT,
+    version TEXT,
+    tags TEXT,
+    is_public BOOLEAN NOT NULL DEFAULT false,
+    cover_img TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Create tags table
+CREATE TABLE tags (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    user_id TEXT,
+    created_by TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(name, team_id, user_id)
+);
+
+-- Create favorites table
+CREATE TABLE favorites (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    prompt_id UUID NOT NULL REFERENCES prompts(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT unique_user_prompt_favorite UNIQUE (user_id, prompt_id)
+);
+
+-- Create public prompts table
+CREATE TABLE public_prompts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    role_category TEXT NOT NULL,
+    content TEXT NOT NULL,
+    category TEXT DEFAULT 'General',
+    language TEXT DEFAULT 'zh',
+    created_by TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Create contributions table
@@ -198,6 +242,7 @@ CREATE TABLE prompt_contributions (
     title TEXT NOT NULL,
     role_category TEXT NOT NULL,
     content TEXT NOT NULL,
+    language TEXT DEFAULT 'zh',
     contributor_email TEXT,
     contributor_name TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
@@ -208,6 +253,16 @@ CREATE TABLE prompt_contributions (
     reviewed_by TEXT,
     published_prompt_id UUID,
     CONSTRAINT valid_status CHECK (status IN ('pending', 'approved', 'rejected'))
+);
+
+-- Create API keys table
+CREATE TABLE provider_keys (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id text NOT NULL,
+    provider text NOT NULL,
+    api_key text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
+    updated_at timestamptz NOT NULL DEFAULT timezone('utc', now())
 );
 ```
 
