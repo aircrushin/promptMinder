@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public_prompts (
     created_by TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    likes INTEGER DEFAULT 0,
     CONSTRAINT chk_public_prompt_title_not_empty CHECK (char_length(trim(title)) > 0),
     CONSTRAINT chk_public_prompt_content_not_empty CHECK (char_length(trim(content)) > 0)
 );
@@ -26,3 +27,4 @@ COMMENT ON COLUMN public_prompts.content IS '提示词内容';
 COMMENT ON COLUMN public_prompts.category IS '分类';
 COMMENT ON COLUMN public_prompts.language IS '语言 (zh/en)';
 COMMENT ON COLUMN public_prompts.created_by IS '创建者邮箱';
+COMMENT ON COLUMN public_prompts.likes IS '点赞数';

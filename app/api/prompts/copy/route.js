@@ -31,7 +31,7 @@ export async function POST(request) {
       dataToCopy = {
         title: promptData.role,
         content: promptData.prompt,
-        description: `Imported from public collection. Original category: ${promptData.category}`,
+        description: `${promptData.category}`,
         tags: promptData.category || null,
         cover_img: null,
       }

@@ -133,9 +133,13 @@ export function PromptGrid({
                         event.stopPropagation();
                         onToggleFavorite?.(latestPrompt.id, isFavorited);
                       }}
-                      className={`h-8 w-8 ${isFavorited ? 'text-red-500 hover:text-red-600' : 'hover:text-red-500'}`}
+                      className={`h-8 w-8 transition-all duration-300 ${
+                        isFavorited 
+                          ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' 
+                          : 'text-gray-400 hover:bg-red-50 hover:text-red-500'
+                      }`}
                     >
-                      <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
+                      <Heart className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current' : ''}`} />
                     </Button>
                     <Button
                       variant="ghost"

@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Import as ImportIcon } from "lucide-react";
+import { Import as ImportIcon, Heart } from "lucide-react";
 import { apiClient } from '@/lib/api-client';
 import { useClipboard } from '@/lib/clipboard';
 
@@ -66,12 +66,72 @@ function PromptCardComponent({ prompt }) {
     t?.publicPage?.copyError || '复制失败'
   );
   const [isImporting, setIsImporting] = useState(false);
+  const [likes, setLikes] = useState(prompt.likes || 0);
+  const [hasLiked, setHasLiked] = useState(prompt.userLiked || false);
 
   // Handle case where translations are not loaded yet
   if (!t || !t.publicPage) return null;
 
   const handleCopy = () => {
     copy(prompt.prompt);
+  };
+
+  const handleLike = async () => {
+    if (!isSignedIn) {
+      toast({
+        title: '请先登录',
+        description: '登录后才能点赞提示词',
+        variant: 'default',
+      });
+      return;
+    }
+
+    const previousLikes = likes;
+    const previousLiked = hasLiked;
+
+    // 乐观更新：立即更新UI
+    if (hasLiked) {
+      // 取消点赞
+      setLikes(prev => Math.max(0, prev - 1));
+      setHasLiked(false);
+    } else {
+      // 点赞
+      setLikes(prev => prev + 1);
+      setHasLiked(true);
+    }
+
+    try {
+      const method = previousLiked ? 'DELETE' : 'POST';
+      const url = previousLiked
+        ? `/api/prompts/like?promptId=${encodeURIComponent(prompt.id)}`
+        : '/api/prompts/like';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        ...(method === 'POST' && { body: JSON.stringify({ promptId: prompt.id }) }),
+      });
+
+      if (!response.ok) {
+        throw new Error(previousLiked ? 'Failed to unlike prompt' : 'Failed to like prompt');
+      }
+
+      const data = await response.json();
+      // 使用服务器返回的值更新，确保数据一致性
+      setLikes(data.likes);
+      setHasLiked(data.liked);
+    } catch (error) {
+      // 回滚：如果请求失败，恢复之前的状态
+      setLikes(previousLikes);
+      setHasLiked(previousLiked);
+      toast({
+        title: previousLiked ? '取消点赞失败' : '点赞失败',
+        description: error.message || '操作失败，请重试',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleImport = async () => {
@@ -109,21 +169,52 @@ function PromptCardComponent({ prompt }) {
             <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-900 dark:group-hover:text-blue-100 transition-colors duration-300 flex-1">
               {prompt.role}
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+             
+              <div className="flex items-center gap-0.15">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      onClick={handleImport} 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      onClick={handleLike}
+                      variant="ghost"
+                      size="icon"
+                      className={`flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 ${
+                        hasLiked
+                          ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400'
+                          : 'text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400'
+                      } hover:scale-105`}
+                    >
+                      <Heart className={`h-4 w-4 transition-transform duration-300 ${hasLiked ? 'fill-current' : ''}`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+                  >
+                    <p className="font-medium">{hasLiked ? '已点赞' : '点赞'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+                {/* <Heart className={`h-3.5 w-3.5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} /> */}
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {likes}
+                </span>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleImport}
+                      variant="ghost"
+                      size="icon"
                       disabled={isImporting}
                       className="flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105"
                     >
                       <ImportIcon className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent 
+                  <TooltipContent
                     side="top"
                     className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
                   >
@@ -134,13 +225,13 @@ function PromptCardComponent({ prompt }) {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      onClick={handleCopy} 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      onClick={handleCopy}
+                      variant="ghost"
+                      size="icon"
                       className={`flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 ${
-                        copied 
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30' 
+                        copied
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
                           : 'text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400'
                       } hover:scale-105`}
                     >
@@ -151,7 +242,7 @@ function PromptCardComponent({ prompt }) {
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent 
+                  <TooltipContent
                     side="top"
                     className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
                   >
@@ -190,15 +281,17 @@ const arePropsEqual = (prevProps, nextProps) => {
   // Compare prompt object properties that affect rendering
   const prevPrompt = prevProps.prompt;
   const nextPrompt = nextProps.prompt;
-  
+
   if (!prevPrompt && !nextPrompt) return true;
   if (!prevPrompt || !nextPrompt) return false;
-  
+
   return (
     prevPrompt.id === nextPrompt.id &&
     prevPrompt.role === nextPrompt.role &&
     prevPrompt.prompt === nextPrompt.prompt &&
-    prevPrompt.category === nextPrompt.category
+    prevPrompt.category === nextPrompt.category &&
+    prevPrompt.likes === nextPrompt.likes &&
+    prevPrompt.userLiked === nextPrompt.userLiked
   );
 };
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { auth } from '@clerk/nextjs/server';
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
@@ -9,6 +10,7 @@ export async function GET(request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
 
     try {
+        const { userId } = await auth();
         const supabase = createSupabaseServerClient();
         
         // 构建查询条件
@@ -35,7 +37,7 @@ export async function GET(request) {
         // 获取分页数据
         let dataQuery = supabase
             .from('public_prompts')
-            .select('id, title, role_category, content, category, created_at')
+            .select('id, title, role_category, content, category, created_at, likes')
             .eq('language', language);
         
         if (category) {
@@ -50,6 +52,19 @@ export async function GET(request) {
             throw error;
         }
 
+        // 获取用户的点赞状态（如果用户已登录）
+        let userLikedPrompts = new Set();
+        if (userId && publicPrompts && publicPrompts.length > 0) {
+            const promptIds = publicPrompts.map(p => p.id);
+            const { data: likesData } = await supabase
+                .from('prompt_likes')
+                .select('prompt_id')
+                .eq('user_id', userId)
+                .in('prompt_id', promptIds);
+
+            userLikedPrompts = new Set((likesData || []).map(l => l.prompt_id));
+        }
+
         // 转换为前端期望的格式
         const prompts = (publicPrompts || []).map(p => ({
             id: p.id,
@@ -57,7 +72,9 @@ export async function GET(request) {
             role: p.role_category || p.title,
             prompt: p.content,
             title: p.title,
-            created_at: p.created_at
+            created_at: p.created_at,
+            likes: p.likes || 0,
+            userLiked: userLikedPrompts.has(p.id)
         }));
 
         // 获取所有分类（用于筛选器）
