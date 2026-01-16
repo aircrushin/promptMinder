@@ -233,7 +233,17 @@ CREATE TABLE public_prompts (
     language TEXT DEFAULT 'zh',
     created_by TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    likes INTEGER DEFAULT 0
+);
+
+-- Create user likes table
+CREATE TABLE prompt_likes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    prompt_id UUID NOT NULL REFERENCES public_prompts(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT prompt_likes_unique UNIQUE(prompt_id, user_id)
 );
 
 -- Create contributions table
