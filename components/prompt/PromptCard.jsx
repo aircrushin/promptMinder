@@ -167,7 +167,7 @@ function PromptCardComponent({ prompt }) {
         <CardHeader className="relative z-10 pb-3">
           <div className="flex justify-between items-start gap-3">
             <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-900 dark:group-hover:text-blue-100 transition-colors duration-300 flex-1">
-              {prompt.role}
+              {prompt.title || prompt.role}
             </CardTitle>
             <div className="flex items-center gap-1">
              
@@ -287,6 +287,7 @@ const arePropsEqual = (prevProps, nextProps) => {
 
   return (
     prevPrompt.id === nextPrompt.id &&
+    prevPrompt.title === nextPrompt.title &&
     prevPrompt.role === nextPrompt.role &&
     prevPrompt.prompt === nextPrompt.prompt &&
     prevPrompt.category === nextPrompt.category &&
