@@ -98,8 +98,7 @@ export default function Footer({ t }) {
                 <ul className="mt-4 space-y-4">
                   <li>
                     <Link
-                      href="https://prompt-minder.canny.io/feature-requests"
-                      target="_blank"
+                      href="/feedback"
                       className="text-sm text-muted-foreground hover:text-foreground"
                      >
                       {translations.feedback}

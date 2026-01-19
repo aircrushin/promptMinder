@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Filter, Clock, Heart } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +35,9 @@ export default function PublicPromptsClient() {
     // 分类筛选状态
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
+    
+    // 排序状态
+    const [sortBy, setSortBy] = useState('created_at');
     
     // 分页状态
     const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +83,9 @@ export default function PublicPromptsClient() {
                 const params = new URLSearchParams({
                     lang: language,
                     page: currentPage.toString(),
-                    pageSize: pageSize.toString()
+                    pageSize: pageSize.toString(),
+                    sortBy: sortBy,
+                    sortOrder: 'desc'
                 });
                 if (selectedCategory) {
                     params.set('category', selectedCategory);
@@ -109,11 +114,17 @@ export default function PublicPromptsClient() {
         };
         
         fetchPrompts();
-    }, [language, currentPage, pageSize, selectedCategory]); // 当语言、页码或分类改变时重新获取数据
+    }, [language, currentPage, pageSize, selectedCategory, sortBy]); // 当语言、页码、分类或排序改变时重新获取数据
     
     // 切换分类时重置页码
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
+        setCurrentPage(1);
+    };
+
+    // 切换排序时重置页码
+    const handleSortChange = (newSortBy) => {
+        setSortBy(newSortBy);
         setCurrentPage(1);
     };
 
@@ -490,9 +501,35 @@ export default function PublicPromptsClient() {
                             </Dialog>
                         </div>
                         
+                        {/* 排序选择器 */}
+                        <div className="flex justify-center gap-2 mt-6">
+                            <button
+                                onClick={() => handleSortChange('created_at')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    sortBy === 'created_at'
+                                        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
+                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                <Clock className="w-4 h-4" />
+                                {language === 'zh' ? '最新' : 'Latest'}
+                            </button>
+                            <button
+                                onClick={() => handleSortChange('likes')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    sortBy === 'likes'
+                                        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
+                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                <Heart className="w-4 h-4" />
+                                {language === 'zh' ? '最热' : 'Popular'}
+                            </button>
+                        </div>
+
                         {/* 分类筛选器 */}
                         {categories.length > 0 && (
-                            <div className="flex flex-wrap gap-2 justify-center mt-6">
+                            <div className="flex flex-wrap gap-2 justify-center mt-4">
                                 <button
                                     onClick={() => handleCategoryChange('')}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${

@@ -8,6 +8,8 @@ export async function GET(request) {
     const category = searchParams.get('category') || '';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
+    const sortBy = searchParams.get('sortBy') || 'created_at';
+    const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     try {
         const { userId } = await auth();
@@ -44,8 +46,12 @@ export async function GET(request) {
             dataQuery = dataQuery.eq('category', category);
         }
 
+        const validSortFields = ['created_at', 'likes'];
+        const orderField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
+        const ascending = sortOrder === 'asc';
+
         const { data: publicPrompts, error } = await dataQuery
-            .order('created_at', { ascending: false })
+            .order(orderField, { ascending })
             .range(offset, offset + pageSize - 1);
 
         if (error) {
