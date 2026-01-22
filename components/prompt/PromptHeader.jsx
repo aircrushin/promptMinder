@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,6 +17,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from '@/lib/api-client';
+import { Pencil, Check, X } from 'lucide-react';
 
 export default function PromptHeader({ 
   prompt, 
@@ -23,13 +26,87 @@ export default function PromptHeader({
   selectedVersion, 
   onVersionChange, 
   onDelete,
+  onPromptUpdate,
   t,
   canManage = true
 }) {
   const router = useRouter();
   const { toast } = useToast();
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState(prompt.description || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const inputRef = useRef(null);
   const tp = t.promptDetailPage;
+
+  useEffect(() => {
+    if (isEditingDescription && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditingDescription]);
+
+  const handleDescriptionEdit = () => {
+    if (!canManage) return;
+    setEditedDescription(prompt.description || '');
+    setIsEditingDescription(true);
+  };
+
+  const handleDescriptionSave = async () => {
+    if (editedDescription === prompt.description) {
+      setIsEditingDescription(false);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await apiClient.updatePrompt(prompt.id, {
+        description: editedDescription,
+      });
+      
+      const freshPrompt = await apiClient.getPrompt(prompt.id);
+      const normalizedPrompt = {
+        ...freshPrompt,
+        tags: Array.isArray(freshPrompt.tags)
+          ? freshPrompt.tags
+          : (freshPrompt.tags || '')
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+      };
+      
+      if (onPromptUpdate) {
+        onPromptUpdate(normalizedPrompt);
+      }
+      
+      toast({
+        title: tp.descriptionSaveSuccess || '描述已更新',
+        description: tp.descriptionSaveSuccessDesc || '提示词描述已成功保存',
+      });
+      setIsEditingDescription(false);
+    } catch (error) {
+      console.error('Failed to update description:', error);
+      toast({
+        title: tp.saveError || '保存失败',
+        description: tp.descriptionSaveErrorDesc || '请稍后重试',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDescriptionCancel = () => {
+    setEditedDescription(prompt.description || '');
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleDescriptionSave();
+    } else if (e.key === 'Escape') {
+      handleDescriptionCancel();
+    }
+  };
 
   const handleShare = async () => {
     try {
@@ -82,9 +159,49 @@ export default function PromptHeader({
         <h1 className="text-2xl sm:text-3xl font-bold">
           {prompt.title}
         </h1>
-        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-          {prompt.description}
-        </p>
+        {isEditingDescription ? (
+          <div className="flex items-center gap-2">
+            <Input
+              ref={inputRef}
+              value={editedDescription}
+              onChange={(e) => setEditedDescription(e.target.value)}
+              onKeyDown={handleDescriptionKeyDown}
+              placeholder={tp.descriptionPlaceholder || '输入描述...'}
+              className="h-7 text-xs flex-1"
+              disabled={isSaving}
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              onClick={handleDescriptionSave}
+              disabled={isSaving}
+            >
+              <Check className="h-3 w-3 text-green-600" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              onClick={handleDescriptionCancel}
+              disabled={isSaving}
+            >
+              <X className="h-3 w-3 text-red-600" />
+            </Button>
+          </div>
+        ) : (
+          <div 
+            className={`group flex items-center gap-1 ${canManage ? 'cursor-pointer hover:bg-secondary/50 rounded px-1 -mx-1 transition-colors' : ''}`}
+            onClick={handleDescriptionEdit}
+          >
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+              {prompt.description || (canManage ? (tp.noDescription || '点击添加描述') : '')}
+            </p>
+            {canManage && (
+              <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">

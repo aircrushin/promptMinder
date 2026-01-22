@@ -468,6 +468,11 @@
     "saveError": "Save failed, please try again",
     "viewDiffTooltip": "View Diff",
     "viewDiffButton": "View Diff",
+    "descriptionPlaceholder": "Enter description...",
+    "noDescription": "Click to add description",
+    "descriptionSaveSuccess": "Description updated",
+    "descriptionSaveSuccessDesc": "Prompt description saved successfully",
+    "descriptionSaveErrorDesc": "Please try again later",
     "chatTest": {
       "sendMessageErrorDefault": "Request failed, please check if the API Key is correct",
       "sendMessageErrorPrefix": "Error: {errorMessage}",
