@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from '@/lib/api-client';
+import { cn } from '@/lib/utils';
 
 export default function PromptContent({ 
   prompt, 
@@ -148,22 +149,25 @@ export default function PromptContent({
       </CardHeader>
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-full w-full">
-          <div className="rounded-lg bg-secondary/30 p-4 min-h-full">
-            {isEditing ? (
-              <div className="min-h-[600px]">
-                <Textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full h-full min-h-[500px] text-base leading-relaxed whitespace-pre-wrap text-primary"
-                  placeholder={tp.editPlaceholder}
-                  style={{ resize: 'vertical', overflowY: 'auto' }}
-                />
-              </div>
-            ) : (
-              <div className="text-base leading-relaxed whitespace-pre-wrap text-primary min-h-[600px]">
-                {hasVariables ? renderedContent : prompt.content}
-              </div>
-            )}
+          <div className="p-4 min-h-full">
+            <Textarea
+              value={isEditing ? editedContent : (hasVariables ? renderedContent : prompt.content)}
+              onChange={(e) => isEditing && setEditedContent(e.target.value)}
+              readOnly={!isEditing}
+              className={cn(
+                "w-full min-h-[500px] text-sm leading-relaxed whitespace-pre-wrap",
+                "bg-gradient-to-br from-background to-secondary/20",
+                "border border-border/50 rounded-xl",
+                "px-5 py-4 shadow-sm",
+                "transition-all duration-200",
+                "focus:ring-2 focus:ring-primary/20 focus:border-primary/50",
+                isEditing 
+                  ? "bg-background border-primary/30 shadow-md" 
+                  : "cursor-default hover:bg-secondary/10"
+              )}
+              placeholder={tp.editPlaceholder}
+              style={{ resize: isEditing ? 'vertical' : 'none' }}
+            />
           </div>
         </ScrollArea>
       </CardContent>
