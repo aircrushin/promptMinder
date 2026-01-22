@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from '@/lib/api-client';
-import { Pencil, Check, X } from 'lucide-react';
+import { Pencil, Check, X, FlaskConical } from 'lucide-react';
 
 export default function PromptHeader({ 
   prompt, 
@@ -106,6 +106,10 @@ export default function PromptHeader({
     } else if (e.key === 'Escape') {
       handleDescriptionCancel();
     }
+  };
+
+  const handleOpenInPlayground = () => {
+    router.push(`/playground?promptId=${prompt.id}`);
   };
 
   const handleShare = async () => {
@@ -282,6 +286,20 @@ export default function PromptHeader({
               </TooltipContent>
             </Tooltip>
           )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleOpenInPlayground}
+                variant="secondary"
+                className="relative overflow-hidden group w-8 h-8 p-0"
+              >
+                <FlaskConical className="w-3 h-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{tp.openInPlaygroundTooltip || "在工作台打开"}</p>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

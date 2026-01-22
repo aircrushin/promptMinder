@@ -473,6 +473,7 @@
     "descriptionSaveSuccess": "描述已更新",
     "descriptionSaveSuccessDesc": "提示词描述已成功保存",
     "descriptionSaveErrorDesc": "请稍后重试",
+    "openInPlaygroundTooltip": "在工作台打开",
     "chatTest": {
       "sendMessageErrorDefault": "请求失败，请检查 API Key 是否正确",
       "sendMessageErrorPrefix": "错误：{errorMessage}",

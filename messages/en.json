@@ -473,6 +473,7 @@
     "descriptionSaveSuccess": "Description updated",
     "descriptionSaveSuccessDesc": "Prompt description saved successfully",
     "descriptionSaveErrorDesc": "Please try again later",
+    "openInPlaygroundTooltip": "Open in Playground",
     "chatTest": {
       "sendMessageErrorDefault": "Request failed, please check if the API Key is correct",
       "sendMessageErrorPrefix": "Error: {errorMessage}",

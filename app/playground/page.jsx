@@ -127,7 +127,30 @@ function PlaygroundContent() {
     if (promptParam) {
       setPromptTemplate(decodeURIComponent(promptParam));
     }
-  }, [searchParams]);
+
+    // Check for promptId from URL params - fetch and load the prompt
+    const promptIdParam = searchParams.get('promptId');
+    if (promptIdParam) {
+      (async () => {
+        try {
+          const response = await fetch(`/api/prompts/${promptIdParam}`);
+          if (response.ok) {
+            const promptData = await response.json();
+            if (promptData?.content) {
+              setPromptTemplate(promptData.content);
+              toast({
+                title: pg.importSuccessTitle || 'Prompt imported',
+                description: formatMessage(pg.importSuccessDescription, { title: promptData.title || '' }) ||
+                  `"${promptData.title || 'Prompt'}" loaded into the template`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load prompt by id:', error);
+        }
+      })();
+    }
+  }, [searchParams, toast, pg, formatMessage]);
 
   // Save state to localStorage
   useEffect(() => {
