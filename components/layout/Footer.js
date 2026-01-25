@@ -150,16 +150,7 @@ export default function Footer({ t }) {
                 </li>
                 <li>
                   <Link
-                    href="https://prompt.lucids.top/"
-                    target="_blank"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                   >
-                    {translations.promptate}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="https://llm-readify.vercel.app/"
+                    href="https://reader.prompt-minder.com/"
                     target="_blank"
                     className="text-sm text-muted-foreground hover:text-foreground"
                    >
