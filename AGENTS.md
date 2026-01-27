@@ -5,25 +5,25 @@ This file provides guidelines for agentic coding agents working in this reposito
 ## Commands
 
 ### Development
-- `npm run dev` - Start development server (http://localhost:3000)
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint (must pass after changes)
+- `pnpm dev` - Start development server (http://localhost:3000)
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint (must pass after changes)
 
 ### Testing
-- `npm test` - Run all tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run test:ci` - Run tests in CI mode
+- `pnpm test` - Run all tests
+- `pnpm test:watch` - Run tests in watch mode
+- `pnpm test:coverage` - Run tests with coverage report
+- `pnpm test:ci` - Run tests in CI mode
 
 ### Running Single Tests
-- `npm test -- path/to/test.test.js` - Run specific test file
-- `npm test -- --testNamePattern="test description"` - Run tests matching pattern
-- `npm test -- --testPathPattern=Button` - Run tests in files matching pattern
+- `pnpm test path/to/test.test.js` - Run specific test file
+- `pnpm test --testNamePattern="test description"` - Run tests matching pattern
+- `pnpm test --testPathPattern=Button` - Run tests in files matching pattern
 
 ### Analysis & Performance
-- `npm run analyze` - Build with bundle analyzer
-- `npm run css:optimize` - Optimize CSS for production
+- `pnpm analyze` - Build with bundle analyzer
+- `pnpm css:optimize` - Optimize CSS for production
 
 ## Code Style Guidelines
 

@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Skill(frontend-design)"
+      "Skill(frontend-design)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

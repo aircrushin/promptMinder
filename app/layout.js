@@ -82,9 +82,13 @@ export const metadata = {
     creator: "@promptminder",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
     apple: "/logo.svg",
   },
+  manifest: "/manifest.json",
   alternates: {
     languages: {
       "zh-CN": siteUrl,
@@ -139,6 +143,10 @@ const structuredData = generateSchemaGraph([
   },
 ]);
 
+export const viewport = {
+  themeColor: "#3b82f6",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="zh" suppressHydrationWarning>
@@ -154,6 +162,11 @@ export default function RootLayout({ children }) {
         {/* DNS预取 - 针对常用AI服务 */}
         <link rel="dns-prefetch" href="https://api.openai.com" />
         <link rel="dns-prefetch" href="https://api.anthropic.com" />
+        {/* PWA */}
+        <link rel="apple-touch-icon" href="/logo.svg" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="theme-color" content="#3b82f6" />
       </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>
