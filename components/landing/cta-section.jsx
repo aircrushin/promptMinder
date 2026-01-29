@@ -26,10 +26,11 @@ export function CTASection({ t }) {
       <div className="absolute right-0 top-0 -z-10 h-[500px] w-[500px] bg-purple-500/10 blur-[120px]" />
       
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="mx-auto max-w-4xl overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-12 text-center shadow-2xl shadow-indigo-500/10 backdrop-blur-xl"
         >
           <div className="mx-auto mb-6 inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-50/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.24em] text-indigo-600">

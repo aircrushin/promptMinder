@@ -1,5 +1,4 @@
 "use client"; // 必须是客户端组件才能使用 hooks
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 // import { Metadata } from "next"; // 移除静态 Metadata 导入
@@ -9,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Dynamic imports for landing page sections
 const Footer = dynamic(() => import("@/components/layout/Footer"), {
-  loading: () => <div className="h-32 bg-secondary/10 animate-pulse" />
+  loading: () => <div className="h-32 bg-secondary/10" />
 });
 
 const HeroSection = dynamic(() => import("@/components/landing/hero-section").then(mod => ({ default: mod.HeroSection })), {
@@ -124,28 +123,28 @@ export default function Home() {
   return (
     <>
       {/* Header 现在从 Context 获取状态，无需 props */}
-      <Header /> 
+      <Header />
       <main className="flex min-h-screen flex-col pt-16">
         {/* 将 Context 中的 t 传递给子组件 */}
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
           <HeroSection t={safeT.hero} />
         </Suspense>
-        <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
+        <Suspense fallback={<div className="py-16 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
           <FeatureSection t={safeT.features} />
         </Suspense>
         {/* <PricingSection /> */}
-        <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
+        <Suspense fallback={<div className="py-16 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
           <TestimonialSection t={safeT.testimonials} />
         </Suspense>
-        <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
+        <Suspense fallback={<div className="py-16 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
           <FAQSection t={safeT.faq} />
         </Suspense>
-        <Suspense fallback={<div className="py-16 flex justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
+        <Suspense fallback={<div className="py-16 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
           <CTASection t={safeT.cta} />
         </Suspense>
       </main>
       {/* 将 Context 中的 t 传递给 Footer */}
-      <Suspense fallback={<div className="h-32 bg-secondary/10 animate-pulse"></div>}>
+      <Suspense fallback={<div className="h-32 bg-secondary/10"></div>}>
         <Footer t={safeT.footer} />
       </Suspense>
     </>

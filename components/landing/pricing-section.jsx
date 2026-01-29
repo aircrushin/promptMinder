@@ -67,7 +67,8 @@ export function PricingSection() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
               className={`relative flex flex-col overflow-hidden rounded-[2rem] p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 ${
                 plan.popular
                   ? "border-2 border-indigo-500 bg-white shadow-2xl shadow-indigo-500/20"

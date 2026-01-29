@@ -1,23 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
-
-const MotionDiv = dynamic(
-  () => import("framer-motion").then((mod) => mod.motion.div),
-  {
-    loading: () => <div />,
-    ssr: false,
-  }
-);
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { TypeAnimation } from "react-type-animation";
 import { BoltIcon, GlobeAltIcon, ShieldCheckIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import ShinyText from "../texts/ShinyText";
 import { GitHubStars } from "../ui/github-stars";
 import { ParticleButton } from "../ui/particle-button";
+import { motion } from "framer-motion";
 
 export function HeroSection({ t }) {
   const { isSignedIn } = useAuth();
@@ -70,17 +59,9 @@ export function HeroSection({ t }) {
   };
 
   const heroCopy = { ...fallback, ...(t || {}) };
-  const animatedText = Array.isArray(heroCopy.animatedText) && heroCopy.animatedText.length > 0
-    ? heroCopy.animatedText
-    : fallback.animatedText;
-  const animationSignature = useMemo(
-    () => animatedText.join("|"),
-    [animatedText]
-  );
-  const animationSequence = useMemo(
-    () => animatedText.flatMap((item) => [item, 2200]),
-    [animationSignature]
-  );
+  const displayText = Array.isArray(heroCopy.animatedText) && heroCopy.animatedText.length > 0
+    ? heroCopy.animatedText[0]
+    : fallback.animatedText[0];
 
   const highlightConfig = [
     { Icon: BoltIcon, defaults: fallback.quickHighlights[0] },
@@ -131,12 +112,7 @@ export function HeroSection({ t }) {
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 lg:py-20">
         {/* Advertisement Banner */}
-        <MotionDiv
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex justify-center mb-10"
-        >
+        <div className="flex justify-center mb-10">
           <Link
             href="https://julebu.co/aff/RQH6MRYL"
             target="_blank"
@@ -158,36 +134,27 @@ export function HeroSection({ t }) {
             <span className="relative text-sm font-medium text-slate-700">{advertisement.description}</span>
             <ArrowTopRightOnSquareIcon className="relative h-4 w-4 text-purple-500 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-purple-600 group-hover:scale-110" />
           </Link>
-        </MotionDiv>
+        </div>
 
         <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
-          <MotionDiv
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="space-y-10 lg:col-span-6"
           >
             {/* Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-50/50 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-indigo-100/50">
               <span>{heroCopy.subtitleStart}</span>
-              <TypeAnimation
-                key={animationSignature}
-                sequence={animationSequence}
-                wrapper="span"
-                speed={44}
-                className="font-bold text-indigo-600"
-                repeat={Infinity}
-              />
+              <span className="font-bold text-indigo-600">{displayText}</span>
               <span>{heroCopy.subtitleEnd}</span>
             </div>
 
             {/* Main Title */}
             <h1 className="text-balance text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl lg:leading-[1.1]">
-              <ShinyText
-                text={heroCopy.mainTitle}
-                speed={3}
-                className="text-transparent bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 [-webkit-background-clip:text] [background-clip:text] drop-shadow-sm"
-              />
+              <span className="text-transparent bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 [-webkit-background-clip:text] [background-clip:text] drop-shadow-sm">
+                {heroCopy.mainTitle}
+              </span>
             </h1>
 
             {/* Description */}
@@ -223,27 +190,22 @@ export function HeroSection({ t }) {
                 ))}
               </div>
             </div>
-          </MotionDiv>
+          </motion.div>
 
           {/* Right Side Visuals */}
-          <MotionDiv
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            className="relative lg:col-span-6 perspective-[2000px]"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="relative lg:col-span-6"
           >
-            <div className="relative mx-auto max-w-lg transform-style-3d rotate-y-[-6deg] rotate-x-[6deg]">
+            <div className="relative mx-auto max-w-lg">
               {/* Glow effects behind cards */}
               <div className="absolute -top-20 -right-20 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[100px]" />
               <div className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-blue-500/10 blur-[100px]" />
 
               {/* Main Card */}
-              <MotionDiv
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="relative z-10 overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl"
-              >
+              <div className="relative z-10 overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-white/10" />
                 <div className="relative">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-6">
@@ -270,15 +232,10 @@ export function HeroSection({ t }) {
                     ))}
                   </div>
                 </div>
-              </MotionDiv>
+              </div>
 
               {/* Floating Card */}
-              <MotionDiv
-                initial={{ x: 40, y: 40, opacity: 0 }}
-                animate={{ x: -20, y: 20, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-                className="absolute -bottom-12 -right-12 z-20 w-80 rounded-[2rem] border border-white/40 bg-white/80 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur-xl"
-              >
+              <div className="absolute -bottom-12 -right-12 z-20 w-80 rounded-[2rem] border border-white/40 bg-white/80 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur-xl">
                  <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{snapshot.badge}</span>
                     <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-bold text-indigo-600">{snapshot.status}</span>
@@ -304,9 +261,9 @@ export function HeroSection({ t }) {
                       </div>
                     </div>
                   </div>
-              </MotionDiv>
+              </div>
             </div>
-          </MotionDiv>
+          </motion.div>
         </div>
       </div>
     </section>

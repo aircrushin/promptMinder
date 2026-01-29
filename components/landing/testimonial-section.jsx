@@ -50,10 +50,10 @@ export function TestimonialSection({ t }) {
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={`${testimonial.author}-${index}`}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.45, delay: index * 0.08 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
               className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 p-8 shadow-xl shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 hover:bg-white/80"
             >
               <p className="text-lg leading-relaxed text-slate-700 font-medium">
