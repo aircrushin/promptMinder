@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Skill(frontend-design)",
+      "Skill(ui-ux-pro-max)",
       "Bash(npm install:*)",
       "Bash(node:*)",
       "Bash(npm run build:*)",
