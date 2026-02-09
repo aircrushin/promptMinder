@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/lib/supabaseServer.js';
+import { queries } from '@/lib/db/index.js';
 import { handleApiError } from '@/lib/handle-api-error.js';
 import { auth } from '@clerk/nextjs/server';
 
 export async function POST(request) {
   try {
-    const supabase = createSupabaseServerClient();
     const data = await request.json();
 
     const { type, description, email } = data;
@@ -32,25 +31,13 @@ export async function POST(request) {
       // User not authenticated, that's okay
     }
 
-    const feedbackPayload = {
+    const newFeedback = await queries.feedback.create({
       type,
       description,
       email: email || null,
-      user_id: userId,
+      userId,
       status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { data: newFeedback, error } = await supabase
-      .from('user_feedback')
-      .insert([feedbackPayload])
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
+    });
 
     return NextResponse.json(newFeedback, { status: 201 });
   } catch (error) {
@@ -60,38 +47,20 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
-    const supabase = createSupabaseServerClient();
-
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
-    const offset = (page - 1) * limit;
 
-    let query = supabase
-      .from('user_feedback')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (status) {
-      query = query.eq('status', status);
-    }
-
-    const { data: feedbackList, error, count } = await query;
-
-    if (error) {
-      throw error;
-    }
+    const result = await queries.feedback.getAll({ 
+      page, 
+      limit, 
+      isResolved: status === 'resolved' ? true : status === 'pending' ? false : undefined 
+    });
 
     return NextResponse.json({
-      feedback: feedbackList || [],
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
-      },
+      feedback: result.feedback,
+      pagination: result.pagination,
     });
   } catch (error) {
     return handleApiError(error, 'Unable to load feedback');
@@ -100,7 +69,6 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
-    const supabase = createSupabaseServerClient();
     const data = await request.json();
 
     const { id, status } = data;
@@ -119,16 +87,9 @@ export async function PATCH(request) {
       );
     }
 
-    const { data: updated, error } = await supabase
-      .from('user_feedback')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
+    const { userId } = await auth();
 
-    if (error) {
-      throw error;
-    }
+    const updated = await queries.feedback.resolve(id, userId);
 
     return NextResponse.json(updated);
   } catch (error) {

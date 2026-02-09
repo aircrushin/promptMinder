@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { queries } from '@/lib/db/index.js';
 
 // 验证管理员权限
 async function verifyAdmin(request) {
@@ -29,23 +29,10 @@ export async function GET(request, { params }) {
   const { id } = await params;
 
   try {
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
-    );
+    const prompt = await queries.publicPrompts.getById(id);
 
-    const { data: prompt, error } = await supabase
-      .from('public_prompts')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: '提示词不存在' }, { status: 404 });
-      }
-      console.error('Error fetching public prompt:', error);
-      return NextResponse.json({ error: '获取提示词失败' }, { status: 500 });
+    if (!prompt) {
+      return NextResponse.json({ error: '提示词不存在' }, { status: 404 });
     }
 
     return NextResponse.json(prompt);
@@ -76,35 +63,15 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: '内容不能为空' }, { status: 400 });
     }
 
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
-    );
-
-    const updateData = {
-      updated_at: new Date().toISOString()
-    };
+    const updateData = {};
 
     if (title !== undefined) updateData.title = title.trim();
-    if (role_category !== undefined) updateData.role_category = role_category.trim();
+    if (role_category !== undefined) updateData.roleCategory = role_category.trim();
     if (content !== undefined) updateData.content = content.trim();
     if (category !== undefined) updateData.category = category.trim();
     if (language !== undefined) updateData.language = language;
 
-    const { data: updatedPrompt, error } = await supabase
-      .from('public_prompts')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: '提示词不存在' }, { status: 404 });
-      }
-      console.error('Error updating public prompt:', error);
-      return NextResponse.json({ error: '更新提示词失败' }, { status: 500 });
-    }
+    const updatedPrompt = await queries.publicPrompts.update(id, updateData);
 
     return NextResponse.json(updatedPrompt);
   } catch (error) {
@@ -123,20 +90,7 @@ export async function DELETE(request, { params }) {
   const { id } = await params;
 
   try {
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
-    );
-
-    const { error } = await supabase
-      .from('public_prompts')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting public prompt:', error);
-      return NextResponse.json({ error: '删除提示词失败' }, { status: 500 });
-    }
+    await queries.publicPrompts.delete(id);
 
     return NextResponse.json({ success: true, message: '提示词已删除' });
   } catch (error) {

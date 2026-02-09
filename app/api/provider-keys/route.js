@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { requireUserId } from '@/lib/auth';
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { requireUserId } from '@/lib/auth.js';
+import { queries } from '@/lib/db/index.js';
 
 const KNOWN_PROVIDERS = new Set(['openai', 'anthropic', 'zhipu', 'custom']);
 
@@ -24,23 +24,14 @@ function maskKey(key) {
 export async function GET() {
   try {
     const userId = await requireUserId();
-    const supabase = createSupabaseServerClient();
-
-    const { data, error } = await supabase
-      .from('provider_keys')
-      .select('provider, api_key, updated_at')
-      .eq('user_id', userId);
-
-    if (error) {
-      throw error;
-    }
+    const keys = await queries.providerKeys.getByUser(userId);
 
     const providers =
-      data?.map((row) => ({
+      keys?.map((row) => ({
         provider: row.provider,
         connected: true,
-        updatedAt: row.updated_at,
-        lastFour: maskKey(row.api_key),
+        updatedAt: row.updatedAt,
+        lastFour: maskKey(row.apiKey),
       })) ?? [];
 
     return NextResponse.json({ providers });
@@ -74,31 +65,12 @@ export async function POST(request) {
       );
     }
 
-    const supabase = createSupabaseServerClient();
-
-    const { data, error } = await supabase
-      .from('provider_keys')
-      .upsert(
-        {
-          user_id: userId,
-          provider,
-          api_key: apiKey,
-        },
-        {
-          onConflict: 'user_id,provider',
-        }
-      )
-      .select('provider, updated_at')
-      .single();
-
-    if (error) {
-      throw error;
-    }
+    const result = await queries.providerKeys.upsert(userId, provider, apiKey);
 
     return NextResponse.json({
-      provider: data.provider,
+      provider: result.provider,
       connected: true,
-      updatedAt: data.updated_at,
+      updatedAt: result.updatedAt,
       lastFour: maskKey(apiKey),
     });
   } catch (error) {
@@ -123,15 +95,10 @@ export async function DELETE(request) {
       );
     }
 
-    const supabase = createSupabaseServerClient();
-    const { error } = await supabase
-      .from('provider_keys')
-      .delete()
-      .eq('user_id', userId)
-      .eq('provider', provider);
-
-    if (error) {
-      throw error;
+    const existing = await queries.providerKeys.getByProvider(userId, provider);
+    
+    if (existing) {
+      await queries.providerKeys.delete(existing.id);
     }
 
     return NextResponse.json({ success: true });
@@ -143,4 +110,3 @@ export async function DELETE(request) {
     );
   }
 }
-

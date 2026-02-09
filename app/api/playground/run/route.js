@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
-import { requireUserId } from '@/lib/auth';
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { requireUserId } from '@/lib/auth.js';
+import { queries } from '@/lib/db/index.js';
 
 // Default configuration from environment
 const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || '';
@@ -16,19 +16,13 @@ const PROVIDER_BASE_URLS = {
 };
 
 async function getStoredProviderKey(userId, provider) {
-  const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from('provider_keys')
-    .select('api_key')
-    .eq('user_id', userId)
-    .eq('provider', provider)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
+  try {
+    const keyRecord = await queries.providerKeys.getByProvider(userId, provider);
+    return keyRecord?.apiKey || null;
+  } catch (error) {
+    console.error('Error fetching provider key:', error);
+    return null;
   }
-
-  return data?.api_key || null;
 }
 
 // Handle Claude API streaming
@@ -392,4 +386,3 @@ export async function POST(request) {
     );
   }
 }
-

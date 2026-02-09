@@ -162,7 +162,93 @@ jest.mock('lucide-react', () => ({
   ChevronDown: (props) => <div data-testid="chevron-down-icon" {...props}>ChevronDown</div>,
 }))
 
+// Fix for postgres.js in Node.js environment
+global.setImmediate = global.setImmediate || ((fn, ...args) => global.setTimeout(fn, 0, ...args));
+
+// Mock Drizzle ORM queries
+jest.mock('@/lib/db/queries', () => ({
+  queries: {
+    prompts: {
+      getAll: jest.fn(),
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      countByUser: jest.fn(),
+    },
+    teams: {
+      getAll: jest.fn(),
+      getById: jest.fn(),
+      getPersonalTeam: jest.fn(),
+      hasPersonalTeam: jest.fn(),
+      countNonPersonalTeams: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    teamMembers: {
+      getByTeamId: jest.fn(),
+      getMembership: jest.fn(),
+      getByUserId: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      updateByUserAndTeam: jest.fn(),
+      getPendingByEmail: jest.fn(),
+    },
+    tags: {
+      getAll: jest.fn(),
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    favorites: {
+      getByUser: jest.fn(),
+      isFavorited: jest.fn(),
+      checkFavorites: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
+    likes: {
+      isLiked: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
+    publicPrompts: {
+      getAll: jest.fn(),
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    contributions: {
+      getAll: jest.fn(),
+      getByUser: jest.fn(),
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    providerKeys: {
+      getByUser: jest.fn(),
+      getByProvider: jest.fn(),
+      upsert: jest.fn(),
+      delete: jest.fn(),
+    },
+    feedback: {
+      getAll: jest.fn(),
+      create: jest.fn(),
+      resolve: jest.fn(),
+    },
+    promptVersions: {
+      getByPromptId: jest.fn(),
+      create: jest.fn(),
+    },
+  }
+}))
+
 // 全局测试环境变量
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'test-clerk-key'
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'

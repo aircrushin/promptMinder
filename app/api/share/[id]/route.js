@@ -1,41 +1,39 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server';
+import { queries } from '@/lib/db/index.js';
 
 export async function GET(request, { params }) {
   const { id } = params;
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
   
-  // First, get the requested prompt
-  const { data: prompt, error: promptError } = await supabase
-    .from('prompts')
-    .select('*')
-    .eq('id', id)
-    .eq('is_public', true)
-    .single();
+  try {
+    // 获取公开的提示词
+    const prompt = await queries.prompts.getById(id);
+    
+    if (!prompt || !prompt.isPublic) {
+      return NextResponse.json({ error: 'Prompt not found or not public' }, { status: 404 });
+    }
 
-  if (promptError) {
-    return NextResponse.json({ error: promptError.message }, { status: 500 });
+    // 获取该提示词的所有版本
+    const versions = await queries.promptVersions.getByPromptId(id);
+
+    // 转换为前端期望的格式
+    const formattedVersions = versions.map(v => ({
+      id: v.id,
+      version: v.version,
+      created_at: v.createdAt,
+    }));
+
+    // Attach versions to the prompt object
+    const result = {
+      ...prompt,
+      created_at: prompt.createdAt,
+      updated_at: prompt.updatedAt,
+      is_public: prompt.isPublic,
+      versions: formattedVersions || []
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error fetching shared prompt:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
-
-  if (!prompt) {
-    return NextResponse.json({ error: 'Prompt not found or not public' }, { status: 404 });
-  }
-
-  // Then, get all versions of this prompt
-  const { data: versions, error: versionsError } = await supabase
-    .from('prompts')
-    .select('id, version, created_at')
-    .eq('title', prompt.title)
-    .eq('is_public', true)
-    .order('created_at', { ascending: false });
-
-  if (versionsError) {
-    // We can still return the main prompt even if versions fail
-    console.error('Error fetching versions:', versionsError.message);
-  }
-
-  // Attach versions to the prompt object
-  prompt.versions = versions || [];
-
-  return NextResponse.json(prompt);
-} 
+}

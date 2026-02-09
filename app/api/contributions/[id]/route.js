@@ -1,19 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server';
+import { queries } from '@/lib/db/index.js';
 
 // 获取单个贡献详情
 export async function GET(request, { params }) {
   const { id } = await params;
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
-    const { data: contribution, error } = await supabase
-      .from('prompt_contributions')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const contribution = await queries.contributions.getById(id);
 
-    if (error) {
+    if (!contribution) {
       return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
     }
 
@@ -31,8 +26,6 @@ export async function PATCH(request, { params }) {
   
   // 从请求头获取管理员邮箱（由前端发送）
   const adminEmail = request.headers.get('x-admin-email');
-  
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
     const { status, adminNotes, publishToPrompts } = await request.json();
@@ -43,23 +36,18 @@ export async function PATCH(request, { params }) {
     }
 
     // 检查贡献是否存在
-    const { data: existingContribution, error: fetchError } = await supabase
-      .from('prompt_contributions')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const existingContribution = await queries.contributions.getById(id);
 
-    if (fetchError || !existingContribution) {
+    if (!existingContribution) {
       return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
     }
 
     // 准备更新数据
     const updateData = {
       status,
-      admin_notes: adminNotes || null,
-      reviewed_at: new Date().toISOString(),
-      reviewed_by: adminEmail || 'admin',
-      updated_at: new Date().toISOString()
+      adminNote: adminNotes || null,
+      reviewedAt: new Date(),
+      reviewedBy: adminEmail || 'admin',
     };
 
     // 如果状态是approved且需要发布到公共提示词库
@@ -67,45 +55,21 @@ export async function PATCH(request, { params }) {
     if (status === 'approved' && publishToPrompts) {
       // 创建新的公共提示词到 public_prompts 表
       const contributionLanguage = existingContribution.language || 'zh';
-      const publicPromptData = {
-        id: crypto.randomUUID(),
+      const newPublicPrompt = await queries.publicPrompts.create({
         title: existingContribution.title,
-        role_category: existingContribution.role_category,
+        roleCategory: existingContribution.roleCategory,
         content: existingContribution.content,
         category: contributionLanguage === 'zh' ? '社区贡献' : 'Community',
         language: contributionLanguage,
-        created_by: existingContribution.contributor_email || null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+        createdBy: existingContribution.contributorEmail || null,
+      });
 
-      const { data: newPrompt, error: promptError } = await supabase
-        .from('public_prompts')
-        .insert([publicPromptData])
-        .select()
-        .single();
-
-      if (promptError) {
-        console.error('Failed to create public prompt:', promptError);
-        return NextResponse.json({ error: 'Failed to publish prompt' }, { status: 500 });
-      }
-
-      publishedPromptId = newPrompt.id;
-      updateData.published_prompt_id = publishedPromptId;
+      publishedPromptId = newPublicPrompt.id;
+      updateData.publishedPromptId = publishedPromptId;
     }
 
     // 更新贡献状态
-    const { data: updatedContribution, error: updateError } = await supabase
-      .from('prompt_contributions')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error('Update error:', updateError);
-      return NextResponse.json({ error: 'Failed to update contribution' }, { status: 500 });
-    }
+    const updatedContribution = await queries.contributions.update(id, updateData);
 
     return NextResponse.json({
       message: 'Contribution updated successfully',
@@ -122,30 +86,17 @@ export async function PATCH(request, { params }) {
 // 删除贡献
 export async function DELETE(request, { params }) {
   const { id } = await params;
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   try {
     // 检查贡献是否存在
-    const { data: contribution, error: fetchError } = await supabase
-      .from('prompt_contributions')
-      .select('id')
-      .eq('id', id)
-      .single();
+    const contribution = await queries.contributions.getById(id);
 
-    if (fetchError || !contribution) {
+    if (!contribution) {
       return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
     }
 
     // 删除贡献
-    const { error: deleteError } = await supabase
-      .from('prompt_contributions')
-      .delete()
-      .eq('id', id);
-
-    if (deleteError) {
-      console.error('Delete error:', deleteError);
-      return NextResponse.json({ error: 'Failed to delete contribution' }, { status: 500 });
-    }
+    await queries.contributions.delete(id);
 
     return NextResponse.json({ message: 'Contribution deleted successfully' });
 
@@ -153,4 +104,4 @@ export async function DELETE(request, { params }) {
     console.error('Server error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

@@ -1,74 +1,68 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server';
+import { queries } from '@/lib/db/index.js';
+import { gte, desc } from 'drizzle-orm';
+import { getDb, schema } from '@/lib/db/index.js';
+
+const { contributions } = schema;
 
 export async function GET(request) {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    // 获取各状态的统计
-    const { data: statusStats, error: statusError } = await supabase
-      .from('prompt_contributions')
-      .select('status')
-      .then(({ data, error }) => {
-        if (error) return { data: null, error };
-        
-        const stats = {
-          pending: 0,
-          approved: 0,
-          rejected: 0,
-          total: data.length
-        };
-        
-        data.forEach(item => {
-          stats[item.status] = (stats[item.status] || 0) + 1;
-        });
-        
-        return { data: stats, error: null };
-      });
+    const db = getDb();
 
-    if (statusError) {
-      return NextResponse.json({ error: 'Failed to fetch statistics' }, { status: 500 });
-    }
+    // 获取所有贡献
+    const allContributions = await db.query.contributions.findMany({
+      orderBy: [desc(contributions.createdAt)],
+    });
+
+    // 计算各状态的统计
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      total: allContributions.length
+    };
+    
+    allContributions.forEach(item => {
+      stats[item.status] = (stats[item.status] || 0) + 1;
+    });
 
     // 获取最近7天的贡献趋势
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const { data: recentContributions, error: recentError } = await supabase
-      .from('prompt_contributions')
-      .select('created_at')
-      .gte('created_at', sevenDaysAgo.toISOString())
-      .order('created_at', { ascending: true });
-
-    if (recentError) {
-      console.error('Recent contributions error:', recentError);
-    }
+    const recentContributions = await db.query.contributions.findMany({
+      where: gte(contributions.createdAt, sevenDaysAgo),
+      orderBy: [desc(contributions.createdAt)],
+    });
 
     // 按天分组统计
     const dailyStats = {};
     if (recentContributions) {
       recentContributions.forEach(contribution => {
-        const date = new Date(contribution.created_at).toISOString().split('T')[0];
+        const date = new Date(contribution.createdAt).toISOString().split('T')[0];
         dailyStats[date] = (dailyStats[date] || 0) + 1;
       });
     }
 
     // 获取最近的几个待审核贡献
-    const { data: pendingPreview, error: pendingError } = await supabase
-      .from('prompt_contributions')
-      .select('id, title, role_category, created_at')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(5);
+    const pendingPreview = await db.query.contributions.findMany({
+      where: gte(contributions.status, 'pending'),
+      orderBy: [desc(contributions.createdAt)],
+      limit: 5,
+    });
 
-    if (pendingError) {
-      console.error('Pending preview error:', pendingError);
-    }
+    // 转换为前端期望的格式
+    const formattedPendingPreview = pendingPreview.map(p => ({
+      id: p.id,
+      title: p.title,
+      role_category: p.roleCategory,
+      created_at: p.createdAt,
+    }));
 
     return NextResponse.json({
-      statusStats,
+      statusStats: stats,
       dailyStats,
-      pendingPreview: pendingPreview || [],
+      pendingPreview: formattedPendingPreview || [],
       lastUpdated: new Date().toISOString()
     });
 
@@ -76,4 +70,4 @@ export async function GET(request) {
     console.error('Server error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}
