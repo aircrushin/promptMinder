@@ -157,16 +157,6 @@ export default function Footer({ t }) {
                     {translations.llmReadify}
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="https://julebu.co/aff/RQH6MRYL"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                   >
-                    {translations.julebu}
-                  </Link>
-                </li>
               </ul>
             </div>
           </div>
