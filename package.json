@@ -18,7 +18,11 @@
     "performance:test": "node scripts/performance-test.js",
     "css:analyze": "node scripts/css-optimization.js",
     "css:optimize": "npm run css:analyze && tailwindcss -i ./app/globals.css -o ./app/globals.optimized.css --minify",
-    "build:optimized": "npm run css:optimize && next build"
+    "build:optimized": "npm run css:optimize && next build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node drizzle/migrate.js",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.1.76",
@@ -54,6 +58,8 @@
     "clsx": "^2.1.1",
     "deepagents": "^1.5.0",
     "diff": "^5.1.0",
+    "dotenv": "^17.2.4",
+    "drizzle-orm": "^0.45.1",
     "framer-motion": "^11.15.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.294.0",
@@ -61,6 +67,7 @@
     "next": "16.0.10",
     "next-pwa": "^5.6.0",
     "openai": "^4.77.0",
+    "postgres": "^3.4.8",
     "react": "19.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "19.2.0",
@@ -83,6 +90,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "baseline-browser-mapping": "^2.8.32",
+    "drizzle-kit": "^0.31.9",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.7",
     "jest": "^30.0.5",
