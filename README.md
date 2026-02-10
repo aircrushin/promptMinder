@@ -36,7 +36,7 @@
 
 - ⚡ **高性能** - Next.js 16 + React 19，极速加载
 - 🔐 **安全认证** - Clerk 提供企业级用户认证
-- 💾 **可靠存储** - Supabase + PostgreSQL 数据库
+- 💾 **可靠存储** - Neon PostgreSQL + Drizzle ORM
 - 🚀 **易部署** - 支持 Vercel、Zeabur 一键部署
 
 ## 🚀 快速开始
@@ -67,7 +67,10 @@ pnpm install
    创建 `.env.local` 文件并配置以下变量：
 
 ```env
-# Supabase 配置
+# 数据库配置 (Neon PostgreSQL)
+DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+
+# Supabase 配置 (仅用于文件存储)
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 
@@ -131,167 +134,47 @@ pnpm dev
 
 ## 🗃 数据库配置
 
-### Supabase 设置
+### Neon PostgreSQL + Drizzle ORM
 
-1. **创建项目**
+本项目使用 [Neon](https://neon.tech) Serverless PostgreSQL 作为数据库，[Drizzle ORM](https://orm.drizzle.team) 进行数据库查询和 Schema 管理。
 
-   - 注册 [Supabase](https://supabase.com) 账户
-   - 创建新项目
-   - 获取项目 URL 和匿名密钥
-2. **创建数据表**
-   执行以下 SQL 语句创建所需的数据表：
+1. **创建 Neon 数据库**
 
-```sql
--- 创建 teams 表
-CREATE TABLE teams (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    description TEXT,
-    avatar_url TEXT,
-    is_personal BOOLEAN NOT NULL DEFAULT false,
-    created_by TEXT NOT NULL,
-    owner_id TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+   - 注册 [Neon](https://neon.tech) 账户
+   - 创建新项目，获取 `DATABASE_URL` 连接字符串
+   - 将连接字符串配置到 `.env.local` 的 `DATABASE_URL` 中
 
--- 创建团队成员表
-CREATE TABLE team_members (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    user_id TEXT NOT NULL,
-    email TEXT,
-    role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
-    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'left', 'removed', 'blocked')),
-    invited_by TEXT,
-    invited_at TIMESTAMPTZ,
-    joined_at TIMESTAMPTZ,
-    left_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by TEXT,
-    UNIQUE(team_id, user_id)
-);
+2. **初始化数据库表结构**
 
--- 创建项目表
-CREATE TABLE projects (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    description TEXT,
-    created_by TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- 创建 prompts 表
-CREATE TABLE prompts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
-    project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    description TEXT,
-    created_by TEXT NOT NULL,
-    user_id TEXT,
-    version TEXT,
-    tags TEXT,
-    is_public BOOLEAN NOT NULL DEFAULT false,
-    cover_img TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- 创建 tags 表
-CREATE TABLE tags (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    user_id TEXT,
-    created_by TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(name, team_id, user_id)
-);
-
--- 创建收藏表
-CREATE TABLE favorites (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
-    prompt_id UUID NOT NULL REFERENCES prompts(id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT unique_user_prompt_favorite UNIQUE (user_id, prompt_id)
-);
-
--- 创建公开提示词表
-CREATE TABLE public_prompts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    role_category TEXT NOT NULL,
-    content TEXT NOT NULL,
-    category TEXT DEFAULT '通用',
-    language TEXT DEFAULT 'zh',
-    created_by TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    likes INTEGER DEFAULT 0
-);
-
--- 创建用户点赞表
-CREATE TABLE prompt_likes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    prompt_id UUID NOT NULL REFERENCES public_prompts(id) ON DELETE CASCADE,
-    user_id TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT prompt_likes_unique UNIQUE(prompt_id, user_id)
-);
-
--- 创建贡献表
-CREATE TABLE prompt_contributions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    role_category TEXT NOT NULL,
-    content TEXT NOT NULL,
-    language TEXT DEFAULT 'zh',
-    contributor_email TEXT,
-    contributor_name TEXT,
-    status TEXT NOT NULL DEFAULT 'pending',
-    admin_notes TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    reviewed_at TIMESTAMPTZ,
-    reviewed_by TEXT,
-    published_prompt_id UUID,
-    CONSTRAINT valid_status CHECK (status IN ('pending', 'approved', 'rejected'))
-);
-
--- 创建 API 密钥表
-CREATE TABLE provider_keys (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id text NOT NULL,
-    provider text NOT NULL,
-    api_key text NOT NULL,
-    created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
-    updated_at timestamptz NOT NULL DEFAULT timezone('utc', now())
-);
+```bash
+# 将 Drizzle Schema 推送到数据库（首次使用或开发环境）
+pnpm db:push
 ```
 
-更多 SQL 文件可以在 `/sql` 目录中找到。
+3. **数据库命令**
 
-### 团队协作迁移指南
+```bash
+pnpm db:push       # 将 Schema 推送到数据库（开发环境推荐）
+pnpm db:generate   # 生成 SQL 迁移文件
+pnpm db:migrate    # 执行迁移文件（生产环境推荐）
+pnpm db:studio     # 打开 Drizzle Studio 可视化管理数据库
+```
 
-现有用户升级到团队协作版本时，需要按顺序执行以下步骤：
+4. **Schema 文件**
 
-1. **应用最新数据库结构**
-   - 依次运行 `sql/teams.sql`, `sql/project.sql`, `sql/prompts.sql`, `sql/tags.sql`，确保新增的外键、检查约束和索引落地。
-2. **回填历史数据**
-   - 执行 `sql/backfill_team_data.sql`，它会为每位用户创建个人团队并将既有提示词、项目、标签挂接到对应团队。
-   - 迁移后可通过脚本末尾的查询检查是否仍存在缺失 `team_id` 的记录。
-3. **发布前校验**
-   - 确认 `team_members` 表中每个团队仅保留一个 `owner`，同时 `teams.owner_id` 与对应成员一致。
-   - 为生产环境配置 `SUPABASE_URL` / `SUPABASE_ANON_KEY`，并在部署前运行 `npm run lint && npm test`。
+   数据库表结构定义在 `drizzle/schema/` 目录中：
+   - `teams.js` — teams、team_members、projects 表
+   - `prompts.js` — prompts、tags、favorites 表
+   - `public.js` — public_prompts、prompt_likes、prompt_contributions 表
+   - `user.js` — user_feedback、provider_keys 表
 
-> 建议先在测试环境导入生产快照验证迁移脚本，确认无数据丢失后再在生产执行。
+### Supabase Storage (文件上传)
+
+Supabase 仅用于文件存储功能（如提示词封面图片上传）。
+
+1. 注册 [Supabase](https://supabase.com) 账户
+2. 创建新项目，获取项目 URL 和匿名密钥
+3. 在 Supabase 控制台创建 Storage Bucket
 
 ## 🔐 认证配置
 
