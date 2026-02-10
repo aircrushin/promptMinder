@@ -1,41 +1,53 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer.js'
+import { db } from '@/lib/db.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { requireUserId } from '@/lib/auth.js'
 import { TEAM_STATUSES } from '@/lib/team-service.js'
+import { eq, and, desc } from 'drizzle-orm'
+import { teamMembers, teams } from '@/drizzle/schema/index.js'
 
 export async function GET() {
   try {
     const userId = await requireUserId()
-    const supabase = createSupabaseServerClient()
 
-    const { data, error } = await supabase
-      .from('team_members')
-      .select(`
-        id,
-        team_id,
-        role,
-        email,
-        status,
-        invited_at,
-        team:teams (
-          id,
-          name,
-          description,
-          avatar_url,
-          is_personal,
-          owner_id
-        )
-      `)
-      .eq('user_id', userId)
-      .eq('status', TEAM_STATUSES.PENDING)
-      .order('invited_at', { ascending: false })
+    const rows = await db
+      .select({
+        id: teamMembers.id,
+        teamId: teamMembers.teamId,
+        role: teamMembers.role,
+        email: teamMembers.email,
+        status: teamMembers.status,
+        invitedAt: teamMembers.invitedAt,
+        tId: teams.id,
+        tName: teams.name,
+        tDescription: teams.description,
+        tAvatarUrl: teams.avatarUrl,
+        tIsPersonal: teams.isPersonal,
+        tOwnerId: teams.ownerId,
+      })
+      .from(teamMembers)
+      .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+      .where(and(eq(teamMembers.userId, userId), eq(teamMembers.status, TEAM_STATUSES.PENDING)))
+      .orderBy(desc(teamMembers.invitedAt))
 
-    if (error) {
-      throw error
-    }
+    const invites = rows.map(row => ({
+      id: row.id,
+      team_id: row.teamId,
+      role: row.role,
+      email: row.email,
+      status: row.status,
+      invited_at: row.invitedAt,
+      team: {
+        id: row.tId,
+        name: row.tName,
+        description: row.tDescription,
+        avatar_url: row.tAvatarUrl,
+        is_personal: row.tIsPersonal,
+        owner_id: row.tOwnerId,
+      }
+    }))
 
-    return NextResponse.json({ invites: data || [] })
+    return NextResponse.json({ invites })
   } catch (error) {
     return handleApiError(error, 'Unable to load team invites')
   }

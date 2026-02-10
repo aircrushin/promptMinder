@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer.js'
+import { db } from '@/lib/db.js'
 import { TeamService } from '@/lib/team-service.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { requireUserId } from '@/lib/auth.js'
 import { clerkClient } from '@clerk/nextjs/server'
+import { eq, and, inArray, asc } from 'drizzle-orm'
+import { teamMembers } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
 async function getTeamId(paramsPromise) {
   const { teamId } = await paramsPromise
@@ -17,26 +20,30 @@ export async function GET(_request, { params }) {
   try {
     const teamId = await getTeamId(params)
     const userId = await requireUserId()
-    const supabase = createSupabaseServerClient()
-    const teamService = new TeamService(supabase)
+    const teamService = new TeamService(db)
 
     await teamService.requireMembership(teamId, userId)
 
     const team = await teamService.getTeam(teamId)
 
-    const { data: members, error } = await supabase
-      .from('team_members')
-      .select('user_id, email, role, status, invited_at, joined_at, left_at, created_at, updated_at')
-      .eq('team_id', teamId)
-      .order('created_at', { ascending: true })
+    const memberRows = await db.select({
+      userId: teamMembers.userId,
+      email: teamMembers.email,
+      role: teamMembers.role,
+      status: teamMembers.status,
+      invitedAt: teamMembers.invitedAt,
+      joinedAt: teamMembers.joinedAt,
+      leftAt: teamMembers.leftAt,
+      createdAt: teamMembers.createdAt,
+      updatedAt: teamMembers.updatedAt,
+    }).from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId))
+      .orderBy(asc(teamMembers.createdAt))
 
-    if (error) {
-      throw error
-    }
+    const members = memberRows.map(toSnakeCase)
 
-    const memberList = members || []
     const uniqueUserIds = Array.from(new Set([
-      ...memberList.map((member) => member.user_id).filter(Boolean),
+      ...members.map((m) => m.user_id).filter(Boolean),
       team.owner_id,
     ].filter(Boolean)))
 
@@ -55,76 +62,46 @@ export async function GET(_request, { params }) {
       }
 
       if (!clerk?.users) {
-        // Fallback: use user IDs as display names
         uniqueUserIds.forEach((id) => {
-          profileMap.set(id, {
-            displayName: id,
-            email: null,
-          })
+          profileMap.set(id, { displayName: id, email: null })
         })
       } else {
         try {
-          // 批量获取用户信息
-          const result = await clerk.users.getUserList({
-            userId: uniqueUserIds,
-            limit: uniqueUserIds.length,
-          })
+          const result = await clerk.users.getUserList({ userId: uniqueUserIds, limit: uniqueUserIds.length })
+          const users = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : []
 
-          // 确保返回的数据是数组
-          const users = Array.isArray(result?.data)
-            ? result.data
-            : Array.isArray(result)
-              ? result
-              : []
-
-          // 处理批量获取的用户信息
           users.forEach((user) => {
             if (!user) return
-            const primaryEmail = user.primaryEmailAddress?.emailAddress
-              || user.emailAddresses?.[0]?.emailAddress
-              || null
+            const primaryEmail = user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress || null
             profileMap.set(user.id, {
               displayName: user.fullName || user.username || primaryEmail || user.id,
               email: primaryEmail,
             })
           })
 
-          // 检查是否有未获取到的用户
           const missingUserIds = uniqueUserIds.filter((id) => !profileMap.has(id))
           if (missingUserIds.length > 0) {
-            console.warn(`[teams/${teamId}] Some users not found in batch fetch, falling back to individual fetch for ${missingUserIds.length} users`)
             throw new Error('Incomplete batch fetch')
           }
         } catch (fetchError) {
           console.error(`[teams/${teamId}] failed to load batch users`, fetchError)
-          // 单个获取用户信息作为后备方案
           await Promise.all(
             uniqueUserIds.map(async (id) => {
               if (profileMap.has(id)) return
               try {
                 const user = await clerk.users.getUser(id)
                 if (!user) {
-                  console.warn(`[teams/${teamId}] User not found: ${id}`)
-                  profileMap.set(id, {
-                    displayName: id,
-                    email: null,
-                  })
+                  profileMap.set(id, { displayName: id, email: null })
                   return
                 }
-                const primaryEmail = user.primaryEmailAddress?.emailAddress
-                  || user.emailAddresses?.[0]?.emailAddress
-                  || null
+                const primaryEmail = user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress || null
                 profileMap.set(id, {
                   displayName: user.fullName || user.username || primaryEmail || id,
                   email: primaryEmail,
                 })
               } catch (singleError) {
                 console.error(`[teams/${teamId}] failed to load user ${id}`, singleError)
-                // 设置默认值，避免undefined
-                profileMap.set(id, {
-                  displayName: id,
-                  email: null,
-                })
+                profileMap.set(id, { displayName: id, email: null })
               }
             })
           )
@@ -132,7 +109,7 @@ export async function GET(_request, { params }) {
       }
     }
 
-    const enrichedMembers = memberList.map((member) => {
+    const enrichedMembers = members.map((member) => {
       const profile = member.user_id ? profileMap.get(member.user_id) : null
       return {
         ...member,
@@ -147,10 +124,7 @@ export async function GET(_request, { params }) {
       || team.owner_id
 
     return NextResponse.json({
-      team: {
-        ...team,
-        owner_display_name: ownerDisplayName,
-      },
+      team: { ...team, owner_display_name: ownerDisplayName },
       members: enrichedMembers,
     })
   } catch (error) {
@@ -164,8 +138,7 @@ export async function PATCH(request, { params }) {
     const userId = await requireUserId()
     const payload = await request.json()
 
-    const supabase = createSupabaseServerClient()
-    const teamService = new TeamService(supabase)
+    const teamService = new TeamService(db)
     const team = await teamService.updateTeam(teamId, {
       name: payload.name,
       description: payload.description,
@@ -183,8 +156,7 @@ export async function DELETE(_request, { params }) {
     const teamId = await getTeamId(params)
     const userId = await requireUserId()
 
-    const supabase = createSupabaseServerClient()
-    const teamService = new TeamService(supabase)
+    const teamService = new TeamService(db)
     await teamService.deleteTeam(teamId, userId)
 
     return NextResponse.json({ success: true })

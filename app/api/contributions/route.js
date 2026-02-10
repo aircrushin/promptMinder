@@ -1,128 +1,78 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { db } from '@/lib/db.js'
+import { eq, desc, count as countFn } from 'drizzle-orm'
+import { promptContributions } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function POST(request) {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    const { title, role, content, language, contributorEmail, contributorName } = await request.json();
+    const { title, role, content, language, contributorEmail, contributorName } = await request.json()
 
-    // 验证必填字段
     if (!title || !title.trim()) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
-
     if (!role || !role.trim()) {
-      return NextResponse.json({ error: 'Role/Category is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Role/Category is required' }, { status: 400 })
     }
-
     if (!content || !content.trim()) {
-      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     }
 
-    // 准备插入数据
-    const contributionData = {
-      id: crypto.randomUUID(),
+    const result = await db.insert(promptContributions).values({
       title: title.trim(),
-      role_category: role.trim(),
+      roleCategory: role.trim(),
       content: content.trim(),
       language: language || 'zh',
-      contributor_email: contributorEmail?.trim() || null,
-      contributor_name: contributorName?.trim() || null,
+      contributorEmail: contributorEmail?.trim() || null,
+      contributorName: contributorName?.trim() || null,
       status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    }).returning()
 
-    // 插入到数据库
-    const { data: newContribution, error } = await supabase
-      .from('prompt_contributions')
-      .insert([contributionData])
-      .select()
-      .single();
+    const newContribution = toSnakeCase(result[0])
 
-    if (error) {
-      console.error('Supabase insert error:', error);
-      return NextResponse.json({ error: 'Failed to save contribution' }, { status: 500 });
-    }
-
-    // 返回成功响应（不包含敏感信息）
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Contribution submitted successfully',
       id: newContribution.id,
       status: newContribution.status,
       created_at: newContribution.created_at
-    });
-
+    })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// 获取贡献列表 - 仅供管理员使用
 export async function GET(request) {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-  
   try {
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') || 'pending';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = (page - 1) * limit;
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status') || 'pending'
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = (page - 1) * limit
 
-    // 获取贡献列表
-    let query = supabase
-      .from('prompt_contributions')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let dataQuery = db.select().from(promptContributions).orderBy(desc(promptContributions.createdAt))
+    let countQuery = db.select({ value: countFn() }).from(promptContributions)
 
-    // 按状态过滤
     if (status !== 'all') {
-      query = query.eq('status', status);
+      dataQuery = dataQuery.where(eq(promptContributions.status, status))
+      countQuery = countQuery.where(eq(promptContributions.status, status))
     }
 
-    // 分页
-    query = query.range(offset, offset + limit - 1);
-
-    const { data: contributions, error } = await query;
-
-    if (error) {
-      console.error('Supabase query error:', error);
-      return NextResponse.json({ error: 'Failed to fetch contributions' }, { status: 500 });
-    }
-
-    // 获取总数
-    let countQuery = supabase
-      .from('prompt_contributions')
-      .select('*', { count: 'exact', head: true });
-    
-    if (status !== 'all') {
-      countQuery = countQuery.eq('status', status);
-    }
-    
-    const { count, error: countError } = await countQuery;
-
-    if (countError) {
-      console.error('Count error:', countError);
-    }
+    const [contributions, countResult] = await Promise.all([
+      dataQuery.limit(limit).offset(offset),
+      countQuery,
+    ])
 
     return NextResponse.json({
-      contributions,
+      contributions: contributions.map(toSnakeCase),
       pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        page, limit,
+        total: countResult[0]?.value || 0,
+        totalPages: Math.ceil((countResult[0]?.value || 0) / limit)
       }
-    });
-
+    })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}

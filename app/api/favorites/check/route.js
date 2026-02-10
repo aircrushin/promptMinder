@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth.js'
-import { createSupabaseServerClient } from '@/lib/supabaseServer.js'
+import { db } from '@/lib/db.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
+import { eq, and, inArray } from 'drizzle-orm'
+import { favorites } from '@/drizzle/schema/index.js'
 
 export async function GET(request) {
   try {
     const userId = await requireUserId()
-    const supabase = createSupabaseServerClient()
 
     const { searchParams } = new URL(request.url)
     const promptIds = searchParams.get('promptIds')
@@ -21,23 +22,12 @@ export async function GET(request) {
       return NextResponse.json({ favorites: {} })
     }
 
-    const { data: favorites, error } = await supabase
-      .from('favorites')
-      .select('prompt_id')
-      .eq('user_id', userId)
-      .in('prompt_id', ids)
-
-    if (error) {
-      throw error
-    }
+    const rows = await db.select({ promptId: favorites.promptId }).from(favorites)
+      .where(and(eq(favorites.userId, userId), inArray(favorites.promptId, ids)))
 
     const favoriteMap = {}
-    ids.forEach(id => {
-      favoriteMap[id] = false
-    })
-    favorites?.forEach(f => {
-      favoriteMap[f.prompt_id] = true
-    })
+    ids.forEach(id => { favoriteMap[id] = false })
+    rows.forEach(f => { favoriteMap[f.promptId] = true })
 
     return NextResponse.json({ favorites: favoriteMap })
   } catch (error) {

@@ -1,79 +1,55 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { db } from '@/lib/db.js'
+import { eq, gte, desc, asc } from 'drizzle-orm'
+import { promptContributions } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request) {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    // 获取各状态的统计
-    const { data: statusStats, error: statusError } = await supabase
-      .from('prompt_contributions')
-      .select('status')
-      .then(({ data, error }) => {
-        if (error) return { data: null, error };
-        
-        const stats = {
-          pending: 0,
-          approved: 0,
-          rejected: 0,
-          total: data.length
-        };
-        
-        data.forEach(item => {
-          stats[item.status] = (stats[item.status] || 0) + 1;
-        });
-        
-        return { data: stats, error: null };
-      });
+    // Get all statuses
+    const allRows = await db.select({ status: promptContributions.status }).from(promptContributions)
 
-    if (statusError) {
-      return NextResponse.json({ error: 'Failed to fetch statistics' }, { status: 500 });
-    }
+    const statusStats = { pending: 0, approved: 0, rejected: 0, total: allRows.length }
+    allRows.forEach(item => {
+      statusStats[item.status] = (statusStats[item.status] || 0) + 1
+    })
 
-    // 获取最近7天的贡献趋势
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // Recent 7 days trend
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-    const { data: recentContributions, error: recentError } = await supabase
-      .from('prompt_contributions')
-      .select('created_at')
-      .gte('created_at', sevenDaysAgo.toISOString())
-      .order('created_at', { ascending: true });
+    const recentRows = await db.select({ createdAt: promptContributions.createdAt })
+      .from(promptContributions)
+      .where(gte(promptContributions.createdAt, sevenDaysAgo))
+      .orderBy(asc(promptContributions.createdAt))
 
-    if (recentError) {
-      console.error('Recent contributions error:', recentError);
-    }
+    const dailyStats = {}
+    recentRows.forEach(row => {
+      const date = new Date(row.createdAt).toISOString().split('T')[0]
+      dailyStats[date] = (dailyStats[date] || 0) + 1
+    })
 
-    // 按天分组统计
-    const dailyStats = {};
-    if (recentContributions) {
-      recentContributions.forEach(contribution => {
-        const date = new Date(contribution.created_at).toISOString().split('T')[0];
-        dailyStats[date] = (dailyStats[date] || 0) + 1;
-      });
-    }
-
-    // 获取最近的几个待审核贡献
-    const { data: pendingPreview, error: pendingError } = await supabase
-      .from('prompt_contributions')
-      .select('id, title, role_category, created_at')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    if (pendingError) {
-      console.error('Pending preview error:', pendingError);
-    }
+    // Pending preview
+    const pendingPreview = await db
+      .select({
+        id: promptContributions.id,
+        title: promptContributions.title,
+        roleCategory: promptContributions.roleCategory,
+        createdAt: promptContributions.createdAt,
+      })
+      .from(promptContributions)
+      .where(eq(promptContributions.status, 'pending'))
+      .orderBy(desc(promptContributions.createdAt))
+      .limit(5)
 
     return NextResponse.json({
       statusStats,
       dailyStats,
-      pendingPreview: pendingPreview || [],
+      pendingPreview: pendingPreview.map(toSnakeCase),
       lastUpdated: new Date().toISOString()
-    });
-
+    })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}
