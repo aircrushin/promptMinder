@@ -3,7 +3,6 @@ import { db } from '@/lib/db.js'
 import { auth } from '@clerk/nextjs/server'
 import { eq, and, desc, asc, inArray, count as countFn } from 'drizzle-orm'
 import { publicPrompts, promptLikes } from '@/drizzle/schema/index.js'
-import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url)

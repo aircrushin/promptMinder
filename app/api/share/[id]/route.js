@@ -5,7 +5,7 @@ import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request, { params }) {
-  const { id } = params
+  const { id } = await params
 
   const rows = await db.select().from(prompts)
     .where(and(eq(prompts.id, id), eq(prompts.isPublic, true)))

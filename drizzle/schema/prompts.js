@@ -5,7 +5,6 @@ import {
   boolean,
   timestamp,
   index,
-  uniqueIndex,
   unique,
   check,
 } from 'drizzle-orm/pg-core'

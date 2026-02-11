@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db.js'
-import { eq, or, ilike, desc, count as countFn } from 'drizzle-orm'
+import { or, ilike, desc, count as countFn } from 'drizzle-orm'
 import { publicPrompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
