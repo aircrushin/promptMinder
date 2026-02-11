@@ -5,9 +5,9 @@ import { promptContributions, publicPrompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request, { params }) {
-  const { id } = await params
-
   try {
+    const { id } = await params
+
     const rows = await db.select().from(promptContributions).where(eq(promptContributions.id, id)).limit(1)
 
     if (!rows[0]) {
@@ -22,10 +22,10 @@ export async function GET(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
-  const { id } = await params
-  const adminEmail = request.headers.get('x-admin-email')
-
   try {
+    const { id } = await params
+    const adminEmail = request.headers.get('x-admin-email')
+
     const { status, adminNotes, publishToPrompts } = await request.json()
 
     if (!['pending', 'approved', 'rejected'].includes(status)) {
@@ -78,9 +78,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const { id } = await params
-
   try {
+    const { id } = await params
+
     const rows = await db.select({ id: promptContributions.id }).from(promptContributions)
       .where(eq(promptContributions.id, id)).limit(1)
 

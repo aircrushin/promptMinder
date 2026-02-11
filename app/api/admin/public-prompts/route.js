@@ -22,18 +22,18 @@ async function verifyAdmin(request) {
 }
 
 export async function GET(request) {
-  const authResult = await verifyAdmin(request)
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error }, { status: 401 })
-  }
-
-  const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get('page') || '1', 10)
-  const limit = parseInt(searchParams.get('limit') || '20', 10)
-  const search = searchParams.get('search') || ''
-  const offset = (page - 1) * limit
-
   try {
+    const authResult = await verifyAdmin(request)
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '20', 10)
+    const search = searchParams.get('search') || ''
+    const offset = (page - 1) * limit
+
     const whereCondition = search
       ? or(
           ilike(publicPrompts.title, `%${search}%`),
@@ -60,12 +60,12 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const authResult = await verifyAdmin(request)
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error }, { status: 401 })
-  }
-
   try {
+    const authResult = await verifyAdmin(request)
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 })
+    }
+
     const body = await request.json()
     const { title, role_category, content, category, language } = body
 

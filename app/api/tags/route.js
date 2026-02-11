@@ -6,13 +6,18 @@ import { tags } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request) {
-  const { userId } = await auth()
+  try {
+    const { userId } = await auth()
 
-  const rows = await db.select().from(tags)
-    .where(or(isNull(tags.userId), eq(tags.userId, userId)))
-    .orderBy(asc(tags.name))
+    const rows = await db.select().from(tags)
+      .where(or(isNull(tags.userId), eq(tags.userId, userId)))
+      .orderBy(asc(tags.name))
 
-  return NextResponse.json(rows.map(toSnakeCase))
+    return NextResponse.json(rows.map(toSnakeCase))
+  } catch (error) {
+    console.error('Error fetching tags:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 }
 
 export async function POST(request) {

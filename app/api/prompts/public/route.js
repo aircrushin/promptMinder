@@ -5,15 +5,15 @@ import { eq, and, desc, asc, inArray, count as countFn } from 'drizzle-orm'
 import { publicPrompts, promptLikes } from '@/drizzle/schema/index.js'
 
 export async function GET(request) {
-    const { searchParams } = new URL(request.url)
-    const language = searchParams.get('lang') || 'zh'
-    const category = searchParams.get('category') || ''
-    const page = parseInt(searchParams.get('page') || '1', 10)
-    const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
-    const sortBy = searchParams.get('sortBy') || 'created_at'
-    const sortOrder = searchParams.get('sortOrder') || 'desc'
-
     try {
+        const { searchParams } = new URL(request.url)
+        const language = searchParams.get('lang') || 'zh'
+        const category = searchParams.get('category') || ''
+        const page = parseInt(searchParams.get('page') || '1', 10)
+        const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
+        const sortBy = searchParams.get('sortBy') || 'created_at'
+        const sortOrder = searchParams.get('sortOrder') || 'desc'
+
         const { userId } = await auth()
 
         // Build where conditions

@@ -22,14 +22,14 @@ async function verifyAdmin(request) {
 }
 
 export async function GET(request, { params }) {
-  const authResult = await verifyAdmin(request)
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error }, { status: 401 })
-  }
-
-  const { id } = await params
-
   try {
+    const authResult = await verifyAdmin(request)
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 })
+    }
+
+    const { id } = await params
+
     const rows = await db.select().from(publicPrompts).where(eq(publicPrompts.id, id)).limit(1)
 
     if (!rows[0]) {
@@ -44,14 +44,14 @@ export async function GET(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
-  const authResult = await verifyAdmin(request)
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error }, { status: 401 })
-  }
-
-  const { id } = await params
-
   try {
+    const authResult = await verifyAdmin(request)
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 })
+    }
+
+    const { id } = await params
+
     const body = await request.json()
     const { title, role_category, content, category, language } = body
 
@@ -84,14 +84,14 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const authResult = await verifyAdmin(request)
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error }, { status: 401 })
-  }
-
-  const { id } = await params
-
   try {
+    const authResult = await verifyAdmin(request)
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 })
+    }
+
+    const { id } = await params
+
     await db.delete(publicPrompts).where(eq(publicPrompts.id, id))
 
     return NextResponse.json({ success: true, message: '提示词已删除' })
