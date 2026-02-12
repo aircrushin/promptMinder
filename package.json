@@ -62,7 +62,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.294.0",
     "motion": "^12.23.12",
-    "next": "16.0.10",
+    "next": "16.1.5",
     "next-pwa": "^5.6.0",
     "openai": "^4.77.0",
     "postgres": "^3.4.8",
