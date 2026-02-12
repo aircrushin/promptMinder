@@ -1,156 +1,98 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { db } from '@/lib/db.js'
+import { eq } from 'drizzle-orm'
+import { promptContributions, publicPrompts } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
-// 获取单个贡献详情
 export async function GET(request, { params }) {
-  const { id } = await params;
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    const { data: contribution, error } = await supabase
-      .from('prompt_contributions')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { id } = await params
 
-    if (error) {
-      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
+    const rows = await db.select().from(promptContributions).where(eq(promptContributions.id, id)).limit(1)
+
+    if (!rows[0]) {
+      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 })
     }
 
-    return NextResponse.json(contribution);
-
+    return NextResponse.json(toSnakeCase(rows[0]))
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// 更新贡献状态（审核）
 export async function PATCH(request, { params }) {
-  const { id } = await params;
-  
-  // 从请求头获取管理员邮箱（由前端发送）
-  const adminEmail = request.headers.get('x-admin-email');
-  
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    const { status, adminNotes, publishToPrompts } = await request.json();
+    const { id } = await params
+    const adminEmail = request.headers.get('x-admin-email')
 
-    // 验证状态值
+    const { status, adminNotes, publishToPrompts } = await request.json()
+
     if (!['pending', 'approved', 'rejected'].includes(status)) {
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
-    // 检查贡献是否存在
-    const { data: existingContribution, error: fetchError } = await supabase
-      .from('prompt_contributions')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (fetchError || !existingContribution) {
-      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
+    const existing = await db.select().from(promptContributions).where(eq(promptContributions.id, id)).limit(1)
+    if (!existing[0]) {
+      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 })
     }
 
-    // 准备更新数据
+    const existingContribution = existing[0]
+
     const updateData = {
       status,
-      admin_notes: adminNotes || null,
-      reviewed_at: new Date().toISOString(),
-      reviewed_by: adminEmail || 'admin',
-      updated_at: new Date().toISOString()
-    };
+      adminNotes: adminNotes || null,
+      reviewedAt: new Date(),
+      reviewedBy: adminEmail || 'admin',
+      updatedAt: new Date(),
+    }
 
-    // 如果状态是approved且需要发布到公共提示词库
-    let publishedPromptId = null;
+    let publishedPromptId = null
     if (status === 'approved' && publishToPrompts) {
-      // 创建新的公共提示词到 public_prompts 表
-      const contributionLanguage = existingContribution.language || 'zh';
-      const publicPromptData = {
-        id: crypto.randomUUID(),
+      const contributionLanguage = existingContribution.language || 'zh'
+      const publicResult = await db.insert(publicPrompts).values({
         title: existingContribution.title,
-        role_category: existingContribution.role_category,
+        roleCategory: existingContribution.roleCategory,
         content: existingContribution.content,
         category: contributionLanguage === 'zh' ? '社区贡献' : 'Community',
         language: contributionLanguage,
-        created_by: existingContribution.contributor_email || null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+        createdBy: existingContribution.contributorEmail || null,
+      }).returning()
 
-      const { data: newPrompt, error: promptError } = await supabase
-        .from('public_prompts')
-        .insert([publicPromptData])
-        .select()
-        .single();
-
-      if (promptError) {
-        console.error('Failed to create public prompt:', promptError);
-        return NextResponse.json({ error: 'Failed to publish prompt' }, { status: 500 });
-      }
-
-      publishedPromptId = newPrompt.id;
-      updateData.published_prompt_id = publishedPromptId;
+      publishedPromptId = publicResult[0].id
+      updateData.publishedPromptId = publishedPromptId
     }
 
-    // 更新贡献状态
-    const { data: updatedContribution, error: updateError } = await supabase
-      .from('prompt_contributions')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error('Update error:', updateError);
-      return NextResponse.json({ error: 'Failed to update contribution' }, { status: 500 });
-    }
+    const result = await db.update(promptContributions).set(updateData)
+      .where(eq(promptContributions.id, id)).returning()
 
     return NextResponse.json({
       message: 'Contribution updated successfully',
-      contribution: updatedContribution,
+      contribution: toSnakeCase(result[0]),
       publishedPromptId
-    });
-
+    })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// 删除贡献
 export async function DELETE(request, { params }) {
-  const { id } = await params;
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
   try {
-    // 检查贡献是否存在
-    const { data: contribution, error: fetchError } = await supabase
-      .from('prompt_contributions')
-      .select('id')
-      .eq('id', id)
-      .single();
+    const { id } = await params
 
-    if (fetchError || !contribution) {
-      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
+    const rows = await db.select({ id: promptContributions.id }).from(promptContributions)
+      .where(eq(promptContributions.id, id)).limit(1)
+
+    if (!rows[0]) {
+      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 })
     }
 
-    // 删除贡献
-    const { error: deleteError } = await supabase
-      .from('prompt_contributions')
-      .delete()
-      .eq('id', id);
+    await db.delete(promptContributions).where(eq(promptContributions.id, id))
 
-    if (deleteError) {
-      console.error('Delete error:', deleteError);
-      return NextResponse.json({ error: 'Failed to delete contribution' }, { status: 500 });
-    }
-
-    return NextResponse.json({ message: 'Contribution deleted successfully' });
-
+    return NextResponse.json({ message: 'Contribution deleted successfully' })
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}

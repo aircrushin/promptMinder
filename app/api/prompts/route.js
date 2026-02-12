@@ -3,29 +3,34 @@ import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { clerkClient } from '@clerk/nextjs/server'
+import { eq, or, and, ilike, desc, count as countFn } from 'drizzle-orm'
+import { prompts } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
-function applyPromptFilters(query, { teamId, userId, tag, search }) {
-  const baseQuery = teamId
-    ? query.eq('team_id', teamId)
-    : query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+function buildPromptConditions({ teamId, userId, tag, search }) {
+  const conditions = []
 
-  let filteredQuery = baseQuery
+  if (teamId) {
+    conditions.push(eq(prompts.teamId, teamId))
+  } else {
+    conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
+  }
 
   if (tag) {
-    filteredQuery = filteredQuery.ilike('tags', `%${tag}%`)
+    conditions.push(ilike(prompts.tags, `%${tag}%`))
   }
 
   if (search) {
-    filteredQuery = filteredQuery.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+    conditions.push(or(ilike(prompts.title, `%${search}%`), ilike(prompts.description, `%${search}%`)))
   }
 
-  return filteredQuery
+  return and(...conditions)
 }
 
 export async function GET(request) {
   try {
     const userId = await requireUserId()
-    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+    const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: false,
       allowMissingTeam: true
     })
@@ -41,40 +46,20 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit') || '10', 10)
     const offset = (page - 1) * limit
 
-    const filters = { teamId, userId, tag, search }
+    const whereCondition = buildPromptConditions({ teamId, userId, tag, search })
 
-    const dataQuery = applyPromptFilters(
-      supabase
-        .from('prompts')
-        .select('*'),
-      filters
-    )
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+    const [dataResult, countResult] = await Promise.all([
+      db.select().from(prompts).where(whereCondition).orderBy(desc(prompts.createdAt)).limit(limit).offset(offset),
+      db.select({ value: countFn() }).from(prompts).where(whereCondition)
+    ])
 
-    const countQuery = applyPromptFilters(
-      supabase
-        .from('prompts')
-        .select('*', { count: 'exact', head: true }),
-      filters
-    )
+    let promptList = dataResult.map(toSnakeCase)
+    const total = countResult[0]?.value || 0
 
-    const [promptsResult, countResult] = await Promise.all([dataQuery, countQuery])
-
-    if (promptsResult.error) {
-      throw promptsResult.error
-    }
-
-    if (countResult.error) {
-      throw countResult.error
-    }
-
-    let prompts = promptsResult.data || []
-    
     // Enrich prompts with creator info if possible
-    if (prompts.length > 0) {
-      const userIds = Array.from(new Set(prompts.map(p => p.created_by).filter(Boolean)))
-      
+    if (promptList.length > 0) {
+      const userIds = Array.from(new Set(promptList.map(p => p.created_by).filter(Boolean)))
+
       if (userIds.length > 0) {
         try {
           let clerk
@@ -92,11 +77,11 @@ export async function GET(request) {
 
             const userMap = new Map()
             const userList = Array.isArray(users?.data) ? users.data : (Array.isArray(users) ? users : [])
-            
+
             userList.forEach(user => {
-              const email = user.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress 
+              const email = user.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress
                 || user.emailAddresses?.[0]?.emailAddress
-              
+
               userMap.set(user.id, {
                 id: user.id,
                 fullName: user.fullName,
@@ -108,25 +93,24 @@ export async function GET(request) {
               })
             })
 
-            prompts = prompts.map(prompt => ({
+            promptList = promptList.map(prompt => ({
               ...prompt,
               creator: userMap.get(prompt.created_by) || null
             }))
           }
         } catch (error) {
           console.warn('Failed to fetch creator details:', error)
-          // Continue without creator details rather than failing
         }
       }
     }
 
     return NextResponse.json({
-      prompts: prompts,
+      prompts: promptList,
       pagination: {
         page,
         limit,
-        total: countResult.count || 0,
-        totalPages: Math.ceil((countResult.count || 0) / limit)
+        total,
+        totalPages: Math.ceil(total / limit)
       }
     })
   } catch (error) {
@@ -137,7 +121,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const userId = await requireUserId()
-    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+    const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: false,
       allowMissingTeam: true
     })
@@ -149,36 +133,25 @@ export async function POST(request) {
     }
 
     const data = await request.json()
-    const timestamp = new Date().toISOString()
 
-    const promptPayload = {
-      id: crypto.randomUUID(),
-      team_id: targetTeamId,
-      project_id: targetTeamId ? data.projectId || null : null,
-      title: data.title,
-      content: data.content,
-      description: data.description || null,
-      created_by: userId,
-      user_id: userId,
-      version: data.version || null,
-      tags: data.tags || null,
-      is_public: data.is_public ?? false,
-      cover_img: data.cover_img || data.image_url || null,
-      created_at: timestamp,
-      updated_at: timestamp
-    }
+    const result = await db
+      .insert(prompts)
+      .values({
+        teamId: targetTeamId,
+        projectId: targetTeamId ? data.projectId || null : null,
+        title: data.title,
+        content: data.content,
+        description: data.description || null,
+        createdBy: userId,
+        userId: userId,
+        version: data.version || null,
+        tags: data.tags || null,
+        isPublic: data.is_public ?? false,
+        coverImg: data.cover_img || data.image_url || null,
+      })
+      .returning()
 
-    const { data: newPrompt, error } = await supabase
-      .from('prompts')
-      .insert([promptPayload])
-      .select()
-      .single()
-
-    if (error) {
-      throw error
-    }
-
-    return NextResponse.json(newPrompt, { status: 201 })
+    return NextResponse.json(toSnakeCase(result[0]), { status: 201 })
   } catch (error) {
     return handleApiError(error, 'Unable to create prompt')
   }

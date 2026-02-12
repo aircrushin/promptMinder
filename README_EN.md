@@ -36,7 +36,7 @@ A professional prompt management platform that makes AI prompt management simple
 
 - ⚡ **High Performance** - Next.js 16 + React 19, lightning-fast loading
 - 🔐 **Secure Authentication** - Enterprise-grade user authentication with Clerk
-- 💾 **Reliable Storage** - Supabase + PostgreSQL database
+- 💾 **Reliable Storage** - Neon PostgreSQL + Drizzle ORM
 - 🚀 **Easy Deployment** - Support for one-click deployment with Vercel and Zeabur
 
 ## 🚀 Quick Start
@@ -67,7 +67,10 @@ pnpm install
    Create a `.env.local` file and configure the following variables:
 
 ```env
-# Supabase configuration
+# Database configuration (Neon PostgreSQL)
+DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+
+# Supabase configuration (file storage only)
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 
@@ -131,152 +134,47 @@ Visit [http://localhost:3000](http://localhost:3000) to view the application.
 
 ## 🗃 Database Configuration
 
-### Supabase Setup
+### Neon PostgreSQL + Drizzle ORM
 
-1. **Create a project**
+This project uses [Neon](https://neon.tech) Serverless PostgreSQL as the database and [Drizzle ORM](https://orm.drizzle.team) for database queries and schema management.
 
-   - Register for a [Supabase](https://supabase.com) account
-   - Create a new project
-   - Get the project URL and anonymous key
-2. **Create data tables**
-   Execute the following SQL statements to create the required data tables:
+1. **Create a Neon database**
 
-```sql
--- Create teams table
-CREATE TABLE teams (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    description TEXT,
-    avatar_url TEXT,
-    is_personal BOOLEAN NOT NULL DEFAULT false,
-    created_by TEXT NOT NULL,
-    owner_id TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+   - Register for a [Neon](https://neon.tech) account
+   - Create a new project and get the `DATABASE_URL` connection string
+   - Add the connection string to `DATABASE_URL` in `.env.local`
 
--- Create team members table
-CREATE TABLE team_members (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    user_id TEXT NOT NULL,
-    email TEXT,
-    role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
-    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'left', 'removed', 'blocked')),
-    invited_by TEXT,
-    invited_at TIMESTAMPTZ,
-    joined_at TIMESTAMPTZ,
-    left_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by TEXT,
-    UNIQUE(team_id, user_id)
-);
+2. **Initialize database schema**
 
--- Create projects table
-CREATE TABLE projects (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    description TEXT,
-    created_by TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Create prompts table
-CREATE TABLE prompts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
-    project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    description TEXT,
-    created_by TEXT NOT NULL,
-    user_id TEXT,
-    version TEXT,
-    tags TEXT,
-    is_public BOOLEAN NOT NULL DEFAULT false,
-    cover_img TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Create tags table
-CREATE TABLE tags (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    user_id TEXT,
-    created_by TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(name, team_id, user_id)
-);
-
--- Create favorites table
-CREATE TABLE favorites (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
-    prompt_id UUID NOT NULL REFERENCES prompts(id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT unique_user_prompt_favorite UNIQUE (user_id, prompt_id)
-);
-
--- Create public prompts table
-CREATE TABLE public_prompts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    role_category TEXT NOT NULL,
-    content TEXT NOT NULL,
-    category TEXT DEFAULT 'General',
-    language TEXT DEFAULT 'zh',
-    created_by TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    likes INTEGER DEFAULT 0
-);
-
--- Create user likes table
-CREATE TABLE prompt_likes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    prompt_id UUID NOT NULL REFERENCES public_prompts(id) ON DELETE CASCADE,
-    user_id TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT prompt_likes_unique UNIQUE(prompt_id, user_id)
-);
-
--- Create contributions table
-CREATE TABLE prompt_contributions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    role_category TEXT NOT NULL,
-    content TEXT NOT NULL,
-    language TEXT DEFAULT 'zh',
-    contributor_email TEXT,
-    contributor_name TEXT,
-    status TEXT NOT NULL DEFAULT 'pending',
-    admin_notes TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    reviewed_at TIMESTAMPTZ,
-    reviewed_by TEXT,
-    published_prompt_id UUID,
-    CONSTRAINT valid_status CHECK (status IN ('pending', 'approved', 'rejected'))
-);
-
--- Create API keys table
-CREATE TABLE provider_keys (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id text NOT NULL,
-    provider text NOT NULL,
-    api_key text NOT NULL,
-    created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
-    updated_at timestamptz NOT NULL DEFAULT timezone('utc', now())
-);
+```bash
+# Push Drizzle schema to the database (first time or development)
+pnpm db:push
 ```
 
-More SQL files can be found in the `/sql` directory.
+3. **Database commands**
+
+```bash
+pnpm db:push       # Push schema to database (recommended for development)
+pnpm db:generate   # Generate SQL migration files
+pnpm db:migrate    # Run migration files (recommended for production)
+pnpm db:studio     # Open Drizzle Studio for visual database management
+```
+
+4. **Schema files**
+
+   Database table definitions are located in `drizzle/schema/`:
+   - `teams.js` — teams, team_members, projects tables
+   - `prompts.js` — prompts, tags, favorites tables
+   - `public.js` — public_prompts, prompt_likes, prompt_contributions tables
+   - `user.js` — user_feedback, provider_keys tables
+
+### Supabase Storage (File Uploads)
+
+Supabase is used only for file storage (e.g., prompt cover image uploads).
+
+1. Register for a [Supabase](https://supabase.com) account
+2. Create a new project and get the project URL and anonymous key
+3. Create a Storage Bucket in the Supabase console
 
 ## 🔐 Authentication Configuration
 

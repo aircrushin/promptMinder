@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
+import { eq, and } from 'drizzle-orm'
+import { prompts } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function POST(request) {
   try {
     const userId = await requireUserId()
-    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+    const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: false,
       allowMissingTeam: true,
     })
@@ -23,8 +26,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid request: Missing sourceId or promptData' }, { status: 400 })
     }
 
-    const timestamp = new Date().toISOString()
-
     let dataToCopy = null
 
     if (promptData) {
@@ -33,47 +34,32 @@ export async function POST(request) {
         content: promptData.prompt,
         description: `${promptData.category}`,
         tags: promptData.category || null,
-        cover_img: null,
+        coverImg: null,
       }
     } else if (sourceId) {
       let sourcePrompt = null
 
       if (teamId) {
-        const { data: teamPrompt, error: teamPromptError } = await supabase
-          .from('prompts')
-          .select('*')
-          .eq('id', sourceId)
-          .eq('team_id', teamId)
-          .maybeSingle()
-
-        if (teamPromptError) {
-          throw teamPromptError
-        }
-
-        sourcePrompt = teamPrompt
+        const rows = await db.select().from(prompts)
+          .where(and(eq(prompts.id, sourceId), eq(prompts.teamId, teamId)))
+          .limit(1)
+        sourcePrompt = rows[0] || null
       }
 
       if (!sourcePrompt) {
-        const { data: publicPrompt, error: publicError } = await supabase
-          .from('prompts')
-          .select('*')
-          .eq('id', sourceId)
-          .eq('is_public', true)
-          .maybeSingle()
+        const rows = await db.select().from(prompts)
+          .where(and(eq(prompts.id, sourceId), eq(prompts.isPublic, true)))
+          .limit(1)
 
-        if (publicError) {
-          throw publicError
-        }
-
-        if (!publicPrompt) {
+        if (!rows[0]) {
           return NextResponse.json({ error: 'Prompt not found or unavailable' }, { status: 404 })
         }
 
-        if (publicPrompt.user_id === userId) {
+        if (rows[0].userId === userId) {
           return NextResponse.json({ error: 'Cannot copy your own public prompt' }, { status: 400 })
         }
 
-        sourcePrompt = publicPrompt
+        sourcePrompt = rows[0]
       }
 
       dataToCopy = {
@@ -81,41 +67,31 @@ export async function POST(request) {
         content: sourcePrompt.content,
         description: sourcePrompt.description,
         tags: sourcePrompt.tags,
-        cover_img: sourcePrompt.cover_img,
-        project_id: sourcePrompt.project_id,
+        coverImg: sourcePrompt.coverImg,
+        projectId: sourcePrompt.projectId,
       }
     }
 
-    const insertPayload = {
-      id: crypto.randomUUID(),
-      team_id: targetTeamId,
-      project_id: targetTeamId ? dataToCopy.project_id || null : null,
-      title: dataToCopy.title,
-      content: dataToCopy.content,
-      description: dataToCopy.description,
-      tags: dataToCopy.tags,
-      version: '1.0.0',
-      user_id: userId,
-      created_by: userId,
-      is_public: false,
-      cover_img: dataToCopy.cover_img,
-      created_at: timestamp,
-      updated_at: timestamp,
-    }
-
-    const { data: newPrompt, error: insertError } = await supabase
-      .from('prompts')
-      .insert([insertPayload])
-      .select()
-      .single()
-
-    if (insertError) {
-      throw insertError
-    }
+    const result = await db
+      .insert(prompts)
+      .values({
+        teamId: targetTeamId,
+        projectId: targetTeamId ? dataToCopy.projectId || null : null,
+        title: dataToCopy.title,
+        content: dataToCopy.content,
+        description: dataToCopy.description,
+        tags: dataToCopy.tags,
+        version: '1.0.0',
+        userId,
+        createdBy: userId,
+        isPublic: false,
+        coverImg: dataToCopy.coverImg,
+      })
+      .returning()
 
     return NextResponse.json({
       message: 'Prompt copied successfully',
-      prompt: newPrompt,
+      prompt: toSnakeCase(result[0]),
     })
   } catch (error) {
     return handleApiError(error, 'Unable to copy prompt')

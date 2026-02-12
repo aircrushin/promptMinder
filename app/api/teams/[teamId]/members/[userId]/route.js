@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer.js'
+import { db } from '@/lib/db.js'
 import { TeamService, TEAM_STATUSES } from '@/lib/team-service.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { requireUserId } from '@/lib/auth.js'
@@ -25,8 +25,7 @@ export async function PATCH(request, { params }) {
     const { teamId, memberUserId } = await resolveParams(params, actorUserId)
     const body = await request.json()
 
-    const supabase = createSupabaseServerClient()
-    const teamService = new TeamService(supabase)
+    const teamService = new TeamService(db)
 
     let membership
     if (memberUserId === actorUserId && body?.status === TEAM_STATUSES.ACTIVE) {
@@ -66,8 +65,7 @@ export async function DELETE(_request, { params }) {
     const actorUserId = await requireUserId()
     const { teamId, memberUserId } = await resolveParams(params, actorUserId)
 
-    const supabase = createSupabaseServerClient()
-    const teamService = new TeamService(supabase)
+    const teamService = new TeamService(db)
     const membership = await teamService.removeMember(teamId, memberUserId, actorUserId)
 
     return NextResponse.json({ membership })

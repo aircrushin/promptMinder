@@ -1,4 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db.js'
+import { eq, and, desc } from 'drizzle-orm'
+import { prompts } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 import SharePromptDetailClient from './SharePromptDetailClient';
 import { notFound } from 'next/navigation';
 import {
@@ -9,34 +12,28 @@ import {
   generateGEOKeywords,
 } from '@/lib/geo-utils';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com';
 
 async function getPrompt(id) {
-  const { data: prompt, error } = await supabase
-    .from('prompts')
-    .select('*')
-    .eq('id', id)
-    .eq('is_public', true)
-    .single();
+  const rows = await db.select().from(prompts)
+    .where(and(eq(prompts.id, id), eq(prompts.isPublic, true)))
+    .limit(1)
 
-  if (error || !prompt) {
+  if (!rows[0]) {
     return null;
   }
 
-  // Fetch versions
-  const { data: versions } = await supabase
-    .from('prompts')
-    .select('id, version, created_at')
-    .eq('title', prompt.title)
-    .eq('is_public', true)
-    .order('created_at', { ascending: false });
+  const prompt = toSnakeCase(rows[0])
 
-  prompt.versions = versions || [];
-  
+  // Fetch versions
+  const versionRows = await db
+    .select({ id: prompts.id, version: prompts.version, createdAt: prompts.createdAt })
+    .from(prompts)
+    .where(and(eq(prompts.title, rows[0].title), eq(prompts.isPublic, true)))
+    .orderBy(desc(prompts.createdAt))
+
+  prompt.versions = versionRows.map(toSnakeCase)
+
   // Normalize tags to array
   if (prompt.tags && typeof prompt.tags === 'string') {
     prompt.tags = prompt.tags.split(',');
@@ -61,7 +58,7 @@ export async function generateMetadata({ params }) {
 
   const title = `${prompt.title} - AI提示词 | Prompt Minder`;
   const url = `${BASE_URL}/share/${id}`;
-  
+
   // 使用GEO优化的描述生成
   const description = generateGEODescription(
     prompt.description || prompt.content,
@@ -70,7 +67,7 @@ export async function generateMetadata({ params }) {
       maxLength: 160,
     }
   );
-  
+
   // 生成GEO优化的关键词
   const keywords = generateGEOKeywords(prompt);
 
@@ -226,4 +223,3 @@ export default async function SharePromptPage({ params }) {
     </>
   );
 }
- 

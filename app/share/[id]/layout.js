@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
-  const { id } = params || {};
+  const { id } = (await params) || {};
   if (!id) return {};
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://prompt-minder.com";

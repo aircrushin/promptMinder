@@ -1,395 +1,228 @@
-import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
-import { requireUserId } from '@/lib/auth';
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { NextResponse } from 'next/server'
+import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
+import { requireUserId } from '@/lib/auth'
+import { db } from '@/lib/db.js'
+import { eq, and } from 'drizzle-orm'
+import { providerKeys } from '@/drizzle/schema/index.js'
 
-// Default configuration from environment
-const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || '';
-const DEFAULT_BASE_URL = process.env.OPENAI_COMPAT_URL || 'https://api.openai.com/v1';
+const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || ''
+const DEFAULT_BASE_URL = process.env.OPENAI_COMPAT_URL || 'https://api.openai.com/v1'
 const PROVIDER_BASE_URLS = {
   openai: 'https://api.openai.com/v1',
   deepseek: 'https://api.deepseek.com/v1',
   zhipu: 'https://open.bigmodel.cn/api/paas/v4',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/',
   claude: 'https://api.anthropic.com/v1',
-};
-
-async function getStoredProviderKey(userId, provider) {
-  const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from('provider_keys')
-    .select('api_key')
-    .eq('user_id', userId)
-    .eq('provider', provider)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data?.api_key || null;
 }
 
-// Handle Claude API streaming
+async function getStoredProviderKey(userId, provider) {
+  const rows = await db.select({ apiKey: providerKeys.apiKey })
+    .from(providerKeys)
+    .where(and(eq(providerKeys.userId, userId), eq(providerKeys.provider, provider)))
+    .limit(1)
+
+  return rows[0]?.apiKey || null
+}
+
 async function handleClaudeStream(anthropic, model, systemPrompt, userPrompt, temperature, maxTokens, topP, startTime, controller, send) {
   try {
-    const messages = [];
+    const messages = []
     if (userPrompt) {
-      messages.push({ role: 'user', content: userPrompt });
+      messages.push({ role: 'user', content: userPrompt })
     }
 
-    const streamParams = {
-      model,
-      max_tokens: maxTokens,
-      temperature,
-      top_p: topP,
-      messages,
-    };
-
-    // Add system prompt if provided
+    const streamParams = { model, max_tokens: maxTokens, temperature, top_p: topP, messages }
     if (systemPrompt) {
-      streamParams.system = systemPrompt;
+      streamParams.system = systemPrompt
     }
 
-    const stream = await anthropic.messages.stream(streamParams);
+    const stream = await anthropic.messages.stream(streamParams)
 
-    let fullText = '';
-    let usage = null;
-    let finishReason = null;
+    let fullText = ''
+    let usage = null
+    let finishReason = null
 
     for await (const event of stream) {
       if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-        const delta = event.delta.text;
-        fullText += delta;
-        send({ type: 'delta', content: delta });
+        const delta = event.delta.text
+        fullText += delta
+        send({ type: 'delta', content: delta })
       } else if (event.type === 'message_stop') {
-        finishReason = 'end_turn';
+        finishReason = 'end_turn'
       } else if (event.type === 'message_delta' && event.usage) {
-        usage = event.usage;
+        usage = event.usage
       }
     }
 
-    const finalMessage = await stream.finalMessage();
+    const finalMessage = await stream.finalMessage()
     if (finalMessage.usage) {
-      usage = finalMessage.usage;
+      usage = finalMessage.usage
     }
 
-    const duration = Date.now() - startTime;
+    const duration = Date.now() - startTime
 
     send({
-      type: 'final',
-      output: fullText,
+      type: 'final', output: fullText,
       usage: {
         promptTokens: usage?.input_tokens || 0,
         completionTokens: usage?.output_tokens || 0,
         totalTokens: (usage?.input_tokens || 0) + (usage?.output_tokens || 0),
       },
-      model,
-      duration,
-      finishReason: finishReason || 'end_turn',
-    });
+      model, duration, finishReason: finishReason || 'end_turn',
+    })
   } catch (error) {
-    console.error('Claude stream error:', error);
-    send({
-      type: 'error',
-      error: error.message || 'An unexpected error occurred',
-    });
+    console.error('Claude stream error:', error)
+    send({ type: 'error', error: error.message || 'An unexpected error occurred' })
   } finally {
-    controller.close();
+    controller.close()
   }
 }
 
-// Handle OpenAI-compatible API streaming
 async function handleOpenAIStream(openai, model, messages, temperature, maxTokens, topP, startTime, controller, send) {
   try {
     const completion = await openai.chat.completions.create({
-      model,
-      messages,
-      temperature,
-      max_tokens: maxTokens,
-      top_p: topP,
-      stream: true,
-    });
+      model, messages, temperature, max_tokens: maxTokens, top_p: topP, stream: true,
+    })
 
-    let fullText = '';
-    let finishReason = null;
+    let fullText = ''
+    let finishReason = null
 
     for await (const part of completion) {
-      const delta = part.choices?.[0]?.delta?.content || '';
+      const delta = part.choices?.[0]?.delta?.content || ''
       if (delta) {
-        fullText += delta;
-        send({ type: 'delta', content: delta });
+        fullText += delta
+        send({ type: 'delta', content: delta })
       }
-      finishReason = part.choices?.[0]?.finish_reason || finishReason;
+      finishReason = part.choices?.[0]?.finish_reason || finishReason
     }
 
-    const usage = completion.finalUsage || {};
-    const duration = Date.now() - startTime;
+    const usage = completion.finalUsage || {}
+    const duration = Date.now() - startTime
 
     send({
-      type: 'final',
-      output: fullText,
-      usage: {
-        promptTokens: usage.prompt_tokens,
-        completionTokens: usage.completion_tokens,
-        totalTokens: usage.total_tokens,
-      },
-      model,
-      duration,
-      finishReason,
-    });
+      type: 'final', output: fullText,
+      usage: { promptTokens: usage.prompt_tokens, completionTokens: usage.completion_tokens, totalTokens: usage.total_tokens },
+      model, duration, finishReason,
+    })
   } catch (error) {
-    console.error('OpenAI stream error:', error);
-    send({
-      type: 'error',
-      error: error.message || 'An unexpected error occurred',
-    });
+    console.error('OpenAI stream error:', error)
+    send({ type: 'error', error: error.message || 'An unexpected error occurred' })
   } finally {
-    controller.close();
+    controller.close()
   }
 }
 
 export async function POST(request) {
-  const startTime = Date.now();
+  const startTime = Date.now()
 
   try {
-    const body = await request.json();
-    const { prompt, systemPrompt, userPrompt, settings = {}, stream = true } = body;
+    const body = await request.json()
+    const { prompt, systemPrompt, userPrompt, settings = {}, stream = true } = body
 
     if (!prompt && !systemPrompt && !userPrompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
     }
 
     const {
-      apiKey,
-      baseURL,
-      model = 'gpt-3.5-turbo',
-      temperature = 0.7,
-      maxTokens = 2000,
-      topP = 0.7,
-      provider = 'openai',
-      useStoredKey = false,
-    } = settings;
+      apiKey, baseURL, model = 'gpt-3.5-turbo', temperature = 0.7,
+      maxTokens = 2000, topP = 0.7, provider = 'openai', useStoredKey = false,
+    } = settings
 
-    const normalizedProvider = (provider || 'openai').toLowerCase();
-    let finalApiKey = apiKey || DEFAULT_API_KEY;
-    let resolvedBaseURL =
-      baseURL || PROVIDER_BASE_URLS[normalizedProvider] || DEFAULT_BASE_URL;
+    const normalizedProvider = (provider || 'openai').toLowerCase()
+    let finalApiKey = apiKey || DEFAULT_API_KEY
+    let resolvedBaseURL = baseURL || PROVIDER_BASE_URLS[normalizedProvider] || DEFAULT_BASE_URL
 
     if (useStoredKey) {
       if (normalizedProvider === 'custom') {
-        return NextResponse.json(
-          { error: 'Stored credentials are only supported for known providers.' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Stored credentials are only supported for known providers.' }, { status: 400 })
       }
-      const userId = await requireUserId();
-      const storedKey = await getStoredProviderKey(userId, normalizedProvider);
+      const userId = await requireUserId()
+      const storedKey = await getStoredProviderKey(userId, normalizedProvider)
       if (!storedKey) {
-        return NextResponse.json(
-          { error: `No saved API key found for ${normalizedProvider}.` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `No saved API key found for ${normalizedProvider}.` }, { status: 400 })
       }
-      finalApiKey = storedKey;
+      finalApiKey = storedKey
     }
 
     if (!finalApiKey) {
-      return NextResponse.json(
-        { error: 'API Key is required. Please provide an API key in settings.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'API Key is required. Please provide an API key in settings.' }, { status: 400 })
     }
 
-    // Determine if using Claude or OpenAI-compatible API
-    const isClaude = normalizedProvider === 'claude';
+    const isClaude = normalizedProvider === 'claude'
 
-    // Prepare messages for chat completion
-    const messages = [];
-    let systemMessage = systemPrompt;
-    let userMessage = userPrompt;
+    const messages = []
+    let systemMessage = systemPrompt
+    let userMessage = userPrompt
 
     if (!isClaude) {
-      // OpenAI format: system and user as message objects
-      if (systemPrompt) {
-        messages.push({ role: 'system', content: systemPrompt });
-      }
-      if (userPrompt) {
-        messages.push({ role: 'user', content: userPrompt });
-      }
-      // Fallback for backward compatibility
-      if (prompt && !systemPrompt && !userPrompt) {
-        messages.push({ role: 'user', content: prompt });
-      }
+      if (systemPrompt) messages.push({ role: 'system', content: systemPrompt })
+      if (userPrompt) messages.push({ role: 'user', content: userPrompt })
+      if (prompt && !systemPrompt && !userPrompt) messages.push({ role: 'user', content: prompt })
     } else {
-      // Claude format: separate system and user messages
-      if (prompt && !systemPrompt && !userPrompt) {
-        userMessage = prompt;
-      }
+      if (prompt && !systemPrompt && !userPrompt) userMessage = prompt
     }
 
-    // Streaming response
     if (stream) {
-      const encoder = new TextEncoder();
+      const encoder = new TextEncoder()
       const streamBody = new ReadableStream({
         async start(controller) {
-          const send = (payload) =>
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+          const send = (payload) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
 
           if (isClaude) {
-            // Use Anthropic SDK for Claude
-            const anthropic = new Anthropic({
-              apiKey: finalApiKey,
-            });
-            await handleClaudeStream(
-              anthropic,
-              model,
-              systemMessage,
-              userMessage,
-              temperature,
-              maxTokens,
-              topP,
-              startTime,
-              controller,
-              send
-            );
+            const anthropic = new Anthropic({ apiKey: finalApiKey })
+            await handleClaudeStream(anthropic, model, systemMessage, userMessage, temperature, maxTokens, topP, startTime, controller, send)
           } else {
-            // Use OpenAI SDK for other providers
-            const openai = new OpenAI({
-              apiKey: finalApiKey,
-              baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
-            });
-            await handleOpenAIStream(
-              openai,
-              model,
-              messages,
-              temperature,
-              maxTokens,
-              topP,
-              startTime,
-              controller,
-              send
-            );
+            const openai = new OpenAI({ apiKey: finalApiKey, baseURL: resolvedBaseURL || DEFAULT_BASE_URL })
+            await handleOpenAIStream(openai, model, messages, temperature, maxTokens, topP, startTime, controller, send)
           }
         },
-      });
+      })
 
       return new Response(streamBody, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache, no-transform',
-          Connection: 'keep-alive',
-        },
-      });
+        headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive' },
+      })
     }
 
-    // Non-streaming response
     if (isClaude) {
-      // Use Anthropic SDK for Claude
-      const anthropic = new Anthropic({
-        apiKey: finalApiKey,
-      });
-
+      const anthropic = new Anthropic({ apiKey: finalApiKey })
       const messageParams = {
-        model,
-        max_tokens: maxTokens,
-        temperature,
-        top_p: topP,
+        model, max_tokens: maxTokens, temperature, top_p: topP,
         messages: [{ role: 'user', content: userMessage }],
-      };
-
-      if (systemMessage) {
-        messageParams.system = systemMessage;
       }
+      if (systemMessage) messageParams.system = systemMessage
 
-      const response = await anthropic.messages.create(messageParams);
-
-      const duration = Date.now() - startTime;
-      const output = response.content?.[0]?.text || '';
-      const usage = response.usage || {};
+      const response = await anthropic.messages.create(messageParams)
+      const duration = Date.now() - startTime
+      const output = response.content?.[0]?.text || ''
+      const usage = response.usage || {}
 
       return NextResponse.json({
         output,
-        usage: {
-          promptTokens: usage.input_tokens || 0,
-          completionTokens: usage.output_tokens || 0,
-          totalTokens: (usage.input_tokens || 0) + (usage.output_tokens || 0),
-        },
-        model: response.model,
-        duration,
-        finishReason: response.stop_reason,
-      });
+        usage: { promptTokens: usage.input_tokens || 0, completionTokens: usage.output_tokens || 0, totalTokens: (usage.input_tokens || 0) + (usage.output_tokens || 0) },
+        model: response.model, duration, finishReason: response.stop_reason,
+      })
     } else {
-      // Use OpenAI SDK for other providers
-      const openai = new OpenAI({
-        apiKey: finalApiKey,
-        baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
-      });
-
-      const completion = await openai.chat.completions.create({
-        model,
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-        top_p: topP,
-      });
-
-      const duration = Date.now() - startTime;
-      const output = completion.choices?.[0]?.message?.content || '';
-      const usage = completion.usage || {};
+      const openai = new OpenAI({ apiKey: finalApiKey, baseURL: resolvedBaseURL || DEFAULT_BASE_URL })
+      const completion = await openai.chat.completions.create({ model, messages, temperature, max_tokens: maxTokens, top_p: topP })
+      const duration = Date.now() - startTime
+      const output = completion.choices?.[0]?.message?.content || ''
+      const usage = completion.usage || {}
 
       return NextResponse.json({
         output,
-        usage: {
-          promptTokens: usage.prompt_tokens,
-          completionTokens: usage.completion_tokens,
-          totalTokens: usage.total_tokens,
-        },
-        model: completion.model,
-        duration,
-        finishReason: completion.choices?.[0]?.finish_reason,
-      });
+        usage: { promptTokens: usage.prompt_tokens, completionTokens: usage.completion_tokens, totalTokens: usage.total_tokens },
+        model: completion.model, duration, finishReason: completion.choices?.[0]?.finish_reason,
+      })
     }
   } catch (error) {
-    console.error('Playground run error:', error);
+    console.error('Playground run error:', error)
 
-    // Handle specific error types
-    if (error.status === 401) {
-      return NextResponse.json(
-        { error: 'Invalid API key. Please check your API key and try again.' },
-        { status: 401 }
-      );
-    }
+    if (error.status === 401) return NextResponse.json({ error: 'Invalid API key. Please check your API key and try again.' }, { status: 401 })
+    if (error.status === 429) return NextResponse.json({ error: 'Rate limit exceeded. Please wait a moment and try again.' }, { status: 429 })
+    if (error.status === 404) return NextResponse.json({ error: 'Model not found. Please check the model name and try again.' }, { status: 404 })
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') return NextResponse.json({ error: 'Could not connect to the API endpoint. Please check the URL.' }, { status: 502 })
 
-    if (error.status === 429) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded. Please wait a moment and try again.' },
-        { status: 429 }
-      );
-    }
-
-    if (error.status === 404) {
-      return NextResponse.json(
-        { error: 'Model not found. Please check the model name and try again.' },
-        { status: 404 }
-      );
-    }
-
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      return NextResponse.json(
-        { error: 'Could not connect to the API endpoint. Please check the URL.' },
-        { status: 502 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: error.message || 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'An unexpected error occurred' }, { status: 500 })
   }
 }
-

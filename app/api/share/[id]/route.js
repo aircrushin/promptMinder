@@ -1,41 +1,35 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { db } from '@/lib/db.js'
+import { eq, and, desc } from 'drizzle-orm'
+import { prompts } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request, { params }) {
-  const { id } = params;
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-  
-  // First, get the requested prompt
-  const { data: prompt, error: promptError } = await supabase
-    .from('prompts')
-    .select('*')
-    .eq('id', id)
-    .eq('is_public', true)
-    .single();
+  try {
+    const { id } = await params
 
-  if (promptError) {
-    return NextResponse.json({ error: promptError.message }, { status: 500 });
+    const rows = await db.select().from(prompts)
+      .where(and(eq(prompts.id, id), eq(prompts.isPublic, true)))
+      .limit(1)
+
+    if (!rows[0]) {
+      return NextResponse.json({ error: 'Prompt not found or not public' }, { status: 404 })
+    }
+
+    const prompt = toSnakeCase(rows[0])
+
+    // Get all versions of this prompt
+    const versionRows = await db
+      .select({ id: prompts.id, version: prompts.version, createdAt: prompts.createdAt })
+      .from(prompts)
+      .where(and(eq(prompts.title, rows[0].title), eq(prompts.isPublic, true)))
+      .orderBy(desc(prompts.createdAt))
+
+    prompt.versions = versionRows.map(toSnakeCase)
+
+    return NextResponse.json(prompt)
+  } catch (error) {
+    console.error('Error fetching shared prompt:', error)
+    return NextResponse.json({ error: 'Unable to load shared prompt' }, { status: 500 })
   }
-
-  if (!prompt) {
-    return NextResponse.json({ error: 'Prompt not found or not public' }, { status: 404 });
-  }
-
-  // Then, get all versions of this prompt
-  const { data: versions, error: versionsError } = await supabase
-    .from('prompts')
-    .select('id, version, created_at')
-    .eq('title', prompt.title)
-    .eq('is_public', true)
-    .order('created_at', { ascending: false });
-
-  if (versionsError) {
-    // We can still return the main prompt even if versions fail
-    console.error('Error fetching versions:', versionsError.message);
-  }
-
-  // Attach versions to the prompt object
-  prompt.versions = versions || [];
-
-  return NextResponse.json(prompt);
-} 
+}

@@ -3,6 +3,9 @@ import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { TEAM_ROLES } from '@/lib/team-service.js'
+import { eq, or, and } from 'drizzle-orm'
+import { prompts } from '@/drizzle/schema/index.js'
+import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function POST(request, { params }) {
   try {
@@ -12,7 +15,7 @@ export async function POST(request, { params }) {
     }
 
     const userId = await requireUserId()
-    const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+    const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: false,
       allowMissingTeam: true,
     })
@@ -22,22 +25,19 @@ export async function POST(request, { params }) {
       membership = await teamService.requireMembership(teamId, userId)
     }
 
-    let query = supabase
-      .from('prompts')
-      .select('id, created_by, user_id, team_id, is_public')
-      .eq('id', promptId)
-
+    const conditions = [eq(prompts.id, promptId)]
     if (teamId) {
-      query = query.eq('team_id', teamId)
+      conditions.push(eq(prompts.teamId, teamId))
     } else {
-      query = query.or(`created_by.eq.${userId},user_id.eq.${userId}`)
+      conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
     }
 
-    const { data: prompt, error } = await query.maybeSingle()
-
-    if (error) {
-      throw error
-    }
+    const rows = await db
+      .select({ id: prompts.id, createdBy: prompts.createdBy, userId: prompts.userId, teamId: prompts.teamId, isPublic: prompts.isPublic })
+      .from(prompts)
+      .where(and(...conditions))
+      .limit(1)
+    const prompt = rows[0] ? toSnakeCase(rows[0]) : null
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 })
@@ -54,23 +54,12 @@ export async function POST(request, { params }) {
       return NextResponse.json({ message: 'Prompt already shared' })
     }
 
-    let updateQuery = supabase
-      .from('prompts')
-      .update({
-        is_public: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', promptId)
-
+    const updateConditions = [eq(prompts.id, promptId)]
     if (prompt.team_id) {
-      updateQuery = updateQuery.eq('team_id', prompt.team_id)
+      updateConditions.push(eq(prompts.teamId, prompt.team_id))
     }
 
-    const { error: updateError } = await updateQuery
-
-    if (updateError) {
-      throw updateError
-    }
+    await db.update(prompts).set({ isPublic: true, updatedAt: new Date() }).where(and(...updateConditions))
 
     return NextResponse.json({ message: 'Prompt shared successfully' })
   } catch (error) {
