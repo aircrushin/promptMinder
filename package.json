@@ -19,10 +19,10 @@
     "css:analyze": "node scripts/css-optimization.js",
     "css:optimize": "npm run css:analyze && tailwindcss -i ./app/globals.css -o ./app/globals.optimized.css --minify",
     "build:optimized": "npm run css:optimize && next build",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "drizzle-kit generate --config drizzle.config.mjs",
     "db:migrate": "node drizzle/migrate.js",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:push": "drizzle-kit push --config drizzle.config.mjs",
+    "db:studio": "drizzle-kit studio --config drizzle.config.mjs"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.1.76",
