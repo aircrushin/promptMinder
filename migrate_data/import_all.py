@@ -62,6 +62,16 @@ def clean_prompt_likes(df, public_prompts_df):
     return df
 
 
+def clean_prompts(df):
+    """清理 prompts 表中 content 为空的记录（用 title 填充）"""
+    null_content = df["content"].isna()
+    count = null_content.sum()
+    if count > 0:
+        df.loc[null_content, "content"] = df.loc[null_content, "title"]
+        print(f"  ⚠ prompts: 修复了 {count} 条 content 为空的记录（使用 title 填充）")
+    return df
+
+
 def clean_tags(df):
     """tags 表在 Supabase 中没有 created_by 和 updated_at，需要补充"""
     # 清理 team_id 和 user_id 都为空的孤儿标签（违反 chk_tag_scope 约束）
@@ -117,7 +127,9 @@ def main():
             original_count = len(df)
 
             # 数据清洗
-            if table_name == "favorites" and prompts_df is not None:
+            if table_name == "prompts":
+                df = clean_prompts(df)
+            elif table_name == "favorites" and prompts_df is not None:
                 df = clean_favorites(df, prompts_df)
             elif table_name == "prompt_likes" and public_prompts_df is not None:
                 df = clean_prompt_likes(df, public_prompts_df)
