@@ -7,7 +7,7 @@ const createJestConfig = nextJest({
 
 // 添加任何自定义配置到Jest
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.tsx'],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
   moduleNameMapper: {
@@ -16,22 +16,25 @@ const customJestConfig = {
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
     '^@/hooks/(.*)$': '<rootDir>/hooks/$1',
     '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
-    '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js',
+    '^lucide-react$': '<rootDir>/__mocks__/lucide-react.tsx',
+  },
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
   collectCoverageFrom: [
-    'components/**/*.{js,jsx}',
-    'lib/**/*.{js,jsx}',
-    'hooks/**/*.{js,jsx}',
-    'app/**/*.{js,jsx}',
-    'contexts/**/*.{js,jsx}',
-    '!app/**/layout.js',
-    '!app/**/loading.js',
-    '!app/**/error.js',
-    '!app/**/not-found.js',
-    '!app/**/page.js',
-    '!app/**/metadata.js',
-    '!app/**/robots.js',
-    '!app/**/sitemap.js',
+    'components/**/*.{js,jsx,ts,tsx}',
+    'lib/**/*.{js,jsx,ts,tsx}',
+    'hooks/**/*.{js,jsx,ts,tsx}',
+    'app/**/*.{js,jsx,ts,tsx}',
+    'contexts/**/*.{js,jsx,ts,tsx}',
+    '!app/**/layout.{js,tsx}',
+    '!app/**/loading.{js,tsx}',
+    '!app/**/error.{js,tsx}',
+    '!app/**/not-found.{js,tsx}',
+    '!app/**/page.{js,tsx}',
+    '!app/**/metadata.{js,ts}',
+    '!app/**/robots.{js,ts}',
+    '!app/**/sitemap.{js,ts}',
     '!app/globals.css',
     '!**/*.d.ts',
     '!**/node_modules/**',
@@ -57,7 +60,7 @@ const customJestConfig = {
     '**/*.(test|spec).(js|jsx|ts|tsx)'
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(lucide-react)/)'
+    'node_modules/(?!(lucide-react|@clerk)/)'
   ],
 }
 
