@@ -18,7 +18,7 @@ This file provides guidelines for agentic coding agents working in this reposito
 - Next.js 16 (App Router)
 - React 19 (functional components with hooks)
 - Clerk for authentication
-- Supabase (PostgreSQL) for database
+- Neon PostgreSQL + Drizzle ORM for database
 - Radix UI for accessible primitives
 - Tailwind CSS for styling
 - Lucide React for icons
@@ -92,7 +92,6 @@ prompt-manager/
 │   ├── team-service.js    # Team business logic
 │   ├── team-request.js    # Team context resolution
 │   ├── team-storage.js    # Team localStorage utilities
-│   ├── supabaseServer.js  # Supabase server client
 │   └── prompts.js         # Prompt utilities
 ├── contexts/              # React Context providers
 │   ├── LanguageContext.js # Internationalization
@@ -174,7 +173,6 @@ prompt-manager/
 Key mocks are configured in `jest.setup.js`:
 - Next.js router and navigation
 - Clerk authentication
-- Supabase client
 - OpenAI API
 - Framer Motion
 - React Hot Toast
@@ -212,7 +210,7 @@ This is a multi-tenant application where all data belongs to a team. Understandi
 
 **Server-side (API routes):**
 1. Extract team ID from `X-Team-Id` header or `?teamId=` query param via `extractTeamId()`
-2. Call `resolveTeamContext()` to get supabase client, teamService, and membership
+2. Call `resolveTeamContext()` to get db client, teamService, and membership
 3. Use `teamService.requireMembership()` to authorize access
 4. Pass `teamId` to database queries
 
@@ -220,16 +218,16 @@ This is a multi-tenant application where all data belongs to a team. Understandi
 ```javascript
 export async function GET(request) {
   const userId = await requireUserId()
-  const { teamId, supabase, teamService } = await resolveTeamContext(request, userId, {
+  const { teamId, teamService } = await resolveTeamContext(request, userId, {
     requireMembership: true,  // Verify user is a team member
     allowMissingTeam: false   // Require teamId to be present
   })
 
   // Query data with team_id filter
-  const { data } = await supabase
-    .from('prompts')
-    .select('*')
-    .eq('team_id', teamId)
+  const data = await db
+    .select()
+    .from(prompts)
+    .where(eq(prompts.team_id, teamId))
 
   return NextResponse.json({ prompts: data })
 }
@@ -251,13 +249,13 @@ export async function GET(request) {
 1. Get userId via `requireUserId()`
 2. Resolve team context via `resolveTeamContext()`
 3. Validate membership if needed
-4. Perform Supabase queries
+4. Perform database queries
 5. Handle errors with `handleApiError()`
 
 **Team-aware queries:**
 - All data tables should have a `team_id` column (nullable for personal items)
 - Always filter by `team_id` in WHERE clauses
-- For personal workspace items, use `.is('team_id', null)`
+- For personal workspace items, use `isNull(prompts.team_id)` with Drizzle ORM
 
 ### Client Components
 
@@ -339,10 +337,9 @@ const newPrompt = await apiClient.createPrompt(promptData, { teamId: 'xxx' })
 - Authentication handled by Clerk
 - API routes use `requireUserId()` to ensure authenticated access
 - Team-based authorization via `teamService.requireMembership()`
-- Supabase RLS policies should be configured for production
 - Environment variables for sensitive configuration:
   - `CLERK_SECRET_KEY`
-  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+  - `DATABASE_URL`
   - `AUTH_SECRET`
   - `ZHIPU_API_KEY`
 
