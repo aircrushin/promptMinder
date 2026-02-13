@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState, use } from 'react';
@@ -17,7 +16,7 @@ import DeleteConfirmDialog from '@/components/prompt/DeleteConfirmDialog';
 import { PromptSkeleton } from '@/components/prompt/PromptSkeleton';
 import { usePromptDetail } from '@/hooks/use-prompt-detail';
 
-export default function PromptDetail({ params }) {
+export default function PromptDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const { t } = useLanguage();

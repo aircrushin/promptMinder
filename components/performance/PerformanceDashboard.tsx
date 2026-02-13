@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Performance dashboard component
  * Displays comprehensive performance metrics and analytics
@@ -183,7 +182,7 @@ export default function PerformanceDashboard() {
                 {Object.entries(metrics)
                   .filter(([key]) => !coreWebVitals.some(cwv => cwv.key === key))
                   .slice(-10) // Show last 10 custom metrics
-                  .map(([key, metric]) => (
+                  .map(([key, metric]: [string, any]) => (
                     <tr key={key}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {key.replace(/^(custom-|render-|api-|interaction-)/, '')}

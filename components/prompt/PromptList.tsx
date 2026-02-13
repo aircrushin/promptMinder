@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo } from 'react';
@@ -15,10 +14,10 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { useClipboard } from '@/lib/clipboard';
 
-function PromptList({ prompts, onDelete, onShare }) {
+function PromptList({ prompts, onDelete, onShare }: { prompts: any[]; onDelete?: (id: string) => void; onShare?: (id: string) => void }) {
   const { toast } = useToast();
   const { copy } = useClipboard();
-  const [selectedVersions, setSelectedVersions] = useState(null);
+  const [selectedVersions, setSelectedVersions] = useState<any[] | null>(null);
 
   // 按标题对提示词进行分组
   const groupedPrompts = prompts?.reduce((acc, prompt) => {
@@ -29,11 +28,11 @@ function PromptList({ prompts, onDelete, onShare }) {
     return acc;
   }, {});
 
-  const handleCopy = async (content) => {
+  const handleCopy = async (content: string) => {
     await copy(content);
   };
 
-  const handleShare = async (id) => {
+  const handleShare = async (id: string) => {
     try {
       await apiClient.sharePrompt(id);
       const shareUrl = `${window.location.origin}/share/${id}`;
@@ -56,7 +55,7 @@ function PromptList({ prompts, onDelete, onShare }) {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Object.entries(groupedPrompts || {}).map(([title, versions]) => {
+        {Object.entries(groupedPrompts || {}).map(([title, versions]: [string, any]) => {
           // 使用最新版本作为显示
           const latestPrompt = versions[0];
           return (

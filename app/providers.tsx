@@ -1,8 +1,6 @@
-// @ts-nocheck
 "use client";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { light } from "@clerk/themes";
 import { zhCN } from "@clerk/localizations";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/next";
@@ -12,7 +10,7 @@ import Navbar from "@/components/layout/Navbar";
 import { usePathname } from "next/navigation";
 import { NO_HEADER_FOOTER_PAGES } from "@/lib/constants";
 
-export default function Providers({ children }) {
+export default function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const shouldShowHeaderFooter = !NO_HEADER_FOOTER_PAGES.includes(pathname);
 
@@ -22,7 +20,6 @@ export default function Providers({ children }) {
       appearance={{
         layout: {
           unsafe_disableDevelopmentModeWarnings: true,
-          socialButtonsIconButton: "hover:bg-gray-100",
         },
         elements: {
           formButtonPrimary: "bg-black hover:bg-black/90 transition-colors",
@@ -30,6 +27,7 @@ export default function Providers({ children }) {
           headerSubtitle: "text-gray-600",
           socialButtonsBlockButton:
             "border border-gray-200 hover:bg-gray-50 transition-colors",
+          socialButtonsIconButton: "hover:bg-gray-100",
           formFieldInput:
             "rounded-lg border-gray-200 focus:border-black focus:ring-black",
           footerActionLink: "text-black hover:text-gray-600 transition-colors",
@@ -46,7 +44,6 @@ export default function Providers({ children }) {
           fontFamily: "Inter, sans-serif",
           borderRadius: "0.5rem",
         },
-        baseTheme: light,
       }}
     >
       <LanguageProvider>
@@ -62,7 +59,3 @@ export default function Providers({ children }) {
     </ClerkProvider>
   );
 }
-
-
-
-

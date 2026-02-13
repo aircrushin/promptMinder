@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
@@ -142,16 +141,7 @@ export default function PromptHeader({
   };
 
   const handleEdit = () => {
-    router.push(`/prompts/${prompt.id}/edit`, {
-      state: {
-        prompt: {
-          ...prompt,
-          tags: Array.isArray(prompt.tags) 
-            ? prompt.tags.join(',') 
-            : (prompt.tags || '')
-        }
-      }
-    });
+    router.push(`/prompts/${prompt.id}/edit`);
   };
 
   const handleViewDiff = () => {
@@ -305,7 +295,7 @@ export default function PromptHeader({
             <TooltipTrigger asChild>
               <Button
                 onClick={handleShare}
-                variant={shareSuccess ? "success" : "secondary"}
+                variant={shareSuccess ? "default" : "secondary"}
                 className="relative overflow-hidden group w-8 h-8 p-0"
               >
                 <svg className={`w-3 h-3 transition-transform duration-300 ${shareSuccess ? "rotate-0" : "rotate-0"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

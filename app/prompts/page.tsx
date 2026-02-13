@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
@@ -115,7 +114,7 @@ export default function PromptsPage() {
           ? prompt.tags
           : (prompt.tags || "").split(",").filter(Boolean),
       });
-      const params = {
+      const params: Record<string, any> = {
         page: currentPage,
         limit: pageSize,
       };
@@ -229,7 +228,7 @@ export default function PromptsPage() {
       return acc;
     }, {});
 
-    return Object.entries(groups).map(([title, versions]) => ({
+    return Object.entries(groups).map(([title, versions]: [string, any]) => ({
       title,
       versions: [...versions].sort(
         (a, b) =>
@@ -594,7 +593,6 @@ export default function PromptsPage() {
                   selectedTags={selectedTags}
                   onTagSelect={setSelectedTags}
                   className="touch-manipulation w-full md:w-auto"
-                  t={t}
                 />
                 <Button
                   asChild

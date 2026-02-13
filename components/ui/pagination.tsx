@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,21 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import { useState } from "react";
+
+interface PaginationProps {
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange: (page: number) => void;
+  showSizeChanger?: boolean;
+  pageSize?: number;
+  onPageSizeChange?: (size: number) => void;
+  pageSizeOptions?: number[];
+  total?: number;
+  showQuickJumper?: boolean;
+  showTotal?: boolean;
+  className?: string;
+  t?: Record<string, any>;
+}
 
 export function Pagination({
   currentPage = 1,
@@ -23,11 +37,11 @@ export function Pagination({
   showQuickJumper = true,
   showTotal = true,
   className = "",
-  t, // 国际化函数
-}) {
+  t,
+}: PaginationProps) {
   const [jumpPage, setJumpPage] = useState("");
 
-  const handlePageJump = (e) => {
+  const handlePageJump = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       const page = parseInt(jumpPage);
       if (page && page >= 1 && page <= totalPages) {
@@ -97,7 +111,7 @@ export function Pagination({
 
   if (totalPages <= 1) return null;
   
-  const tp = t?.pagination || {};
+  const tp: Record<string, any> = (t as any)?.pagination || {};
 
   return (
     <div className={`flex items-center justify-between gap-4 ${className}`}>

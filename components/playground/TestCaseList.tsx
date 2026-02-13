@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useCallback } from 'react';
@@ -22,9 +21,9 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-export function TestCaseList({ testCases, variables, onChange, runningCases }) {
+export function TestCaseList({ testCases, variables, onChange, runningCases }: { testCases: any[]; variables: string[]; onChange: (testCases: any[]) => void; runningCases: Set<string> }) {
   const { t } = useLanguage();
-  const pg = t?.playground || {
+  const pg: Record<string, any> = (t as any)?.playground || {
     testCases: 'Test Cases',
     addCase: 'Add Case',
     variables: 'Variables',

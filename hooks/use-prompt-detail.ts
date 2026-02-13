@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 
-export function usePromptDetail(id) {
+export function usePromptDetail(id: string) {
   const router = useRouter();
   const [prompt, setPrompt] = useState(null);
   const [versions, setVersions] = useState([]);
@@ -55,7 +54,7 @@ export function usePromptDetail(id) {
 
           const sameTitle = list.filter((item) => item.title === data.title);
           const sorted = sameTitle.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
           setVersions(sorted);
         } catch (error) {
@@ -83,19 +82,19 @@ export function usePromptDetail(id) {
     };
   }, [id]);
 
-  const handleVersionChange = (version) => {
-    const selectedPrompt = versions.find(v => v.version === version);
+  const handleVersionChange = (version: string) => {
+    const selectedPrompt = versions.find((v: any) => v.version === version);
     if (selectedPrompt) {
       router.push(`/prompts/${selectedPrompt.id}`);
     }
   };
 
-  const handleVariablesChange = (values, hasVars) => {
+  const handleVariablesChange = (values: Record<string, any>, hasVars: boolean) => {
     setVariableValues(values);
     setHasVariables(hasVars);
   };
 
-  const updatePrompt = (updatedPrompt) => {
+  const updatePrompt = (updatedPrompt: any) => {
     setPrompt(updatedPrompt);
   };
 

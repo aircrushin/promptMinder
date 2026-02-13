@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { TeamService, TEAM_ROLES, TEAM_STATUSES } from '@/lib/team-service'
 import { ApiError } from '@/lib/api-error'
 

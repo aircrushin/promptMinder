@@ -1,9 +1,14 @@
-// @ts-nocheck
 import '@testing-library/jest-dom'
+import React from 'react'
 
 // Mock Next.js Request and Response
-global.Request = class Request {
-  constructor(url, options = {}) {
+(global as any).Request = class MockRequest {
+  url: string
+  method: string
+  headers: Map<string, string>
+  body: any
+
+  constructor(url: string, options: any = {}) {
     this.url = url
     this.method = options.method || 'GET'
     this.headers = new Map(Object.entries(options.headers || {}))
@@ -13,18 +18,22 @@ global.Request = class Request {
   async json() {
     return JSON.parse(this.body || '{}')
   }
-}
+};
 
-global.Response = class Response {
-  constructor(body, options = {}) {
+(global as any).Response = class MockResponse {
+  body: any
+  status: number
+  headers: Map<string, string>
+
+  constructor(body: any, options: any = {}) {
     this.body = body
     this.status = options.status || 200
     this.headers = new Map(Object.entries(options.headers || {}))
   }
 
-  static json(data, init = {}) {
+  static json(data: any, init: any = {}) {
     const body = JSON.stringify(data)
-    return new global.Response(body, {
+    return new (global as any).Response(body, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
@@ -99,8 +108,8 @@ jest.mock('@clerk/nextjs', () => ({
     isSignedIn: true,
     getToken: jest.fn().mockResolvedValue('mock-token'),
   }),
-  SignInButton: ({ children }) => children,
-  SignUpButton: ({ children }) => children,
+  SignInButton: ({ children }: { children: React.ReactNode }) => children,
+  SignUpButton: ({ children }: { children: React.ReactNode }) => children,
   UserButton: () => <div data-testid="user-button">User Button</div>,
 }))
 
@@ -137,11 +146,11 @@ jest.mock('openai', () => ({
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }) => <div {...props}>{children}</div>,
-    span: ({ children, ...props }) => <span {...props}>{children}</span>,
-    button: ({ children, ...props }) => <button {...props}>{children}</button>,
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
   },
-  AnimatePresence: ({ children }) => children,
+  AnimatePresence: ({ children }: any) => children,
 }))
 
 // Mock react-hot-toast
@@ -156,11 +165,11 @@ jest.mock('react-hot-toast', () => ({
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
-  Import: (props) => <div data-testid="import-icon" {...props}>Import</div>,
-  Copy: (props) => <div data-testid="copy-icon" {...props}>Copy</div>,
-  Share2: (props) => <div data-testid="share-icon" {...props}>Share</div>,
-  Trash2: (props) => <div data-testid="trash-icon" {...props}>Trash</div>,
-  ChevronDown: (props) => <div data-testid="chevron-down-icon" {...props}>ChevronDown</div>,
+  Import: (props: any) => <div data-testid="import-icon" {...props}>Import</div>,
+  Copy: (props: any) => <div data-testid="copy-icon" {...props}>Copy</div>,
+  Share2: (props: any) => <div data-testid="share-icon" {...props}>Share</div>,
+  Trash2: (props: any) => <div data-testid="trash-icon" {...props}>Trash</div>,
+  ChevronDown: (props: any) => <div data-testid="chevron-down-icon" {...props}>ChevronDown</div>,
 }))
 
 // 全局测试环境变量

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useMemo, useCallback } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -7,7 +6,7 @@ describe('useMemo and useCallback Optimizations', () => {
     it('should memoize expensive filtering operations', () => {
       const expensiveFilterSpy = jest.fn();
       
-      const TestComponent = ({ items, filter }) => {
+      const TestComponent = ({ items, filter }: { items: string[]; filter: string }) => {
         const filteredItems = useMemo(() => {
           expensiveFilterSpy();
           return items.filter(item => item.includes(filter));
@@ -39,7 +38,7 @@ describe('useMemo and useCallback Optimizations', () => {
     it('should memoize array transformations', () => {
       const transformSpy = jest.fn();
       
-      const TestComponent = ({ data }) => {
+      const TestComponent = ({ data }: { data: any[] }) => {
         const transformedData = useMemo(() => {
           transformSpy();
           return data.map(item => ({ ...item, processed: true }));
@@ -72,24 +71,24 @@ describe('useMemo and useCallback Optimizations', () => {
     it('should memoize object grouping operations', () => {
       const groupSpy = jest.fn();
       
-      const TestComponent = ({ items }) => {
+      const TestComponent = ({ items }: { items: any[] }) => {
         const groupedItems = useMemo(() => {
           groupSpy();
-          return items.reduce((acc, item) => {
+          return items.reduce((acc: any, item: any) => {
             if (!acc[item.category]) {
               acc[item.category] = [];
             }
             acc[item.category].push(item);
             return acc;
-          }, {});
+          }, {} as Record<string, any[]>);
         }, [items]);
-        
+
         return (
           <div>
-            {Object.entries(groupedItems).map(([category, categoryItems]) => (
+            {Object.entries(groupedItems).map(([category, categoryItems]: [string, any[]]) => (
               <div key={category}>
                 <h3>{category}</h3>
-                {categoryItems.map((item, index) => (
+                {categoryItems.map((item: any, index: number) => (
                   <div key={index}>{item.name}</div>
                 ))}
               </div>
@@ -123,7 +122,7 @@ describe('useMemo and useCallback Optimizations', () => {
     it('should memoize event handlers to prevent child re-renders', () => {
       const childRenderSpy = jest.fn();
       
-      const ChildComponent = React.memo(({ onClick }) => {
+      const ChildComponent = React.memo(({ onClick }: { onClick: () => void }) => {
         childRenderSpy();
         return <button onClick={onClick}>Click me</button>;
       });
@@ -164,7 +163,7 @@ describe('useMemo and useCallback Optimizations', () => {
         const [multiplier, setMultiplier] = useState(2);
         const [value, setValue] = useState(1);
         
-        const handleCalculate = useCallback((input) => {
+        const handleCalculate = useCallback((input: number) => {
           return input * multiplier;
         }, [multiplier]);
         
@@ -195,9 +194,9 @@ describe('useMemo and useCallback Optimizations', () => {
     it('should optimize search debouncing with useCallback', () => {
       const searchSpy = jest.fn();
       
-      const debounce = (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
+      const debounce = (func: (...args: any[]) => void, wait: number) => {
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        return function executedFunction(...args: any[]) {
           const later = () => {
             clearTimeout(timeout);
             func(...args);
@@ -211,13 +210,13 @@ describe('useMemo and useCallback Optimizations', () => {
         const [query, setQuery] = useState('');
         
         const debouncedSearch = useCallback(
-          debounce((value) => {
+          debounce((value: string) => {
             searchSpy(value);
           }, 100),
           []
         );
         
-        const handleInputChange = (e) => {
+        const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           const value = e.target.value;
           setQuery(value);
           debouncedSearch(value);
@@ -280,12 +279,12 @@ describe('useMemo and useCallback Optimizations', () => {
         }, [items, selectedCategory, maxPrice]);
         
         // Memoize event handlers
-        const handleCategoryChange = useCallback((category) => {
+        const handleCategoryChange = useCallback((category: string) => {
           handlerSpy('category', category);
           setSelectedCategory(category);
         }, []);
         
-        const handlePriceChange = useCallback((price) => {
+        const handlePriceChange = useCallback((price: number) => {
           handlerSpy('price', price);
           setMaxPrice(price);
         }, []);

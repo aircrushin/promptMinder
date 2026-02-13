@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -105,7 +104,7 @@ function AdminSidebar() {
   );
 }
 
-function AdminLayoutContent({ children }) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AdminSidebar />
@@ -125,7 +124,7 @@ function AdminLayoutContent({ children }) {
   );
 }
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminAuth>
       <AdminLayoutContent>{children}</AdminLayoutContent>

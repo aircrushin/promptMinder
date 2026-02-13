@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -54,8 +53,8 @@ export default function NewPrompt() {
     is_public: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tagOptions, setTagOptions] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [tagOptions, setTagOptions] = useState<any[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState('');
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
@@ -81,7 +80,7 @@ export default function NewPrompt() {
         console.error('Error fetching tags:', error);
         toast({
           variant: 'destructive',
-          description: error.message || '获取标签失败',
+          description: (error as any).message || '获取标签失败',
         });
       }
     };
@@ -90,17 +89,17 @@ export default function NewPrompt() {
   }, [activeTeamId, toast]);
 
   if (!t) return null;
-  const tp = t.newPromptPage;
+  const tp: Record<string, any> = (t as any).newPromptPage;
 
   const validateForm = () => {
-    const validationErrors = {};
+    const validationErrors: Record<string, string> = {};
     if (!prompt.title.trim()) validationErrors.title = tp.errorTitleRequired;
     if (!prompt.content.trim()) validationErrors.content = tp.errorContentRequired;
     setErrors(validationErrors);
     return Object.keys(validationErrors).length === 0;
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm()) return;
 
@@ -312,8 +311,8 @@ export default function NewPrompt() {
                     id="tags"
                     isMulti
                     value={prompt.tags ? prompt.tags.split(',').map((tag) => ({ value: tag, label: tag })) : []}
-                    onChange={(selected) => {
-                      const tags = selected ? selected.map((option) => option.value).join(',') : '';
+                    onChange={(selected: any) => {
+                      const tags = selected ? selected.map((option: any) => option.value).join(',') : '';
                       setPrompt({ ...prompt, tags });
                     }}
                     options={tagOptions}

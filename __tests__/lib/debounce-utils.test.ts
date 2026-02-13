@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Tests for Enhanced Debouncing Utilities
  */
 
-import { 
-  debounce, 
-  createDebouncedApiSearch, 
+import {
+  debounce,
+  createDebouncedApiSearch,
   createDebouncedTagFilter,
   DebouncedApiClient,
   DebouncedFunction,
@@ -40,9 +39,9 @@ describe('DebouncedFunction', () => {
     const mockFn = jest.fn();
     const debouncedFn = new DebouncedFunction(mockFn, 100);
 
-    expect(debouncedFn.func).toBe(mockFn);
-    expect(debouncedFn.wait).toBe(100);
-    expect(debouncedFn.timeout).toBeNull();
+    expect((debouncedFn as any).func).toBe(mockFn);
+    expect((debouncedFn as any).wait).toBe(100);
+    expect((debouncedFn as any).timeout).toBeNull();
   });
 
   test('should delay function execution', () => {
@@ -151,21 +150,21 @@ describe('debounce', () => {
   });
 
   test('should throw error for non-function input', () => {
-    expect(() => debounce('not a function', 100)).toThrow(TypeError);
+    expect(() => debounce('not a function' as any, 100)).toThrow(TypeError);
   });
 });
 
 describe('createDebouncedApiSearch', () => {
-  let mockSearchFn;
-  let mockDeduplicationService;
+  let mockSearchFn: jest.Mock;
+  let mockDeduplicationService: any;
 
   beforeEach(() => {
     jest.useFakeTimers();
     mockSearchFn = jest.fn().mockResolvedValue({ results: [] });
-    
+
     const { requestDeduplicationService } = require('../../lib/request-deduplication');
     mockDeduplicationService = requestDeduplicationService;
-    mockDeduplicationService.dedupe.mockImplementation((key, fn) => fn());
+    mockDeduplicationService.dedupe.mockImplementation((key: string, fn: () => any) => fn());
   });
 
   afterEach(() => {
@@ -177,7 +176,7 @@ describe('createDebouncedApiSearch', () => {
 
     expect(typeof debouncedSearch).toBe('function');
     expect(typeof debouncedSearch.cancel).toBe('function');
-    expect(typeof debouncedSearch.cleanup).toBe('function');
+    expect(typeof (debouncedSearch as any).cleanup).toBe('function');
   });
 
   test('should debounce search calls', async () => {
@@ -197,9 +196,9 @@ describe('createDebouncedApiSearch', () => {
   });
 
   test('should use deduplication when enabled', async () => {
-    const debouncedSearch = createDebouncedApiSearch(mockSearchFn, { 
+    const debouncedSearch = createDebouncedApiSearch(mockSearchFn, {
       wait: 100,
-      deduplication: true 
+      deduplication: true
     });
 
     debouncedSearch('query');
@@ -211,13 +210,13 @@ describe('createDebouncedApiSearch', () => {
 
   test('should cleanup properly', () => {
     const debouncedSearch = createDebouncedApiSearch(mockSearchFn);
-    
+
     debouncedSearch('query');
-    
-    expect(typeof debouncedSearch.cleanup).toBe('function');
-    
+
+    expect(typeof (debouncedSearch as any).cleanup).toBe('function');
+
     // Cleanup should cancel the debounced function
-    debouncedSearch.cleanup();
+    (debouncedSearch as any).cleanup();
     expect(debouncedSearch.pending()).toBe(false);
   });
 });
@@ -256,16 +255,16 @@ describe('createDebouncedTagFilter', () => {
 });
 
 describe('DebouncedApiClient', () => {
-  let mockApiClient;
-  let debouncedClient;
+  let mockApiClient: any;
+  let debouncedClient: any;
 
   beforeEach(() => {
     jest.useFakeTimers();
-    
+
     const { cachedApiClient } = require('../../lib/cached-api-client');
     mockApiClient = cachedApiClient;
     mockApiClient.getPrompts.mockResolvedValue({ prompts: [] });
-    
+
     debouncedClient = new DebouncedApiClient(mockApiClient, {
       searchWait: 100,
       filterWait: 50
@@ -301,7 +300,7 @@ describe('DebouncedApiClient', () => {
   test('should debounce filter by tags', async () => {
     // Clear any previous calls
     mockApiClient.getPrompts.mockClear();
-    
+
     debouncedClient.filterByTags(['tag1']);
     debouncedClient.filterByTags(['tag1', 'tag2']);
 
@@ -353,7 +352,7 @@ describe('DebounceUtils', () => {
   test('should create cleanup function', () => {
     const mockFn1 = { cancel: jest.fn(), cleanup: jest.fn() };
     const mockFn2 = { cancel: jest.fn() };
-    
+
     const cleanup = DebounceUtils.createCleanup([mockFn1, mockFn2]);
     cleanup();
 

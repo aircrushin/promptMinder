@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { memo } from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -41,69 +40,74 @@ describe('Component Memoization Tests', () => {
   describe('React.memo functionality', () => {
     it('should prevent re-renders when props are the same', () => {
       const renderSpy = jest.fn();
-      
+
       // Create a simple memoized component for testing
-      const TestComponent = memo(({ value }) => {
+      const TestComponent = memo(({ value }: { value: string }) => {
         renderSpy();
         return <div>{value}</div>;
       });
 
       const { rerender } = render(<TestComponent value="test" />);
-      
+
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with the same props
       rerender(<TestComponent value="test" />);
-      
+
       // Should still only be called once due to memoization
       expect(renderSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should re-render when props change', () => {
       const renderSpy = jest.fn();
-      
-      const TestComponent = memo(({ value }) => {
+
+      const TestComponent = memo(({ value }: { value: string }) => {
         renderSpy();
         return <div>{value}</div>;
       });
 
       const { rerender } = render(<TestComponent value="test" />);
-      
+
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with different props
       rerender(<TestComponent value="updated" />);
-      
+
       // Should re-render due to prop change
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should use custom comparison function', () => {
       const renderSpy = jest.fn();
-      
+
+      interface TestProps {
+        important: string;
+        unimportant: string;
+      }
+
       // Custom comparison that only checks the 'important' property
-      const areEqual = (prevProps, nextProps) => {
+      const areEqual = (prevProps: TestProps, nextProps: TestProps) => {
         return prevProps.important === nextProps.important;
       };
-      
-      const TestComponent = memo(({ important, unimportant }) => {
+
+      const TestComponent = memo(({ important, unimportant }: TestProps) => {
         renderSpy();
         return <div>{important} - {unimportant}</div>;
       }, areEqual);
 
       const { rerender } = render(<TestComponent important="same" unimportant="value1" />);
-      
+
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with same important prop but different unimportant prop
       rerender(<TestComponent important="same" unimportant="value2" />);
-      
+
       // Should not re-render due to custom comparison
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with different important prop
       rerender(<TestComponent important="different" unimportant="value2" />);
-      
+
       // Should re-render due to important prop change
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });
@@ -112,13 +116,17 @@ describe('Component Memoization Tests', () => {
   describe('Array comparison memoization', () => {
     it('should handle array prop changes correctly', () => {
       const renderSpy = jest.fn();
-      
+
+      interface TestProps {
+        items?: string[];
+      }
+
       // Custom comparison for array props
-      const areEqual = (prevProps, nextProps) => {
+      const areEqual = (prevProps: TestProps, nextProps: TestProps) => {
         if (prevProps.items?.length !== nextProps.items?.length) {
           return false;
         }
-        
+
         if (prevProps.items && nextProps.items) {
           for (let i = 0; i < prevProps.items.length; i++) {
             if (prevProps.items[i] !== nextProps.items[i]) {
@@ -126,70 +134,80 @@ describe('Component Memoization Tests', () => {
             }
           }
         }
-        
+
         return true;
       };
-      
-      const TestComponent = memo(({ items }) => {
+
+      const TestComponent = memo(({ items }: TestProps) => {
         renderSpy();
         return <div>{items?.join(', ')}</div>;
       }, areEqual);
 
       const initialItems = ['a', 'b', 'c'];
       const { rerender } = render(<TestComponent items={initialItems} />);
-      
+
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with same array content but different reference
       rerender(<TestComponent items={['a', 'b', 'c']} />);
-      
+
       // Should not re-render due to custom comparison
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with different array content
       rerender(<TestComponent items={['a', 'b', 'c', 'd']} />);
-      
+
       // Should re-render due to content change
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should handle object prop changes correctly', () => {
       const renderSpy = jest.fn();
-      
+
+      interface DataObj {
+        id: number;
+        name: string;
+        value: string;
+      }
+
+      interface TestProps {
+        data?: DataObj;
+      }
+
       // Custom comparison for object props
-      const areEqual = (prevProps, nextProps) => {
+      const areEqual = (prevProps: TestProps, nextProps: TestProps) => {
         const prevObj = prevProps.data;
         const nextObj = nextProps.data;
-        
+
         if (!prevObj && !nextObj) return true;
         if (!prevObj || !nextObj) return false;
-        
+
         return (
           prevObj.id === nextObj.id &&
           prevObj.name === nextObj.name &&
           prevObj.value === nextObj.value
         );
       };
-      
-      const TestComponent = memo(({ data }) => {
+
+      const TestComponent = memo(({ data }: TestProps) => {
         renderSpy();
         return <div>{data?.name}: {data?.value}</div>;
       }, areEqual);
 
       const initialData = { id: 1, name: 'test', value: 'initial' };
       const { rerender } = render(<TestComponent data={initialData} />);
-      
+
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with same content but different reference
       rerender(<TestComponent data={{ id: 1, name: 'test', value: 'initial' }} />);
-      
+
       // Should not re-render due to custom comparison
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      
+
       // Re-render with different content
       rerender(<TestComponent data={{ id: 1, name: 'test', value: 'updated' }} />);
-      
+
       // Should re-render due to content change
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });

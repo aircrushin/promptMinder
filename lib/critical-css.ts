@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Critical CSS utilities for performance optimization
  */
@@ -92,7 +91,7 @@ export function injectCriticalCSS() {
 /**
  * Preloads CSS for a specific route
  */
-export function preloadRouteCSS(route) {
+export function preloadRouteCSS(route: string) {
   if (typeof document === 'undefined') return;
   
   const link = document.createElement('link');
@@ -105,7 +104,7 @@ export function preloadRouteCSS(route) {
 /**
  * Generates component-specific CSS classes
  */
-export function generateComponentCSS(componentName, styles) {
+export function generateComponentCSS(componentName: string, styles: Record<string, string>) {
   return Object.entries(styles).reduce((acc, [key, value]) => {
     acc[`${componentName}__${key}`] = value;
     return acc;
@@ -115,7 +114,7 @@ export function generateComponentCSS(componentName, styles) {
 /**
  * CSS-in-JS utility for dynamic styles
  */
-export function createStyleSheet(styles) {
+export function createStyleSheet(styles: Record<string, Record<string, string>>) {
   if (typeof document === 'undefined') return;
   
   const styleSheet = document.createElement('style');
@@ -140,8 +139,8 @@ export function deferNonCriticalCSS() {
   
   window.addEventListener('load', () => {
     const nonCriticalLinks = document.querySelectorAll('link[rel="preload"][as="style"]');
-    nonCriticalLinks.forEach(link => {
-      link.rel = 'stylesheet';
+    nonCriticalLinks.forEach((link) => {
+      (link as HTMLLinkElement).rel = 'stylesheet';
     });
   });
 }

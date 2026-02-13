@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * React hooks for API cache management
  */
@@ -9,8 +8,44 @@ import { requestCache, CacheInvalidationStrategies } from '../lib/api-cache';
 /**
  * Hook for managing API cache operations
  */
+interface CacheStats {
+  totalEntries: number;
+  expiredEntries: number;
+  activeEntries: number;
+  totalAccessCount: number;
+  averageAccessCount: number;
+  maxSize: number;
+  hitRate: number;
+  missRate: number;
+  hitCount?: number;
+  missCount?: number;
+}
+
+interface CachedRequestOptions {
+  ttl?: number;
+  enabled?: boolean;
+  onSuccess?: (data: any) => void;
+  onError?: (err: any) => void;
+  cacheKey?: string;
+}
+
+interface DebouncedSearchOptions {
+  wait?: number;
+  maxWait?: number;
+  leading?: boolean;
+  trailing?: boolean;
+  deduplication?: boolean;
+}
+
+interface DebouncedFilterOptions {
+  wait?: number;
+  maxWait?: number;
+  leading?: boolean;
+  trailing?: boolean;
+}
+
 export function useApiCache() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<CacheStats | null>(null);
   
   const updateStats = useCallback(() => {
     setStats(requestCache.getStats());
@@ -24,12 +59,12 @@ export function useApiCache() {
     return () => clearInterval(interval);
   }, [updateStats]);
   
-  const invalidate = useCallback((pattern) => {
+  const invalidate = useCallback((pattern: string | RegExp) => {
     requestCache.invalidate(pattern);
     updateStats();
   }, [updateStats]);
   
-  const invalidateByEndpoint = useCallback((endpoint) => {
+  const invalidateByEndpoint = useCallback((endpoint: string) => {
     requestCache.invalidateByEndpoint(endpoint);
     updateStats();
   }, [updateStats]);
@@ -58,7 +93,7 @@ export function useApiCache() {
 /**
  * Hook for cached API requests with automatic cache management
  */
-export function useCachedRequest(requestFn, dependencies = [], options = {}) {
+export function useCachedRequest(requestFn: (...args: any[]) => Promise<any>, dependencies: any[] = [], options: CachedRequestOptions = {}) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -72,9 +107,9 @@ export function useCachedRequest(requestFn, dependencies = [], options = {}) {
     cacheKey
   } = options;
   
-  const abortControllerRef = useRef(null);
-  const requestIdRef = useRef(0);
-  
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef<number>(0);
+
   const executeRequest = useCallback(async (forceRefresh = false) => {
     if (!enabled) return;
     
@@ -126,7 +161,7 @@ export function useCachedRequest(requestFn, dependencies = [], options = {}) {
       }
       
       return result;
-    } catch (err) {
+    } catch (err: any) {
       // Only update if this is still the current request and not aborted
       if (currentRequestId === requestIdRef.current && err.name !== 'AbortError') {
         setError(err);
@@ -180,7 +215,7 @@ export function useCacheInvalidation() {
     CacheInvalidationStrategies.onPromptMutation(requestCache);
   }, []);
   
-  const onPromptUpdate = useCallback((promptId) => {
+  const onPromptUpdate = useCallback((promptId: string) => {
     CacheInvalidationStrategies.onPromptUpdate(requestCache, promptId);
   }, []);
   
@@ -204,7 +239,7 @@ export function useCacheInvalidation() {
  * Hook for cache warming (preloading data)
  */
 export function useCacheWarming() {
-  const warmCache = useCallback(async (requests) => {
+  const warmCache = useCallback(async (requests: Array<{ requestFn: (...args: any[]) => Promise<any>; key?: string; ttl?: number }>) => {
     const promises = requests.map(async ({ requestFn, key, ttl }) => {
       try {
         const cacheKey = key || requestCache.generateKey(requestFn.toString());
@@ -241,7 +276,7 @@ export function useCacheMonitoring() {
     setMetrics({
       hitRate: stats.hitRate,
       missRate: stats.missRate,
-      totalRequests: stats.hitCount + stats.missCount,
+      totalRequests: stats.totalAccessCount,
       cacheSize: stats.activeEntries
     });
   }, []);
@@ -275,24 +310,24 @@ export function usePrefetching() {
     return () => clearInterval(interval);
   }, [updateStats]);
 
-  const prefetchForContext = useCallback(async (context) => {
+  const prefetchForContext = useCallback(async (context: any) => {
     const { dataPrefetchingService } = await import('../lib/data-prefetching');
     await dataPrefetchingService.prefetchForContext(context);
     updateStats();
   }, [updateStats]);
 
-  const recordUserBehavior = useCallback(async (action, context) => {
+  const recordUserBehavior = useCallback(async (action: string, context: any) => {
     const { dataPrefetchingService } = await import('../lib/data-prefetching');
     dataPrefetchingService.recordUserBehavior(action, context);
   }, []);
 
-  const prefetchPromptDetails = useCallback(async (promptId) => {
+  const prefetchPromptDetails = useCallback(async (promptId: string) => {
     const { dataPrefetchingService } = await import('../lib/data-prefetching');
     await dataPrefetchingService.prefetchPromptDetails(promptId);
     updateStats();
   }, [updateStats]);
 
-  const prefetchNextPage = useCallback(async (context) => {
+  const prefetchNextPage = useCallback(async (context: any) => {
     const { dataPrefetchingService } = await import('../lib/data-prefetching');
     await dataPrefetchingService.prefetchNextPage(context);
     updateStats();
@@ -310,11 +345,11 @@ export function usePrefetching() {
 /**
  * Hook for hover-based prefetching
  */
-export function useHoverPrefetch(getContext) {
+export function useHoverPrefetch(getContext: (event: any) => any) {
   const { recordUserBehavior, prefetchForContext } = usePrefetching();
-  const hoverTimeoutRef = useRef(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const onMouseEnter = useCallback((event) => {
+  const onMouseEnter = useCallback((event: any) => {
     hoverTimeoutRef.current = setTimeout(async () => {
       const context = getContext(event);
       await recordUserBehavior('hover', context);
@@ -343,11 +378,11 @@ export function useHoverPrefetch(getContext) {
 /**
  * Hook for scroll-based prefetching
  */
-export function useScrollPrefetch(getContext) {
+export function useScrollPrefetch(getContext: (event: any) => any) {
   const { recordUserBehavior, prefetchForContext } = usePrefetching();
-  const scrollTimeoutRef = useRef(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const onScroll = useCallback((event) => {
+  const onScroll = useCallback((event: any) => {
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
@@ -372,7 +407,7 @@ export function useScrollPrefetch(getContext) {
  *
  Hook for debounced search operations
  */
-export function useDebouncedSearch(searchFn, options = {}) {
+export function useDebouncedSearch(searchFn: (...args: any[]) => Promise<any>, options: DebouncedSearchOptions = {}) {
   const {
     wait = 300,
     maxWait = 1000,
@@ -385,15 +420,15 @@ export function useDebouncedSearch(searchFn, options = {}) {
   const [searchResults, setSearchResults] = useState(null);
   const [searchError, setSearchError] = useState(null);
   
-  const debouncedSearchRef = useRef(null);
-  const abortControllerRef = useRef(null);
+  const debouncedSearchRef = useRef<any>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Create debounced search function
   useEffect(() => {
     const { createDebouncedApiSearch } = require('../lib/debounce-utils');
-    
+
     debouncedSearchRef.current = createDebouncedApiSearch(
-      async (query, filters, options) => {
+      async (query: any, filters: any, options: any) => {
         setIsSearching(true);
         setSearchError(null);
         
@@ -401,7 +436,7 @@ export function useDebouncedSearch(searchFn, options = {}) {
           const result = await searchFn(query, filters, options);
           setSearchResults(result);
           return result;
-        } catch (error) {
+        } catch (error: any) {
           if (error.name !== 'AbortError') {
             setSearchError(error);
           }
@@ -420,7 +455,7 @@ export function useDebouncedSearch(searchFn, options = {}) {
     };
   }, [searchFn, wait, maxWait, leading, trailing, deduplication]);
 
-  const search = useCallback(async (query, filters = {}) => {
+  const search = useCallback(async (query: any, filters: any = {}) => {
     if (!debouncedSearchRef.current) return;
     
     // Cancel previous request
@@ -434,7 +469,7 @@ export function useDebouncedSearch(searchFn, options = {}) {
       return await debouncedSearchRef.current(query, filters, {
         signal: abortControllerRef.current.signal
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error.name !== 'AbortError') {
         console.error('Search error:', error);
       }
@@ -478,7 +513,7 @@ export function useDebouncedSearch(searchFn, options = {}) {
 /**
  * Hook for debounced filtering operations
  */
-export function useDebouncedFilter(filterFn, options = {}) {
+export function useDebouncedFilter(filterFn: (...args: any[]) => Promise<any>, options: DebouncedFilterOptions = {}) {
   const {
     wait = 200,
     maxWait = 800,
@@ -490,14 +525,14 @@ export function useDebouncedFilter(filterFn, options = {}) {
   const [filterResults, setFilterResults] = useState(null);
   const [filterError, setFilterError] = useState(null);
   
-  const debouncedFilterRef = useRef(null);
+  const debouncedFilterRef = useRef<any>(null);
 
   // Create debounced filter function
   useEffect(() => {
     const { createDebouncedTagFilter } = require('../lib/debounce-utils');
-    
+
     debouncedFilterRef.current = createDebouncedTagFilter(
-      async (filters) => {
+      async (filters: any) => {
         setIsFiltering(true);
         setFilterError(null);
         
@@ -522,7 +557,7 @@ export function useDebouncedFilter(filterFn, options = {}) {
     };
   }, [filterFn, wait, maxWait, leading, trailing]);
 
-  const filter = useCallback(async (filters) => {
+  const filter = useCallback(async (filters: any) => {
     if (!debouncedFilterRef.current) return;
     
     try {
@@ -566,11 +601,11 @@ export function useDebouncedFilter(filterFn, options = {}) {
 /**
  * Hook for debounced state updates
  */
-export function useDebouncedState(initialValue, wait = 300) {
-  const [value, setValue] = useState(initialValue);
-  const [debouncedValue, setDebouncedValue] = useState(initialValue);
-  
-  const debouncedSetterRef = useRef(null);
+export function useDebouncedState<T>(initialValue: T, wait = 300) {
+  const [value, setValue] = useState<T>(initialValue);
+  const [debouncedValue, setDebouncedValue] = useState<T>(initialValue);
+
+  const debouncedSetterRef = useRef<any>(null);
 
   useEffect(() => {
     const { DebounceUtils } = require('../lib/debounce-utils');

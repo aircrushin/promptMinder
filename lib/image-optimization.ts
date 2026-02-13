@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 /**
@@ -10,13 +9,13 @@
  * @param {string} format - Image format to check (webp, avif, etc.)
  * @returns {Promise<boolean>} - Whether the format is supported
  */
-export function supportsImageFormat(format) {
+export function supportsImageFormat(format: string): Promise<boolean> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1;
     canvas.height = 1;
     
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, 1, 1);
     
@@ -49,7 +48,14 @@ export async function getBestImageFormat() {
  * @param {Object} options - Optimization options
  * @returns {string} - Optimized image URL
  */
-export function getOptimizedImageUrl(baseUrl, options = {}) {
+interface ImageOptimizationOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: string;
+}
+
+export function getOptimizedImageUrl(baseUrl: string, options: ImageOptimizationOptions = {}) {
   const {
     width,
     height,
@@ -79,7 +85,7 @@ export function getOptimizedImageUrl(baseUrl, options = {}) {
  * @param {Array} sizes - Array of size configurations
  * @returns {Object} - Object with sources for different formats
  */
-export function generateResponsiveSources(baseUrl, sizes = []) {
+export function generateResponsiveSources(baseUrl: string, sizes: Array<{ width: number; suffix: string }> = []) {
   const defaultSizes = [
     { width: 400, suffix: '-sm' },
     { width: 800, suffix: '-md' },
@@ -124,7 +130,7 @@ export function generateResponsiveSources(baseUrl, sizes = []) {
  * @param {Array} imageUrls - Array of image URLs to preload
  * @param {Object} options - Preload options
  */
-export async function preloadImages(imageUrls, options = {}) {
+export async function preloadImages(imageUrls: string[], options: { format?: string; priority?: boolean } = {}) {
   const { format = 'auto', priority = false } = options;
   
   const bestFormat = format === 'auto' ? await getBestImageFormat() : format;
@@ -146,7 +152,7 @@ export async function preloadImages(imageUrls, options = {}) {
  * @param {Object} options - Compression options
  * @returns {Promise<Blob>} - Compressed image blob
  */
-export function compressImage(file, options = {}) {
+export function compressImage(file: File, options: { maxWidth?: number; maxHeight?: number; quality?: number; format?: string } = {}): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const {
       maxWidth = 1200,
@@ -156,22 +162,22 @@ export function compressImage(file, options = {}) {
     } = options;
     
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const img = new Image();
-    
+
     img.onload = () => {
       // Calculate new dimensions
       let { width, height } = img;
-      
+
       if (width > maxWidth || height > maxHeight) {
         const ratio = Math.min(maxWidth / width, maxHeight / height);
         width *= ratio;
         height *= ratio;
       }
-      
+
       canvas.width = width;
       canvas.height = height;
-      
+
       // Draw and compress
       ctx.drawImage(img, 0, 0, width, height);
       
@@ -195,18 +201,18 @@ export function compressImage(file, options = {}) {
  * @param {number} size - Placeholder size (default: 10)
  * @returns {Promise<string>} - Base64 encoded blur placeholder
  */
-export function generateBlurPlaceholder(imageUrl, size = 10) {
+export function generateBlurPlaceholder(imageUrl: string, size = 10): Promise<string> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const img = new Image();
-    
+
     canvas.width = size;
     canvas.height = size;
-    
+
     img.onload = () => {
       ctx.drawImage(img, 0, 0, size, size);
-      
+
       // Apply blur effect
       ctx.filter = 'blur(2px)';
       ctx.drawImage(canvas, 0, 0);

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @jest-environment node
  */
@@ -32,7 +31,7 @@ jest.mock('openai', () => {
 const OpenAI = require('openai');
 
 describe('POST /api/playground/run', () => {
-  let mockCreate;
+  let mockCreate: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,7 +45,7 @@ describe('POST /api/playground/run', () => {
     }));
   });
 
-  const createRequest = (body) => {
+  const createRequest = (body: any) => {
     return new Request('http://localhost/api/playground/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -188,7 +187,7 @@ describe('POST /api/playground/run', () => {
 
   describe('Error handling', () => {
     it('should handle 401 authentication errors', async () => {
-      const error = new Error('Invalid API key');
+      const error: any = new Error('Invalid API key');
       error.status = 401;
       mockCreate.mockRejectedValue(error);
 
@@ -205,7 +204,7 @@ describe('POST /api/playground/run', () => {
     });
 
     it('should handle 429 rate limit errors', async () => {
-      const error = new Error('Rate limit exceeded');
+      const error: any = new Error('Rate limit exceeded');
       error.status = 429;
       mockCreate.mockRejectedValue(error);
 
@@ -222,7 +221,7 @@ describe('POST /api/playground/run', () => {
     });
 
     it('should handle 404 model not found errors', async () => {
-      const error = new Error('Model not found');
+      const error: any = new Error('Model not found');
       error.status = 404;
       mockCreate.mockRejectedValue(error);
 
@@ -239,7 +238,7 @@ describe('POST /api/playground/run', () => {
     });
 
     it('should handle connection errors', async () => {
-      const error = new Error('Connection refused');
+      const error: any = new Error('Connection refused');
       error.code = 'ECONNREFUSED';
       mockCreate.mockRejectedValue(error);
 

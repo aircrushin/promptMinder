@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { useToast, toast, reducer } from '@/hooks/use-toast'

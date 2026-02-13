@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { forwardRef, Suspense } from 'react';
@@ -6,7 +5,17 @@ import { useLazyComponent } from '@/hooks/use-lazy-loading';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './skeleton';
 
-const LazyComponent = forwardRef(({
+interface LazyComponentProps {
+  importFn: () => Promise<any>;
+  fallback?: React.ReactNode;
+  errorFallback?: React.ReactNode;
+  className?: string;
+  rootMargin?: string;
+  threshold?: number;
+  [key: string]: any;
+}
+
+const LazyComponent = forwardRef<HTMLDivElement, LazyComponentProps>(({
   importFn,
   fallback,
   errorFallback,
@@ -38,14 +47,14 @@ const LazyComponent = forwardRef(({
   );
 
   return (
-    <div 
+    <div
       ref={(node) => {
         ref(node);
         if (forwardedRef) {
           if (typeof forwardedRef === 'function') {
             forwardedRef(node);
           } else {
-            forwardedRef.current = node;
+            (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }
         }
       }}

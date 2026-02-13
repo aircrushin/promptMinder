@@ -1,9 +1,8 @@
-// @ts-nocheck
 import React from 'react';
 
 // Create a factory for generating icon mocks
-const createIconMock = (name) => {
-  const Icon = (props) => <svg data-testid={`${name.toLowerCase()}-icon`} className={`lucide-${name.toLowerCase()}`} {...props} />;
+const createIconMock = (name: string) => {
+  const Icon = (props: any) => <svg data-testid={`${name.toLowerCase()}-icon`} className={`lucide-${name.toLowerCase()}`} {...props} />;
   Icon.displayName = name;
   return Icon;
 };

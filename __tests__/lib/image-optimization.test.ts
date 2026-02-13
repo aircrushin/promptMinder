@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @jest-environment jsdom
  */
@@ -21,22 +20,25 @@ const mockGetContext = jest.fn(() => ({
 }));
 const mockToDataURL = jest.fn(() => 'data:image/jpeg;base64,test');
 
-global.HTMLCanvasElement.prototype.getContext = mockGetContext;
+(global.HTMLCanvasElement.prototype as any).getContext = mockGetContext;
 global.HTMLCanvasElement.prototype.toBlob = mockToBlob;
 global.HTMLCanvasElement.prototype.toDataURL = mockToDataURL;
 
 // Mock Image constructor
-global.Image = class {
+(global as any).Image = class MockImage {
+  onload: (() => void) | null = null;
+  _src: string = '';
+
   constructor() {
     setTimeout(() => {
       this.onload && this.onload();
     }, 0);
   }
-  
-  set src(value) {
+
+  set src(value: string) {
     this._src = value;
   }
-  
+
   get src() {
     return this._src;
   }
@@ -52,7 +54,7 @@ describe('Image Optimization Utilities', () => {
 
   describe('supportsImageFormat', () => {
     it('should check if browser supports WebP format', async () => {
-      mockToBlob.mockImplementation((callback) => {
+      mockToBlob.mockImplementation((callback: (blob: Blob | null) => void) => {
         callback(new Blob(['test'], { type: 'image/webp' }));
       });
 
@@ -62,7 +64,7 @@ describe('Image Optimization Utilities', () => {
     });
 
     it('should return false for unsupported format', async () => {
-      mockToBlob.mockImplementation((callback) => {
+      mockToBlob.mockImplementation((callback: (blob: Blob | null) => void) => {
         callback(null);
       });
 
@@ -74,7 +76,7 @@ describe('Image Optimization Utilities', () => {
   describe('getBestImageFormat', () => {
     it('should return the best supported format', async () => {
       // Mock AVIF support
-      mockToBlob.mockImplementation((callback, format) => {
+      mockToBlob.mockImplementation((callback: (blob: Blob | null) => void, format: string) => {
         if (format === 'image/avif') {
           callback(new Blob(['test'], { type: 'image/avif' }));
         } else {
@@ -87,7 +89,7 @@ describe('Image Optimization Utilities', () => {
     });
 
     it('should fallback to jpeg if no modern formats are supported', async () => {
-      mockToBlob.mockImplementation((callback) => {
+      mockToBlob.mockImplementation((callback: (blob: Blob | null) => void) => {
         callback(null);
       });
 
@@ -120,11 +122,11 @@ describe('Image Optimization Utilities', () => {
   describe('generateResponsiveSources', () => {
     it('should generate responsive sources for different formats', () => {
       const result = generateResponsiveSources('https://example.com/image.jpg');
-      
+
       expect(result).toHaveProperty('webp');
       expect(result).toHaveProperty('avif');
       expect(result).toHaveProperty('jpeg');
-      
+
       expect(result.webp).toHaveLength(3); // Default sizes
       expect(result.avif).toHaveLength(3);
       expect(result.jpeg).toHaveLength(3);
@@ -135,9 +137,9 @@ describe('Image Optimization Utilities', () => {
         { width: 300, suffix: '-xs' },
         { width: 600, suffix: '-sm' },
       ];
-      
+
       const result = generateResponsiveSources('https://example.com/image.jpg', customSizes);
-      
+
       expect(result.webp).toHaveLength(2);
       expect(result.webp[0].srcSet).toContain('-xs.webp');
       expect(result.webp[1].srcSet).toContain('-sm.webp');
@@ -148,8 +150,8 @@ describe('Image Optimization Utilities', () => {
     it('should compress an image file', async () => {
       const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
       const mockBlob = new Blob(['compressed'], { type: 'image/jpeg' });
-      
-      mockToBlob.mockImplementation((callback) => {
+
+      mockToBlob.mockImplementation((callback: (blob: Blob | null) => void) => {
         callback(mockBlob);
       });
 
@@ -168,8 +170,8 @@ describe('Image Optimization Utilities', () => {
 
     it('should reject if compression fails', async () => {
       const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      
-      mockToBlob.mockImplementation((callback) => {
+
+      mockToBlob.mockImplementation((callback: (blob: Blob | null) => void) => {
         callback(null);
       });
 

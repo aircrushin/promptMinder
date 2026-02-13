@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GEO (Generative Engine Optimization) 工具库
  * 用于生成针对AI搜索引擎优化的结构化数据
@@ -99,7 +98,7 @@ export function generateSoftwareApplicationSchema() {
  * @param {Array} faqs - FAQ项目数组 [{question, answer}]
  * @param {string} language - 语言代码
  */
-export function generateFAQPageSchema(faqs, language = 'zh') {
+export function generateFAQPageSchema(faqs: Array<{ question: string; answer: string }>, language = 'zh') {
   return {
     "@type": "FAQPage",
     "@id": `${BASE_URL}/#faq`,
@@ -120,7 +119,7 @@ export function generateFAQPageSchema(faqs, language = 'zh') {
  * 生成面包屑结构化数据
  * @param {Array} items - 面包屑项目数组 [{name, url}]
  */
-export function generateBreadcrumbSchema(items) {
+export function generateBreadcrumbSchema(items: Array<{ name: string; url?: string }>) {
   return {
     "@type": "BreadcrumbList",
     "@id": `${BASE_URL}/#breadcrumb`,
@@ -137,7 +136,7 @@ export function generateBreadcrumbSchema(items) {
  * 生成提示词/创意作品结构化数据
  * @param {Object} prompt - 提示词对象
  */
-export function generatePromptSchema(prompt) {
+export function generatePromptSchema(prompt: any) {
   const promptUrl = `${BASE_URL}/share/${prompt.id}`;
   
   return {
@@ -170,7 +169,7 @@ export function generatePromptSchema(prompt) {
  * @param {Array} prompts - 提示词数组
  * @param {Object} options - 配置选项
  */
-export function generatePromptListSchema(prompts, options = {}) {
+export function generatePromptListSchema(prompts: any[], options: { name?: string; description?: string; url?: string } = {}) {
   const {
     name = "AI提示词合集",
     description = "精选的AI提示词集合",
@@ -197,7 +196,7 @@ export function generatePromptListSchema(prompts, options = {}) {
  * 生成HowTo结构化数据（用于教程类内容）
  * @param {Object} options - HowTo配置
  */
-export function generateHowToSchema(options) {
+export function generateHowToSchema(options: { name: string; description: string; steps: Array<{ name: string; text: string; url?: string }>; totalTime?: string }) {
   const {
     name,
     description,
@@ -224,7 +223,7 @@ export function generateHowToSchema(options) {
  * 生成WebPage结构化数据
  * @param {Object} options - 页面配置
  */
-export function generateWebPageSchema(options) {
+export function generateWebPageSchema(options: { name: string; description: string; url: string; type?: string; datePublished?: string; dateModified?: string }) {
   const {
     name,
     description,
@@ -256,7 +255,7 @@ export function generateWebPageSchema(options) {
  * 生成完整的结构化数据图谱
  * @param {Array} schemas - Schema数组
  */
-export function generateSchemaGraph(schemas) {
+export function generateSchemaGraph(schemas: any[]) {
   return {
     "@context": "https://schema.org",
     "@graph": schemas,
@@ -267,7 +266,7 @@ export function generateSchemaGraph(schemas) {
  * 检测文本语言（简单实现）
  * @param {string} text - 要检测的文本
  */
-function detectLanguage(text) {
+function detectLanguage(text: string) {
   if (!text) return 'zh-CN';
   // 检测中文字符比例
   const chineseChars = text.match(/[\u4e00-\u9fa5]/g) || [];
@@ -281,7 +280,7 @@ function detectLanguage(text) {
  * @param {string} content - 原始内容
  * @param {Object} options - 配置选项
  */
-export function generateGEODescription(content, options = {}) {
+export function generateGEODescription(content: string, options: { maxLength?: number; prefix?: string; suffix?: string; keywords?: string[] } = {}) {
   const {
     maxLength = 160,
     prefix = "",
@@ -317,7 +316,7 @@ export function generateGEODescription(content, options = {}) {
  * 生成针对GEO的关键词数组
  * @param {Object} prompt - 提示词对象
  */
-export function generateGEOKeywords(prompt) {
+export function generateGEOKeywords(prompt: any) {
   const baseKeywords = [
     "AI提示词",
     "Prompt",
@@ -339,7 +338,7 @@ export function generateGEOKeywords(prompt) {
  * 生成AI引擎友好的内容摘要
  * @param {string} content - 原始内容
  */
-export function generateAISummary(content) {
+export function generateAISummary(content: string) {
   if (!content) return "";
   
   // 提取核心信息点（用于AI搜索引擎的快速理解）

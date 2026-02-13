@@ -1,6 +1,6 @@
-// @ts-nocheck
 import { createClient } from '@supabase/supabase-js'
 import { auth } from '@clerk/nextjs/server'
+import { NextRequest } from 'next/server'
 
 // Mock the route handlers
 const mockGET = jest.fn()
@@ -16,13 +16,13 @@ jest.mock('@supabase/supabase-js')
 jest.mock('@clerk/nextjs/server')
 
 describe('/api/prompts', () => {
-  let mockSupabase
-  let mockAuth
+  let mockSupabase: any
+  let mockAuth: any
 
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks()
-    
+
     // Mock Supabase client
     mockSupabase = {
       from: jest.fn().mockReturnThis(),
@@ -33,14 +33,14 @@ describe('/api/prompts', () => {
       order: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
     }
-    
-    createClient.mockReturnValue(mockSupabase)
-    
+
+    ;(createClient as jest.Mock).mockReturnValue(mockSupabase)
+
     // Mock auth
     mockAuth = {
       userId: 'test-user-id'
     }
-    auth.mockResolvedValue(mockAuth)
+    ;(auth as unknown as jest.Mock).mockResolvedValue(mockAuth)
   })
 
   describe('GET /api/prompts', () => {
@@ -55,7 +55,7 @@ describe('/api/prompts', () => {
           created_at: '2024-01-01T00:00:00Z'
         },
         {
-          id: '2', 
+          id: '2',
           title: '测试提示词2',
           content: '这是测试内容2',
           user_id: 'test-user-id',
@@ -70,7 +70,7 @@ describe('/api/prompts', () => {
       })
 
       const request = new NextRequest('http://localhost:3000/api/prompts')
-      const response = await GET(request)
+      const response = await mockGET(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -99,7 +99,7 @@ describe('/api/prompts', () => {
       })
 
       const request = new NextRequest('http://localhost:3000/api/prompts?tag=测试')
-      const response = await GET(request)
+      const response = await mockGET(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -115,7 +115,7 @@ describe('/api/prompts', () => {
       })
 
       const request = new NextRequest('http://localhost:3000/api/prompts')
-      const response = await GET(request)
+      const response = await mockGET(request)
       const data = await response.json()
 
       expect(response.status).toBe(500)
@@ -146,7 +146,7 @@ describe('/api/prompts', () => {
       })
 
       // Mock crypto.randomUUID
-      global.crypto = {
+      ;(global as any).crypto = {
         randomUUID: jest.fn().mockReturnValue('generated-uuid')
       }
 
@@ -155,7 +155,7 @@ describe('/api/prompts', () => {
         body: JSON.stringify(newPromptData)
       })
 
-      const response = await POST(request)
+      const response = await mockPOST(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -188,7 +188,7 @@ describe('/api/prompts', () => {
         error: mockError
       })
 
-      global.crypto = {
+      ;(global as any).crypto = {
         randomUUID: jest.fn().mockReturnValue('generated-uuid')
       }
 
@@ -197,7 +197,7 @@ describe('/api/prompts', () => {
         body: JSON.stringify(newPromptData)
       })
 
-      const response = await POST(request)
+      const response = await mockPOST(request)
       const data = await response.json()
 
       expect(response.status).toBe(500)
@@ -210,7 +210,7 @@ describe('/api/prompts', () => {
         body: 'invalid json'
       })
 
-      const response = await POST(request)
+      const response = await mockPOST(request)
       const data = await response.json()
 
       expect(response.status).toBe(500)

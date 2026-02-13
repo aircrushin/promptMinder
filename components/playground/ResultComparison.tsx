@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useMemo } from 'react';
@@ -204,9 +203,9 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
   );
 }
 
-export function ResultComparison({ testCases, results, promptTemplate, runningCases }) {
+export function ResultComparison({ testCases, results, promptTemplate, runningCases }: { testCases: any[]; results: Record<string, any>; promptTemplate: string; runningCases: Set<string> }) {
   const { t } = useLanguage();
-  const pg = t?.playground || {
+  const pg: Record<string, any> = (t as any)?.playground || {
     results: 'Results',
     resolvedPrompt: 'Resolved Prompt',
     noPromptTemplate: 'No prompt template',
@@ -230,7 +229,7 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
 
   // Calculate summary statistics
   const stats = useMemo(() => {
-    const resultList = Object.values(results);
+    const resultList: any[] = Object.values(results);
     if (resultList.length === 0) return null;
 
     const successful = resultList.filter((r) => r.status === 'success');

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -17,7 +16,8 @@ import { apiClient } from '@/lib/api-client';
 import { generatePromptListSchema, generateBreadcrumbSchema, generateSchemaGraph } from '@/lib/geo-utils';
 
 export default function PublicPromptsClient() {
-    const { language, t } = useLanguage();
+    const { language, t: _t } = useLanguage();
+    const t = _t as Record<string, any>;
     const { toast } = useToast();
     const [prompts, setPrompts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -358,7 +358,7 @@ export default function PublicPromptsClient() {
                         <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
                             <span className="px-4 bg-white/80 dark:bg-gray-900/80 rounded-full py-1">
-                                {t.publicPage.totalPrompts.replace('{count}', pagination.total)}
+                                {t.publicPage.totalPrompts.replace('{count}', String(pagination.total))}
                             </span>
                             <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
                         </div>
@@ -708,7 +708,7 @@ export default function PublicPromptsClient() {
                 </div>
             </div>
             {/* Footer */}
-            <Footer t={t.footer} variant="transparent" />
+            <Footer t={t.footer} />
             {/* 回到顶部按钮 */}
             {showBackToTop && (
                 <button

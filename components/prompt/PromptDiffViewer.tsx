@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import { useMemo, useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';

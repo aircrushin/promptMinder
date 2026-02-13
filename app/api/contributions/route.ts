@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { eq, desc, count as countFn } from 'drizzle-orm'
 import { promptContributions } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const { title, role, content, language, contributorEmail, contributorName } = await request.json()
 
@@ -43,7 +42,7 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') || 'pending'
@@ -51,8 +50,8 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = (page - 1) * limit
 
-    let dataQuery = db.select().from(promptContributions).orderBy(desc(promptContributions.createdAt))
-    let countQuery = db.select({ value: countFn() }).from(promptContributions)
+    let dataQuery: any = db.select().from(promptContributions).orderBy(desc(promptContributions.createdAt))
+    let countQuery: any = db.select({ value: countFn() }).from(promptContributions)
 
     if (status !== 'all') {
       dataQuery = dataQuery.where(eq(promptContributions.status, status))

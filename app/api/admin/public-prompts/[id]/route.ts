@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { publicPrompts } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 
-async function verifyAdmin(request) {
+async function verifyAdmin(request: Request) {
   const adminEmail = request.headers.get('x-admin-email')
   const adminToken = request.headers.get('x-admin-token')
 
@@ -22,7 +21,7 @@ async function verifyAdmin(request) {
   return { success: true }
 }
 
-export async function GET(request, { params }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.success) {
@@ -44,7 +43,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.success) {
@@ -63,7 +62,7 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: '内容不能为空' }, { status: 400 })
     }
 
-    const updateData = { updatedAt: new Date() }
+    const updateData: Record<string, any> = { updatedAt: new Date() }
     if (title !== undefined) updateData.title = title.trim()
     if (role_category !== undefined) updateData.roleCategory = role_category.trim()
     if (content !== undefined) updateData.content = content.trim()
@@ -84,7 +83,7 @@ export async function PATCH(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await verifyAdmin(request)
     if (!authResult.success) {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import TagFilter from '@/components/prompt/TagFilter'
@@ -107,7 +106,7 @@ describe('TagFilter', () => {
       />
     )
 
-    expect(container.firstChild.children).toHaveLength(0)
+    expect((container.firstChild as Element).children).toHaveLength(0)
   })
 
   it('应该正确处理单个标签的选择和取消', () => {

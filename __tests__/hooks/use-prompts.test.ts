@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { usePrompts, usePromptSearch } from '@/hooks/use-prompts'
@@ -32,24 +31,24 @@ describe('usePrompts', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    useToast.mockReturnValue({ toast: mockToast })
+    ;(useToast as jest.Mock).mockReturnValue({ toast: mockToast })
     Object.assign(apiClient, mockApiClient)
-    
+
     // Mock crypto.randomUUID
-    global.crypto = {
+    ;(global as any).crypto = {
       randomUUID: jest.fn().mockReturnValue('test-uuid')
     }
-    
+
     // Mock navigator.clipboard
     Object.assign(navigator, {
       clipboard: {
-        writeText: jest.fn().mockResolvedValue()
+        writeText: jest.fn().mockResolvedValue(undefined)
       }
     })
-    
+
     // Mock window.location
-    delete window.location
-    window.location = {
+    delete (window as any).location
+    ;(window as any).location = {
       origin: 'http://localhost:3000'
     }
   })
@@ -64,17 +63,17 @@ describe('usePrompts', () => {
           tags: 'react,javascript'
         }
       ]
-      
+
       mockApiClient.getPrompts.mockResolvedValue(mockPrompts)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       expect(result.current.isLoading).toBe(true)
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       expect(result.current.prompts).toHaveLength(1)
       expect(result.current.prompts[0]).toEqual({
         id: '1',
@@ -89,13 +88,13 @@ describe('usePrompts', () => {
     it('应该处理获取提示词失败', async () => {
       const error = new Error('获取失败')
       mockApiClient.getPrompts.mockRejectedValue(error)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       expect(result.current.error).toBe(error)
       expect(mockToast).toHaveBeenCalledWith({
         title: '获取失败',
@@ -107,9 +106,9 @@ describe('usePrompts', () => {
     it('应该根据过滤器获取提示词', async () => {
       const filters = { tag: 'react' }
       mockApiClient.getPrompts.mockResolvedValue([])
-      
+
       renderHook(() => usePrompts(filters))
-      
+
       await waitFor(() => {
         expect(mockApiClient.getPrompts).toHaveBeenCalledWith(filters)
       })
@@ -120,7 +119,7 @@ describe('usePrompts', () => {
         title: '新提示词',
         content: '新内容'
       }
-      
+
       const createdPrompt = {
         id: 'test-uuid',
         ...newPromptData,
@@ -128,21 +127,21 @@ describe('usePrompts', () => {
         updated_at: expect.any(String),
         is_public: true
       }
-      
+
       mockApiClient.getPrompts.mockResolvedValue([])
       mockApiClient.createPrompt.mockResolvedValue(createdPrompt)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
-      let returnedPrompt
+
+      let returnedPrompt: any
       await act(async () => {
         returnedPrompt = await result.current.createPrompt(newPromptData)
       })
-      
+
       expect(mockApiClient.createPrompt).toHaveBeenCalledWith({
         id: 'test-uuid',
         ...newPromptData,
@@ -150,11 +149,11 @@ describe('usePrompts', () => {
         updated_at: expect.any(String),
         is_public: true
       })
-      
+
       expect(result.current.prompts).toHaveLength(1)
       expect(result.current.prompts[0]).toEqual(createdPrompt)
       expect(returnedPrompt).toEqual(createdPrompt)
-      
+
       expect(mockToast).toHaveBeenCalledWith({
         title: '创建成功',
         description: '提示词已成功创建',
@@ -165,19 +164,19 @@ describe('usePrompts', () => {
       const error = new Error('创建失败')
       mockApiClient.getPrompts.mockResolvedValue([])
       mockApiClient.createPrompt.mockRejectedValue(error)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       await expect(
         act(async () => {
           await result.current.createPrompt({ title: '测试' })
         })
       ).rejects.toThrow('创建失败')
-      
+
       expect(mockToast).toHaveBeenCalledWith({
         title: '创建失败',
         description: '创建失败',
@@ -189,30 +188,30 @@ describe('usePrompts', () => {
       const initialPrompts = [
         { id: '1', title: '原标题', content: '原内容' }
       ]
-      
+
       const updateData = { title: '新标题' }
       const updatedPrompt = { id: '1', title: '新标题', content: '原内容' }
-      
+
       mockApiClient.getPrompts.mockResolvedValue(initialPrompts)
       mockApiClient.updatePrompt.mockResolvedValue(updatedPrompt)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       await act(async () => {
         await result.current.updatePrompt('1', updateData)
       })
-      
+
       expect(mockApiClient.updatePrompt).toHaveBeenCalledWith('1', {
         ...updateData,
         updated_at: expect.any(String)
       })
-      
+
       expect(result.current.prompts[0].title).toBe('新标题')
-      
+
       expect(mockToast).toHaveBeenCalledWith({
         title: '更新成功',
         description: '提示词已成功更新',
@@ -224,24 +223,24 @@ describe('usePrompts', () => {
         { id: '1', title: '提示词1' },
         { id: '2', title: '提示词2' }
       ]
-      
+
       mockApiClient.getPrompts.mockResolvedValue(initialPrompts)
-      mockApiClient.deletePrompt.mockResolvedValue()
-      
+      mockApiClient.deletePrompt.mockResolvedValue(undefined)
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       await act(async () => {
         await result.current.deletePrompt('1')
       })
-      
+
       expect(mockApiClient.deletePrompt).toHaveBeenCalledWith('1')
       expect(result.current.prompts).toHaveLength(1)
       expect(result.current.prompts[0].id).toBe('2')
-      
+
       expect(mockToast).toHaveBeenCalledWith({
         title: '删除成功',
         description: '提示词已成功删除',
@@ -250,21 +249,21 @@ describe('usePrompts', () => {
 
     it('应该成功分享提示词', async () => {
       mockApiClient.getPrompts.mockResolvedValue([])
-      mockApiClient.sharePrompt.mockResolvedValue()
-      
+      mockApiClient.sharePrompt.mockResolvedValue(undefined)
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       await act(async () => {
         await result.current.sharePrompt('1')
       })
-      
+
       expect(mockApiClient.sharePrompt).toHaveBeenCalledWith('1')
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('http://localhost:3000/share/1')
-      
+
       expect(mockToast).toHaveBeenCalledWith({
         title: '分享成功',
         description: '分享链接已复制到剪贴板',
@@ -274,24 +273,24 @@ describe('usePrompts', () => {
     it('应该成功复制提示词', async () => {
       const promptData = { title: '复制的提示词', content: '内容' }
       const copiedPrompt = { id: 'new-id', ...promptData }
-      
+
       mockApiClient.getPrompts.mockResolvedValue([])
       mockApiClient.copyPrompt.mockResolvedValue(copiedPrompt)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       await act(async () => {
         await result.current.copyPrompt(promptData)
       })
-      
+
       expect(mockApiClient.copyPrompt).toHaveBeenCalledWith(promptData)
       expect(result.current.prompts).toHaveLength(1)
       expect(result.current.prompts[0]).toEqual(copiedPrompt)
-      
+
       expect(mockToast).toHaveBeenCalledWith({
         title: '导入成功',
         description: '提示词已导入到你的库中',
@@ -304,15 +303,15 @@ describe('usePrompts', () => {
         { id: '2', title: '标题B', content: '内容2' },
         { id: '3', title: '标题A', content: '内容3' }
       ]
-      
+
       mockApiClient.getPrompts.mockResolvedValue(prompts)
-      
+
       const { result } = renderHook(() => usePrompts())
-      
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
-      
+
       expect(result.current.groupedPrompts).toEqual({
         '标题A': [
           expect.objectContaining({ id: '1', title: '标题A' }),
@@ -359,7 +358,7 @@ describe('usePrompts', () => {
     ]
 
     it('应该根据搜索查询过滤提示词', async () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, 'React', [])
       )
 
@@ -375,16 +374,16 @@ describe('usePrompts', () => {
     })
 
     it('应该根据标签过滤提示词', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, '', ['javascript'])
       )
 
       expect(result.current.filteredPrompts).toHaveLength(2)
-      expect(result.current.filteredPrompts.map(p => p.id)).toEqual(['1', '2'])
+      expect(result.current.filteredPrompts.map((p: any) => p.id)).toEqual(['1', '2'])
     })
 
     it('应该同时根据搜索查询和标签过滤', async () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, 'React', ['javascript'])
       )
 
@@ -399,7 +398,7 @@ describe('usePrompts', () => {
     })
 
     it('应该在搜索查询中包含描述和内容', async () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, '开发', [])
       )
 
@@ -439,7 +438,7 @@ describe('usePrompts', () => {
     })
 
     it('应该处理空的提示词列表', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(null, 'test', [])
       )
 
@@ -447,7 +446,7 @@ describe('usePrompts', () => {
     })
 
     it('应该处理空的搜索查询和标签', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, '', [])
       )
 
@@ -472,7 +471,7 @@ describe('usePrompts', () => {
     })
 
     it('应该在标签匹配时不区分大小写', async () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, 'REACT', [])
       )
 
@@ -487,12 +486,12 @@ describe('usePrompts', () => {
     })
 
     it('应该支持多个标签的OR逻辑', () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         usePromptSearch(mockPrompts, '', ['react', 'css'])
       )
 
       expect(result.current.filteredPrompts).toHaveLength(2)
-      expect(result.current.filteredPrompts.map(p => p.title)).toEqual(['React组件', 'CSS样式'])
+      expect(result.current.filteredPrompts.map((p: any) => p.title)).toEqual(['React组件', 'CSS样式'])
     })
   })
 })

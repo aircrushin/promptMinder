@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Dialog,
   DialogContent,
@@ -45,9 +44,22 @@ export function ConfirmDialog({
   icon = "warning",
   isLoading = false,
   children,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+  variant?: string;
+  icon?: string;
+  isLoading?: boolean;
+  children?: React.ReactNode;
 }) {
-  const IconComponent = iconMap[icon];
-  const styles = variantStyles[variant] || variantStyles.default;
+  const IconComponent = (iconMap as Record<string, any>)[icon];
+  const styles = (variantStyles as Record<string, any>)[variant] || variantStyles.default;
 
   const handleConfirm = () => {
     onConfirm?.();

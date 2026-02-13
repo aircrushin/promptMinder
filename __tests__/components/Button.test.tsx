@@ -1,12 +1,11 @@
-// @ts-nocheck
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { Button, buttonVariants } from '@/components/ui/button'
 
 describe('Button', () => {
   it('应该正确渲染基本按钮', () => {
-    render(<Button>点击我</Button>)
-    
+    render(<Button>点击我</Button> as any)
+
     const button = screen.getByRole('button', { name: '点击我' })
     expect(button).toBeInTheDocument()
     expect(button).toHaveTextContent('点击我')
@@ -14,72 +13,72 @@ describe('Button', () => {
 
   it('应该处理点击事件', () => {
     const handleClick = jest.fn()
-    render(<Button onClick={handleClick}>点击我</Button>)
-    
+    render(<Button onClick={handleClick}>点击我</Button> as any)
+
     const button = screen.getByRole('button')
     fireEvent.click(button)
-    
+
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
 
   it('应该应用默认样式变体', () => {
-    render(<Button>默认按钮</Button>)
-    
+    render(<Button>默认按钮</Button> as any)
+
     const button = screen.getByRole('button')
     expect(button).toHaveClass('bg-primary', 'text-primary-foreground')
   })
 
   it('应该应用不同的变体样式', () => {
-    const { rerender } = render(<Button variant="destructive">删除</Button>)
+    const { rerender } = render(<Button variant="destructive">删除</Button> as any)
     let button = screen.getByRole('button')
     expect(button).toHaveClass('bg-destructive', 'text-destructive-foreground')
 
-    rerender(<Button variant="outline">轮廓</Button>)
+    rerender(<Button variant="outline">轮廓</Button> as any)
     button = screen.getByRole('button')
     expect(button).toHaveClass('border', 'border-input', 'bg-background')
 
-    rerender(<Button variant="secondary">次要</Button>)
+    rerender(<Button variant="secondary">次要</Button> as any)
     button = screen.getByRole('button')
     expect(button).toHaveClass('bg-secondary', 'text-secondary-foreground')
 
-    rerender(<Button variant="ghost">幽灵</Button>)
+    rerender(<Button variant="ghost">幽灵</Button> as any)
     button = screen.getByRole('button')
     expect(button).toHaveClass('hover:bg-accent', 'hover:text-accent-foreground')
 
-    rerender(<Button variant="link">链接</Button>)
+    rerender(<Button variant="link">链接</Button> as any)
     button = screen.getByRole('button')
     expect(button).toHaveClass('text-primary', 'underline-offset-4', 'hover:underline')
   })
 
   it('应该应用不同的尺寸样式', () => {
-    const { rerender } = render(<Button size="sm">小按钮</Button>)
+    const { rerender } = render(<Button size="sm">小按钮</Button> as any)
     let button = screen.getByRole('button')
     expect(button).toHaveClass('h-8', 'px-3', 'text-xs')
 
-    rerender(<Button size="lg">大按钮</Button>)
+    rerender(<Button size="lg">大按钮</Button> as any)
     button = screen.getByRole('button')
     expect(button).toHaveClass('h-10', 'px-8')
 
-    rerender(<Button size="icon">图标</Button>)
+    rerender(<Button size="icon">图标</Button> as any)
     button = screen.getByRole('button')
     expect(button).toHaveClass('h-9', 'w-9')
   })
 
   it('应该应用自定义className', () => {
-    render(<Button className="custom-class">自定义</Button>)
-    
+    render(<Button className="custom-class">自定义</Button> as any)
+
     const button = screen.getByRole('button')
     expect(button).toHaveClass('custom-class')
   })
 
   it('禁用状态下应该不响应点击', () => {
     const handleClick = jest.fn()
-    render(<Button disabled onClick={handleClick}>禁用按钮</Button>)
-    
+    render(<Button disabled onClick={handleClick}>禁用按钮</Button> as any)
+
     const button = screen.getByRole('button')
     expect(button).toBeDisabled()
     expect(button).toHaveClass('disabled:pointer-events-none', 'disabled:opacity-50')
-    
+
     fireEvent.click(button)
     expect(handleClick).not.toHaveBeenCalled()
   })
@@ -88,24 +87,24 @@ describe('Button', () => {
     render(
       <Button asChild>
         <a href="/test">链接按钮</a>
-      </Button>
+      </Button> as any
     )
-    
+
     const link = screen.getByRole('link', { name: '链接按钮' })
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/test')
   })
 
   it('应该正确转发ref', () => {
-    const ref = React.createRef()
-    render(<Button ref={ref}>引用按钮</Button>)
-    
+    const ref = React.createRef<HTMLButtonElement>()
+    render(<Button ref={ref}>引用按钮</Button> as any)
+
     expect(ref.current).toBeInstanceOf(HTMLButtonElement)
   })
 
   it('应该传递其他props', () => {
-    render(<Button data-testid="test-button" aria-label="测试按钮">按钮</Button>)
-    
+    render(<Button data-testid="test-button" aria-label="测试按钮">按钮</Button> as any)
+
     const button = screen.getByTestId('test-button')
     expect(button).toHaveAttribute('aria-label', '测试按钮')
   })
@@ -117,9 +116,9 @@ describe('Button', () => {
           <path />
         </svg>
         带图标
-      </Button>
+      </Button> as any
     )
-    
+
     const button = screen.getByRole('button')
     expect(button).toHaveClass('[&_svg]:pointer-events-none', '[&_svg]:size-4', '[&_svg]:shrink-0')
   })

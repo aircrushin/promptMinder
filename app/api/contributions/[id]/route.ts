@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { promptContributions, publicPrompts } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 
-export async function GET(request, { params }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 
@@ -22,7 +21,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const adminEmail = request.headers.get('x-admin-email')
@@ -40,7 +39,7 @@ export async function PATCH(request, { params }) {
 
     const existingContribution = existing[0]
 
-    const updateData = {
+    const updateData: Record<string, any> = {
       status,
       adminNotes: adminNotes || null,
       reviewedAt: new Date(),
@@ -78,7 +77,7 @@ export async function PATCH(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 

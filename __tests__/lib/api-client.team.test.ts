@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { ApiClient, ApiError } from '@/lib/api-client'
 import { PERSONAL_TEAM_ID, TEAM_STORAGE_KEY } from '@/lib/team-storage'
 
 describe('ApiClient team scoping', () => {
-  let client
+  let client: any
 
   beforeEach(() => {
     client = new ApiClient('')
@@ -13,7 +12,7 @@ describe('ApiClient team scoping', () => {
         ok: true,
         json: async () => ({}),
       })
-    )
+    ) as jest.Mock
   })
 
   it('attaches team id header from local storage when available', async () => {
@@ -64,7 +63,7 @@ describe('ApiClient team scoping', () => {
   })
 
   it('throws ApiError on network failure', async () => {
-    global.fetch = jest.fn(() => Promise.reject(new Error('network down')))
+    global.fetch = jest.fn(() => Promise.reject(new Error('network down'))) as jest.Mock
 
     await expect(client.request('/api/test')).rejects.toBeInstanceOf(ApiError)
   })

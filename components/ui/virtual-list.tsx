@@ -117,6 +117,17 @@ export function VirtualGrid({
   gap = 0,
   onScroll,
   ...props
+}: {
+  items?: any[];
+  itemHeight?: number;
+  itemsPerRow?: number;
+  containerHeight?: number;
+  renderItem: (item: any, index: number) => React.ReactNode;
+  overscan?: number;
+  className?: string;
+  gap?: number;
+  onScroll?: (scrollTop: number) => void;
+  [key: string]: any;
 }) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef(null);

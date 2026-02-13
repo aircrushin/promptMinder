@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Performance monitoring component
  * Provides real-time performance metrics display for development
@@ -149,7 +148,7 @@ export default function PerformanceMonitor({ enabled = process.env.NODE_ENV === 
           {Object.entries(metrics)
             .filter(([key]) => key.startsWith('custom-') || key.startsWith('render-') || key.startsWith('api-'))
             .slice(-5) // Show last 5 custom metrics
-            .map(([key, metric]) => (
+            .map(([key, metric]: [string, any]) => (
               <div key={key} className="flex justify-between">
                 <span className="truncate mr-2">{key.replace(/^(custom-|render-|api-)/, '')}:</span>
                 <span>{formatTime(metric.value)}</span>
@@ -189,7 +188,7 @@ export function PerformanceMetricsDisplay({ metrics }) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {Object.entries(metrics).map(([key, metric]) => (
+      {Object.entries(metrics).map(([key, metric]: [string, any]) => (
         <div key={key} className="bg-white p-3 rounded-lg shadow-sm border">
           <div className="text-sm font-medium text-gray-900 mb-1">
             {key.replace(/-/g, ' ').toUpperCase()}

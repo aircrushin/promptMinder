@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -50,7 +49,7 @@ export default function TeamsPage() {
   const { t } = useLanguage();
 
   // 提供默认翻译对象作为后备
-  const safeT = t || {
+  const safeT: Record<string, any> = t || {
     teamsPage: {
       title: "团队管理",
       subtitle: "管理你的团队和成员",

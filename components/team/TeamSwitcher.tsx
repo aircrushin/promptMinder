@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import Link from 'next/link'
@@ -21,7 +20,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 const CREATE_TEAM_VALUE = 'create-team'
 
-export function TeamSwitcher({ className }) {
+export function TeamSwitcher({ className }: { className?: string }) {
   const {
     teams,
     activeTeams,
@@ -33,7 +32,7 @@ export function TeamSwitcher({ className }) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const { t } = useLanguage()
-  const safeT = t || {}
+  const safeT: Record<string, any> = (t as any) || {}
 
   const selectedValue = activeTeamId ?? PERSONAL_TEAM_ID
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Button } from "@/components/ui/button"
@@ -99,9 +98,10 @@ const getSavedSettings = () => {
 };
 
 export default function ChatTest({ prompt, variableValues = {}, hasVariables = false }: any) {
-  const { t } = useLanguage();
+  const { t: _t } = useLanguage();
+  const t = _t as Record<string, any>;
   const { toast } = useToast();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

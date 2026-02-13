@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * TestCaseList Component Tests
  * 

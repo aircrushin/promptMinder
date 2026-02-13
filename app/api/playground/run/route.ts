@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
@@ -9,7 +8,7 @@ import { providerKeys } from '@/drizzle/schema/index'
 
 const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || ''
 const DEFAULT_BASE_URL = process.env.OPENAI_COMPAT_URL || 'https://api.openai.com/v1'
-const PROVIDER_BASE_URLS = {
+const PROVIDER_BASE_URLS: Record<string, string> = {
   openai: 'https://api.openai.com/v1',
   deepseek: 'https://api.deepseek.com/v1',
   zhipu: 'https://open.bigmodel.cn/api/paas/v4',
@@ -17,7 +16,7 @@ const PROVIDER_BASE_URLS = {
   claude: 'https://api.anthropic.com/v1',
 }
 
-async function getStoredProviderKey(userId, provider) {
+async function getStoredProviderKey(userId: string, provider: string) {
   const rows = await db.select({ apiKey: providerKeys.apiKey })
     .from(providerKeys)
     .where(and(eq(providerKeys.userId, userId), eq(providerKeys.provider, provider)))
@@ -26,14 +25,14 @@ async function getStoredProviderKey(userId, provider) {
   return rows[0]?.apiKey || null
 }
 
-async function handleClaudeStream(anthropic, model, systemPrompt, userPrompt, temperature, maxTokens, topP, startTime, controller, send) {
+async function handleClaudeStream(anthropic: any, model: string, systemPrompt: string | undefined, userPrompt: string | undefined, temperature: number, maxTokens: number, topP: number, startTime: number, controller: ReadableStreamDefaultController, send: (payload: any) => void) {
   try {
     const messages = []
     if (userPrompt) {
       messages.push({ role: 'user', content: userPrompt })
     }
 
-    const streamParams = { model, max_tokens: maxTokens, temperature, top_p: topP, messages }
+    const streamParams: any = { model, max_tokens: maxTokens, temperature, top_p: topP, messages }
     if (systemPrompt) {
       streamParams.system = systemPrompt
     }
@@ -72,7 +71,7 @@ async function handleClaudeStream(anthropic, model, systemPrompt, userPrompt, te
       },
       model, duration, finishReason: finishReason || 'end_turn',
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Claude stream error:', error)
     send({ type: 'error', error: error.message || 'An unexpected error occurred' })
   } finally {
@@ -80,7 +79,7 @@ async function handleClaudeStream(anthropic, model, systemPrompt, userPrompt, te
   }
 }
 
-async function handleOpenAIStream(openai, model, messages, temperature, maxTokens, topP, startTime, controller, send) {
+async function handleOpenAIStream(openai: any, model: string, messages: any[], temperature: number, maxTokens: number, topP: number, startTime: number, controller: ReadableStreamDefaultController, send: (payload: any) => void) {
   try {
     const completion = await openai.chat.completions.create({
       model, messages, temperature, max_tokens: maxTokens, top_p: topP, stream: true,
@@ -98,7 +97,7 @@ async function handleOpenAIStream(openai, model, messages, temperature, maxToken
       finishReason = part.choices?.[0]?.finish_reason || finishReason
     }
 
-    const usage = completion.finalUsage || {}
+    const usage: any = completion.finalUsage || {}
     const duration = Date.now() - startTime
 
     send({
@@ -106,7 +105,7 @@ async function handleOpenAIStream(openai, model, messages, temperature, maxToken
       usage: { promptTokens: usage.prompt_tokens, completionTokens: usage.completion_tokens, totalTokens: usage.total_tokens },
       model, duration, finishReason,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('OpenAI stream error:', error)
     send({ type: 'error', error: error.message || 'An unexpected error occurred' })
   } finally {
@@ -114,7 +113,7 @@ async function handleOpenAIStream(openai, model, messages, temperature, maxToken
   }
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   const startTime = Date.now()
 
   try {
@@ -168,7 +167,7 @@ export async function POST(request) {
       const encoder = new TextEncoder()
       const streamBody = new ReadableStream({
         async start(controller) {
-          const send = (payload) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
+          const send = (payload: any) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
 
           if (isClaude) {
             const anthropic = new Anthropic({ apiKey: finalApiKey })
@@ -187,16 +186,16 @@ export async function POST(request) {
 
     if (isClaude) {
       const anthropic = new Anthropic({ apiKey: finalApiKey })
-      const messageParams = {
+      const messageParams: any = {
         model, max_tokens: maxTokens, temperature, top_p: topP,
-        messages: [{ role: 'user', content: userMessage }],
+        messages: [{ role: 'user' as const, content: userMessage }],
       }
       if (systemMessage) messageParams.system = systemMessage
 
       const response = await anthropic.messages.create(messageParams)
       const duration = Date.now() - startTime
-      const output = response.content?.[0]?.text || ''
-      const usage = response.usage || {}
+      const output = (response.content?.[0] as any)?.text || ''
+      const usage: any = response.usage || {}
 
       return NextResponse.json({
         output,
@@ -208,7 +207,7 @@ export async function POST(request) {
       const completion = await openai.chat.completions.create({ model, messages, temperature, max_tokens: maxTokens, top_p: topP })
       const duration = Date.now() - startTime
       const output = completion.choices?.[0]?.message?.content || ''
-      const usage = completion.usage || {}
+      const usage: any = completion.usage || {}
 
       return NextResponse.json({
         output,
@@ -216,7 +215,7 @@ export async function POST(request) {
         model: completion.model, duration, finishReason: completion.choices?.[0]?.finish_reason,
       })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Playground run error:', error)
 
     if (error.status === 401) return NextResponse.json({ error: 'Invalid API key. Please check your API key and try again.' }, { status: 401 })

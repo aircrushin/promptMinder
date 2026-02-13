@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -11,7 +10,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  * @param {boolean} options.triggerOnce - Whether to trigger only once
  * @returns {Object} - { ref, isIntersecting, isLoaded }
  */
-export function useLazyLoading(options = {}) {
+interface LazyLoadingOptions {
+  rootMargin?: string;
+  threshold?: number;
+  triggerOnce?: boolean;
+}
+
+export function useLazyLoading(options: LazyLoadingOptions = {}) {
   const {
     rootMargin = '50px',
     threshold = 0.1,
@@ -80,7 +85,7 @@ export function useLazyLoading(options = {}) {
  * @param {Object} options - Lazy loading options
  * @returns {Object} - { ref, isLoaded, hasError, load }
  */
-export function useLazyImage(src, options = {}) {
+export function useLazyImage(src: string, options: LazyLoadingOptions = {}) {
   const [hasError, setHasError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const { ref, isLoaded } = useLazyLoading(options);
@@ -123,7 +128,7 @@ export function useLazyImage(src, options = {}) {
  * @param {Object} options - Lazy loading options
  * @returns {Object} - { ref, Component, isLoading, error }
  */
-export function useLazyComponent(importFn, options = {}) {
+export function useLazyComponent(importFn: () => Promise<any>, options: LazyLoadingOptions = {}) {
   const [Component, setComponent] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

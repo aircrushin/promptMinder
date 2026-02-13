@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import * as React from "react"
 import { useState, useRef } from "react";
@@ -50,11 +49,18 @@ function ParticleButton({
     successDuration = 1000,
     className,
     ...props
+}: {
+    children: React.ReactNode;
+    onClick?: (e: React.MouseEvent) => void;
+    onSuccess?: () => void;
+    successDuration?: number;
+    className?: string;
+    [key: string]: any;
 }) {
     const [showParticles, setShowParticles] = useState(false);
-    const buttonRef = useRef(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const handleClick = async (e) => {
+    const handleClick = async (e: React.MouseEvent) => {
         if (onClick) {
             await onClick(e);
         }

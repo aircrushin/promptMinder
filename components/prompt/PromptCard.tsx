@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, memo } from 'react';
@@ -57,9 +56,10 @@ function CheckIcon(props) {
       );
 }
 
-function PromptCardComponent({ prompt }) {
+function PromptCardComponent({ prompt }: { prompt: any }) {
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t: _t } = useLanguage();
+  const t = _t as Record<string, any>;
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { copy, copied } = useClipboard(

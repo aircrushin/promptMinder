@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { cn } from '@/lib/utils'
 
 describe('utils', () => {
@@ -76,8 +75,8 @@ describe('utils', () => {
     it('应该处理嵌套的条件逻辑', () => {
       const isActive = true
       const isDisabled = false
-      const variant = 'primary'
-      
+      const variant: string = 'primary'
+
       const result = cn(
         'btn',
         isActive && 'active',

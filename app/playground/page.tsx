@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { Suspense, useState, useCallback, useEffect } from 'react';
@@ -55,8 +54,8 @@ function PlaygroundContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const pg = t?.playground || {};
-  const header = t?.header || {};
+  const pg: Record<string, any> = (t as any)?.playground || {};
+  const header: Record<string, any> = (t as any)?.header || {};
 
   const formatMessage = useCallback((template, values = {}) => {
     if (!template) return '';
@@ -72,7 +71,7 @@ function PlaygroundContent() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [results, setResults] = useState({});
   const [isRunning, setIsRunning] = useState(false);
-  const [runningCases, setRunningCases] = useState(new Set());
+  const [runningCases, setRunningCases] = useState<Set<string>>(new Set());
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [promptSearch, setPromptSearch] = useState('');
   const [promptResults, setPromptResults] = useState([]);

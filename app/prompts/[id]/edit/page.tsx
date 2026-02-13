@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { use, useEffect, useMemo, useState, Suspense } from 'react';
@@ -39,7 +38,7 @@ const VariableInputs = dynamic(() => import('@/components/prompt/VariableInputs'
   ssr: false,
 });
 
-export default function EditPrompt({ params }) {
+export default function EditPrompt({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -50,13 +49,13 @@ export default function EditPrompt({ params }) {
     }
     return Promise.resolve(params);
   }, [params]);
-  const resolvedParams = use(paramsResource);
+  const resolvedParams: any = use(paramsResource);
   const promptId = resolvedParams?.id;
 
-  const [prompt, setPrompt] = useState(null);
-  const [originalVersion, setOriginalVersion] = useState(null);
+  const [prompt, setPrompt] = useState<any>(null);
+  const [originalVersion, setOriginalVersion] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tagOptions, setTagOptions] = useState([]);
+  const [tagOptions, setTagOptions] = useState<any[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState('');
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
@@ -92,7 +91,7 @@ export default function EditPrompt({ params }) {
         console.error('Error fetching prompt:', error);
         toast({
           variant: 'destructive',
-          description: error.message || '加载提示词失败',
+          description: (error as any).message || '加载提示词失败',
         });
       }
     };
@@ -108,7 +107,7 @@ export default function EditPrompt({ params }) {
     );
   }
 
-  const tp = t.promptEditPage;
+  const tp: Record<string, any> = (t as any).promptEditPage;
 
   if (!prompt) {
     return (
@@ -118,7 +117,7 @@ export default function EditPrompt({ params }) {
     );
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
     try {
@@ -328,8 +327,8 @@ export default function EditPrompt({ params }) {
                     id="tags"
                     isMulti
                     value={prompt.tags ? prompt.tags.split(',').map((tag) => ({ value: tag, label: tag })) : []}
-                    onChange={(selected) => {
-                      const tags = selected ? selected.map((option) => option.value).join(',') : '';
+                    onChange={(selected: any) => {
+                      const tags = selected ? selected.map((option: any) => option.value).join(',') : '';
                       setPrompt({ ...prompt, tags });
                     }}
                     options={tagOptions}

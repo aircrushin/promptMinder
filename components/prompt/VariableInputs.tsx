@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,22 +26,26 @@ const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.d
 });
 
 const AnimatePresence = dynamic(() => import('framer-motion').then(mod => mod.AnimatePresence), {
-  loading: () => ({ children }) => <>{children}</>,
+  loading: () => null,
   ssr: false
 });
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 
-export default function VariableInputs({ 
-  content, 
-  onVariablesChange, 
+export default function VariableInputs({
+  content,
+  onVariablesChange,
   className = ""
+}: {
+  content: string;
+  onVariablesChange?: (values: Record<string, any>, hasVariables: boolean) => void;
+  className?: string;
 }) {
   const { toast } = useToast();
   const { t } = useLanguage();
-  const [variableData, setVariableData] = useState(null);
-  const [variableValues, setVariableValues] = useState({});
-  const [validationErrors, setValidationErrors] = useState({});
+  const [variableData, setVariableData] = useState<any>(null);
+  const [variableValues, setVariableValues] = useState<Record<string, any>>({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, any>>({});
 
   // Analyze content for variables
   useEffect(() => {
@@ -80,7 +83,7 @@ export default function VariableInputs({
     }
   }, [variableValues, variableData, onVariablesChange]);
 
-  const handleVariableChange = (variableName, value) => {
+  const handleVariableChange = (variableName: string, value: any) => {
     setVariableValues(prev => ({
       ...prev,
       [variableName]: value
@@ -108,13 +111,13 @@ export default function VariableInputs({
     });
   };
 
-  const renderVariableInput = (variable) => {
+  const renderVariableInput = (variable: any) => {
     const value = variableValues[variable.name] || '';
     const hasError = validationErrors[variable.name];
 
     const inputProps = {
       value,
-      onChange: (e) => handleVariableChange(variable.name, e.target.value),
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handleVariableChange(variable.name, e.target.value),
       placeholder: variable.placeholder,
       className: `${hasError ? 'border-red-500 focus-visible:ring-red-500' : ''}`,
       'aria-describedby': hasError ? `${variable.name}-error` : undefined
@@ -206,8 +209,8 @@ export default function VariableInputs({
 }
 
 // A simplified hook for just getting variable data
-export function useVariables(content) {
-  const [variableData, setVariableData] = useState(null);
+export function useVariables(content: string) {
+  const [variableData, setVariableData] = useState<any>(null);
   
   useEffect(() => {
     if (content) {

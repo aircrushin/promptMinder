@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,13 +17,13 @@ import PromptDiffViewer from '@/components/prompt/PromptDiffViewer';
 import { PromptSkeleton } from '@/components/prompt/PromptSkeleton';
 import { apiClient } from '@/lib/api-client';
 
-export default function PromptDiffPage({ params }) {
+export default function PromptDiffPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const { t } = useLanguage();
   const { prompt, versions, isLoading } = usePromptDetail(id);
-  const [leftVersion, setLeftVersion] = useState(null);
-  const [rightVersion, setRightVersion] = useState(null);
+  const [leftVersion, setLeftVersion] = useState<string | null>(null);
+  const [rightVersion, setRightVersion] = useState<string | null>(null);
   const [leftContent, setLeftContent] = useState('');
   const [rightContent, setRightContent] = useState('');
   const [loadingContent, setLoadingContent] = useState(false);
@@ -33,7 +32,7 @@ export default function PromptDiffPage({ params }) {
   useEffect(() => {
     if (versions && versions.length > 0 && !leftVersion && !rightVersion) {
       const sortedVersions = [...versions].sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       
       if (sortedVersions.length >= 2) {
@@ -135,10 +134,10 @@ export default function PromptDiffPage({ params }) {
     );
   }
 
-  const tp = t.promptDiffPage || {};
+  const tp: Record<string, any> = (t as any).promptDiffPage || {};
 
   const sortedVersions = [...versions].sort(
-    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
   return (

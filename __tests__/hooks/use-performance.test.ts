@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Tests for performance monitoring infrastructure
  */
@@ -20,10 +19,12 @@ const mockPerformance = {
 };
 
 // Mock PerformanceObserver
-global.PerformanceObserver = jest.fn().mockImplementation((callback) => ({
+const MockPerformanceObserver = jest.fn().mockImplementation((callback: any) => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
-}));
+})) as any;
+MockPerformanceObserver.supportedEntryTypes = ['paint', 'largest-contentful-paint', 'first-input', 'layout-shift'];
+global.PerformanceObserver = MockPerformanceObserver;
 
 Object.defineProperty(global, 'performance', {
   value: mockPerformance,
@@ -74,14 +75,14 @@ describe('Performance Monitoring Infrastructure', () => {
     });
 
     it('should return null for memory usage when not available', () => {
-      const originalMemory = performance.memory;
-      delete performance.memory;
-      
+      const originalMemory = (performance as any).memory;
+      delete (performance as any).memory;
+
       const memoryUsage = performanceMetrics.getMemoryUsage();
       expect(memoryUsage).toBeNull();
-      
+
       // Restore
-      performance.memory = originalMemory;
+      (performance as any).memory = originalMemory;
     });
   });
 

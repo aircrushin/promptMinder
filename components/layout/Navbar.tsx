@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -57,7 +56,7 @@ export default function Navbar() {
     }
   };
 
-  const translations = t || fallbackTranslations;
+  const translations: Record<string, any> = (t as any) || fallbackTranslations;
 
   const navItems = [
     {
@@ -203,12 +202,12 @@ export default function Navbar() {
           </Button>
 
           <SignedOut>
-            <SignInButton mode="modal" redirectUrl="/prompts">
+            <SignInButton mode="modal" forceRedirectUrl="/prompts">
               <Button variant="ghost" className="hidden px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 sm:inline-flex">
                 {translations.auth?.login || '登录'}
               </Button>
             </SignInButton>
-            <SignUpButton mode="modal" redirectUrl="/prompts">
+            <SignUpButton mode="modal" forceRedirectUrl="/prompts">
               <Button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30">
                 {translations.auth?.signup || '注册'}
               </Button>

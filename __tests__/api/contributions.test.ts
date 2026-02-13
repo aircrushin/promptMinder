@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GET, POST } from '@/app/api/contributions/route'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest } from 'next/server'
@@ -7,11 +6,11 @@ import { NextRequest } from 'next/server'
 jest.mock('@supabase/supabase-js')
 
 describe('/api/contributions', () => {
-  let mockSupabase
+  let mockSupabase: any
 
   beforeEach(() => {
     jest.clearAllMocks()
-    
+
     // Mock Supabase client
     mockSupabase = {
       from: jest.fn().mockReturnThis(),
@@ -22,8 +21,8 @@ describe('/api/contributions', () => {
       order: jest.fn().mockReturnThis(),
       range: jest.fn().mockReturnThis(),
     }
-    
-    createClient.mockReturnValue(mockSupabase)
+
+    ;(createClient as jest.Mock).mockReturnValue(mockSupabase)
   })
 
   describe('POST /api/contributions', () => {
@@ -54,7 +53,7 @@ describe('/api/contributions', () => {
       })
 
       // Mock crypto.randomUUID
-      global.crypto = {
+      ;(global as any).crypto = {
         randomUUID: jest.fn().mockReturnValue('generated-uuid')
       }
 
@@ -171,7 +170,7 @@ describe('/api/contributions', () => {
         error: { message: '数据库插入失败' }
       })
 
-      global.crypto = {
+      ;(global as any).crypto = {
         randomUUID: jest.fn().mockReturnValue('generated-uuid')
       }
 
@@ -212,7 +211,7 @@ describe('/api/contributions', () => {
         error: null
       })
 
-      global.crypto = {
+      ;(global as any).crypto = {
         randomUUID: jest.fn().mockReturnValue('generated-uuid')
       }
 
@@ -264,7 +263,7 @@ describe('/api/contributions', () => {
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({ count: 2, error: null })
       }
-      createClient.mockReturnValueOnce(mockSupabase).mockReturnValueOnce(mockCountSupabase)
+      ;(createClient as jest.Mock).mockReturnValueOnce(mockSupabase).mockReturnValueOnce(mockCountSupabase)
 
       const request = new NextRequest('http://localhost:3000/api/contributions')
       const response = await GET(request)
@@ -307,7 +306,7 @@ describe('/api/contributions', () => {
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({ count: 1, error: null })
       }
-      createClient.mockReturnValueOnce(mockSupabase).mockReturnValueOnce(mockCountSupabase)
+      ;(createClient as jest.Mock).mockReturnValueOnce(mockSupabase).mockReturnValueOnce(mockCountSupabase)
 
       const request = new NextRequest('http://localhost:3000/api/contributions?status=approved')
       const response = await GET(request)
@@ -338,7 +337,7 @@ describe('/api/contributions', () => {
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({ count: 25, error: null })
       }
-      createClient.mockReturnValueOnce(mockSupabase).mockReturnValueOnce(mockCountSupabase)
+      ;(createClient as jest.Mock).mockReturnValueOnce(mockSupabase).mockReturnValueOnce(mockCountSupabase)
 
       const request = new NextRequest('http://localhost:3000/api/contributions?page=2&limit=10')
       const response = await GET(request)

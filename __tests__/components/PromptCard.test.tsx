@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { PromptCard } from '@/components/prompt/PromptCard'
@@ -42,16 +41,16 @@ describe('PromptCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    
-    useToast.mockReturnValue({ toast: mockToast })
-    useLanguage.mockReturnValue({ t: mockTranslations })
-    useClipboard.mockReturnValue({ copy: mockCopy, copied: false })
+
+    ;(useToast as jest.Mock).mockReturnValue({ toast: mockToast })
+    ;(useLanguage as jest.Mock).mockReturnValue({ t: mockTranslations })
+    ;(useClipboard as jest.Mock).mockReturnValue({ copy: mockCopy, copied: false })
     apiClient.copyPrompt = mockApiClient.copyPrompt
   })
 
   it('应该正确渲染提示词卡片', () => {
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     expect(screen.getByText('代码助手')).toBeInTheDocument()
     expect(screen.getByText('你是一个专业的代码助手，请帮助用户解决编程问题。')).toBeInTheDocument()
     expect(screen.getByText('开发工具')).toBeInTheDocument()
@@ -59,25 +58,25 @@ describe('PromptCard', () => {
 
   it('应该显示复制和导入按钮', () => {
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     const buttons = screen.getAllByRole('button')
     expect(buttons).toHaveLength(2) // 导入按钮和复制按钮
   })
 
   it('点击复制按钮应该复制提示词内容', () => {
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     const copyButton = screen.getAllByRole('button')[1] // 复制按钮是第二个
     fireEvent.click(copyButton)
-    
+
     expect(mockCopy).toHaveBeenCalledWith('你是一个专业的代码助手，请帮助用户解决编程问题。')
   })
 
   it('复制成功后应该显示已复制状态', () => {
-    useClipboard.mockReturnValue({ copy: mockCopy, copied: true })
-    
+    ;(useClipboard as jest.Mock).mockReturnValue({ copy: mockCopy, copied: true })
+
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     // 检查是否显示了CheckIcon（已复制状态）
     const copyButton = screen.getAllByRole('button')[1]
     expect(copyButton).toHaveClass('bg-green-100')
@@ -85,14 +84,14 @@ describe('PromptCard', () => {
 
   it('点击导入按钮应该调用API导入提示词', async () => {
     mockApiClient.copyPrompt.mockResolvedValue({})
-    
+
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     const importButton = screen.getAllByRole('button')[0] // 导入按钮是第一个
     fireEvent.click(importButton)
-    
+
     expect(mockApiClient.copyPrompt).toHaveBeenCalledWith(mockPrompt)
-    
+
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith({
         title: '导入成功',
@@ -104,12 +103,12 @@ describe('PromptCard', () => {
   it('导入失败时应该显示错误提示', async () => {
     const error = new Error('网络错误')
     mockApiClient.copyPrompt.mockRejectedValue(error)
-    
+
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     const importButton = screen.getAllByRole('button')[0]
     fireEvent.click(importButton)
-    
+
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith({
         title: '导入失败',
@@ -120,20 +119,20 @@ describe('PromptCard', () => {
   })
 
   it('导入过程中应该禁用导入按钮', async () => {
-    let resolvePromise
+    let resolvePromise: (value: any) => void
     const promise = new Promise(resolve => {
       resolvePromise = resolve
     })
     mockApiClient.copyPrompt.mockReturnValue(promise)
-    
+
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     const importButton = screen.getAllByRole('button')[0]
     fireEvent.click(importButton)
-    
+
     expect(importButton).toBeDisabled()
-    
-    resolvePromise({})
+
+    resolvePromise!({})
     await waitFor(() => {
       expect(importButton).not.toBeDisabled()
     })
@@ -141,25 +140,25 @@ describe('PromptCard', () => {
 
   it('没有分类时不应该显示分类标签', () => {
     const promptWithoutCategory = { ...mockPrompt, category: null }
-    
+
     render(<PromptCard prompt={promptWithoutCategory} />)
-    
+
     expect(screen.queryByText('开发工具')).not.toBeInTheDocument()
   })
 
   it('翻译未加载时应该返回null', () => {
-    useLanguage.mockReturnValue({ t: null })
-    
+    ;(useLanguage as jest.Mock).mockReturnValue({ t: null })
+
     const { container } = render(<PromptCard prompt={mockPrompt} />)
-    
+
     expect(container.firstChild).toBeNull()
   })
 
   it('翻译的publicPage未加载时应该返回null', () => {
-    useLanguage.mockReturnValue({ t: {} })
-    
+    ;(useLanguage as jest.Mock).mockReturnValue({ t: {} })
+
     const { container } = render(<PromptCard prompt={mockPrompt} />)
-    
+
     expect(container.firstChild).toBeNull()
   })
 
@@ -168,21 +167,21 @@ describe('PromptCard', () => {
       ...mockPrompt,
       prompt: '第一行内容\n第二行内容\n第三行内容'
     }
-    
+
     render(<PromptCard prompt={multilinePrompt} />)
-    
+
     const content = screen.getByText('第一行内容\n第二行内容\n第三行内容')
     expect(content).toHaveClass('whitespace-pre-line')
   })
 
   it('鼠标悬停时应该应用hover样式', () => {
     render(<PromptCard prompt={mockPrompt} />)
-    
+
     const card = screen.getByText('代码助手').closest('.group')
     expect(card).toHaveClass('group')
-    
+
     // 检查卡片是否有hover相关的类
-    const cardElement = card.querySelector('[class*="hover:"]')
+    const cardElement = card!.querySelector('[class*="hover:"]')
     expect(cardElement).toBeInTheDocument()
   })
 })

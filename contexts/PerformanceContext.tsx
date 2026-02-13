@@ -4,8 +4,8 @@
  */
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { performanceMetrics } from '../lib/performance/metrics';
-import { getPerformanceConfig } from '../lib/performance/config';
+import { performanceMetrics } from '@/lib/performance/metrics';
+import { getPerformanceConfig } from '@/lib/performance/config';
 
 const PerformanceContext = createContext({});
 

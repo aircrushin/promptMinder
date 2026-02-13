@@ -1,18 +1,19 @@
-// @ts-nocheck
 import { apiClient, ApiError, useApiRequest } from '@/lib/api-client'
 
 // Mock fetch
-global.fetch = jest.fn()
+global.fetch = jest.fn() as jest.Mock
+
+const mockFetch = fetch as jest.Mock
 
 describe('ApiClient', () => {
   beforeEach(() => {
-    fetch.mockClear()
+    mockFetch.mockClear()
   })
 
   describe('request method', () => {
     it('应该发送基本的GET请求', async () => {
       const mockResponse = { data: 'test' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -30,8 +31,8 @@ describe('ApiClient', () => {
     it('应该发送POST请求并序列化body', async () => {
       const mockResponse = { success: true }
       const requestBody = { name: 'test' }
-      
-      fetch.mockResolvedValueOnce({
+
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -53,16 +54,16 @@ describe('ApiClient', () => {
 
     it('应该处理HTTP错误响应', async () => {
       const errorResponse = { error: '请求失败' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 400,
         json: async () => errorResponse,
       })
 
       await expect(apiClient.request('/test')).rejects.toThrow(ApiError)
-      
+
       // 重新mock以便第二次调用
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 400,
         json: async () => errorResponse,
@@ -71,17 +72,17 @@ describe('ApiClient', () => {
     })
 
     it('应该处理网络错误', async () => {
-      fetch.mockRejectedValueOnce(new Error('网络连接失败'))
+      mockFetch.mockRejectedValueOnce(new Error('网络连接失败'))
 
       await expect(apiClient.request('/test')).rejects.toThrow(ApiError)
-      
+
       // 重新mock以便第二次调用
-      fetch.mockRejectedValueOnce(new Error('网络连接失败'))
+      mockFetch.mockRejectedValueOnce(new Error('网络连接失败'))
       await expect(apiClient.request('/test')).rejects.toThrow('Network error')
     })
 
     it('应该处理JSON解析错误', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => {
           throw new Error('Invalid JSON')
@@ -93,7 +94,7 @@ describe('ApiClient', () => {
     })
 
     it('应该合并自定义headers', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({}),
       })
@@ -117,7 +118,7 @@ describe('ApiClient', () => {
 
   describe('Prompt API methods', () => {
     it('getPrompts应该构建正确的查询参数', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ([]),
       })
@@ -129,7 +130,7 @@ describe('ApiClient', () => {
 
     it('createPrompt应该发送POST请求', async () => {
       const promptData = { title: '测试提示词', content: '内容' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => promptData,
       })
@@ -147,7 +148,7 @@ describe('ApiClient', () => {
 
     it('updatePrompt应该发送POST请求到正确的端点', async () => {
       const promptData = { title: '更新的提示词' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => promptData,
       })
@@ -164,7 +165,7 @@ describe('ApiClient', () => {
     })
 
     it('deletePrompt应该发送DELETE请求', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
       })
@@ -180,7 +181,7 @@ describe('ApiClient', () => {
     })
 
     it('sharePrompt应该发送POST请求到分享端点', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ shareId: 'abc123' }),
       })
@@ -197,7 +198,7 @@ describe('ApiClient', () => {
 
     it('copyPrompt应该发送POST请求到复制端点', async () => {
       const promptData = { title: '复制的提示词' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => promptData,
       })
@@ -217,7 +218,7 @@ describe('ApiClient', () => {
   describe('Tags API methods', () => {
     it('getTags应该发送GET请求', async () => {
       const tags = ['react', 'javascript']
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => tags,
       })
@@ -230,7 +231,7 @@ describe('ApiClient', () => {
 
     it('createTag应该发送POST请求', async () => {
       const tagData = { name: '新标签', color: '#blue' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => tagData,
       })
@@ -248,7 +249,7 @@ describe('ApiClient', () => {
 
     it('updateTag应该发送PATCH请求', async () => {
       const tagData = { name: '更新的标签' }
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => tagData,
       })
@@ -265,7 +266,7 @@ describe('ApiClient', () => {
     })
 
     it('deleteTag应该发送DELETE请求', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
       })
@@ -287,7 +288,7 @@ describe('ApiClient', () => {
         ok: true,
         body: 'stream data',
       }
-      fetch.mockResolvedValueOnce(mockResponse)
+      mockFetch.mockResolvedValueOnce(mockResponse)
 
       const messages = [{ role: 'user', content: '你好' }]
       const result = await apiClient.chat(messages)
@@ -303,18 +304,18 @@ describe('ApiClient', () => {
     })
 
     it('chat应该处理错误响应', async () => {
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
         json: async () => ({ error: '服务器错误' }),
       })
 
       const messages = [{ role: 'user', content: '你好' }]
-      
+
       await expect(apiClient.chat(messages)).rejects.toThrow(ApiError)
-      
+
       // 重新mock以便第二次调用
-      fetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
         json: async () => ({ error: '服务器错误' }),
@@ -329,7 +330,7 @@ describe('ApiClient', () => {
         ok: true,
         body: 'generated content',
       }
-      fetch.mockResolvedValueOnce(mockResponse)
+      mockFetch.mockResolvedValueOnce(mockResponse)
 
       const result = await apiClient.generate('测试文本')
 
@@ -347,7 +348,7 @@ describe('ApiClient', () => {
   describe('ApiError', () => {
     it('应该正确创建ApiError实例', () => {
       const error = new ApiError('测试错误', 400, { details: '详细信息' })
-      
+
       expect(error.name).toBe('ApiError')
       expect(error.message).toBe('测试错误')
       expect(error.status).toBe(400)
@@ -359,7 +360,7 @@ describe('ApiClient', () => {
   describe('useApiRequest hook', () => {
     it('应该返回apiClient和ApiError', () => {
       const result = useApiRequest()
-      
+
       expect(result.apiClient).toBe(apiClient)
       expect(result.ApiError).toBe(ApiError)
     })

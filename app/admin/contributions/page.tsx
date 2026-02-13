@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,7 +72,8 @@ const STATUS_THEMES = {
 };
 
 export default function AdminContributionsPage() {
-  const { t } = useLanguage();
+  const { t: _t } = useLanguage();
+  const t = _t as Record<string, any>;
 
   const STAT_CARD_META = useMemo(() => [
     {
@@ -243,10 +243,10 @@ export default function AdminContributionsPage() {
     );
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now - date);
+    const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return t?.admin?.contributions?.today || "今天";
@@ -397,7 +397,7 @@ export default function AdminContributionsPage() {
                   </div>
                   {key !== "total" && stats?.total ? (
                     <p className="mt-1 text-xs text-white/70">
-                      {(t?.admin?.contributions?.percentOfTotal || "占总数 {percent}%").replace('{percent}', (stats[key] ? Math.round((stats[key] / stats.total) * 100) : 0))}
+                      {(t?.admin?.contributions?.percentOfTotal || "占总数 {percent}%").replace('{percent}', String(stats[key] ? Math.round((stats[key] / stats.total) * 100) : 0))}
                     </p>
                   ) : null}
                 </CardContent>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { POST } from '@/app/api/chat/route'
 import OpenAI from 'openai'
 import { NextRequest } from 'next/server'
@@ -7,8 +6,8 @@ import { NextRequest } from 'next/server'
 jest.mock('openai')
 
 describe('/api/chat', () => {
-  let mockOpenAI
-  let mockCompletion
+  let mockOpenAI: any
+  let mockCompletion: any
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -42,7 +41,7 @@ describe('/api/chat', () => {
       }
     }
 
-    OpenAI.mockImplementation(() => mockOpenAI)
+    ;(OpenAI as unknown as jest.Mock).mockImplementation(() => mockOpenAI)
   })
 
   it('应该成功处理聊天请求并返回流式响应', async () => {

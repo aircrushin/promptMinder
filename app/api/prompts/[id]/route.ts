@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth'
 import { handleApiError } from '@/lib/handle-api-error'
@@ -8,7 +7,7 @@ import { eq, or, and } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 
-async function getPromptId(paramsPromise) {
+async function getPromptId(paramsPromise: Promise<{ id: string }>) {
   const { id } = await paramsPromise
   if (!id) {
     throw new Error('Prompt id missing in route params')
@@ -16,15 +15,15 @@ async function getPromptId(paramsPromise) {
   return id
 }
 
-function isCreator(prompt, userId) {
+function isCreator(prompt: any, userId: string) {
   return prompt.created_by === userId || prompt.user_id === userId
 }
 
-function ensureManagerPermission(membership) {
+function ensureManagerPermission(membership: any) {
   return membership && [TEAM_ROLES.ADMIN, TEAM_ROLES.OWNER].includes(membership.role)
 }
 
-export async function GET(request, { params }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const id = await getPromptId(params)
     const userId = await requireUserId()
@@ -58,7 +57,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function POST(request, { params }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const id = await getPromptId(params)
     const userId = await requireUserId()
@@ -92,7 +91,7 @@ export async function POST(request, { params }) {
 
     const payload = await request.json()
 
-    const updateData = { updatedAt: new Date() }
+    const updateData: Record<string, any> = { updatedAt: new Date() }
 
     if (payload.title !== undefined) updateData.title = payload.title
     if (payload.content !== undefined) updateData.content = payload.content
@@ -122,7 +121,7 @@ export async function POST(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const id = await getPromptId(params)
     const userId = await requireUserId()

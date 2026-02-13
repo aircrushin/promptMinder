@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -30,10 +29,10 @@ const CUSTOM_MODEL_OPTION = { value: 'custom', label: 'Custom Model...' };
 const DEFAULT_CUSTOM_ENDPOINT_OPTION = { value: 'custom', label: 'Custom Endpoint...', url: '' };
 const PROVIDER_OPTIONS = providerOptions;
 
-export function PlaygroundSettings({ settings, onSettingsChange }) {
+export function PlaygroundSettings({ settings, onSettingsChange }: { settings: any; onSettingsChange: (settings: any) => void }) {
   const { toast } = useToast();
   const { t } = useLanguage();
-  const pg = t?.playground || {};
+  const pg: Record<string, any> = (t as any)?.playground || {};
   const [showApiKey, setShowApiKey] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [customModel, setCustomModel] = useState('');

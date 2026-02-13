@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { renderHook, act } from '@testing-library/react';
 import { useLazyLoading, useLazyImage, useLazyComponent } from '@/hooks/use-lazy-loading';
 
@@ -12,7 +11,9 @@ mockIntersectionObserver.mockReturnValue({
 window.IntersectionObserver = mockIntersectionObserver;
 
 // Mock Image constructor
-global.Image = class {
+(global as any).Image = class {
+  onload: (() => void) | null = null;
+  src: string = '';
   constructor() {
     setTimeout(() => {
       this.onload && this.onload();

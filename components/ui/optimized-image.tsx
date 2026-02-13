@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import Image from 'next/image';
@@ -6,7 +5,28 @@ import { useState, useEffect, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { getBestImageFormat, generateResponsiveSources } from '@/lib/image-optimization';
 
-const OptimizedImage = forwardRef(({
+interface OptimizedImageProps {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  fill?: boolean;
+  priority?: boolean;
+  quality?: number;
+  placeholder?: 'blur' | 'empty';
+  blurDataURL?: string;
+  sizes?: string;
+  className?: string;
+  fallbackSrc?: string;
+  autoFormat?: boolean;
+  webpSrc?: string;
+  avifSrc?: string;
+  onLoad?: (event: any) => void;
+  onError?: (event: any) => void;
+  [key: string]: any;
+}
+
+const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(({
   src,
   alt,
   width,
@@ -29,7 +49,7 @@ const OptimizedImage = forwardRef(({
   const [imgSrc, setImgSrc] = useState(src);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [bestFormat, setBestFormat] = useState(null);
+  const [bestFormat, setBestFormat] = useState<string | null>(null);
 
   // Generate a simple blur data URL if not provided
   const defaultBlurDataURL = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==';
@@ -44,20 +64,20 @@ const OptimizedImage = forwardRef(({
   // Select the best source based on format support
   const getOptimalSrc = () => {
     if (!autoFormat) return imgSrc;
-    
+
     if (bestFormat === 'avif' && avifSrc) return avifSrc;
     if (bestFormat === 'webp' && webpSrc) return webpSrc;
-    
+
     return imgSrc;
   };
 
-  const handleLoad = (event) => {
+  const handleLoad = (event: any) => {
     setIsLoading(false);
     setHasError(false);
     onLoad?.(event);
   };
 
-  const handleError = (event) => {
+  const handleError = (event: any) => {
     setIsLoading(false);
     setHasError(true);
     if (imgSrc !== fallbackSrc) {
@@ -68,7 +88,7 @@ const OptimizedImage = forwardRef(({
 
   // Generate responsive sizes if not provided
   const responsiveSizes = sizes || (
-    fill 
+    fill
       ? '100vw'
       : width && height
         ? `(max-width: 768px) 100vw, (max-width: 1200px) 50vw, ${width}px`
@@ -108,12 +128,12 @@ const OptimizedImage = forwardRef(({
             {...props}
           />
         </picture>
-        
+
         {/* Loading skeleton */}
         {isLoading && (
           <div className="absolute inset-0 bg-muted animate-pulse" />
         )}
-        
+
         {/* Error indicator */}
         {hasError && (
           <div className="absolute inset-0 bg-muted/50 flex items-center justify-center">
@@ -150,12 +170,12 @@ const OptimizedImage = forwardRef(({
         )}
         {...props}
       />
-      
+
       {/* Loading skeleton */}
       {isLoading && (
         <div className="absolute inset-0 bg-muted animate-pulse" />
       )}
-      
+
       {/* Error indicator */}
       {hasError && (
         <div className="absolute inset-0 bg-muted/50 flex items-center justify-center">

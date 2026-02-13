@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Debouncing Utilities for API Optimization
  * Provides advanced debouncing with cancellation, immediate execution, and cleanup
@@ -322,7 +321,12 @@ export function debounce(func: Function, wait: number, options: any = {}) {
   debounced.flush = flush;
   debounced.pending = pending;
 
-  return debounced;
+  return debounced as ((...args: any[]) => any) & {
+    cancel: typeof cancel;
+    flush: typeof flush;
+    pending: typeof pending;
+    cleanup?: () => void;
+  };
 }
 
 /**

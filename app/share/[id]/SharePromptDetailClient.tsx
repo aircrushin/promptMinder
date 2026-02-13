@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -188,7 +187,7 @@ export default function SharePromptDetailClient({ initialPrompt, id }) {
                       <div className="flex items-center gap-2">
                         <Button
                           onClick={handleCopy}
-                          variant={copied ? "success" : "secondary"}
+                          variant={copied ? "default" : "secondary"}
                           className="relative px-4 py-2 text-sm font-medium"
                           size="sm"
                         >

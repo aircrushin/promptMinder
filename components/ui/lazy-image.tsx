@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { forwardRef } from 'react';
@@ -6,7 +5,23 @@ import { OptimizedImage } from './optimized-image';
 import { useLazyImage } from '@/hooks/use-lazy-loading';
 import { cn } from '@/lib/utils';
 
-const LazyImage = forwardRef(({
+interface LazyImageProps {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  fill?: boolean;
+  className?: string;
+  fallbackSrc?: string;
+  placeholder?: 'blur' | 'empty';
+  rootMargin?: string;
+  threshold?: number;
+  onLoad?: (event: any) => void;
+  onError?: (event: any) => void;
+  [key: string]: any;
+}
+
+const LazyImage = forwardRef<HTMLDivElement, LazyImageProps>(({
   src,
   alt,
   width,
@@ -27,23 +42,23 @@ const LazyImage = forwardRef(({
     triggerOnce: true,
   });
 
-  const handleLoad = (event) => {
+  const handleLoad = (event: any) => {
     onLoad?.(event);
   };
 
-  const handleError = (event) => {
+  const handleError = (event: any) => {
     onError?.(event);
   };
 
   return (
-    <div 
+    <div
       ref={(node) => {
         ref(node);
         if (forwardedRef) {
           if (typeof forwardedRef === 'function') {
             forwardedRef(node);
           } else {
-            forwardedRef.current = node;
+            (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }
         }
       }}
