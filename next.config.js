@@ -151,16 +151,10 @@ const nextConfig = {
   // Enable static optimization
   output: "standalone",
 
-  // modularizeImports removed - Next.js 16 handles this automatically via optimizePackageImports
+  // Turbopack config (required when webpack config exists in Next.js 16)
+  turbopack: {},
 
-  turbopack: {
-    rules: {
-      "*.svg": {
-        loaders: ["@svgr/webpack"],
-        as: "*.js",
-      },
-    }
-  }
+  // modularizeImports removed - Next.js 16 handles this automatically via optimizePackageImports
 };
 
 module.exports = withBundleAnalyzer(withPWA(nextConfig));

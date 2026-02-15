@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Tailwind CSS for styling
 - Lucide React for icons
 - Framer Motion for animations
-- No TypeScript - uses JavaScript with jsconfig.json for path mapping
+- TypeScript (gradual migration, many files still use `// @ts-nocheck`)
 
 ## Commands
 
@@ -61,9 +61,9 @@ prompt-manager/
 │   ├── share/             # Shared prompt pages
 │   ├── sign-in/           # Authentication pages
 │   ├── sign-up/           # Registration pages
-│   ├── layout.js          # Root layout with metadata
-│   ├── page.js            # Landing page
-│   ├── providers.jsx      # Context providers wrapper
+│   ├── layout.tsx         # Root layout with metadata
+│   ├── page.tsx            # Landing page
+│   ├── providers.tsx       # Context providers wrapper
 │   └── globals.css        # Global styles with Tailwind
 ├── components/            # React components
 │   ├── ui/                # Reusable UI components (Button, Card, Dialog, etc.)
@@ -76,26 +76,26 @@ prompt-manager/
 │   ├── performance/       # Performance monitoring components
 │   └── common/            # Shared utility components
 ├── hooks/                 # Custom React hooks
-│   ├── use-prompts.js     # Prompt data fetching
-│   ├── use-prompt-detail.js
-│   ├── use-toast.js       # Toast notifications
-│   ├── use-api-cache.js   # API caching
-│   ├── use-lazy-loading.js
-│   └── use-performance.js
+│   ├── use-prompts.ts     # Prompt data fetching
+│   ├── use-prompt-detail.ts
+│   ├── use-toast.ts       # Toast notifications
+│   ├── use-api-cache.ts   # API caching
+│   ├── use-lazy-loading.ts
+│   └── use-performance.ts
 ├── lib/                   # Utility functions and configurations
-│   ├── api-client.js      # Centralized API client
-│   ├── api-error.js       # Error handling utilities
-│   ├── auth.js            # Authentication helpers
-│   ├── constants.js       # Application constants
-│   ├── utils.js           # Utility functions (cn, etc.)
-│   ├── team-service.js    # Team business logic
-│   ├── team-request.js    # Team context resolution
-│   ├── team-storage.js    # Team localStorage utilities
-│   └── prompts.js         # Prompt utilities
+│   ├── api-client.ts      # Centralized API client
+│   ├── api-error.ts       # Error handling utilities
+│   ├── auth.ts            # Authentication helpers
+│   ├── constants.ts       # Application constants
+│   ├── utils.ts           # Utility functions (cn, etc.)
+│   ├── team-service.ts    # Team business logic
+│   ├── team-request.ts    # Team context resolution
+│   ├── team-storage.ts    # Team localStorage utilities
+│   └── prompts.ts         # Prompt utilities
 ├── contexts/              # React Context providers
-│   ├── LanguageContext.js # Internationalization
-│   ├── team-context.js    # Team state management
-│   └── PerformanceContext.js
+│   ├── LanguageContext.tsx # Internationalization
+│   ├── team-context.tsx    # Team state management
+│   └── PerformanceContext.tsx
 ├── messages/              # Internationalization files
 │   ├── zh.json            # Chinese translations
 │   └── en.json            # English translations
@@ -108,13 +108,13 @@ prompt-manager/
 │   └── backfill_team_data.sql
 ├── __tests__/             # Test files (mirrors source structure)
 ├── __mocks__/             # Jest mocks
-│   └── lucide-react.js    # Icon mocks for testing
+│   └── lucide-react.tsx    # Icon mocks for testing
 ├── public/                # Static assets
 ├── jest.config.js         # Jest configuration
-├── jest.setup.js          # Jest setup and mocks
+├── jest.setup.tsx          # Jest setup and mocks
 ├── tailwind.config.js     # Tailwind CSS configuration
 ├── next.config.js         # Next.js configuration
-└── jsconfig.json          # JavaScript path mapping
+└── tsconfig.json          # TypeScript configuration
 ```
 
 ## Code Style Guidelines
@@ -126,9 +126,11 @@ prompt-manager/
 - Example: `import { apiClient, ApiError } from '@/lib/api-client'`
 
 ### File Types
-- `.jsx` - React components (use 'use client' directive when needed)
-- `.js` - Utility functions, hooks, API clients, and tests
-- No TypeScript - uses JavaScript with jsconfig.json for path mapping
+- `.tsx` - React components (use 'use client' directive when needed)
+- `.ts` - Utility functions, hooks, API clients, API routes, and tests
+- Config files remain `.js`/`.mjs` (jest.config.js, tailwind.config.js, etc.)
+- `tsconfig.json` for TypeScript configuration with path mapping
+- Shared types in `types/index.ts`
 
 ### Formatting
 - 2 space indentation
@@ -141,8 +143,8 @@ prompt-manager/
 - Functions: camelCase (fetchPrompts, handleCopy, validateInput)
 - Constants: UPPER_SNAKE_CASE (PERSONAL_TEAM_ID, DEFAULTS, UI_CONFIG)
 - Hooks: use prefix (usePrompts, useToast, useLanguage)
-- Files: kebab-case (prompt-card.jsx, button.jsx, api-client.js)
-- Test files: *.test.js pattern (Button.test.js, api-client.test.js)
+- Files: kebab-case (prompt-card.tsx, button.tsx, api-client.ts)
+- Test files: *.test.ts / *.test.tsx pattern (Button.test.tsx, api-client.test.ts)
 
 ### React Patterns
 - Use functional components with hooks over class components
@@ -169,13 +171,13 @@ prompt-manager/
 - Coverage threshold: 70% for branches, functions, lines, statements
 
 ### Mock Setup
-Key mocks are configured in `jest.setup.js`:
+Key mocks are configured in `jest.setup.tsx`:
 - Next.js router and navigation
 - Clerk authentication
 - OpenAI API
 - Framer Motion
 - React Hot Toast
-- Lucide React icons (also in `__mocks__/lucide-react.js`)
+- Lucide React icons (also in `__mocks__/lucide-react.tsx`)
 
 ## Multi-Tenant Team Architecture
 
@@ -202,7 +204,7 @@ This is a multi-tenant application where all data belongs to a team. Understandi
 ### Team Context Flow
 
 **Client-side:**
-1. `TeamContext` (contexts/team-context.js) manages active team selection
+1. `TeamContext` (contexts/team-context.tsx) manages active team selection
 2. Active team ID stored in localStorage via `TEAM_STORAGE_KEY`
 3. `null` team ID represents personal workspace
 4. `ApiClient` reads from localStorage and sends `X-Team-Id` header
@@ -246,11 +248,11 @@ const data = teamId
 
 ### Key Team Files
 
-- `lib/team-service.js` - Business logic for team operations (invite, accept, leave, transfer ownership)
-- `lib/team-request.js` - Server-side team context resolution from headers/params
-- `lib/team-storage.js` - Constants and utilities for localStorage team persistence
-- `contexts/team-context.js` - Client-side team state management
-- `components/team/TeamSwitcher.jsx` - UI for switching between teams
+- `lib/team-service.ts` - Business logic for team operations (invite, accept, leave, transfer ownership)
+- `lib/team-request.ts` - Server-side team context resolution from headers/params
+- `lib/team-storage.ts` - Constants and utilities for localStorage team persistence
+- `contexts/team-context.tsx` - Client-side team state management
+- `components/team/TeamSwitcher.tsx` - UI for switching between teams
 
 ## API & Data Layer
 
@@ -289,7 +291,7 @@ const newPrompt = await apiClient.createPrompt(promptData, { teamId: 'xxx' })
 
 ### Custom Hooks
 
-**Data fetching hooks** (`hooks/use-*.js`):
+**Data fetching hooks** (`hooks/use-*.ts`):
 - `usePrompts(filters)` - Fetch and manage prompts
 - `usePromptDetail(id)` - Fetch single prompt
 - Access team context from TeamProvider via components

@@ -7,7 +7,24 @@
       "Bash(node:*)",
       "Bash(npm run build:*)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(python3:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(echo:*)",
+      "Bash(git stash:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(git -C /Users/zhanghuanming/Documents/prj/promptMinder log --oneline -n 10)",
+      "Bash(git -C /Users/zhanghuanming/Documents/prj/promptMinder status --short)",
+      "Bash(pnpm test:ci:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(ls:*)",
+      "Bash(npx eslint:*)",
+      "Bash(head:*)",
+      "Bash(npx next lint:*)",
+      "Bash(pnpm add:*)"
     ]
   }
 }
