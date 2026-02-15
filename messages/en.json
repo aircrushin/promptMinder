@@ -42,6 +42,8 @@
   },
   "hero": {
     "mainTitle": "Simpler Prompt Management",
+    "headingLine1": "Create, version, and share",
+    "headingLine2": "your AI prompts",
     "subtitleStart": "An open-source prompt platform built for ",
     "animatedText": [
       "AI practitioners",
@@ -53,7 +55,7 @@
     "description": "Supports version control, team collaboration, smart categorization, and more.",
     "ctaButton": "Start Exploring",
     "ctaButtonLoggedIn": "Go to Console",
-    "secondaryCta": "Prompt gallery",
+    "secondaryCta": "Browse Collections",
     "quickHighlights": [
       {
         "title": "Version aware",
