@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 // Mock dependencies
 jest.mock('@/hooks/use-toast', () => ({

@@ -4,7 +4,7 @@ import { eq, gte, desc, asc } from 'drizzle-orm'
 import { promptContributions } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 
-export async function GET(request) {
+export async function GET(_request: Request) {
   try {
     // Get all statuses
     const allRows = await db.select({ status: promptContributions.status }).from(promptContributions)

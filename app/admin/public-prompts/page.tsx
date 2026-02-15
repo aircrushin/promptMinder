@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -329,7 +329,7 @@ export default function AdminPublicPromptsPage() {
         description: "内容已复制到剪贴板",
       });
       setTimeout(() => setCopiedId(null), 2000);
-    } catch (error) {
+    } catch {
       toast({
         title: "复制失败",
         description: "无法复制到剪贴板",

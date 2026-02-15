@@ -4,7 +4,7 @@ import { TeamService } from '@/lib/team-service'
 import { handleApiError } from '@/lib/handle-api-error'
 import { requireUserId } from '@/lib/auth'
 import { clerkClient } from '@clerk/nextjs/server'
-import { eq, and, inArray, asc } from 'drizzle-orm'
+import { eq, asc } from 'drizzle-orm'
 import { teamMembers } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +11,6 @@ import { Bug, Lightbulb, ArrowLeft, Send, Loader2, Sparkles } from 'lucide-react
 import { cn } from '@/lib/utils';
 
 export default function FeedbackPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const [type, setType] = useState('feature_request');
   const [description, setDescription] = useState('');

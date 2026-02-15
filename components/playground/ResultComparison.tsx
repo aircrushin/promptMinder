@@ -18,7 +18,6 @@ import {
   XCircle,
   Loader2,
   AlertTriangle,
-  Maximize2,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';

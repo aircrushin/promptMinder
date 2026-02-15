@@ -71,7 +71,7 @@ export default function CreateTeamPage() {
         throw new Error(payload?.error || "创建团队失败");
       }
 
-      const payload = await response.json();
+      await response.json();
       toast({ description: safeT.createTeamPage.createSuccess });
       await refresh();
       router.push("/teams");

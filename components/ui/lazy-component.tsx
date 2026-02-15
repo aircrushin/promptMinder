@@ -24,7 +24,7 @@ const LazyComponent = forwardRef<HTMLDivElement, LazyComponentProps>(({
   threshold = 0.1,
   ...props
 }, forwardedRef) => {
-  const { ref, Component, isLoading, error } = useLazyComponent(importFn, {
+  const { ref, Component, error } = useLazyComponent(importFn, {
     rootMargin,
     threshold,
     triggerOnce: true,

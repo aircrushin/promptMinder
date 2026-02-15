@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Badge } from "@/components/ui/badge";
 
 // 1. 定义 Props 的类型接口
@@ -10,7 +10,7 @@ interface TagFilterProps {
 }
 
 // 2. 在函数参数中使用这个接口
-function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }: TagFilterProps) {
+function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }: TagFilterProps): ReactNode {
   const toggleTag = (tag: string) => {
     if (selectedTags.includes(tag)) {
       onTagSelect(selectedTags.filter(t => t !== tag));
@@ -58,4 +58,6 @@ const arePropsEqual = (prevProps: TagFilterProps, nextProps: TagFilterProps) => 
   return prevProps.onTagSelect === nextProps.onTagSelect;
 };
 
-export default memo(TagFilter, arePropsEqual);
+const MemoizedTagFilter = memo(TagFilter, arePropsEqual);
+export default MemoizedTagFilter;
+export { type TagFilterProps };

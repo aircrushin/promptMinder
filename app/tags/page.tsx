@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal';
 import { Trash2, Pencil, ArrowLeft } from 'lucide-react';
-import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiClient } from '@/lib/api-client';
@@ -47,7 +46,7 @@ const TagsSkeleton = () => {
 
 export default function TagsPage() {
   const router = useRouter();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

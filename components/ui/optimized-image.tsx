@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { getBestImageFormat, generateResponsiveSources } from '@/lib/image-optimization';
+import { getBestImageFormat } from '@/lib/image-optimization';
 
 interface OptimizedImageProps {
   src: string;

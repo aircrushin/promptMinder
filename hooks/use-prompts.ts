@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { apiClient, ApiError } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { DEFAULTS, UI_CONFIG } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 

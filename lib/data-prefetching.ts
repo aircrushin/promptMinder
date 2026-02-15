@@ -4,7 +4,6 @@
  */
 
 import { cachedApiClient } from './cached-api-client';
-import { requestCache } from './api-cache';
 
 class PrefetchStrategy {
   name: string;

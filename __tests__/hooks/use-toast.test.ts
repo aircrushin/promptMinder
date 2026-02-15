@@ -1,4 +1,3 @@
-import React from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { useToast, toast, reducer } from '@/hooks/use-toast'
 
@@ -200,9 +199,8 @@ describe('useToast', () => {
     it('应该处理toast的onOpenChange回调', () => {
       const { result } = renderHook(() => useToast())
       
-      let toastInstance
       act(() => {
-        toastInstance = result.current.toast({ title: '测试toast' })
+        result.current.toast({ title: '测试toast' })
       })
       
       expect(result.current.toasts[0].open).toBe(true)

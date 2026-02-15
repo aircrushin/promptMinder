@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Filter, Clock, Heart } from 'lucide-react';
+import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Clock, Heart } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -655,7 +655,7 @@ export default function PublicPromptsClient() {
                                         pages.push(totalPages);
                                     }
                                     
-                                    return pages.map((page, index) => {
+                                    return pages.map((page) => {
                                         if (typeof page === 'string') {
                                             // 省略号
                                             return (

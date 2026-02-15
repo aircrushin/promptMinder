@@ -19,7 +19,7 @@ const mockPerformance = {
 };
 
 // Mock PerformanceObserver
-const MockPerformanceObserver = jest.fn().mockImplementation((callback: any) => ({
+const MockPerformanceObserver = jest.fn().mockImplementation((_callback: unknown) => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
 })) as any;

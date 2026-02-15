@@ -85,7 +85,7 @@ export default function ContributionDetailPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         toast({
           title: t?.admin?.contributions?.detailPage?.reviewSuccess || "审核成功",
           description:

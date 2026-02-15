@@ -125,7 +125,7 @@ describe('TagFilter', () => {
     expect(mockOnTagSelect).toHaveBeenCalledWith(['React'])
 
     // 重新渲染为选中状态
-    const { rerender } = render(
+    render(
       <TagFilter 
         allTags={['React']}
         selectedTags={['React']}

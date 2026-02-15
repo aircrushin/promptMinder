@@ -5,7 +5,7 @@ import { eq, or, isNull, asc } from 'drizzle-orm'
 import { tags } from '@/drizzle/schema/index'
 import { toSnakeCase } from '@/lib/case-utils'
 
-export async function GET(request) {
+export async function GET(_request: Request) {
   try {
     const { userId } = await auth()
 

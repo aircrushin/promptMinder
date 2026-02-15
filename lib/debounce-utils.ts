@@ -3,11 +3,13 @@
  * Provides advanced debouncing with cancellation, immediate execution, and cleanup
  */
 
+type AnyFn = (...args: any[]) => any;
+
 import { requestDeduplicationService } from './request-deduplication';
 import { cachedApiClient } from './cached-api-client';
 
 class DebouncedFunction {
-  private func: Function;
+  private func: AnyFn;
   private wait: number;
   private options: any;
   private timeout: ReturnType<typeof setTimeout> | null;
@@ -19,7 +21,7 @@ class DebouncedFunction {
   private result: any;
   private cancelled: boolean;
 
-  constructor(func: Function, wait: number, options: any = {}) {
+  constructor(func: AnyFn, wait: number, options: any = {}) {
     this.func = func;
     this.wait = wait;
     this.options = {
@@ -191,7 +193,7 @@ class DebouncedFunction {
 /**
  * Enhanced debounce function with advanced options
  */
-export function debounce(func: Function, wait: number, options: any = {}) {
+export function debounce(func: AnyFn, wait: number, options: any = {}) {
   if (typeof func !== 'function') {
     throw new TypeError('Expected a function');
   }
@@ -332,14 +334,14 @@ export function debounce(func: Function, wait: number, options: any = {}) {
 /**
  * Create a debounced API search function
  */
-export function createDebouncedApiSearch(searchFn: Function, options: any = {}) {
+export function createDebouncedApiSearch(searchFn: AnyFn, options: any = {}) {
   const {
     wait = 300,
     maxWait = 1000,
     leading = false,
     trailing = true,
     deduplication = true,
-    caching = true
+    caching: _caching = true
   } = options;
 
   let currentRequestKey = null;
@@ -393,7 +395,7 @@ export function createDebouncedApiSearch(searchFn: Function, options: any = {}) 
 /**
  * Create a debounced filter function for tags
  */
-export function createDebouncedTagFilter(filterFn: Function, options: any = {}) {
+export function createDebouncedTagFilter(filterFn: AnyFn, options: any = {}) {
   const {
     wait = 200,
     maxWait = 800,

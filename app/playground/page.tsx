@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { extractVariables, replaceVariables } from '@/lib/promptVariables';
-import { Play, Loader2, Sparkles, RotateCcw, Download, Search, FileText, ChevronDown } from 'lucide-react';
+import { Play, Loader2, Sparkles, RotateCcw, Download, Search, FileText } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Select,

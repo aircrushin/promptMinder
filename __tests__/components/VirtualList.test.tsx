@@ -284,7 +284,6 @@ describe('Virtual List Components', () => {
       );
 
       const scrollContainer = container.firstChild as Element;
-      const initialRenderCount = renderSpy.mock.calls.length;
 
       // Simulate scrolling to different positions
       fireEvent.scroll(scrollContainer, { target: { scrollTop: 500 } });

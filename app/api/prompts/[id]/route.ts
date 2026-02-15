@@ -32,9 +32,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       allowMissingTeam: true,
     })
 
-    let membership = null
     if (teamId) {
-      membership = await teamService.requireMembership(teamId, userId)
+      await teamService.requireMembership(teamId, userId)
     }
 
     const conditions = [eq(prompts.id, id)]

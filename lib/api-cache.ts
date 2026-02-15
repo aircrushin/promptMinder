@@ -203,7 +203,7 @@ class RequestCache {
     let expiredEntries = 0;
     let totalAccessCount = 0;
     
-    for (const [key, entry] of this.cache) {
+    for (const [_key, entry] of this.cache) {
       totalEntries++;
       totalAccessCount += entry.accessCount;
       
@@ -228,7 +228,6 @@ class RequestCache {
    * Cleanup expired entries
    */
   cleanup() {
-    const now = Date.now();
     const expiredKeys = [];
     
     for (const [key, entry] of this.cache) {

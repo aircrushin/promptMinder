@@ -5,8 +5,6 @@
  * used in the Playground feature.
  */
 
-import React from 'react';
-
 // Mock crypto.randomUUID before any imports
 let uuidCounter = 0;
 Object.defineProperty(global, 'crypto', {

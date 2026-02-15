@@ -59,7 +59,7 @@ export class ApiClient {
       let data = null;
       try {
         data = await response.json();
-      } catch (jsonError) {
+      } catch {
         // Ignore JSON parse error
       }
       if (!response.ok) {

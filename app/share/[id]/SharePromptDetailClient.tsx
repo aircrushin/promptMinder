@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select"
 
 export default function SharePromptDetailClient({ initialPrompt, id }) {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { isSignedIn, userId } = useAuth();
   const { toast } = useToast();
   const { copy, copied } = useClipboard();

@@ -18,7 +18,7 @@ const LanguageContext = createContext({
 // 2. 创建 Provider 组件
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('zh'); // 默认中文
-  const [mounted, setMounted] = useState(false);
+  const [_mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // 确保在客户端环境中运行

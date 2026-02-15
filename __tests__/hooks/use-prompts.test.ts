@@ -1,10 +1,7 @@
-import React from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { usePrompts, usePromptSearch } from '@/hooks/use-prompts'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
-import { DEFAULTS, UI_CONFIG } from '@/lib/constants'
-
 // Mock dependencies
 jest.mock('@/lib/api-client')
 jest.mock('@/hooks/use-toast')
@@ -454,7 +451,7 @@ describe('usePrompts', () => {
     })
 
     it('应该返回防抖后的查询', async () => {
-      const { result, rerender } = renderHook(
+      const { result } = renderHook(
         ({ query }) => usePromptSearch(mockPrompts, query, []),
         { initialProps: { query: 'React' } }
       )

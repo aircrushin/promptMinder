@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 
 /**
  * VirtualList component for efficiently rendering large lists
@@ -60,11 +60,6 @@ export function VirtualList({
     }
   }, [itemHeight]);
 
-  // Scroll to top
-  const scrollToTop = useCallback(() => {
-    scrollToItem(0);
-  }, [scrollToItem]);
-
   return (
     <div
       ref={containerRef}
@@ -85,7 +80,7 @@ export function VirtualList({
             right: 0,
           }}
         >
-          {visibleItems.map(({ item, index, originalIndex }) => (
+          {visibleItems.map(({ item, originalIndex }) => (
             <div
               key={originalIndex}
               style={{

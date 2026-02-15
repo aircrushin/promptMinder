@@ -4,10 +4,8 @@ import { memo, useCallback } from 'react';
 import { VirtualGrid } from '@/components/ui/virtual-list';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Share2, Trash2, ChevronDown } from "lucide-react";
+import { Copy, Share2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Image from 'next/image';
-import Link from 'next/link';
 import { extractVariables } from "@/lib/promptVariables";
 import { useClipboard } from '@/lib/clipboard';
 

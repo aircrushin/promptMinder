@@ -61,7 +61,7 @@ export function useClipboard(successMessage = '已复制到剪贴板', errorMess
         });
         setTimeout(() => setCopied(false), 2000);
       },
-      (error) => {
+      () => {
         toast({
           description: errorMessage,
           variant: 'destructive',

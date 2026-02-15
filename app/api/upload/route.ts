@@ -44,7 +44,7 @@ export async function POST(request) {
       .toBuffer()
 
     const fileName = `${baseFileName}.jpg`
-    const { data, error } = await storage.from('cover').upload(fileName, compressedImageBuffer, { contentType: 'image/jpeg' })
+    const { error } = await storage.from('cover').upload(fileName, compressedImageBuffer, { contentType: 'image/jpeg' })
 
     if (error) {
       throw error

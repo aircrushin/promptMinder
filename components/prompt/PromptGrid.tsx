@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -201,9 +202,9 @@ export function PromptGrid({
                 </div>
                 {!isPersonal && latestPrompt.creator && (
                   <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-border/50" title={`Created by ${latestPrompt.creator.fullName || latestPrompt.creator.email}`}>
-                    <div className="h-4 w-4 rounded-full overflow-hidden bg-secondary ring-1 ring-border/50 flex-shrink-0">
+                    <div className="h-4 w-4 rounded-full overflow-hidden bg-secondary ring-1 ring-border/50 flex-shrink-0 relative">
                         {latestPrompt.creator.imageUrl ? (
-                            <img src={latestPrompt.creator.imageUrl} alt="" className="h-full w-full object-cover" />
+                            <Image src={latestPrompt.creator.imageUrl} alt="" className="h-full w-full object-cover" fill sizes="16px" />
                         ) : (
                             <div className="h-full w-full flex items-center justify-center text-[10px] font-medium">
                                 {(latestPrompt.creator.firstName?.[0] || latestPrompt.creator.email?.[0] || '?').toUpperCase()}

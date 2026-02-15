@@ -3,7 +3,7 @@
  * Displays comprehensive performance metrics and analytics
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { usePerformanceMetrics, useMemoryMonitor, useBundleMetrics } from '../../hooks/use-performance';
 import { Card } from '../ui/card';
 

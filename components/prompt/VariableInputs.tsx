@@ -4,17 +4,10 @@ import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  analyzePromptVariables, 
-  validateVariableValue, 
-  generateVariableExamples 
-} from '@/lib/promptVariables';
+import { analyzePromptVariables } from '@/lib/promptVariables';
 import { 
   Variable, 
-  Sparkles, 
   AlertCircle 
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -25,10 +18,6 @@ const MotionDiv = dynamic(() => import('framer-motion').then(mod => mod.motion.d
   ssr: false
 });
 
-const AnimatePresence = dynamic(() => import('framer-motion').then(mod => mod.AnimatePresence), {
-  loading: () => null,
-  ssr: false
-});
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -96,19 +85,6 @@ export default function VariableInputs({
         return newErrors;
       });
     }
-  };
-
-  const fillWithExamples = () => {
-    if (!variableData) return;
-
-    const examples = generateVariableExamples(variableData.variables.map(v => v.name));
-    setVariableValues(examples);
-    setValidationErrors({});
-    
-    toast({
-      description: t?.variableInputs?.exampleFilled || "示例数据已填充。",
-      duration: 2000,
-    });
   };
 
   const renderVariableInput = (variable: any) => {

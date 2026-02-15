@@ -90,7 +90,7 @@ export async function GET(request) {
         { error: '权限已失效' },
         { status: 403 }
       );
-    } catch (e) {
+    } catch {
       return NextResponse.json(
         { error: 'Token 无效' },
         { status: 401 }

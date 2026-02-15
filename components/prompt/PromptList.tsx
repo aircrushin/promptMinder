@@ -14,7 +14,7 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { useClipboard } from '@/lib/clipboard';
 
-function PromptList({ prompts, onDelete, onShare }: { prompts: any[]; onDelete?: (id: string) => void; onShare?: (id: string) => void }) {
+function PromptList({ prompts, onDelete }: { prompts: any[]; onDelete?: (id: string) => void; onShare?: (id: string) => void }) {
   const { toast } = useToast();
   const { copy } = useClipboard();
   const [selectedVersions, setSelectedVersions] = useState<any[] | null>(null);

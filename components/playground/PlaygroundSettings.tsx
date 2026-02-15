@@ -157,14 +157,6 @@ export function PlaygroundSettings({ settings, onSettingsChange }: { settings: a
     !settings.model ||
     !providerModels.some((m) => m.value === settings.model);
 
-  const isCustomEndpoint = (() => {
-    if (customEndpoint !== '') return true;
-    const preset = endpointOptions.find(
-      (endpoint) => endpoint.url === settings.baseURL && endpoint.value !== 'custom'
-    );
-    return !preset;
-  })();
-
   const endpointSelectValue = (() => {
     if (customEndpoint !== '') return 'custom';
     const preset = endpointOptions.find(

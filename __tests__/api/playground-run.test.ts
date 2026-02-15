@@ -83,7 +83,7 @@ describe('POST /api/playground/run', () => {
         settings: { apiKey: '' }, // Explicitly empty
       });
       const response = await POST(request);
-      const data = await response.json();
+      await response.json();
 
       // When no API key is provided and no default exists, should return 400
       // But if a default key exists in env, it might succeed or fail differently

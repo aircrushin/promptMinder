@@ -45,7 +45,7 @@ function SuccessParticles({
 function ParticleButton({
     children,
     onClick,
-    onSuccess,
+    onSuccess: _onSuccess,
     successDuration = 1000,
     className,
     ...props

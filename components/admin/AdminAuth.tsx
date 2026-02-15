@@ -77,13 +77,6 @@ export default function AdminAuth({ children }) {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_email");
-    setIsVerified(false);
-    setEmail("");
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

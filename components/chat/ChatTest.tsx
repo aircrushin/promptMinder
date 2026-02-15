@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Settings2, Send, Check, Copy, HelpCircle, Trash2, User, Bot, Edit3, RotateCw } from "lucide-react"
+import { Settings2, Send, Check, Copy, HelpCircle, Trash2, Edit3, RotateCw } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -23,7 +23,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { useLanguage } from '@/contexts/LanguageContext';
 import { replaceVariables } from '@/lib/promptVariables';
@@ -89,7 +88,7 @@ const getSavedSettings = () => {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -103,7 +102,7 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
   const { toast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  const [, setIsSending] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
   // Provider-related state
@@ -970,7 +969,7 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
                           <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-pre:my-0 prose-headings:mb-2 prose-headings:mt-4 prose-li:my-0.5">
                             <ReactMarkdown
                               components={{
-                                code({ node, inline, className, children, ...props }: any) {
+                                code({ inline, className, children, ...props }: any) {
                                   const match = /language-(\w+)/.exec(className || '');
                                   return !inline && match ? (
                                     <div className="not-prose rounded-md my-3 bg-black/90 relative group">

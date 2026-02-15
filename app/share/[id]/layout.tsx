@@ -1,5 +1,3 @@
-import { notFound } from "next/navigation";
-
 export async function generateMetadata({ params }) {
   const { id } = (await params) || {};
   if (!id) return {};
@@ -31,7 +29,7 @@ export async function generateMetadata({ params }) {
         images: ["/main-page.png"],
       },
     };
-  } catch (e) {
+  } catch {
     return {};
   }
 }
