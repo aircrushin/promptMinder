@@ -58,16 +58,15 @@ export function Header() {
         {/* Right: Nav → Language → Auth */}
         <div className="flex items-center gap-3">
           <SignedOut>
-            <Link
-              href="/sign-in"
-              className="hidden text-sm font-medium text-gray-600 transition-colors duration-150 hover:text-gray-900 sm:block"
-            >
-              {t.auth.login}
+            <Link href="/sign-in">
+              <Button variant="ghost" className="hidden px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 sm:inline-flex">
+                {t.auth.login}
+              </Button>
             </Link>
             <Link href="/sign-up">
-              <button className="rounded-md border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors duration-150 hover:border-gray-400 hover:text-gray-900">
+              <Button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30">
                 {t.auth.signup}
-              </button>
+              </Button>
             </Link>
           </SignedOut>
 
