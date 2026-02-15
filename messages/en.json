@@ -56,6 +56,12 @@
     "ctaButton": "Start Exploring",
     "ctaButtonLoggedIn": "Go to Console",
     "secondaryCta": "Browse Collections",
+    "trustText": "2,300+ teams trust PromptMinder",
+    "trustBadges": {
+      "openSource": "Open Source",
+      "secure": "Secure",
+      "teamReady": "Team Ready"
+    },
     "quickHighlights": [
       {
         "title": "Version aware",

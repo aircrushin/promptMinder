@@ -56,6 +56,12 @@
     "ctaButton": "免费开始使用",
     "ctaButtonLoggedIn": "进入控制台",
     "secondaryCta": "浏览合集",
+    "trustText": "2,300+ 团队正在使用 PromptMinder",
+    "trustBadges": {
+      "openSource": "开源免费",
+      "secure": "安全可靠",
+      "teamReady": "团队协作"
+    },
     "quickHighlights": [
       {
         "title": "版本感知",

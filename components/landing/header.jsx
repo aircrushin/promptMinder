@@ -55,55 +55,8 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Center: Navigation (signed in only) */}
-        <SignedIn>
-          <NavigationMenu className="hidden sm:flex">
-            <NavigationMenuList className="flex items-center gap-1">
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/prompts"
-                    className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
-                      pathname === '/prompts'
-                        ? 'text-gray-900'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    <Library className="h-4 w-4" />
-                    {t.header.manage}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/public"
-                    className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
-                      pathname === '/public'
-                        ? 'text-gray-900'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                    {t.header.public}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </SignedIn>
-
-        {/* Right: Language toggle + Auth */}
+        {/* Right: Nav → Language → Auth */}
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleLanguage}
-            className="h-9 w-9 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <Languages className="h-[18px] w-[18px]" />
-          </Button>
-
           <SignedOut>
             <Link
               href="/sign-in"
@@ -117,6 +70,40 @@ export function Header() {
               </button>
             </Link>
           </SignedOut>
+
+          <SignedIn>
+            <Link
+              href="/prompts"
+              className={`hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 sm:flex ${
+                pathname === '/prompts'
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              <Library className="h-4 w-4" />
+              {t.header.manage}
+            </Link>
+            <Link
+              href="/public"
+              className={`hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 sm:flex ${
+                pathname === '/public'
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              {t.header.public}
+            </Link>
+          </SignedIn>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            className="h-9 w-9 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          >
+            <Languages className="h-[18px] w-[18px]" />
+          </Button>
 
           <SignedIn>
             <UserButton
