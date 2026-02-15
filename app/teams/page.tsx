@@ -200,8 +200,7 @@ export default function TeamsPage() {
     } else {
       setTeamDetails(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTeamId, refreshKey]);
+  }, [activeTeamId, refreshKey]);  
 
   const handleDeleteDialogChange = useCallback((nextOpen) => {
     setDeleteOpen(nextOpen);

@@ -31,7 +31,7 @@ global.HTMLCanvasElement.prototype.toDataURL = mockToDataURL;
 
   constructor() {
     setTimeout(() => {
-      this.onload && this.onload();
+      if (this.onload) this.onload();
     }, 0);
   }
 

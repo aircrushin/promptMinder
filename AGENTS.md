@@ -23,7 +23,7 @@ This file provides guidelines for agentic coding agents working in this reposito
 - Tailwind CSS for styling
 - Lucide React for icons
 - Framer Motion for animations
-- No TypeScript - uses JavaScript with jsconfig.json for path mapping
+- TypeScript (gradual migration, many files still use `// @ts-nocheck`)
 
 ## Commands
 
@@ -115,7 +115,7 @@ prompt-manager/
 ├── jest.setup.js          # Jest setup and mocks
 ├── tailwind.config.js     # Tailwind CSS configuration
 ├── next.config.js         # Next.js configuration
-└── jsconfig.json          # JavaScript path mapping
+└── tsconfig.json          # TypeScript configuration
 ```
 
 ## Code Style Guidelines
@@ -129,7 +129,7 @@ prompt-manager/
 ### File Types
 - `.jsx` - React components (use 'use client' directive when needed)
 - `.js` - Utility functions, hooks, API clients, and tests
-- No TypeScript - uses JavaScript with jsconfig.json for path mapping
+- TypeScript (gradual migration, many files still use `// @ts-nocheck`)
 
 ### Formatting
 - 2 space indentation

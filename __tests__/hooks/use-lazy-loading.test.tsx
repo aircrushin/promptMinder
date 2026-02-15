@@ -16,7 +16,7 @@ window.IntersectionObserver = mockIntersectionObserver;
   src: string = '';
   constructor() {
     setTimeout(() => {
-      this.onload && this.onload();
+      if (this.onload) this.onload();
     }, 100);
   }
 };

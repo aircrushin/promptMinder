@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 
     const normalizedProvider = (provider || 'openai').toLowerCase()
     let finalApiKey = apiKey || DEFAULT_API_KEY
-    let resolvedBaseURL = baseURL || PROVIDER_BASE_URLS[normalizedProvider] || DEFAULT_BASE_URL
+    const resolvedBaseURL = baseURL || PROVIDER_BASE_URLS[normalizedProvider] || DEFAULT_BASE_URL
 
     if (useStoredKey) {
       if (normalizedProvider === 'custom') {
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
     const isClaude = normalizedProvider === 'claude'
 
     const messages = []
-    let systemMessage = systemPrompt
+    const systemMessage = systemPrompt
     let userMessage = userPrompt
 
     if (!isClaude) {
