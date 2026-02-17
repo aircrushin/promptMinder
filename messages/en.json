@@ -1138,5 +1138,28 @@
     "userPromptPlaceholder": "Enter user message...",
     "importButton": "Import",
     "versions": "versions"
+  },
+  "agent": {
+    "welcome": {
+      "title": "Prompt Agent",
+      "subtitle": "Prompt Intelligence Assistant",
+      "description": "Your intelligent assistant for crafting, optimizing, and refining AI prompts.",
+      "suggestions": {
+        "chatbot": "Help me write a chatbot prompt",
+        "optimize": "Optimize my existing prompt",
+        "tips": "Explain prompt engineering tips",
+        "codeReview": "Create a code review prompt"
+      }
+    },
+    "chat": {
+      "inputPlaceholder": "Message Prompt Agent...",
+      "keyboardHint": "Press Enter to send, Shift+Enter for new line",
+      "clearConversation": "Clear conversation",
+      "thinking": "Thinking...",
+      "you": "You",
+      "agentName": "Prompt Agent",
+      "copied": "Copied to clipboard",
+      "copyFailed": "Failed to copy"
+    }
   }
 }

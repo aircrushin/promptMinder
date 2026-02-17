@@ -1160,5 +1160,28 @@
     "userPromptPlaceholder": "输入用户消息...",
     "importButton": "导入",
     "versions": "个版本"
+  },
+  "agent": {
+    "welcome": {
+      "title": "Prompt Agent",
+      "subtitle": "提示词智能助手",
+      "description": "帮助您创建、优化和完善 AI 提示词的智能助手",
+      "suggestions": {
+        "chatbot": "帮我写一个聊天机器人提示词",
+        "optimize": "优化我现有的提示词",
+        "tips": "讲解提示词工程技巧",
+        "codeReview": "创建代码审查提示词"
+      }
+    },
+    "chat": {
+      "inputPlaceholder": "给提示词助手发送消息...",
+      "keyboardHint": "按 Enter 发送，Shift+Enter 换行",
+      "clearConversation": "清空对话",
+      "thinking": "思考中...",
+      "you": "您",
+      "agentName": "提示词助手",
+      "copied": "已复制到剪贴板",
+      "copyFailed": "复制失败"
+    }
   }
 }
