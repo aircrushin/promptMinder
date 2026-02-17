@@ -25,6 +25,7 @@
     "db:studio": "drizzle-kit studio --config drizzle.config.mjs"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.88",
     "@anthropic-ai/claude-agent-sdk": "^0.1.76",
     "@anthropic-ai/sdk": "^0.32.1",
     "@clerk/localizations": "^3.9.5",
@@ -52,6 +53,7 @@
     "@radix-ui/react-visually-hidden": "^1.2.0",
     "@supabase/supabase-js": "^2.46.2",
     "@vercel/analytics": "^1.4.1",
+    "ai": "^6.0.86",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "deepagents": "^1.5.0",
