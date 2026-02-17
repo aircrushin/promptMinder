@@ -4,7 +4,7 @@ const LANGGRAPH_PROJECT_ID = '7607669951100354600';
 export async function POST(request) {
   const { text, sessionId } = await request.json();
 
-  const token = process.env.NEXT_PUBLIC_LANGGRAPH_TOKEN;
+  const token = process.env.LANGGRAPH_TOKEN;
   if (!token) {
     return new Response(JSON.stringify({ error: 'LANGGRAPH_TOKEN not configured' }), {
       status: 500,
