@@ -43,6 +43,7 @@ import {
   Loader2,
   X,
   Tag,
+  Pencil,
 } from 'lucide-react';
 
 // ============================================================================
@@ -738,6 +739,46 @@ function ToolCallItem({ toolCall }) {
   );
 }
 
+function UserMessageActions({ content, onEditResend }) {
+  const { toast } = useToast();
+  const { t } = useLanguage();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      toast({ description: t.agent.chat.copied });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ description: t.agent.chat.copyFailed, variant: 'destructive' });
+    }
+  }, [content, toast, t.agent.chat.copied, t.agent.chat.copyFailed]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex items-center gap-0.5 mt-2"
+    >
+      <button
+        onClick={handleCopy}
+        className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-all duration-200"
+        title={t.agent.chat.copy}
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+      </button>
+      <button
+        onClick={onEditResend}
+        className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-all duration-200"
+        title={t.agent.chat.editResend}
+      >
+        <Pencil className="h-3.5 w-3.5" />
+      </button>
+    </motion.div>
+  );
+}
+
 function MessageActions({ content, onRegenerate, showRegenerate }) {
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -805,7 +846,7 @@ function MessageActions({ content, onRegenerate, showRegenerate }) {
   );
 }
 
-function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user, toolCalls = [], onImport }) {
+function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user, toolCalls = [], onImport, onEditResend, messageIndex }) {
   const isUser = message.role === 'user';
   const { t } = useLanguage();
 
@@ -824,6 +865,7 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user,
 
   const showStreamingIndicator = isStreaming && isLast && message.role === 'assistant';
   const showActions = !isUser && !isStreaming && textContent;
+  const showUserActions = isUser && textContent && !isStreaming;
   const showRegenerate = isLast && status === 'ready';
   const showToolCalls = toolCalls.length > 0;
 
@@ -909,6 +951,12 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user,
               content={textContent}
               onRegenerate={onRegenerate}
               showRegenerate={showRegenerate}
+            />
+          )}
+          {showUserActions && (
+            <UserMessageActions
+              content={textContent}
+              onEditResend={() => onEditResend?.(messageIndex, textContent)}
             />
           )}
         </div>
@@ -1261,6 +1309,14 @@ export default function AgentChat() {
     setStreamPhase('idle');
   }, [setMessages]);
 
+  const handleEditResend = useCallback((messageIndex, content) => {
+    setMessages(prev => prev.slice(0, messageIndex));
+    setToolCallsMap({});
+    setStreamPhase('idle');
+    setInput(content);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  }, [setMessages]);
+
   const handleImportPrompt = useCallback(async ({ title, content, description, tags }) => {
     try {
       await apiClient.createPrompt(
@@ -1302,6 +1358,8 @@ export default function AgentChat() {
                   user={user}
                   toolCalls={index === rawMessages.length - 1 && message.role === 'assistant' ? currentToolCalls : []}
                   onImport={handleImportPrompt}
+                  onEditResend={handleEditResend}
+                  messageIndex={index}
                 />
               ))}
             </AnimatePresence>
