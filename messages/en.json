@@ -1160,7 +1160,9 @@
       "you": "You",
       "agentName": "Prompt Agent",
       "copied": "Copied to clipboard",
-      "copyFailed": "Failed to copy"
+      "copyFailed": "Failed to copy",
+      "editResend": "Edit and resend",
+      "copy": "Copy"
     }
   }
 }
