@@ -2,30 +2,47 @@ import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth.js'
 import { db } from '@/lib/db.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
+import { resolveTeamContext } from '@/lib/team-request.js'
 import { clerkClient } from '@clerk/nextjs/server'
-import { eq, and, desc, inArray, count as countFn } from 'drizzle-orm'
+import { eq, or, and, desc, inArray, count as countFn } from 'drizzle-orm'
 import { favorites, prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request) {
   try {
     const userId = await requireUserId()
+    const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true
+    })
+
+    if (teamId) {
+      await teamService.requireMembership(teamId, userId)
+    }
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = parseInt(searchParams.get('limit') || '20', 10)
     const offset = (page - 1) * limit
 
+    // Build team filter for prompts
+    const teamCondition = teamId
+      ? eq(prompts.teamId, teamId)
+      : or(eq(prompts.createdBy, userId), eq(prompts.userId, userId))
+
+    // Join favorites with prompts to filter by team and count correctly
     const [favRows, countResult] = await Promise.all([
       db.select({ promptId: favorites.promptId })
         .from(favorites)
-        .where(eq(favorites.userId, userId))
+        .innerJoin(prompts, eq(favorites.promptId, prompts.id))
+        .where(and(eq(favorites.userId, userId), teamCondition))
         .orderBy(desc(favorites.createdAt))
         .limit(limit)
         .offset(offset),
       db.select({ value: countFn() })
         .from(favorites)
-        .where(eq(favorites.userId, userId))
+        .innerJoin(prompts, eq(favorites.promptId, prompts.id))
+        .where(and(eq(favorites.userId, userId), teamCondition))
     ])
 
     const total = countResult[0]?.value || 0
