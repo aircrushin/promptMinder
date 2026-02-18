@@ -37,7 +37,6 @@ import {
   AlertCircle,
   Wrench,
   ChevronRight,
-  Clock,
   Terminal,
   Download,
   Loader2,
@@ -984,9 +983,13 @@ function WelcomeScreen({ onSuggestionClick }) {
       >
         {/* Logo */}
         <div className="relative mb-6">
-          <div className="absolute inset-0 bg-zinc-400 rounded-3xl blur-2xl opacity-20" />
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-zinc-900 shadow-xl shadow-zinc-900/25">
-            <Sparkles className="h-10 w-10 text-white" />
+          <div className="absolute inset-0 bg-amber-500/20 rounded-3xl blur-2xl" />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 shadow-xl shadow-slate-900/25 ring-1 ring-amber-500/30 overflow-hidden">
+            <img 
+              src="/decant-logo.svg" 
+              alt="Decant" 
+              className="h-16 w-16 object-contain"
+            />
           </div>
         </div>
 
@@ -1107,8 +1110,13 @@ function StreamLoadingIndicator() {
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                    className="flex items-center justify-center"
                   >
-                    <Sparkles className="h-5 w-5 text-white" />
+                    <img 
+                      src="/decant-logo.svg" 
+                      alt="Decant" 
+                      className="h-5 w-5 object-contain"
+                    />
                   </motion.div>
                 </motion.div>
                 <motion.span

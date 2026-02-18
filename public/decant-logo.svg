@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <!-- Vintage gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="50%" style="stop-color:#16213e"/>
+      <stop offset="100%" style="stop-color:#0f3460"/>
+    </linearGradient>
+    
+    <!-- Gold gradient for accents -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4af37"/>
+      <stop offset="50%" style="stop-color:#f4d03f"/>
+      <stop offset="100%" style="stop-color:#b8860b"/>
+    </linearGradient>
+    
+    <!-- Burgundy/wine gradient -->
+    <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#722f37"/>
+      <stop offset="50%" style="stop-color:#8b3a3a"/>
+      <stop offset="100%" style="stop-color:#5c1a1b"/>
+    </linearGradient>
+    
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="100" height="100" rx="20" fill="url(#bgGradient)"/>
+  
+  <!-- Ornate border frame -->
+  <rect x="5" y="5" width="90" height="90" rx="16" fill="none" stroke="url(#goldGradient)" stroke-width="1.5"/>
+  <rect x="8" y="8" width="84" height="84" rx="14" fill="none" stroke="url(#goldGradient)" stroke-width="0.5" opacity="0.5"/>
+  
+  <!-- Corner ornaments -->
+  <circle cx="15" cy="15" r="3" fill="url(#goldGradient)"/>
+  <circle cx="85" cy="15" r="3" fill="url(#goldGradient)"/>
+  <circle cx="15" cy="85" r="3" fill="url(#goldGradient)"/>
+  <circle cx="85" cy="85" r="3" fill="url(#goldGradient)"/>
+  
+  <!-- Decorative corner scrolls -->
+  <path d="M15 25 Q15 15 25 15" fill="none" stroke="url(#goldGradient)" stroke-width="1" opacity="0.6"/>
+  <path d="M75 15 Q85 15 85 25" fill="none" stroke="url(#goldGradient)" stroke-width="1" opacity="0.6"/>
+  <path d="M15 75 Q15 85 25 85" fill="none" stroke="url(#goldGradient)" stroke-width="1" opacity="0.6"/>
+  <path d="M75 85 Q85 85 85 75" fill="none" stroke="url(#goldGradient)" stroke-width="1" opacity="0.6"/>
+  
+  <!-- Main Decanter/Flask Icon -->
+  <g transform="translate(50, 52)" filter="url(#shadow)">
+    <!-- Flask body -->
+    <path d="M-12 -20 
+             L-12 -8 
+             Q-20 0 -20 15 
+             Q-20 28 0 28 
+             Q20 28 20 15 
+             Q20 0 12 -8 
+             L12 -20 
+             Z" 
+          fill="url(#wineGradient)" 
+          stroke="url(#goldGradient)" 
+          stroke-width="1.5"/>
+    
+    <!-- Flask neck -->
+    <rect x="-6" y="-28" width="12" height="10" rx="1" fill="#2d2d44" stroke="url(#goldGradient)" stroke-width="1"/>
+    
+    <!-- Flask rim -->
+    <ellipse cx="0" cy="-28" rx="7" ry="2" fill="none" stroke="url(#goldGradient)" stroke-width="1.5"/>
+    
+    <!-- Liquid level -->
+    <ellipse cx="0" cy="-5" rx="14" ry="4" fill="#a03030" opacity="0.8"/>
+    
+    <!-- Inner highlight -->
+    <path d="M-8 5 Q-12 15 -5 22" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+    
+    <!-- Decorative bands on flask -->
+    <path d="M-18 8 Q0 12 18 8" fill="none" stroke="url(#goldGradient)" stroke-width="0.8" opacity="0.6"/>
+    <path d="M-19 15 Q0 19 19 15" fill="none" stroke="url(#goldGradient)" stroke-width="0.8" opacity="0.6"/>
+  </g>
+  
+  <!-- Spark/star accents -->
+  <g fill="url(#goldGradient)">
+    <circle cx="30" cy="35" r="1.5"/>
+    <circle cx="70" cy="40" r="1"/>
+    <circle cx="25" cy="60" r="1"/>
+    <circle cx="72" cy="65" r="1.5"/>
+  </g>
+  
+  <!-- Letter D monogram at bottom -->
+  <text x="50" y="82" 
+        font-family="Georgia, serif" 
+        font-size="8" 
+        font-weight="bold" 
+        fill="url(#goldGradient)" 
+        text-anchor="middle" 
+        letter-spacing="2">D</text>
+</svg>

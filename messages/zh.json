@@ -1166,14 +1166,14 @@
   },
   "agent": {
     "welcome": {
-      "title": "Prompt Agent",
-      "subtitle": "提示词智能助手",
+      "title": "Decant",
+      "subtitle": "提示词精炼师",
       "description": "帮助您创建、优化和完善 AI 提示词的智能助手",
       "suggestions": {
-        "creativeContent": "请帮我写一段小红书文案",
-        "codingAssistant": "检查这段代码有没有问题",
-        "dataAnalysis": "请分析这份销售数据",
-        "onlineEducation": "请解释这个概念"
+        "creativeContent": "小红书文案生成器",
+        "codingAssistant": "React 前端工程师",
+        "dataAnalysis": "数据分析师",
+        "onlineEducation": "万物解释器"
       }
     },
     "chat": {

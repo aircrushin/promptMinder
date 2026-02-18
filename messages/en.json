@@ -1145,14 +1145,14 @@
   },
   "agent": {
     "welcome": {
-      "title": "Prompt Agent",
+      "title": "Decant",
       "subtitle": "Prompt Intelligence Assistant",
       "description": "Your intelligent assistant for crafting, optimizing, and refining AI prompts.",
       "suggestions": {
-        "creativeContent": "Please help me write a Xiaohongshu post",
-        "codingAssistant": "Check if there are any issues with this code",
-        "dataAnalysis": "Please analyze this sales data",
-        "onlineEducation": "Please explain this concept"
+        "creativeContent": "Xiaohongshu Post Generator",
+        "codingAssistant": "React Frontend Engineer",
+        "dataAnalysis": "Data Analyst",
+        "onlineEducation": "Everything Explainer"
       }
     },
     "chat": {
