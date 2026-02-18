@@ -449,7 +449,8 @@
     "cancel": "Cancel",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
-    "applyOptimization": "Apply Optimization Result"
+    "applyOptimization": "Apply Optimization Result",
+    "agentEntry": "Open AI Agent"
   },
   "promptDetailPage": {
     "backToList": "Back to Prompt List",
