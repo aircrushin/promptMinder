@@ -421,6 +421,8 @@
     "variableTip": "💡 Tip: Use {{variableName}} syntax to create dynamic variables",
     "creating": "Creating...",
     "create": "Create",
+    "agentEntry": "Open AI Agent",
+    "optimizeButton": "Optimize Prompt",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
     "applyOptimization": "Apply Optimization Result"
@@ -450,7 +452,8 @@
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
     "applyOptimization": "Apply Optimization Result",
-    "agentEntry": "Open AI Agent"
+    "agentEntry": "Open AI Agent",
+    "optimizeButton": "Optimize"
   },
   "promptDetailPage": {
     "backToList": "Back to Prompt List",

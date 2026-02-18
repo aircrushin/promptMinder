@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, PlusCircle, Wand2 } from "lucide-react";
+import { Bot, Loader2, PlusCircle, Wand2 } from "lucide-react";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 const CreatableSelect = dynamic(() => import("react-select/creatable"), {
@@ -78,22 +79,39 @@ export function NewPromptDialog({
                 value={prompt.content}
                 onChange={(event) => onFieldChange("content", event.target.value)}
                 placeholder={copy.formContentPlaceholder}
-                className="min-h-[200px] pr-10 focus-visible:ring-primary/30"
+                className="min-h-[200px] pr-20 focus-visible:ring-primary/30"
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-2 hover:bg-accent hover:text-primary"
-                onClick={onOptimize}
-                disabled={!prompt.content.trim() || isOptimizing}
-              >
-                {isOptimizing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Wand2 className="h-4 w-4" />
-                )}
-              </Button>
+              <div className="absolute right-2 top-2 flex gap-1">
+                <Link href="/agent">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-accent hover:text-primary"
+                    title={copy.agentEntry}
+                    aria-label={copy.agentEntry}
+                  >
+                    <Bot className="h-4 w-4" />
+                    <span className="sr-only">{copy.agentEntry}</span>
+                  </Button>
+                </Link>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-accent hover:text-primary"
+                  onClick={onOptimize}
+                  disabled={!prompt.content.trim() || isOptimizing}
+                  title={copy.optimizeButton}
+                  aria-label={copy.optimizeButton}
+                >
+                  {isOptimizing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">{copy.variableTip}</p>
           </div>

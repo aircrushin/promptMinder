@@ -421,6 +421,8 @@
     "variableTip": "💡 提示：使用 {{变量名}} 语法可以创建动态变量",
     "creating": "创建中...",
     "create": "创建",
+    "agentEntry": "进入 AI Agent",
+    "optimizeButton": "优化提示词",
     "optimizePreviewTitle": "优化结果预览",
     "optimizePlaceholder": "正在生成优化内容...",
     "applyOptimization": "应用优化结果"

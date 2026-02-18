@@ -279,8 +279,10 @@ export default function NewPrompt() {
                           variant="ghost"
                           className="hover:bg-primary/10"
                           title={tp.agentEntry}
+                          aria-label={tp.agentEntry}
                         >
                           <Bot className="h-4 w-4" />
+                          <span className="sr-only">{tp.agentEntry}</span>
                         </Button>
                       </Link>
                       <Button
@@ -290,8 +292,11 @@ export default function NewPrompt() {
                         className="hover:bg-primary/10"
                         onClick={handleOptimize}
                         disabled={isOptimizing || !prompt.content.trim()}
+                        title={tp.optimizeButton}
+                        aria-label={tp.optimizeButton}
                       >
                         {isOptimizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                        <span className="sr-only">{tp.optimizeButton}</span>
                       </Button>
                     </div>
                   </div>
@@ -353,10 +358,11 @@ export default function NewPrompt() {
 
                 <MotionDiv className="flex gap-4" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
                   <Button type="submit" disabled={isSubmitting} className="relative">
-                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : tp.submitButton}
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    <span>{isSubmitting ? tp.creating : tp.create}</span>
                   </Button>
                   <Button type="button" variant="outline" onClick={() => router.back()}>
-                    {tp.cancelButton}
+                    {tp.cancel}
                   </Button>
                 </MotionDiv>
               </form>
