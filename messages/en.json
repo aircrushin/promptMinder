@@ -394,6 +394,9 @@
     "optimizeError": "Optimization failed",
     "optimizeParsingError": "Error parsing response data:",
     "optimizeRetry": "Optimization failed, please try again",
+    "importToLibrarySuccess": "Successfully imported to prompt library",
+    "importToLibraryError": "Import failed, please try again",
+    "optimizedPromptDefaultTitle": "AI Optimized Prompt",
     "title": "Prompt Library",
     "totalPrompts": "{count} prompts in total",
     "searchPlaceholder": "Search prompts...",
@@ -423,7 +426,13 @@
     "create": "Create",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
-    "applyOptimization": "Apply Optimization Result"
+    "applyOptimization": "Apply Optimization Result",
+    "copyOptimization": "Copy",
+    "copied": "Copied",
+    "importToLibrary": "Import to Library",
+    "importToLibrarySuccess": "Successfully imported to prompt library",
+    "importToLibraryError": "Import failed, please try again",
+    "optimizedPromptDefaultTitle": "AI Optimized Prompt"
   },
   "newPromptPage": {
     "title": "Create New Prompt",
@@ -449,7 +458,13 @@
     "cancel": "Cancel",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
-    "applyOptimization": "Apply Optimization Result"
+    "applyOptimization": "Apply Optimization Result",
+    "copyOptimization": "Copy",
+    "copied": "Copied",
+    "importToLibrary": "Import to Library",
+    "importToLibrarySuccess": "Successfully imported to prompt library",
+    "importToLibraryError": "Import failed, please try again",
+    "optimizedPromptDefaultTitle": "AI Optimized Prompt"
   },
   "promptDetailPage": {
     "backToList": "Back to Prompt List",
@@ -630,7 +645,13 @@
     "cancelButton": "Cancel",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
-    "applyOptimization": "Apply Optimization Result"
+    "applyOptimization": "Apply Optimization Result",
+    "copyOptimization": "Copy",
+    "copied": "Copied",
+    "importToLibrary": "Import to Library",
+    "importToLibrarySuccess": "Successfully imported to prompt library",
+    "importToLibraryError": "Import failed, please try again",
+    "optimizedPromptDefaultTitle": "AI Optimized Prompt"
   },
   "chatTest": {
     "defaultPromptTitle": "Test",

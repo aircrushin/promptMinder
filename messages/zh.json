@@ -394,6 +394,9 @@
     "optimizeError": "优化失败",
     "optimizeParsingError": "解析响应数据出错：",
     "optimizeRetry": "优化失败，请重试",
+    "importToLibrarySuccess": "已成功导入到提示词库",
+    "importToLibraryError": "导入失败，请重试",
+    "optimizedPromptDefaultTitle": "AI优化提示词",
     "title": "提示词库",
     "totalPrompts": "共 {count} 个提示词",
     "searchPlaceholder": "搜索提示词...",
@@ -423,7 +426,13 @@
     "create": "创建",
     "optimizePreviewTitle": "优化结果预览",
     "optimizePlaceholder": "正在生成优化内容...",
-    "applyOptimization": "应用优化结果"
+    "applyOptimization": "应用优化结果",
+    "copyOptimization": "复制",
+    "copied": "已复制",
+    "importToLibrary": "导入到提示词库",
+    "importToLibrarySuccess": "已成功导入到提示词库",
+    "importToLibraryError": "导入失败，请重试",
+    "optimizedPromptDefaultTitle": "AI优化提示词"
   },
   "newPromptPage": {
     "title": "创建新提示词",
@@ -449,7 +458,13 @@
     "cancel": "取消",
     "optimizePreviewTitle": "优化结果预览",
     "optimizePlaceholder": "正在生成优化内容...",
-    "applyOptimization": "应用优化结果"
+    "applyOptimization": "应用优化结果",
+    "copyOptimization": "复制",
+    "copied": "已复制",
+    "importToLibrary": "导入到提示词库",
+    "importToLibrarySuccess": "已成功导入到提示词库",
+    "importToLibraryError": "导入失败，请重试",
+    "optimizedPromptDefaultTitle": "AI优化提示词"
   },
   "promptDetailPage": {
     "backToList": "返回提示词列表",
@@ -694,7 +709,13 @@
     "cancelButton": "取消",
     "optimizePreviewTitle": "优化结果预览",
     "optimizePlaceholder": "正在生成优化内容...",
-    "applyOptimization": "应用优化结果"
+    "applyOptimization": "应用优化结果",
+    "copyOptimization": "复制",
+    "copied": "已复制",
+    "importToLibrary": "导入到提示词库",
+    "importToLibrarySuccess": "已成功导入到提示词库",
+    "importToLibraryError": "导入失败，请重试",
+    "optimizedPromptDefaultTitle": "AI优化提示词"
   },
   "publicPage": {
     "title": "提示词合集",

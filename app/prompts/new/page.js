@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Wand2 } from 'lucide-react';
+import { Loader2, Wand2, Copy, Check, FolderInput } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Modal,
@@ -58,6 +58,8 @@ export default function NewPrompt() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState('');
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
+  const [isCopiedOptimized, setIsCopiedOptimized] = useState(false);
+  const [isImportingOptimized, setIsImportingOptimized] = useState(false);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -216,6 +218,53 @@ export default function NewPrompt() {
     setShowOptimizeModal(false);
   };
 
+  const handleCopyOptimized = async () => {
+    if (!optimizedContent.trim()) return;
+    try {
+      await navigator.clipboard.writeText(optimizedContent);
+      setIsCopiedOptimized(true);
+      setTimeout(() => setIsCopiedOptimized(false), 2000);
+    } catch (e) {
+      console.error('Failed to copy:', e);
+    }
+  };
+
+  const handleImportOptimized = async () => {
+    if (!optimizedContent.trim()) return;
+    setIsImportingOptimized(true);
+    try {
+      const baseTitle = (prompt?.title || '').trim() || (tp.optimizedPromptDefaultTitle || 'AI优化提示词');
+      await apiClient.createPrompt(
+        {
+          title: `${baseTitle} (AI优化)`,
+          content: optimizedContent,
+          description: '',
+          tags: prompt?.tags || '',
+          version: '1.0.0',
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_public: true,
+        },
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
+      setShowOptimizeModal(false);
+      setOptimizedContent('');
+      toast({
+        title: '成功',
+        description: tp.importToLibrarySuccess || '已成功导入到提示词库',
+      });
+    } catch (error) {
+      console.error('Error importing optimized prompt:', error);
+      toast({
+        variant: 'destructive',
+        description: error.message || tp.importToLibraryError || '导入失败，请重试',
+      });
+    } finally {
+      setIsImportingOptimized(false);
+    }
+  };
+
   return (
     <>
       <Suspense
@@ -359,9 +408,37 @@ export default function NewPrompt() {
           <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 text-sm leading-relaxed">
             {optimizedContent || tp.optimizePlaceholder}
           </div>
-          <ModalFooter>
+          <ModalFooter className="gap-2 flex-wrap">
             <Button variant="outline" onClick={() => setShowOptimizeModal(false)}>
               {tp.cancel}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleCopyOptimized}
+              disabled={!optimizedContent.trim() || isOptimizing}
+              className="gap-2"
+            >
+              {isCopiedOptimized ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              {isCopiedOptimized
+                ? tp.copied || '已复制'
+                : tp.copyOptimization || '复制'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleImportOptimized}
+              disabled={!optimizedContent.trim() || isOptimizing || isImportingOptimized}
+              className="gap-2"
+            >
+              {isImportingOptimized ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FolderInput className="h-4 w-4" />
+              )}
+              {tp.importToLibrary || '导入到提示词库'}
             </Button>
             <Button onClick={handleApplyOptimized} disabled={!optimizedContent.trim()}>
               {tp.applyOptimization}

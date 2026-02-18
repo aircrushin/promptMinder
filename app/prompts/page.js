@@ -53,6 +53,7 @@ export default function PromptsPage() {
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isImportingOptimized, setIsImportingOptimized] = useState(false);
   const [newPrompt, setNewPrompt] = useState({
     title: "",
     content: "",
@@ -383,6 +384,43 @@ export default function PromptsPage() {
     setOptimizedContent("");
     setShowOptimizeModal(false);
   }, [optimizedContent]);
+
+  const handleImportOptimized = useCallback(async () => {
+    if (!optimizedContent.trim() || !t?.promptsPage) return;
+    setIsImportingOptimized(true);
+    try {
+      const baseTitle = newPrompt.title.trim() || t.promptsPage.optimizedPromptDefaultTitle || "AI优化提示词";
+      await apiClient.createPrompt(
+        {
+          title: `${baseTitle} (AI优化)`,
+          content: optimizedContent,
+          description: "",
+          tags: newPrompt.tags || "",
+          version: "1.0.0",
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_public: true,
+        },
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
+      fetchPrompts();
+      setShowOptimizeModal(false);
+      setOptimizedContent("");
+      toast({
+        title: "成功",
+        description: t.promptsPage.importToLibrarySuccess || "已成功导入到提示词库",
+      });
+    } catch (error) {
+      console.error("Error importing optimized prompt:", error);
+      toast({
+        variant: "destructive",
+        description: error.message || t.promptsPage.importToLibraryError || "导入失败，请重试",
+      });
+    } finally {
+      setIsImportingOptimized(false);
+    }
+  }, [optimizedContent, newPrompt.title, newPrompt.tags, activeTeamId, fetchPrompts, toast, t]);
 
   const fetchFavorites = useCallback(async () => {
     try {
@@ -818,6 +856,8 @@ export default function PromptsPage() {
         optimizedContent={optimizedContent}
         onChangeContent={setOptimizedContent}
         onApply={applyOptimizedContent}
+        onImport={handleImportOptimized}
+        isImporting={isImportingOptimized}
         onCancel={() => {
           setShowOptimizeModal(false);
           setOptimizedContent("");

@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Wand2 } from "lucide-react";
+import { Loader2, Wand2, Copy, Check, FolderInput } from "lucide-react";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { useState } from "react";
 
 export function OptimizePromptDialog({
   open,
@@ -21,8 +22,23 @@ export function OptimizePromptDialog({
   onChangeContent,
   onApply,
   onCancel,
+  onImport,
+  isImporting,
 }) {
+  const [copied, setCopied] = useState(false);
+
   if (!copy) return null;
+
+  const handleCopy = async () => {
+    if (!optimizedContent.trim()) return;
+    try {
+      await navigator.clipboard.writeText(optimizedContent);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      console.error("Failed to copy:", e);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,10 +70,40 @@ export function OptimizePromptDialog({
             placeholder={isOptimizing ? "" : copy.optimizePlaceholder}
           />
         </div>
-        <DialogFooter className="gap-2 mt-4">
+        <DialogFooter className="gap-2 mt-4 sm:flex-row flex-col">
           <Button variant="outline" onClick={onCancel}>
             {copy.cancel}
           </Button>
+          <Button
+            variant="outline"
+            onClick={handleCopy}
+            disabled={!optimizedContent.trim() || isOptimizing}
+            className="gap-2"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+            {copied
+              ? copy.copied || "已复制"
+              : copy.copyOptimization || "复制"}
+          </Button>
+          {onImport && (
+            <Button
+              variant="outline"
+              onClick={onImport}
+              disabled={!optimizedContent.trim() || isOptimizing || isImporting}
+              className="gap-2"
+            >
+              {isImporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FolderInput className="h-4 w-4" />
+              )}
+              {copy.importToLibrary || "导入到提示词库"}
+            </Button>
+          )}
           <Button
             onClick={onApply}
             disabled={!optimizedContent.trim()}
