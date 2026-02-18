@@ -2,8 +2,9 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -281,7 +282,7 @@ function MessageActions({ content, onRegenerate, showRegenerate }) {
   );
 }
 
-function ChatMessage({ message, isStreaming, isLast, onRegenerate, status }) {
+function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user }) {
   const isUser = message.role === 'user';
   const { t } = useLanguage();
 
@@ -313,6 +314,9 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status }) {
             ? 'bg-zinc-200 ring-zinc-200'
             : 'bg-zinc-900 ring-zinc-300'
         )}>
+          {isUser && user?.imageUrl ? (
+            <AvatarImage src={user.imageUrl} alt={user?.fullName || user?.username || 'User'} />
+          ) : null}
           <AvatarFallback className={cn('bg-transparent', isUser ? 'text-zinc-600' : 'text-white')}>
             {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
           </AvatarFallback>
@@ -323,7 +327,7 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status }) {
           {/* Header */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-zinc-900">
-              {isUser ? t.agent.chat.you : t.agent.chat.agentName}
+              {isUser ? (user?.fullName || user?.username || t.agent.chat.you) : t.agent.chat.agentName}
             </span>
             {message.createdAt && (
               <span className="text-xs text-zinc-400">
@@ -474,6 +478,7 @@ function ErrorBanner({ error, onRetry, onDismiss }) {
 export default function AgentChat() {
   const { toast } = useToast();
   const { t, language } = useLanguage();
+  const { user } = useUser();
   const [input, setInput] = useState('');
   const [sessionId] = useState(() => `session-${generateId()}`);
 
@@ -581,6 +586,7 @@ export default function AgentChat() {
                   isLast={index === messages.length - 1}
                   onRegenerate={handleRegenerate}
                   status={status}
+                  user={user}
                 />
               ))}
             </AnimatePresence>

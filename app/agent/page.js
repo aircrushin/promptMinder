@@ -1,6 +1,8 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import AgentChat from '@/components/agent/agent-chat';
 
 function LoadingSpinner() {
@@ -14,12 +16,37 @@ function LoadingSpinner() {
   );
 }
 
+function AgentPageContent() {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/sign-in');
+    }
+  }, [isLoaded, user, router]);
+
+  // 如果认证状态还在加载中，显示加载动画
+  if (!isLoaded) {
+    return <LoadingSpinner />;
+  }
+
+  // 如果用户未登录，显示加载动画（等待重定向）
+  if (!user) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <AgentChat />
+    </Suspense>
+  );
+}
+
 export default function AgentPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-65px)] bg-white overflow-hidden">
-      <Suspense fallback={<LoadingSpinner />}>
-        <AgentChat />
-      </Suspense>
+      <AgentPageContent />
     </div>
   );
 }
