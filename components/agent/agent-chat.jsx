@@ -840,8 +840,7 @@ export default function AgentChat() {
   const [input, setInput] = useState('');
   const [sessionId] = useState(() => `session-${generateId()}`);
 
-  const toolCallsRef = useRef({});
-  const [, forceUpdate] = useState({});
+  const [toolCallsMap, setToolCallsMap] = useState({});
 
   // Stream state tracking: 'idle' | 'message_start' | 'content_started' | 'ended'
   const [streamPhase, setStreamPhase] = useState('idle');
@@ -851,24 +850,16 @@ export default function AgentChat() {
 
   const handleToolCall = useCallback(({ type, toolCall, toolResult }) => {
     if (type === 'request' && toolCall) {
-      if (toolCallsRef.current[toolCall.id]) {
-        return;
-      }
-      toolCallsRef.current = {
-        ...toolCallsRef.current,
-        [toolCall.id]: toolCall,
-      };
-      forceUpdate({});
+      setToolCallsMap(prev => {
+        if (prev[toolCall.id]) return prev;
+        return { ...prev, [toolCall.id]: toolCall };
+      });
     } else if (type === 'response' && toolResult) {
-      const existing = toolCallsRef.current[toolResult.id];
-      if (existing && existing.status !== 'pending') {
-        return;
-      }
-      toolCallsRef.current = {
-        ...toolCallsRef.current,
-        [toolResult.id]: { ...existing, ...toolResult },
-      };
-      forceUpdate({});
+      setToolCallsMap(prev => {
+        const existing = prev[toolResult.id];
+        if (existing && existing.status !== 'pending') return prev;
+        return { ...prev, [toolResult.id]: { ...existing, ...toolResult } };
+      });
     }
   }, []);
 
@@ -902,8 +893,8 @@ export default function AgentChat() {
   });
 
   const currentToolCalls = useMemo(() => {
-    return Object.values(toolCallsRef.current);
-  }, [toolCallsRef.current]);
+    return Object.values(toolCallsMap);
+  }, [toolCallsMap]);
 
   const isStreaming = status === 'streaming' || status === 'submitted';
 
@@ -932,7 +923,7 @@ export default function AgentChat() {
       if (!content || isStreaming) return;
 
       setStreamPhase('idle');
-      toolCallsRef.current = {};
+      setToolCallsMap({});
 
       sendMessage({ text: content });
       setInput('');
@@ -965,9 +956,8 @@ export default function AgentChat() {
 
   const handleClear = useCallback(() => {
     setMessages([]);
-    toolCallsRef.current = {};
+    setToolCallsMap({});
     setStreamPhase('idle');
-    forceUpdate({});
   }, [setMessages]);
 
   return (
