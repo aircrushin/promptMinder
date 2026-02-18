@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Wand2 } from 'lucide-react';
+import { Loader2, Wand2, Bot } from 'lucide-react';
+import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Modal,
@@ -267,19 +268,32 @@ export default function NewPrompt() {
                       value={prompt.content}
                       onChange={(event) => setPrompt({ ...prompt, content: event.target.value })}
                       placeholder={tp.formContentPlaceholder}
-                      className={`min-h-[250px] pr-12 ${errors.content ? 'border-red-500' : ''}`}
+                      className={`min-h-[250px] pr-20 ${errors.content ? 'border-red-500' : ''}`}
                       required
                     />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="absolute right-2 top-2 hover:bg-primary/10"
-                      onClick={handleOptimize}
-                      disabled={isOptimizing || !prompt.content.trim()}
-                    >
-                      {isOptimizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                    </Button>
+                    <div className="absolute right-2 top-2 flex gap-1">
+                      <Link href="/agent">
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="hover:bg-primary/10"
+                          title={tp.agentEntry}
+                        >
+                          <Bot className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="hover:bg-primary/10"
+                        onClick={handleOptimize}
+                        disabled={isOptimizing || !prompt.content.trim()}
+                      >
+                        {isOptimizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
                   {errors.content && <span className="text-sm text-red-500">{errors.content}</span>}
                   <p className="text-sm text-muted-foreground">{tp.variableTip}</p>
