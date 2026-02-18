@@ -1145,10 +1145,10 @@
       "subtitle": "Prompt Intelligence Assistant",
       "description": "Your intelligent assistant for crafting, optimizing, and refining AI prompts.",
       "suggestions": {
-        "chatbot": "Help me write a chatbot prompt",
-        "optimize": "Optimize my existing prompt",
-        "tips": "Explain prompt engineering tips",
-        "codeReview": "Create a code review prompt"
+        "creativeContent": "Please help me write a Xiaohongshu post",
+        "codingAssistant": "Check if there are any issues with this code",
+        "dataAnalysis": "Please analyze this sales data",
+        "onlineEducation": "Please explain this concept"
       }
     },
     "chat": {

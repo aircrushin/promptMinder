@@ -95,10 +95,15 @@ module.exports = {
   				'0%': { 'background-position': '100%' },
   				'100%': { 'background-position': '-100%' },
   			},
+  			shimmer: {
+  				'0%': { transform: 'translateX(-100%)' },
+  				'100%': { transform: 'translateX(100%)' },
+  			},
   		},
   		animation: {
   			'grid': 'grid 20s linear infinite',
   			'shine': 'shine 5s linear infinite',
+  			'shimmer': 'shimmer 2s infinite',
   		},
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

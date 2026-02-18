@@ -23,6 +23,11 @@ import {
   Sparkles,
   Check,
   AlertCircle,
+  Wrench,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Terminal,
 } from 'lucide-react';
 
 // ============================================================================
@@ -109,7 +114,7 @@ const markdownComponents = {
 // Custom ChatTransport for Coze SSE API
 // ============================================================================
 
-function createCozeTransport(sessionId) {
+function createCozeTransport(sessionId, onToolCall, onStreamEvent) {
   return {
     sendMessages: async ({ messages, abortSignal }) => {
       // Get the last user message
@@ -130,6 +135,10 @@ function createCozeTransport(sessionId) {
       // Transform Coze SSE format to UIMessageChunk format
       const textId = `text-${Date.now()}`;
       let started = false;
+      let hasContent = false;
+      
+      // Track tool calls
+      const pendingToolCalls = new Map();
 
       const transformStream = new TransformStream({
         start() {},
@@ -150,7 +159,10 @@ function createCozeTransport(sessionId) {
             try {
               const parsed = JSON.parse(dataLines.join('\n'));
 
-              if (parsed.type === 'answer') {
+              if (parsed.type === 'message_start') {
+                // Notify UI that message stream has started
+                onStreamEvent?.({ type: 'message_start', data: parsed.content?.message_start });
+              } else if (parsed.type === 'answer') {
                 const answerText = parsed.content?.answer ?? '';
 
                 if (!started) {
@@ -159,17 +171,74 @@ function createCozeTransport(sessionId) {
                 }
 
                 if (answerText) {
+                  hasContent = true;
+                  // Notify UI that content has started
+                  onStreamEvent?.({ type: 'content_start' });
                   controller.enqueue({
                     type: 'text-delta',
                     id: textId,
                     delta: answerText,
                   });
                 }
+              } else if (parsed.type === 'message_end') {
+                // Notify UI that message stream has ended
+                onStreamEvent?.({ type: 'message_end' });
               } else if (parsed.type === 'error') {
                 controller.enqueue({
                   type: 'error',
                   errorText: parsed.content?.message || 'Unknown error',
                 });
+              } else if (parsed.type === 'tool_request') {
+                // Tool call request - extract from data.content.tool_request
+                const toolRequest = parsed.content?.tool_request;
+                if (toolRequest) {
+                  const toolCallId = toolRequest?.tool_call_id;
+                  
+                  // Skip if already exists (deduplication)
+                  if (pendingToolCalls.has(toolCallId)) {
+                    continue;
+                  }
+                  
+                  const toolCall = {
+                    id: toolCallId,
+                    toolName: toolRequest?.tool_name,
+                    parameters: toolRequest?.parameters,
+                    isParallel: toolRequest?.is_parallel,
+                    index: toolRequest?.index,
+                    status: 'pending',
+                  };
+                  pendingToolCalls.set(toolCall.id, toolCall);
+                  
+                  // Notify parent component to update UI
+                  onToolCall?.({ type: 'request', toolCall });
+                }
+              } else if (parsed.type === 'tool_response') {
+                // Tool call response - extract from data.content.tool_response
+                const toolResponse = parsed.content?.tool_response;
+                if (toolResponse) {
+                  const toolCallId = toolResponse?.tool_call_id;
+                  const pendingCall = pendingToolCalls.get(toolCallId);
+                  
+                  // Skip if already processed (deduplication)
+                  if (!pendingCall) {
+                    continue;
+                  }
+                  
+                  const toolResult = {
+                    id: toolCallId,
+                    code: toolResponse?.code,
+                    message: toolResponse?.message,
+                    result: toolResponse?.result,
+                    timeCost: toolResponse?.time_cost_ms,
+                    toolName: pendingCall?.toolName || toolResponse?.tool_name,
+                    status: String(toolResponse?.code) === '0' ? 'success' : 'error',
+                  };
+                  
+                  pendingToolCalls.delete(toolCallId);
+                  
+                  // Notify parent component to update UI
+                  onToolCall?.({ type: 'response', toolResult });
+                }
               }
             } catch {
               // Ignore non-JSON blocks
@@ -214,6 +283,220 @@ function generateId() {
 // ============================================================================
 // Sub-Components
 // ============================================================================
+
+function ToolCallItem({ toolCall, isLast }) {
+  
+  const [expanded, setExpanded] = useState(false);
+  
+  const isPending = toolCall.status === 'pending';
+  const isSuccess = toolCall.status === 'success';
+  const isError = toolCall.status === 'error';
+  
+  // Format parameters for display
+  const paramsText = useMemo(() => {
+    if (!toolCall.parameters) return '';
+    try {
+      return JSON.stringify(toolCall.parameters, null, 2);
+    } catch {
+      return String(toolCall.parameters);
+    }
+  }, [toolCall.parameters]);
+  
+  // Format result for display
+  const resultText = useMemo(() => {
+    if (!toolCall.result) return '';
+    try {
+      const parsed = JSON.parse(toolCall.result);
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      return toolCall.result;
+    }
+  }, [toolCall.result]);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      className="mb-2 last:mb-0"
+    >
+      <div 
+        className={cn(
+          'rounded-lg border overflow-hidden transition-all duration-200',
+          isPending && 'border-amber-200 bg-amber-50/50',
+          isSuccess && 'border-emerald-200 bg-emerald-50/50',
+          isError && 'border-rose-200 bg-rose-50/50',
+          !isPending && !isSuccess && !isError && 'border-zinc-200 bg-zinc-50'
+        )}
+      >
+        {/* Header - Always visible */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-black/5 transition-colors"
+        >
+          {expanded ? (
+            <ChevronDown className="h-4 w-4 text-zinc-400" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-zinc-400" />
+          )}
+          
+          {/* Status Icon */}
+          {isPending ? (
+            <div className="relative">
+              <Wrench className="h-4 w-4 text-amber-500 animate-pulse" />
+              {isLast && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+              )}
+            </div>
+          ) : isSuccess ? (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            >
+              <Check className="h-4 w-4 text-emerald-500" />
+            </motion.div>
+          ) : isError ? (
+            <AlertCircle className="h-4 w-4 text-rose-500" />
+          ) : (
+            <Wrench className="h-4 w-4 text-zinc-500" />
+          )}
+          
+          {/* Tool Name */}
+          <span className="text-sm font-medium text-zinc-700">
+            {toolCall.toolName || 'Tool'}
+          </span>
+          
+          {/* Status Badge */}
+          <span className={cn(
+            'text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1',
+            isPending && 'text-amber-700 bg-amber-100',
+            isSuccess && 'text-emerald-700 bg-emerald-100',
+            isError && 'text-rose-700 bg-rose-100'
+          )}>
+            {isPending && (
+              <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                <circle 
+                  className="opacity-25" 
+                  cx="12" cy="12" r="10" 
+                  stroke="currentColor" 
+                  strokeWidth="4" 
+                  fill="none"
+                />
+                <path 
+                  className="opacity-75" 
+                  fill="currentColor" 
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            )}
+            {isPending ? '运行中' : isSuccess ? '成功' : isError ? '失败' : '完成'}
+          </span>
+        </button>
+        
+        {/* Progress Bar - Show when pending */}
+        {isPending && (
+          <div className="px-3 pb-2">
+            <div className="h-1.5 w-full bg-amber-100 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 rounded-full"
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+                style={{ width: '50%' }}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Success Animation Bar */}
+        {isSuccess && (
+          <motion.div 
+            className="px-3 pb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="h-1.5 w-full bg-emerald-100 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-emerald-500 rounded-full"
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+              />
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Error Bar */}
+        {isError && (
+          <div className="px-3 pb-2">
+            <div className="h-1.5 w-full bg-rose-500 rounded-full" />
+          </div>
+        )}
+        
+        {/* Expanded Content */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="px-3 pb-3 space-y-2">
+                {/* Parameters */}
+                {paramsText && (
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs text-zinc-500 mb-1">
+                      <Terminal className="h-3 w-3" />
+                      <span>参数</span>
+                    </div>
+                    <pre className="text-xs bg-zinc-900/5 text-zinc-700 p-2 rounded overflow-x-auto">
+                      <code>{paramsText}</code>
+                    </pre>
+                  </div>
+                )}
+                
+                {/* Result */}
+                {resultText && (
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs text-zinc-500 mb-1">
+                      <Check className="h-3 w-3" />
+                      <span>结果</span>
+                    </div>
+                    <pre className={cn(
+                      'text-xs p-2 rounded overflow-x-auto',
+                      isError 
+                        ? 'bg-rose-100 text-rose-800' 
+                        : 'bg-zinc-900/5 text-zinc-700'
+                    )}>
+                      <code>{resultText}</code>
+                    </pre>
+                  </div>
+                )}
+                
+                {/* Error Message */}
+                {toolCall.message && isError && (
+                  <div className="text-xs text-rose-600">
+                    {toolCall.message}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
 
 function MessageActions({ content, onRegenerate, showRegenerate }) {
   const { toast } = useToast();
@@ -282,7 +565,7 @@ function MessageActions({ content, onRegenerate, showRegenerate }) {
   );
 }
 
-function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user }) {
+function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user, toolCalls = [] }) {
   const isUser = message.role === 'user';
   const { t } = useLanguage();
 
@@ -298,6 +581,7 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user 
   const showStreamingIndicator = isStreaming && isLast && message.role === 'assistant';
   const showActions = !isUser && !isStreaming && textContent;
   const showRegenerate = isLast && status === 'ready';
+  const showToolCalls = toolCalls.length > 0;
 
   return (
     <motion.div
@@ -336,6 +620,19 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user 
             )}
           </div>
 
+          {/* Tool Calls */}
+          {showToolCalls && (
+            <div className="mb-3">
+              {toolCalls.map((toolCall, index) => (
+                <ToolCallItem 
+                  key={toolCall.id || index} 
+                  toolCall={toolCall} 
+                  isLast={isLast && index === toolCalls.length - 1 && toolCall.status === 'pending'}
+                />
+              ))}
+            </div>
+          )}
+          
           {/* Message Body */}
           <div className="text-[15px] leading-relaxed text-zinc-700">
             {isUser ? (
@@ -378,10 +675,10 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user 
 function WelcomeScreen({ onSuggestionClick }) {
   const { t } = useLanguage();
   const suggestions = [
-    { icon: '✨', key: 'chatbot' },
-    { icon: '🔧', key: 'optimize' },
-    { icon: '💡', key: 'tips' },
-    { icon: '📝', key: 'codeReview' },
+    { icon: '✨', key: 'creativeContent' },
+    { icon: '🔧', key: 'codingAssistant' },
+    { icon: '📊', key: 'dataAnalysis' },
+    { icon: '📚', key: 'onlineEducation' },
   ];
 
   return (
@@ -471,6 +768,146 @@ function ErrorBanner({ error, onRetry, onDismiss }) {
   );
 }
 
+function StreamLoadingIndicator() {
+  const { t } = useLanguage();
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+      className="group relative px-4 py-6 sm:px-6"
+    >
+      <div className="mx-auto max-w-3xl flex gap-4">
+        {/* Avatar */}
+        <div className="relative">
+          <Avatar className="h-8 w-8 shrink-0 ring-2 ring-offset-2 shadow-sm bg-zinc-900 ring-zinc-300">
+            <AvatarFallback className="bg-transparent text-white">
+              <Bot className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
+          {/* Pulsing ring */}
+          <span className="absolute inset-0 rounded-full animate-ping bg-zinc-400 opacity-20" />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 space-y-3">
+          {/* Animated loading card */}
+          <motion.div 
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 border border-zinc-200 p-4"
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+            
+            <div className="flex items-center gap-3">
+              {/* Animated brain/thinking icon */}
+              <div className="relative flex-shrink-0">
+                <motion.div
+                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center shadow-lg"
+                  animate={{ 
+                    boxShadow: [
+                      '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+                      '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <Sparkles className="h-5 w-5 text-white" />
+                  </motion.div>
+                </motion.div>
+                {/* Orbiting dots */}
+                <motion.span
+                  className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full"
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0.7, 1, 0.7],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                />
+                <motion.span
+                  className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-emerald-400 rounded-full"
+                  animate={{ 
+                    scale: [1, 1.3, 1],
+                    opacity: [0.7, 1, 0.7],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                />
+              </div>
+              
+              {/* Text content */}
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-700">{t.agent.chat.thinking}</span>
+                  <motion.span 
+                    className="flex gap-0.5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="w-1 h-1 bg-zinc-400 rounded-full"
+                        animate={{ 
+                          y: [0, -3, 0],
+                          opacity: [0.4, 1, 0.4],
+                        }}
+                        transition={{ 
+                          duration: 0.6, 
+                          repeat: Infinity, 
+                          delay: i * 0.15,
+                          ease: 'easeInOut'
+                        }}
+                      />
+                    ))}
+                  </motion.span>
+                </div>
+                
+                {/* Animated skeleton lines */}
+                <div className="space-y-1.5">
+                  <motion.div 
+                    className="h-2 bg-zinc-200 rounded-full"
+                    animate={{ width: ['60%', '80%', '60%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  <motion.div 
+                    className="h-2 bg-zinc-200 rounded-full"
+                    animate={{ width: ['40%', '55%', '40%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Progress bar at bottom */}
+            <div className="mt-3 h-1 w-full bg-zinc-200 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-zinc-400 via-zinc-600 to-zinc-400 rounded-full"
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+                style={{ width: '40%' }}
+              />
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -481,16 +918,65 @@ export default function AgentChat() {
   const { user } = useUser();
   const [input, setInput] = useState('');
   const [sessionId] = useState(() => `session-${generateId()}`);
+  
+  // Use ref for tool calls to ensure real-time updates during streaming
+  const toolCallsRef = useRef({});
+  const [, forceUpdate] = useState({});
+  
+  // Stream state tracking: 'idle' | 'message_start' | 'content_started' | 'ended'
+  const [streamPhase, setStreamPhase] = useState('idle');
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Create custom transport
-  const transport = useMemo(() => createCozeTransport(sessionId), [sessionId]);
+  // Handle tool call updates from transport - synchronous update
+  const handleToolCall = useCallback(({ type, toolCall, toolResult }) => {
+    if (type === 'request' && toolCall) {
+      // Check if already exists
+      if (toolCallsRef.current[toolCall.id]) {
+        return;
+      }
+      toolCallsRef.current = {
+        ...toolCallsRef.current,
+        [toolCall.id]: toolCall,
+      };
+      // Force immediate re-render
+      forceUpdate({});
+    } else if (type === 'response' && toolResult) {
+      const existing = toolCallsRef.current[toolResult.id];
+      // Skip if already completed
+      if (existing && existing.status !== 'pending') {
+        return;
+      }
+      toolCallsRef.current = {
+        ...toolCallsRef.current,
+        [toolResult.id]: { ...existing, ...toolResult },
+      };
+      // Force immediate re-render
+      forceUpdate({});
+    }
+  }, []);
+  
+  // Handle stream events from transport
+  const handleStreamEvent = useCallback(({ type }) => {
+    if (type === 'message_start') {
+      setStreamPhase('message_start');
+    } else if (type === 'content_start') {
+      setStreamPhase('content_started');
+    } else if (type === 'message_end') {
+      setStreamPhase('ended');
+    }
+  }, []);
+
+  // Create custom transport with tool call handler and stream event handler
+  const transport = useMemo(
+    () => createCozeTransport(sessionId, handleToolCall, handleStreamEvent), 
+    [sessionId, handleToolCall, handleStreamEvent]
+  );
 
   // useChat hook from Vercel AI SDK
   const {
-    messages,
+    messages: rawMessages,
     sendMessage,
     status,
     stop,
@@ -502,6 +988,11 @@ export default function AgentChat() {
     id: sessionId,
     transport,
   });
+  
+  // Get current tool calls array for the latest assistant message
+  const currentToolCalls = useMemo(() => {
+    return Object.values(toolCallsRef.current);
+  }, [toolCallsRef.current]);
 
   const isStreaming = status === 'streaming' || status === 'submitted';
 
@@ -512,7 +1003,7 @@ export default function AgentChat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [rawMessages, streamPhase, scrollToBottom]);
 
   // Auto-resize textarea
   const adjustTextareaHeight = useCallback(() => {
@@ -532,6 +1023,10 @@ export default function AgentChat() {
       const content = (text || input).trim();
       if (!content || isStreaming) return;
 
+      // Reset stream phase and tool calls for new message
+      setStreamPhase('idle');
+      toolCallsRef.current = {};
+      
       sendMessage({ text: content });
       setInput('');
 
@@ -567,29 +1062,41 @@ export default function AgentChat() {
   // Handle clear conversation
   const handleClear = useCallback(() => {
     setMessages([]);
+    toolCallsRef.current = {};
+    setStreamPhase('idle');
+    forceUpdate({});
   }, [setMessages]);
 
   return (
     <div className="flex flex-1 flex-col h-full bg-white overflow-hidden">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto">
-        {messages.length === 0 ? (
+        {rawMessages.length === 0 && streamPhase !== 'message_start' ? (
           <WelcomeScreen onSuggestionClick={handleSend} />
         ) : (
           <div className="min-h-full">
             <AnimatePresence mode="popLayout">
-              {messages.map((message, index) => (
+              {rawMessages.map((message, index) => (
                 <ChatMessage
                   key={message.id}
                   message={message}
                   isStreaming={isStreaming}
-                  isLast={index === messages.length - 1}
+                  isLast={index === rawMessages.length - 1}
                   onRegenerate={handleRegenerate}
                   status={status}
                   user={user}
+                  toolCalls={index === rawMessages.length - 1 && message.role === 'assistant' ? currentToolCalls : []}
                 />
               ))}
             </AnimatePresence>
+            
+            {/* Loading indicator when message_start received but no content yet */}
+            <AnimatePresence>
+              {streamPhase === 'message_start' && (
+                <StreamLoadingIndicator />
+              )}
+            </AnimatePresence>
+            
             <div ref={messagesEndRef} className="h-32" />
           </div>
         )}
@@ -669,7 +1176,7 @@ export default function AgentChat() {
                 </>
               )}
             </div>
-            {messages.length > 0 && (
+            {rawMessages.length > 0 && (
               <button
                 onClick={handleClear}
                 className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
