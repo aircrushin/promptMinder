@@ -848,6 +848,9 @@ function MessageActions({ content, onRegenerate, showRegenerate }) {
 function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user, toolCalls = [], onImport, onEditResend, messageIndex }) {
   const isUser = message.role === 'user';
   const { t } = useLanguage();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const editTextareaRef = useRef(null);
 
   const textContent = useMemo(() => {
     if (!message.parts) return '';
@@ -862,9 +865,51 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user,
     [isUser, onImport]
   );
 
+  // Auto-resize the inline edit textarea
+  useEffect(() => {
+    if (!isEditing || !editTextareaRef.current) return;
+    const el = editTextareaRef.current;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [isEditing, editValue]);
+
+  const handleStartEdit = useCallback(() => {
+    setEditValue(textContent);
+    setIsEditing(true);
+    setTimeout(() => {
+      if (editTextareaRef.current) {
+        editTextareaRef.current.focus();
+        const len = editTextareaRef.current.value.length;
+        editTextareaRef.current.setSelectionRange(len, len);
+      }
+    }, 0);
+  }, [textContent]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+    setEditValue('');
+  }, []);
+
+  const handleConfirmEdit = useCallback(() => {
+    const trimmed = editValue.trim();
+    if (!trimmed) return;
+    setIsEditing(false);
+    setEditValue('');
+    onEditResend?.(messageIndex, trimmed);
+  }, [editValue, messageIndex, onEditResend]);
+
+  const handleEditKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleConfirmEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  }, [handleConfirmEdit, handleCancelEdit]);
+
   const showStreamingIndicator = isStreaming && isLast && message.role === 'assistant';
   const showActions = !isUser && !isStreaming && textContent;
-  const showUserActions = isUser && textContent && !isStreaming;
+  const showUserActions = isUser && textContent && !isStreaming && !isEditing;
   const showRegenerate = isLast && status === 'ready';
   const showToolCalls = toolCalls.length > 0;
 
@@ -877,16 +922,28 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user,
     >
       <div className="mx-auto max-w-3xl flex gap-4">
         {/* Avatar */}
-        <Avatar className={cn(
-          'h-8 w-8 shrink-0 ring-2 ring-offset-2 shadow-sm',
-          isUser
-            ? 'bg-zinc-200 ring-zinc-200'
-            : 'bg-zinc-900 ring-zinc-300'
-        )}>
+        <Avatar
+          className={cn(
+            'h-8 w-8 shrink-0 ring-2 ring-offset-2 shadow-sm overflow-hidden',
+            isUser ? 'bg-zinc-200 ring-zinc-200' : 'bg-zinc-900 ring-zinc-300'
+          )}
+        >
           {isUser && user?.imageUrl ? (
-            <AvatarImage src={user.imageUrl} alt={user?.fullName || user?.username || 'User'} />
+            <AvatarImage
+              src={user.imageUrl}
+              alt={user?.fullName || user?.username || 'User'}
+            />
           ) : null}
-          <AvatarFallback className={cn('bg-transparent', isUser ? 'text-zinc-600' : 'text-white')}>
+          {!isUser && (
+            <AvatarImage
+              src="/decant-logo.svg"
+              alt="Decant"
+              className="object-contain"
+            />
+          )}
+          <AvatarFallback
+            className={cn('bg-transparent', isUser ? 'text-zinc-600' : 'text-white')}
+          >
             {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
           </AvatarFallback>
         </Avatar>
@@ -920,7 +977,45 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user,
           {/* Message Body */}
           <div className="text-[15px] leading-relaxed text-zinc-700">
             {isUser ? (
-              <p className="whitespace-pre-wrap">{textContent}</p>
+              isEditing ? (
+                <div className="space-y-2">
+                  <textarea
+                    ref={editTextareaRef}
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
+                    rows={1}
+                    className={cn(
+                      'w-full resize-none rounded-xl border border-zinc-300 bg-white px-3 py-2.5',
+                      'text-[15px] text-zinc-900 leading-relaxed',
+                      'focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200',
+                      'min-h-[42px] overflow-hidden'
+                    )}
+                  />
+                  <div className="flex items-center gap-2 justify-end">
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors"
+                    >
+                      {t.agent.chat.cancelEdit}
+                    </button>
+                    <button
+                      onClick={handleConfirmEdit}
+                      disabled={!editValue.trim()}
+                      className={cn(
+                        'px-3 py-1.5 text-sm rounded-lg font-medium transition-colors',
+                        editValue.trim()
+                          ? 'bg-zinc-900 text-white hover:bg-zinc-800'
+                          : 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+                      )}
+                    >
+                      {t.agent.chat.confirmResend}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap">{textContent}</p>
+              )
             ) : (
               <div className="prose prose-zinc prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-zinc-900 prose-pre:text-zinc-100 prose-code:before:content-none prose-code:after:content-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                 {textContent ? (
@@ -955,7 +1050,7 @@ function ChatMessage({ message, isStreaming, isLast, onRegenerate, status, user,
           {showUserActions && (
             <UserMessageActions
               content={textContent}
-              onEditResend={() => onEditResend?.(messageIndex, textContent)}
+              onEditResend={handleStartEdit}
             />
           )}
         </div>
@@ -1075,7 +1170,12 @@ function StreamLoadingIndicator() {
       <div className="mx-auto max-w-3xl flex gap-4">
         {/* Avatar */}
         <div className="relative">
-          <Avatar className="h-8 w-8 shrink-0 ring-2 ring-offset-2 shadow-sm bg-zinc-900 ring-zinc-300">
+          <Avatar className="h-8 w-8 shrink-0 ring-2 ring-offset-2 shadow-sm bg-zinc-900 ring-zinc-300 overflow-hidden">
+            <AvatarImage
+              src="/decant-logo.svg"
+              alt="Decant"
+              className="object-contain"
+            />
             <AvatarFallback className="bg-transparent text-white">
               <Bot className="h-4 w-4" />
             </AvatarFallback>
@@ -1321,9 +1421,10 @@ export default function AgentChat() {
     setMessages(prev => prev.slice(0, messageIndex));
     setToolCallsMap({});
     setStreamPhase('idle');
-    setInput(content);
-    setTimeout(() => textareaRef.current?.focus(), 0);
-  }, [setMessages]);
+    setTimeout(() => {
+      sendMessage({ text: content });
+    }, 0);
+  }, [setMessages, sendMessage]);
 
   const handleImportPrompt = useCallback(async ({ title, content, description, tags }) => {
     try {

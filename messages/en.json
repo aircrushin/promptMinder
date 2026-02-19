@@ -1146,7 +1146,7 @@
   "agent": {
     "welcome": {
       "title": "Decant",
-      "subtitle": "Prompt Intelligence Assistant",
+      "subtitle": "SOTA Prompt Optimization Agent",
       "description": "Your intelligent assistant for crafting, optimizing, and refining AI prompts.",
       "suggestions": {
         "creativeContent": "Xiaohongshu Post Generator",
@@ -1156,16 +1156,18 @@
       }
     },
     "chat": {
-      "inputPlaceholder": "Message Prompt Agent...",
+      "inputPlaceholder": "Message Decant Agent...",
       "keyboardHint": "Press Enter to send, Shift+Enter for new line",
       "clearConversation": "Clear conversation",
       "thinking": "Thinking...",
       "you": "You",
-      "agentName": "Prompt Agent",
+      "agentName": "Decant Agent",
       "copied": "Copied to clipboard",
       "copyFailed": "Failed to copy",
       "editResend": "Edit and resend",
-      "copy": "Copy"
+      "copy": "Copy",
+      "cancelEdit": "Cancel",
+      "confirmResend": "Resend"
     }
   }
 }

@@ -1167,7 +1167,7 @@
   "agent": {
     "welcome": {
       "title": "Decant",
-      "subtitle": "提示词精炼师",
+      "subtitle": "SOTA提示词优化Agent",
       "description": "帮助您创建、优化和完善 AI 提示词的智能助手",
       "suggestions": {
         "creativeContent": "小红书文案生成器",
@@ -1177,16 +1177,18 @@
       }
     },
     "chat": {
-      "inputPlaceholder": "给提示词助手发送消息...",
+      "inputPlaceholder": "给 Decant Agent 发送消息...",
       "keyboardHint": "按 Enter 发送，Shift+Enter 换行",
       "clearConversation": "清空对话",
       "thinking": "思考中...",
       "you": "您",
-      "agentName": "提示词助手",
+      "agentName": "Decant Agent",
       "copied": "已复制到剪贴板",
       "copyFailed": "复制失败",
       "editResend": "编辑并重新发送",
-      "copy": "复制"
+      "copy": "复制",
+      "cancelEdit": "取消",
+      "confirmResend": "重新发送"
     }
   }
 }
