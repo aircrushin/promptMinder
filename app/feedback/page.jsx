@@ -84,11 +84,11 @@ export default function FeedbackPage() {
         backgroundSize: '50px 50px'
       }} />
 
-      <div className="relative max-w-2xl mx-auto px-4 py-12">
+      <div className="relative max-w-xl mx-auto px-4 py-8">
         {/* Back button with animated hover */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-12 group transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-8 group transition-colors"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           <span className="relative">
@@ -98,44 +98,44 @@ export default function FeedbackPage() {
         </Link>
 
         {/* Main card */}
-        <div className="bg-white rounded-3xl shadow-2xl shadow-neutral-200/50 border border-neutral-200 p-8 md:p-12 relative overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl shadow-neutral-200/50 border border-neutral-200 p-6 md:p-8 relative overflow-hidden">
           {/* Decorative top accent */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-900 to-transparent" />
 
           {/* Header */}
-          <div className="text-center mb-12 relative">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-900 rounded-2xl mb-6 shadow-xl shadow-neutral-300/50">
-              <Sparkles className="h-8 w-8 text-white" />
+          <div className="text-center mb-8 relative">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-neutral-900 rounded-xl mb-4 shadow-lg shadow-neutral-300/50">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-3 tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2 tracking-tight">
               用户反馈
             </h1>
-            <p className="text-neutral-500 text-lg leading-relaxed">
+            <p className="text-neutral-500 text-base leading-relaxed">
               您的声音推动我们前进<br className="hidden md:block" />
               帮助打造更好的体验
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Type selection with enhanced styling */}
-            <div className="space-y-4">
-              <Label className="text-sm font-bold text-neutral-900 uppercase tracking-wider">
+            <div className="space-y-3">
+              <Label className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
                 反馈类型
               </Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setType('feature_request')}
                   className={cn(
-                    'relative group flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-300',
+                    'relative group flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300',
                     type === 'feature_request'
                       ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl shadow-neutral-300/50 scale-[1.02]'
                       : 'border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600'
                   )}
                 >
                   {type === 'feature_request' && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                      <svg className="w-4 h-4 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <svg className="w-3 h-3 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -145,13 +145,13 @@ export default function FeedbackPage() {
                     type === 'feature_request' ? 'scale-110' : 'group-hover:scale-105'
                   )}>
                     <Lightbulb className={cn(
-                      'h-7 w-7',
+                      'h-5 w-5',
                       type === 'feature_request' ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700'
                     )} />
                   </div>
                   <div className="text-center">
                     <div className={cn(
-                      'font-bold text-base mb-1 transition-colors',
+                      'font-bold text-sm mb-0.5 transition-colors',
                       type === 'feature_request' ? 'text-white' : 'text-neutral-700'
                     )}>
                       功能建议
@@ -169,15 +169,15 @@ export default function FeedbackPage() {
                   type="button"
                   onClick={() => setType('bug')}
                   className={cn(
-                    'relative group flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-300',
+                    'relative group flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300',
                     type === 'bug'
                       ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl shadow-neutral-300/50 scale-[1.02]'
                       : 'border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600'
                   )}
                 >
                   {type === 'bug' && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                      <svg className="w-4 h-4 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <svg className="w-3 h-3 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -187,13 +187,13 @@ export default function FeedbackPage() {
                     type === 'bug' ? 'scale-110' : 'group-hover:scale-105'
                   )}>
                     <Bug className={cn(
-                      'h-7 w-7',
+                      'h-5 w-5',
                       type === 'bug' ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700'
                     )} />
                   </div>
                   <div className="text-center">
                     <div className={cn(
-                      'font-bold text-base mb-1 transition-colors',
+                      'font-bold text-sm mb-0.5 transition-colors',
                       type === 'bug' ? 'text-white' : 'text-neutral-700'
                     )}>
                       问题反馈
@@ -210,33 +210,33 @@ export default function FeedbackPage() {
             </div>
 
             {/* Description textarea with enhanced focus states */}
-            <div className="space-y-3">
-              <Label htmlFor="description" className="text-sm font-bold text-neutral-900 uppercase tracking-wider">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
                 详细描述 <span className="text-neutral-900">*</span>
               </Label>
               <div className={cn(
-                'relative rounded-2xl transition-all duration-300',
-                focusedField === 'description' && 'ring-4 ring-neutral-200'
+                'relative rounded-xl transition-all duration-300',
+                focusedField === 'description' && 'ring-2 ring-neutral-200'
               )}>
                 <Textarea
                   id="description"
                   placeholder={
                     type === 'feature_request'
-                      ? '请描述您希望添加的功能或改进建议...\n\n例如：\n• 您希望实现什么功能？\n• 这个功能能解决什么问题？\n• 您有预期的使用方式吗？'
-                      : '请详细描述您遇到的问题，包括复现步骤...\n\n例如：\n• 您在做什么时遇到问题？\n• 期望的结果是什么？\n• 实际发生了什么？'
+                      ? '请描述您希望添加的功能或改进建议...\n\n例如：\n• 您希望实现什么功能？\n• 这个功能能解决什么问题？'
+                      : '请详细描述您遇到的问题，包括复现步骤...\n\n例如：\n• 您在做什么时遇到问题？\n• 期望的结果是什么？'
                   }
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   onFocus={() => setFocusedField('description')}
                   onBlur={() => setFocusedField(null)}
-                  rows={7}
+                  rows={5}
                   className={cn(
-                    'resize-none rounded-2xl border-2 transition-all duration-300',
+                    'resize-none rounded-xl border-2 transition-all duration-300 text-sm',
                     focusedField === 'description'
                       ? 'border-neutral-900 bg-white'
                       : 'border-neutral-200 focus:border-neutral-900'
                   )}
-                  style={{ fontSize: '15px', lineHeight: '1.7' }}
+                  style={{ lineHeight: '1.6' }}
                 />
               </div>
               <div className="flex justify-end">
@@ -250,14 +250,14 @@ export default function FeedbackPage() {
             </div>
 
             {/* Email input with subtle styling */}
-            <div className="space-y-3">
-              <Label htmlFor="email" className="text-sm font-bold text-neutral-900 uppercase tracking-wider">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
                 联系邮箱
                 <span className="ml-2 text-xs font-normal text-neutral-400 font-sans tracking-normal">(可选)</span>
               </Label>
               <div className={cn(
-                'relative rounded-2xl transition-all duration-300',
-                focusedField === 'email' && 'ring-4 ring-neutral-200'
+                'relative rounded-xl transition-all duration-300',
+                focusedField === 'email' && 'ring-2 ring-neutral-200'
               )}>
                 <Input
                   id="email"
@@ -268,7 +268,7 @@ export default function FeedbackPage() {
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
                   className={cn(
-                    'rounded-2xl border-2 transition-all duration-300',
+                    'rounded-xl border-2 transition-all duration-300 text-sm',
                     focusedField === 'email'
                       ? 'border-neutral-900 bg-white'
                       : 'border-neutral-200 focus:border-neutral-900'
@@ -285,9 +285,9 @@ export default function FeedbackPage() {
             <Button
               type="submit"
               className={cn(
-                'w-full relative overflow-hidden rounded-2xl font-bold text-base py-6 transition-all duration-300',
+                'w-full relative overflow-hidden rounded-xl font-bold text-sm py-4 transition-all duration-300',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                !isSubmitting && description.trim() && 'hover:shadow-2xl hover:shadow-neutral-300/50 hover:scale-[1.02] active:scale-[0.98]'
+                !isSubmitting && description.trim() && 'hover:shadow-lg hover:shadow-neutral-300/50 hover:scale-[1.02] active:scale-[0.98]'
               )}
               style={{
                 background: description.trim() && !isSubmitting
@@ -300,12 +300,12 @@ export default function FeedbackPage() {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   提交中...
                 </>
               ) : (
                 <>
-                  <Send className="h-5 w-5 mr-2" />
+                  <Send className="h-4 w-4 mr-2" />
                   提交反馈
                 </>
               )}
@@ -323,7 +323,7 @@ export default function FeedbackPage() {
         </div>
 
         {/* Footer text */}
-        <p className="text-center text-neutral-400 text-sm mt-8 leading-relaxed font-medium">
+        <p className="text-center text-neutral-400 text-xs mt-6 leading-relaxed font-medium">
           每一条反馈都值得我们认真对待
         </p>
       </div>

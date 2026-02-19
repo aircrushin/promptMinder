@@ -44,6 +44,37 @@ export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')
+    const idsParam = searchParams.get('ids')
+
+    // 批量删除
+    if (idsParam) {
+      const ids = idsParam.split(',').filter(Boolean)
+      
+      if (ids.length === 0) {
+        return NextResponse.json({ error: '未提供标签ID' }, { status: 400 })
+      }
+
+      // 验证所有标签是否存在且属于当前用户
+      const rows = await db.select().from(tags).where(eq(tags.userId, userId))
+      const userTagIds = new Set(rows.map(t => t.id))
+      
+      const invalidIds = ids.filter(id => !userTagIds.has(id))
+      if (invalidIds.length > 0) {
+        return NextResponse.json({ error: '部分标签不存在或无权删除' }, { status: 403 })
+      }
+
+      // 执行批量删除
+      for (const id of ids) {
+        await db.delete(tags).where(eq(tags.id, id))
+      }
+
+      return NextResponse.json({ success: true, deletedCount: ids.length })
+    }
+
+    // 单个删除
+    if (!tagId) {
+      return NextResponse.json({ error: '未提供标签ID' }, { status: 400 })
+    }
 
     const rows = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1)
     const tag = rows[0]

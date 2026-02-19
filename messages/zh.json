@@ -627,6 +627,7 @@
   "tagsPage": {
     "fetchError": "获取标签失败",
     "deleteError": "删除标签失败",
+    "batchDeleteError": "批量删除标签失败",
     "updateError": "更新标签失败",
     "backToList": "返回提示词列表",
     "title": "标签管理",
@@ -639,8 +640,14 @@
     "privateTagBadge": "私有",
     "deleteConfirmTitle": "确认删除",
     "deleteConfirmDescription": "确定要删除这个标签吗？此操作无法撤销。",
+    "batchDeleteConfirmTitle": "确认批量删除",
+    "batchDeleteConfirmDescription": "确定要删除选中的 {count} 个标签吗？此操作无法撤销。",
     "cancel": "取消",
     "delete": "删除",
+    "batchDelete": "批量删除",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "selectedCount": "已选择 {count} 个",
     "editModalTitle": "编辑标签",
     "editPlaceholder": "请输入标签名称",
     "save": "保存"
