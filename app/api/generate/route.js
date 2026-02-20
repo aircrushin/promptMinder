@@ -1,5 +1,4 @@
-import { ChatZhipuAI } from "@langchain/community/chat_models/zhipuai";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
 
 const AGENT_SYSTEM_PROMPT = `# Role: 高级Prompt工程专家
 
@@ -72,9 +71,9 @@ const AGENT_SYSTEM_PROMPT = `# Role: 高级Prompt工程专家
 export async function POST(req) {
   try {
     const { text } = await req.json();
-    
+
     const apiKey = process.env.ZHIPUAI_API_KEY || process.env.ZHIPU_API_KEY;
-    
+
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: "ZHIPUAI_API_KEY or ZHIPU_API_KEY not configured" }),
@@ -82,45 +81,38 @@ export async function POST(req) {
       );
     }
 
-    const model = new ChatZhipuAI({
-      model: "glm-4.5-flash",
-      temperature: 0.7,
-      zhipuAIApiKey: apiKey,
-      streaming: true,
-    });
-
-    const messages = [
-      new SystemMessage(AGENT_SYSTEM_PROMPT),
-      new HumanMessage(`请优化以下Prompt并生成结构化版本：\n\n"${text}"`),
-    ];
-
-    const stream = await model.stream(messages);
-
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of stream) {
-            const content = chunk.content;
-            if (content && typeof content === "string") {
-              const data = `data: ${JSON.stringify({
-                choices: [{ delta: { content } }],
-              })}\n\n`;
-              controller.enqueue(new TextEncoder().encode(data));
-            }
-          }
-          controller.close();
-        } catch (error) {
-          console.error("Stream error:", error);
-          controller.error(error);
-        }
-      },
-    });
-
-    return new Response(readableStream, {
+    const res = await fetch(ZHIPU_API_URL, {
+      method: 'POST',
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'glm-4.7-flash',
+        messages: [
+          { role: 'system', content: AGENT_SYSTEM_PROMPT },
+          { role: 'user', content: `请优化以下Prompt并生成结构化版本：\n\n"${text}"` },
+        ],
+        temperature: 0.7,
+        stream: true,
+        thinking: { type: 'disabled' },
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('ZhipuAI generate error:', err);
+      return new Response(
+        JSON.stringify({ error: 'Upstream API error' }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(res.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
       },
     });
   } catch (error) {

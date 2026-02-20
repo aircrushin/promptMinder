@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bot, Loader2, Wand2 } from 'lucide-react';
+import { Bot, Loader2, Wand2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 // Dynamic imports for heavy components
 const MotionDiv = dynamic(() => import('framer-motion').then((mod) => mod.motion.div), {
@@ -136,6 +137,8 @@ export function PromptForm({
   className,
 }) {
   const isCompact = mode === 'compact';
+  const { toast } = useToast();
+  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
 
   const handleTagsChange = useCallback((selected) => {
     const tags = selected
@@ -169,10 +172,65 @@ export function PromptForm({
         whileHover={!isCompact ? { scale: 1.01 } : undefined} 
         transition={{ duration: 0.2 }}
       >
-        <Label htmlFor="title" className={isCompact ? 'text-sm font-medium' : 'text-base'}>
-          {copy.formTitleLabel}
-          <span className="ml-1 text-red-500">*</span>
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="title" className={isCompact ? 'text-sm font-medium' : 'text-base'}>
+            {copy.formTitleLabel}
+            <span className="ml-1 text-red-500">*</span>
+          </Label>
+          {/* AI生成标题按钮 - 仅在内容不为空时显示 */}
+          {prompt.content?.trim() && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                try {
+                  setIsGeneratingMeta(true);
+                  const response = await fetch('/api/generate/meta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: prompt.content }),
+                  });
+                  
+                  if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '生成失败');
+                  }
+                  
+                  const data = await response.json();
+                  if (data.title) {
+                    onFieldChange('title', data.title);
+                  }
+                  if (data.description) {
+                    onFieldChange('description', data.description);
+                  }
+                  toast({
+                    title: '生成成功',
+                    description: '标题和描述已自动生成',
+                  });
+                } catch (error) {
+                  console.error('生成元数据失败:', error);
+                  toast({
+                    title: '生成失败',
+                    description: error.message || '请稍后重试',
+                    variant: 'destructive',
+                  });
+                } finally {
+                  setIsGeneratingMeta(false);
+                }
+              }}
+              disabled={isGeneratingMeta}
+              className="h-7 px-2 text-xs bg-muted hover:bg-muted/80 text-foreground border border-border rounded-md transition-all duration-200 hover:scale-105"
+            >
+              {isGeneratingMeta ? (
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              ) : (
+                <Sparkles className="h-3 w-3 mr-1" />
+              )}
+              <span>AI生成</span>
+            </Button>
+          )}
+        </div>
         <Input
           id="title"
           value={prompt.title}
