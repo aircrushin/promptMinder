@@ -8,10 +8,21 @@ import { toSnakeCase } from '@/lib/case-utils.js'
 export async function GET(request) {
   try {
     const { userId } = await auth()
+    const { searchParams } = new URL(request.url)
+    const teamId = searchParams.get('teamId')
 
-    const rows = await db.select().from(tags)
-      .where(or(isNull(tags.userId), eq(tags.userId, userId)))
-      .orderBy(asc(tags.name))
+    let rows
+    if (teamId) {
+      // 获取团队标签（teamId 不为 null，userId 为 null）
+      rows = await db.select().from(tags)
+        .where(eq(tags.teamId, teamId))
+        .orderBy(asc(tags.name))
+    } else {
+      // 获取个人标签（teamId 为 null，userId 为当前用户）
+      rows = await db.select().from(tags)
+        .where(eq(tags.userId, userId))
+        .orderBy(asc(tags.name))
+    }
 
     return NextResponse.json(rows.map(toSnakeCase))
   } catch (error) {

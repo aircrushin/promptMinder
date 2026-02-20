@@ -8,6 +8,7 @@ import { Trash2, Pencil, ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTeam } from '@/contexts/team-context';
 import { apiClient } from '@/lib/api-client';
 
 const TagsSkeleton = () => {
@@ -48,6 +49,7 @@ const TagsSkeleton = () => {
 export default function TagsPage() {
   const router = useRouter();
   const { language, t } = useLanguage();
+  const { activeTeamId } = useTeam();
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,7 +63,7 @@ export default function TagsPage() {
 
   const fetchTags = useCallback(async () => {
     try {
-      const data = await apiClient.getTags();
+      const data = await apiClient.getTags(activeTeamId ? { teamId: activeTeamId } : {});
 
       // Normalize API response to a flat array for rendering safety
       const teamTags = Array.isArray(data?.team) ? data.team : [];
@@ -80,7 +82,7 @@ export default function TagsPage() {
     } finally {
       setLoading(false);
     }
-  }, [t]); // Add t to dependencies
+  }, [t, activeTeamId]); // Add t and activeTeamId to dependencies
 
   useEffect(() => {
     fetchTags();
@@ -90,7 +92,11 @@ export default function TagsPage() {
   const tp = t.tagsPage;
   if (!tp) return <TagsSkeleton />;
 
-  const privateTags = tags.filter(tag => tag.user_id);
+  // 在当前团队上下文中，所有返回的标签都是该团队的标签
+  // 如果是个人上下文（activeTeamId 为 null），则使用 user_id 区分私有标签
+  const privateTags = activeTeamId 
+    ? tags  // 团队上下文中，所有标签都是团队标签
+    : tags.filter(tag => tag.user_id);  // 个人上下文中，只显示有 user_id 的标签
 
   const handleDelete = async (tagId) => {
     setSelectedTagId(tagId);
@@ -233,98 +239,174 @@ export default function TagsPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* 公共标签部分 */}
-          <div>
-            <h2 className="text-xl font-semibold mb-4">{tp.publicTagsTitle}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {tags.filter(tag => !tag.user_id).map((tag) => (
-                <div
-                  key={tag.id}
-                  className="group relative bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 hover:border-indigo-300 transition-colors"
-                >
-                  <div className="inline-flex items-center">
-                    <span className="text-sm font-medium text-gray-700">{tag.name}</span>
-                  </div>
-                </div>
-              ))}
-              {tags.filter(tag => !tag.user_id).length === 0 && (
-                <div className="col-span-full text-center text-gray-500 py-4">
-                  {tp.noPublicTags}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 私有标签部分 */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">{tp.privateTagsTitle}</h2>
-              {isBatchMode && privateTags.length > 0 && (
-                <button
-                  onClick={toggleSelectAll}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
-                >
-                  {selectedTags.size === privateTags.length ? tp.deselectAll : tp.selectAll}
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {privateTags.map((tag) => (
-                <div
-                  key={tag.id}
-                  onClick={() => isBatchMode && toggleTagSelection(tag.id)}
-                  className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors ${
-                    isBatchMode
-                      ? selectedTags.has(tag.id)
-                        ? 'border-indigo-500 bg-indigo-50 cursor-pointer'
-                        : 'border-gray-200 hover:border-indigo-300 cursor-pointer'
-                      : 'border-gray-200 hover:border-indigo-300'
-                  }`}
-                >
-                  <div className="inline-flex items-center">
-                    {isBatchMode && (
-                      <span className="mr-2">
-                        {selectedTags.has(tag.id) ? (
-                          <CheckSquare className="w-4 h-4 text-indigo-600" />
-                        ) : (
-                          <Square className="w-4 h-4 text-gray-400" />
-                        )}
-                      </span>
+          {activeTeamId ? (
+            // 团队上下文：只显示团队标签（可编辑）
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">{tp.teamTagsTitle || '团队标签'}</h2>
+                {isBatchMode && privateTags.length > 0 && (
+                  <button
+                    onClick={toggleSelectAll}
+                    className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    {selectedTags.size === privateTags.length ? tp.deselectAll : tp.selectAll}
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {privateTags.map((tag) => (
+                  <div
+                    key={tag.id}
+                    onClick={() => isBatchMode && toggleTagSelection(tag.id)}
+                    className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors ${
+                      isBatchMode
+                        ? selectedTags.has(tag.id)
+                          ? 'border-indigo-500 bg-indigo-50 cursor-pointer'
+                          : 'border-gray-200 hover:border-indigo-300 cursor-pointer'
+                        : 'border-gray-200 hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="inline-flex items-center">
+                      {isBatchMode && (
+                        <span className="mr-2">
+                          {selectedTags.has(tag.id) ? (
+                            <CheckSquare className="w-4 h-4 text-indigo-600" />
+                          ) : (
+                            <Square className="w-4 h-4 text-gray-400" />
+                          )}
+                        </span>
+                      )}
+                      <span className="text-sm font-medium text-gray-700">{tag.name}</span>
+                      <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 rounded-full">{tp.teamTagBadge || '团队'}</span>
+                    </div>
+                    {!isBatchMode && (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(tag);
+                          }}
+                          className="p-1.5 hover:bg-gray-100 rounded-full"
+                        >
+                          <Pencil className="w-4 h-4 text-gray-500" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(tag.id);
+                          }}
+                          className="p-1.5 hover:bg-gray-100 rounded-full"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </button>
+                      </div>
                     )}
-                    <span className="text-sm font-medium text-gray-700">{tag.name}</span>
-                    <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-indigo-50 text-indigo-600 rounded-full">{tp.privateTagBadge}</span>
                   </div>
-                  {!isBatchMode && (
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(tag);
-                        }}
-                        className="p-1.5 hover:bg-gray-100 rounded-full"
-                      >
-                        <Pencil className="w-4 h-4 text-gray-500" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(tag.id);
-                        }}
-                        className="p-1.5 hover:bg-gray-100 rounded-full"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
+                ))}
+                {privateTags.length === 0 && (
+                  <div className="col-span-full text-center text-gray-500 py-4">
+                    {tp.noTeamTags || '暂无团队标签'}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            // 个人上下文：显示公共标签和私有标签
+            <>
+              {/* 公共标签部分 */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">{tp.publicTagsTitle}</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {tags.filter(tag => !tag.user_id).map((tag) => (
+                    <div
+                      key={tag.id}
+                      className="group relative bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 hover:border-indigo-300 transition-colors"
+                    >
+                      <div className="inline-flex items-center">
+                        <span className="text-sm font-medium text-gray-700">{tag.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {tags.filter(tag => !tag.user_id).length === 0 && (
+                    <div className="col-span-full text-center text-gray-500 py-4">
+                      {tp.noPublicTags}
                     </div>
                   )}
                 </div>
-              ))}
-              {privateTags.length === 0 && (
-                <div className="col-span-full text-center text-gray-500 py-4">
-                  {tp.noPrivateTags}
+              </div>
+
+              {/* 私有标签部分 */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">{tp.privateTagsTitle}</h2>
+                  {isBatchMode && privateTags.length > 0 && (
+                    <button
+                      onClick={toggleSelectAll}
+                      className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                    >
+                      {selectedTags.size === privateTags.length ? tp.deselectAll : tp.selectAll}
+                    </button>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {privateTags.map((tag) => (
+                    <div
+                      key={tag.id}
+                      onClick={() => isBatchMode && toggleTagSelection(tag.id)}
+                      className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors ${
+                        isBatchMode
+                          ? selectedTags.has(tag.id)
+                            ? 'border-indigo-500 bg-indigo-50 cursor-pointer'
+                            : 'border-gray-200 hover:border-indigo-300 cursor-pointer'
+                          : 'border-gray-200 hover:border-indigo-300'
+                      }`}
+                    >
+                      <div className="inline-flex items-center">
+                        {isBatchMode && (
+                          <span className="mr-2">
+                            {selectedTags.has(tag.id) ? (
+                              <CheckSquare className="w-4 h-4 text-indigo-600" />
+                            ) : (
+                              <Square className="w-4 h-4 text-gray-400" />
+                            )}
+                          </span>
+                        )}
+                        <span className="text-sm font-medium text-gray-700">{tag.name}</span>
+                        <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-indigo-50 text-indigo-600 rounded-full">{tp.privateTagBadge}</span>
+                      </div>
+                      {!isBatchMode && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(tag);
+                            }}
+                            className="p-1.5 hover:bg-gray-100 rounded-full"
+                          >
+                            <Pencil className="w-4 h-4 text-gray-500" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(tag.id);
+                            }}
+                            className="p-1.5 hover:bg-gray-100 rounded-full"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {privateTags.length === 0 && (
+                    <div className="col-span-full text-center text-gray-500 py-4">
+                      {tp.noPrivateTags}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
       {/* 单个删除确认弹窗 */}
