@@ -143,16 +143,6 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }) => children,
 }))
 
-// Mock react-hot-toast
-jest.mock('react-hot-toast', () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    loading: jest.fn(),
-  },
-  Toaster: () => <div data-testid="toaster" />,
-}))
-
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
   Import: (props) => <div data-testid="import-icon" {...props}>Import</div>,

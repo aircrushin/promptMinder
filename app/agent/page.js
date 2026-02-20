@@ -1,13 +1,24 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import AgentChat from '@/components/agent/agent-chat';
+import dynamic from 'next/dynamic';
+
+// 动态导入组件以避免 SSR 问题
+const AgentChat = dynamic(() => import('@/components/agent/agent-chat'), {
+  ssr: false,
+  loading: () => <LoadingSpinner />
+});
+
+const ConversationSidebar = dynamic(() => import('@/components/agent/conversation-sidebar'), {
+  ssr: false,
+  loading: () => <SidebarSkeleton />
+});
 
 function LoadingSpinner() {
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex-1 flex items-center justify-center">
       <div className="relative">
         <div className="h-12 w-12 rounded-full border-4 border-zinc-200" />
         <div className="absolute inset-0 h-12 w-12 animate-spin rounded-full border-4 border-transparent border-t-zinc-800" />
@@ -16,9 +27,26 @@ function LoadingSpinner() {
   );
 }
 
+function SidebarSkeleton() {
+  return (
+    <div className="w-[260px] border-r border-zinc-200 bg-white flex flex-col shrink-0">
+      <div className="p-4 border-b border-zinc-100">
+        <div className="h-8 bg-zinc-100 rounded-lg animate-pulse" />
+      </div>
+      <div className="flex-1 p-3 space-y-2">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-10 bg-zinc-100 rounded-lg animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AgentPageContent() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const [currentConversation, setCurrentConversation] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -26,26 +54,73 @@ function AgentPageContent() {
     }
   }, [isLoaded, user, router]);
 
-  // 如果认证状态还在加载中，显示加载动画
-  if (!isLoaded) {
-    return <LoadingSpinner />;
-  }
+  const generateNewSession = useCallback(() => {
+    const newSessionId = `session-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    setSessionId(newSessionId);
+    setCurrentConversation(null);
+  }, []);
 
-  // 如果用户未登录，显示加载动画（等待重定向）
-  if (!user) {
+  useEffect(() => {
+    if (!sessionId) {
+      generateNewSession();
+    }
+  }, [sessionId, generateNewSession]);
+
+  const handleSelectConversation = useCallback((conversation) => {
+    if (conversation) {
+      setCurrentConversation(conversation);
+      setSessionId(conversation.sessionId);
+    } else {
+      generateNewSession();
+    }
+  }, [generateNewSession]);
+
+  const handleCreateConversation = useCallback((conversation) => {
+    setCurrentConversation(conversation);
+    setSessionId(conversation.sessionId);
+  }, []);
+
+  const handleConversationChange = useCallback(() => {
+    if (typeof window !== 'undefined' && window.refreshConversationSidebar) {
+      window.refreshConversationSidebar();
+    }
+  }, []);
+
+  if (!isLoaded || !user) {
     return <LoadingSpinner />;
   }
 
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <AgentChat />
-    </Suspense>
+    <div className="flex h-full w-full">
+      {/* 侧边栏 */}
+      <ConversationSidebar
+        currentConversationId={currentConversation?.id}
+        onSelectConversation={handleSelectConversation}
+        onCreateConversation={handleCreateConversation}
+        onConversationChange={handleConversationChange}
+      />
+      
+      {/* 聊天区域 - 占满剩余空间 */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white relative">
+        <Suspense fallback={<LoadingSpinner />}>
+          {sessionId && (
+            <AgentChat
+              key={sessionId}
+              conversationId={currentConversation?.id}
+              sessionId={sessionId}
+              onConversationCreated={handleCreateConversation}
+              onMessagesChange={handleConversationChange}
+            />
+          )}
+        </Suspense>
+      </div>
+    </div>
   );
 }
 
 export default function AgentPage() {
   return (
-    <div className="flex flex-col h-[calc(100vh-65px)] bg-white overflow-hidden">
+    <div className="h-[calc(100vh-65px)] bg-white overflow-hidden">
       <AgentPageContent />
     </div>
   );

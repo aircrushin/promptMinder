@@ -665,12 +665,6 @@ function ToolCallItem({ toolCall }) {
             {isPending && (
               <span className="text-[11px] text-zinc-400 select-none">运行中</span>
             )}
-            {/* {isSuccess && toolCall.timeCost !== undefined && (
-              <span className="text-[11px] text-zinc-400 tabular-nums flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {toolCall.timeCost}ms
-              </span>
-            )} */}
             {isError && (
               <span className="text-[11px] text-rose-400">失败</span>
             )}
@@ -1285,13 +1279,20 @@ function StreamLoadingIndicator() {
 // Main Component
 // ============================================================================
 
-export default function AgentChat() {
+export default function AgentChat({ 
+  conversationId, 
+  sessionId: externalSessionId,
+  onConversationCreated,
+  onMessagesChange,
+}) {
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const { user } = useUser();
   const { activeTeamId } = useTeam();
   const [input, setInput] = useState('');
-  const [sessionId] = useState(() => `session-${generateId()}`);
+  const [sessionId] = useState(() => externalSessionId || `session-${generateId()}`);
+  const [currentConversationId, setCurrentConversationId] = useState(conversationId);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [toolCallsMap, setToolCallsMap] = useState({});
 
@@ -1300,6 +1301,8 @@ export default function AgentChat() {
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const hasCreatedConversation = useRef(false);
+  const pendingMessages = useRef([]);
 
   const handleToolCall = useCallback(({ type, toolCall, toolResult }) => {
     if (type === 'request' && toolCall) {
@@ -1370,6 +1373,96 @@ export default function AgentChat() {
     adjustTextareaHeight();
   }, [input, adjustTextareaHeight]);
 
+  // 保存消息到服务器
+  const saveMessage = useCallback(async (role, content, toolCallsData, toolResultsData) => {
+    if (!currentConversationId) return;
+    
+    try {
+      await apiClient.saveAgentMessage({
+        conversationId: currentConversationId,
+        role,
+        content,
+        toolCalls: toolCallsData,
+        toolResults: toolResultsData,
+      }, { teamId: activeTeamId });
+    } catch (error) {
+      console.error('Failed to save message:', error);
+    }
+  }, [currentConversationId, activeTeamId]);
+
+  // 创建新对话
+  const createConversation = useCallback(async (firstMessage) => {
+    if (hasCreatedConversation.current) return;
+    hasCreatedConversation.current = true;
+    
+    try {
+      setIsSaving(true);
+      const title = firstMessage.slice(0, 50) + (firstMessage.length > 50 ? '...' : '');
+      const data = await apiClient.createAgentConversation(
+        { sessionId, title },
+        { teamId: activeTeamId }
+      );
+      
+      const newConversation = data.conversation;
+      setCurrentConversationId(newConversation.id);
+      onConversationCreated?.(newConversation);
+      
+      // 保存第一条用户消息
+      await apiClient.saveAgentMessage({
+        conversationId: newConversation.id,
+        role: 'user',
+        content: firstMessage,
+      }, { teamId: activeTeamId });
+      
+      // 保存之前缓存的消息
+      for (const msg of pendingMessages.current) {
+        await apiClient.saveAgentMessage({
+          conversationId: newConversation.id,
+          role: msg.role,
+          content: msg.content,
+          toolCalls: msg.toolCalls,
+          toolResults: msg.toolResults,
+        }, { teamId: activeTeamId });
+      }
+      pendingMessages.current = [];
+      
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      hasCreatedConversation.current = false;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [sessionId, activeTeamId, onConversationCreated]);
+
+  // 监听消息变化，保存到服务器
+  useEffect(() => {
+    onMessagesChange?.(rawMessages);
+    
+    // 如果有新消息且对话已创建，保存消息
+    if (currentConversationId && rawMessages.length > 0) {
+      const lastMessage = rawMessages[rawMessages.length - 1];
+      const textContent = lastMessage?.parts
+        ?.filter(p => p.type === 'text')
+        .map(p => p.text)
+        .join('') || '';
+      
+      if (textContent && lastMessage.role) {
+        // 保存消息（这里简化处理，实际应该检查是否已保存）
+        // 使用防抖避免频繁保存
+        const timeoutId = setTimeout(() => {
+          saveMessage(
+            lastMessage.role,
+            textContent,
+            lastMessage.role === 'assistant' ? Object.values(toolCallsMap) : null,
+            null
+          );
+        }, 1000);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [rawMessages, currentConversationId, toolCallsMap, onMessagesChange, saveMessage]);
+
   const handleSend = useCallback(
     (text) => {
       const content = (text || input).trim();
@@ -1378,6 +1471,11 @@ export default function AgentChat() {
       setStreamPhase('idle');
       setToolCallsMap({});
 
+      // 如果没有当前对话，创建新对话
+      if (!currentConversationId && !hasCreatedConversation.current) {
+        createConversation(content);
+      }
+
       sendMessage({ text: content });
       setInput('');
 
@@ -1385,7 +1483,7 @@ export default function AgentChat() {
         textareaRef.current.style.height = 'auto';
       }
     },
-    [input, isStreaming, sendMessage]
+    [input, isStreaming, currentConversationId, createConversation, sendMessage]
   );
 
   const handleKeyDown = useCallback(
@@ -1415,6 +1513,8 @@ export default function AgentChat() {
     setMessages([]);
     setToolCallsMap({});
     setStreamPhase('idle');
+    hasCreatedConversation.current = false;
+    setCurrentConversationId(null);
   }, [setMessages]);
 
   const handleEditResend = useCallback((messageIndex, content) => {
@@ -1447,13 +1547,49 @@ export default function AgentChat() {
     }
   }, [activeTeamId, toast]);
 
+  // 加载已有对话的消息
+  useEffect(() => {
+    if (conversationId && conversationId !== currentConversationId) {
+      setCurrentConversationId(conversationId);
+      hasCreatedConversation.current = true;
+      
+      // 加载对话消息
+      const loadConversation = async () => {
+        try {
+          const data = await apiClient.getAgentConversation(conversationId, { teamId: activeTeamId });
+          const { messages: serverMessages, session_id } = data.conversation;
+          
+          // 转换为 useChat 格式
+          const chatMessages = serverMessages.map((msg, index) => ({
+            id: msg.id || `msg-${index}`,
+            role: msg.role,
+            parts: [{ type: 'text', text: msg.content }],
+            createdAt: new Date(msg.createdAt),
+          }));
+          
+          setMessages(chatMessages);
+        } catch (error) {
+          console.error('Failed to load conversation:', error);
+          toast({
+            variant: 'destructive',
+            description: '加载对话失败',
+          });
+        }
+      };
+      
+      loadConversation();
+    }
+  }, [conversationId, currentConversationId, activeTeamId, setMessages, toast]);
+
   return (
     <div className="flex flex-1 flex-col h-full bg-white overflow-hidden">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
-        {rawMessages.length === 0 && streamPhase !== 'message_start' ? (
+      {rawMessages.length === 0 && streamPhase !== 'message_start' ? (
+        <div className="flex-1 flex items-center justify-center overflow-y-auto">
           <WelcomeScreen onSuggestionClick={handleSend} />
-        ) : (
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto">
           <div className="min-h-full">
             <AnimatePresence mode="popLayout">
               {rawMessages.map((message, index) => (
@@ -1482,8 +1618,8 @@ export default function AgentChat() {
 
             <div ref={messagesEndRef} className="h-32" />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Error Banner */}
       <AnimatePresence>
