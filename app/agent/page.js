@@ -4,43 +4,18 @@ import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { AgentPageSkeleton } from '@/components/agent/agent-skeleton';
 
 // 动态导入组件以避免 SSR 问题
 const AgentChat = dynamic(() => import('@/components/agent/agent-chat'), {
   ssr: false,
-  loading: () => <LoadingSpinner />
+  loading: () => <AgentPageSkeleton />
 });
 
 const ConversationSidebar = dynamic(() => import('@/components/agent/conversation-sidebar'), {
   ssr: false,
-  loading: () => <SidebarSkeleton />
+  loading: () => <AgentPageSkeleton />
 });
-
-function LoadingSpinner() {
-  return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="relative">
-        <div className="h-12 w-12 rounded-full border-4 border-zinc-200" />
-        <div className="absolute inset-0 h-12 w-12 animate-spin rounded-full border-4 border-transparent border-t-zinc-800" />
-      </div>
-    </div>
-  );
-}
-
-function SidebarSkeleton() {
-  return (
-    <div className="w-[260px] border-r border-zinc-200 bg-white flex flex-col shrink-0">
-      <div className="p-4 border-b border-zinc-100">
-        <div className="h-8 bg-zinc-100 rounded-lg animate-pulse" />
-      </div>
-      <div className="flex-1 p-3 space-y-2">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-10 bg-zinc-100 rounded-lg animate-pulse" />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function AgentPageContent() {
   const { user, isLoaded } = useUser();
@@ -87,7 +62,7 @@ function AgentPageContent() {
   }, []);
 
   if (!isLoaded || !user) {
-    return <LoadingSpinner />;
+    return <AgentPageSkeleton />;
   }
 
   return (
@@ -102,7 +77,7 @@ function AgentPageContent() {
       
       {/* 聊天区域 - 占满剩余空间 */}
       <div className="flex-1 flex flex-col min-w-0 bg-white relative">
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<AgentPageSkeleton />}>
           {sessionId && (
             <AgentChat
               key={sessionId}

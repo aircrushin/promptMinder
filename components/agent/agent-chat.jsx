@@ -1089,13 +1089,7 @@ function WelcomeScreen({ onSuggestionClick }) {
           {t.agent.welcome.subtitle}
         </p>
 
-        <div className="text-center max-w-md mb-10">
-          <p className="text-base text-zinc-500 leading-relaxed">
-            {t.agent.welcome.description}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg mt-10">
           {suggestions.map((suggestion, index) => {
             const suggestionText = t.agent.welcome.suggestions[suggestion.key];
             return (
@@ -1549,37 +1543,40 @@ export default function AgentChat({
 
   // 加载已有对话的消息
   useEffect(() => {
-    if (conversationId && conversationId !== currentConversationId) {
-      setCurrentConversationId(conversationId);
-      hasCreatedConversation.current = true;
-      
-      // 加载对话消息
-      const loadConversation = async () => {
-        try {
-          const data = await apiClient.getAgentConversation(conversationId, { teamId: activeTeamId });
-          const { messages: serverMessages, session_id } = data.conversation;
-          
-          // 转换为 useChat 格式
-          const chatMessages = serverMessages.map((msg, index) => ({
-            id: msg.id || `msg-${index}`,
-            role: msg.role,
-            parts: [{ type: 'text', text: msg.content }],
-            createdAt: new Date(msg.createdAt),
-          }));
-          
-          setMessages(chatMessages);
-        } catch (error) {
-          console.error('Failed to load conversation:', error);
-          toast({
-            variant: 'destructive',
-            description: '加载对话失败',
-          });
-        }
-      };
-      
-      loadConversation();
+    if (conversationId) {
+      // 如果 conversationId 变化了，或者当前没有加载过消息（组件刚挂载）
+      if (conversationId !== currentConversationId || rawMessages.length === 0) {
+        setCurrentConversationId(conversationId);
+        hasCreatedConversation.current = true;
+        
+        // 加载对话消息
+        const loadConversation = async () => {
+          try {
+            const data = await apiClient.getAgentConversation(conversationId, { teamId: activeTeamId });
+            const { messages: serverMessages, session_id } = data.conversation;
+            
+            // 转换为 useChat 格式
+            const chatMessages = serverMessages.map((msg, index) => ({
+              id: msg.id || `msg-${index}`,
+              role: msg.role,
+              parts: [{ type: 'text', text: msg.content }],
+              createdAt: new Date(msg.createdAt),
+            }));
+            
+            setMessages(chatMessages);
+          } catch (error) {
+            console.error('Failed to load conversation:', error);
+            toast({
+              variant: 'destructive',
+              description: '加载对话失败',
+            });
+          }
+        };
+        
+        loadConversation();
+      }
     }
-  }, [conversationId, currentConversationId, activeTeamId, setMessages, toast]);
+  }, [conversationId, currentConversationId, activeTeamId, setMessages, toast, rawMessages.length]);
 
   return (
     <div className="flex flex-1 flex-col h-full bg-white overflow-hidden">
