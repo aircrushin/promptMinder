@@ -3,13 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Wand2, Bot } from 'lucide-react';
-import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Modal,
@@ -18,24 +12,16 @@ import {
   ModalFooter,
   ModalTitle,
 } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { useTeam } from '@/contexts/team-context';
+import { PromptForm } from '@/components/prompt/PromptForm';
 
 // Dynamic imports for heavy components
 const MotionDiv = dynamic(() => import('framer-motion').then((mod) => mod.motion.div), {
   loading: () => <div className="animate-pulse" />,
-  ssr: false,
-});
-
-const VariableInputs = dynamic(() => import('@/components/prompt/VariableInputs'), {
-  loading: () => <Skeleton className="h-16 w-full" />,
-  ssr: false,
-});
-
-const CreatableSelect = dynamic(() => import('react-select/creatable'), {
-  loading: () => <Skeleton className="h-10 w-full" />,
   ssr: false,
 });
 
@@ -100,8 +86,15 @@ export default function NewPrompt() {
     return Object.keys(validationErrors).length === 0;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleFieldChange = (field, value) => {
+    setPrompt((prev) => ({ ...prev, [field]: value }));
+    // 清除对应字段的错误
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -130,38 +123,24 @@ export default function NewPrompt() {
     }
   };
 
-  const tagSelectProps = {
-    isCreatable: true,
-    onKeyDown: (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        event.stopPropagation();
-        const inputValue = event.target.value;
-        if (inputValue) {
-          tagSelectProps.onCreateOption(inputValue);
-        }
-      }
-    },
-    onCreateOption: async (inputValue) => {
-      try {
-        await apiClient.createTag(
-          { name: inputValue, scope: activeTeamId ? 'team' : 'personal' },
-          activeTeamId ? { teamId: activeTeamId } : {}
-        );
-        const newOption = { value: inputValue, label: inputValue };
-        setTagOptions((prev) => [...prev, newOption]);
-
-        const newTags = prompt.tags ? `${prompt.tags},${inputValue}` : inputValue;
-        setPrompt({ ...prompt, tags: newTags });
-      } catch (error) {
-        console.error('Error creating new tag:', error);
-        toast({
-          variant: 'destructive',
-          description: error.message || '创建标签失败',
-          duration: 2000,
-        });
-      }
-    },
+  const handleCreateTag = async (inputValue) => {
+    try {
+      await apiClient.createTag(
+        { name: inputValue, scope: activeTeamId ? 'team' : 'personal' },
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
+      const newOption = { value: inputValue, label: inputValue };
+      setTagOptions((prev) => [...prev, newOption]);
+      return newOption;
+    } catch (error) {
+      console.error('Error creating new tag:', error);
+      toast({
+        variant: 'destructive',
+        description: error.message || '创建标签失败',
+        duration: 2000,
+      });
+      return null;
+    }
   };
 
   const handleOptimize = async () => {
@@ -217,6 +196,10 @@ export default function NewPrompt() {
     setShowOptimizeModal(false);
   };
 
+  const handleCancel = () => {
+    router.back();
+  };
+
   return (
     <>
       <Suspense
@@ -240,132 +223,20 @@ export default function NewPrompt() {
           <h1 className="mb-6 text-3xl font-bold">{tp.title}</h1>
           <Card>
             <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-                  <Label htmlFor="title" className="text-base">
-                    {tp.formTitleLabel}
-                    <span className="ml-1 text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    value={prompt.title}
-                    onChange={(event) => setPrompt({ ...prompt, title: event.target.value })}
-                    placeholder={tp.formTitlePlaceholder}
-                    className={errors.title ? 'border-red-500' : ''}
-                    required
-                  />
-                  {errors.title && <span className="text-sm text-red-500">{errors.title}</span>}
-                </MotionDiv>
-
-                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-                  <Label htmlFor="content" className="text-base">
-                    {tp.formContentLabel}
-                    <span className="ml-1 text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <Textarea
-                      id="content"
-                      value={prompt.content}
-                      onChange={(event) => setPrompt({ ...prompt, content: event.target.value })}
-                      placeholder={tp.formContentPlaceholder}
-                      className={`min-h-[250px] pr-20 ${errors.content ? 'border-red-500' : ''}`}
-                      required
-                    />
-                    <div className="absolute right-2 top-2 flex gap-1">
-                      <Link href="/agent">
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:bg-primary/10"
-                          title={tp.agentEntry}
-                          aria-label={tp.agentEntry}
-                        >
-                          <Bot className="h-4 w-4" />
-                          <span className="sr-only">{tp.agentEntry}</span>
-                        </Button>
-                      </Link>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        className="hover:bg-primary/10"
-                        onClick={handleOptimize}
-                        disabled={isOptimizing || !prompt.content.trim()}
-                        title={tp.optimizeButton}
-                        aria-label={tp.optimizeButton}
-                      >
-                        {isOptimizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                        <span className="sr-only">{tp.optimizeButton}</span>
-                      </Button>
-                    </div>
-                  </div>
-                  {errors.content && <span className="text-sm text-red-500">{errors.content}</span>}
-                  <p className="text-sm text-muted-foreground">{tp.variableTip}</p>
-                </MotionDiv>
-
-                <Suspense fallback={<Skeleton className="h-16 w-full" />}>
-                  <VariableInputs content={prompt.content} className="my-4" />
-                </Suspense>
-
-                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-                  <Label htmlFor="description" className="text-base">
-                    {tp.formDescriptionLabel}
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={prompt.description}
-                    onChange={(event) => setPrompt({ ...prompt, description: event.target.value })}
-                    placeholder={tp.formDescriptionPlaceholder}
-                    className="min-h-[80px]"
-                  />
-                </MotionDiv>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags" className="text-base">
-                    {tp.formTagsLabel}
-                  </Label>
-                  <CreatableSelect
-                    key="tags-select"
-                    id="tags"
-                    isMulti
-                    value={prompt.tags ? prompt.tags.split(',').map((tag) => ({ value: tag, label: tag })) : []}
-                    onChange={(selected) => {
-                      const tags = selected ? selected.map((option) => option.value).join(',') : '';
-                      setPrompt({ ...prompt, tags });
-                    }}
-                    options={tagOptions}
-                    placeholder={tp.formTagsPlaceholder}
-                    className="basic-multi-select"
-                    classNamePrefix="select"
-                    {...tagSelectProps}
-                    instanceId="tags-select"
-                  />
-                </div>
-
-                <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-                  <Label htmlFor="version" className="text-base">
-                    {tp.formVersionLabel}
-                  </Label>
-                  <Input
-                    id="version"
-                    value={prompt.version}
-                    onChange={(event) => setPrompt({ ...prompt, version: event.target.value })}
-                    placeholder={tp.formVersionPlaceholder}
-                  />
-                  <p className="text-sm text-muted-foreground">{tp.versionSuggestion}</p>
-                </MotionDiv>
-
-                <MotionDiv className="flex gap-4" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-                  <Button type="submit" disabled={isSubmitting} className="relative">
-                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    <span>{isSubmitting ? tp.creating : tp.create}</span>
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => router.back()}>
-                    {tp.cancel}
-                  </Button>
-                </MotionDiv>
-              </form>
+              <PromptForm
+                mode="full"
+                prompt={prompt}
+                onFieldChange={handleFieldChange}
+                tagOptions={tagOptions}
+                onCreateTag={handleCreateTag}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+                onOptimize={handleOptimize}
+                isSubmitting={isSubmitting}
+                isOptimizing={isOptimizing}
+                errors={errors}
+                copy={tp}
+              />
             </CardContent>
           </Card>
         </MotionDiv>
