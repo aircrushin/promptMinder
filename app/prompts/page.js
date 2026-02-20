@@ -503,23 +503,31 @@ export default function PromptsPage() {
       try {
         const data = await apiClient.getTags(activeTeamId ? { teamId: activeTeamId } : {});
 
-        if (data?.team || data?.personal || data?.global) {
-          const combined = [
+        let combinedTags = [];
+        
+        if (data?.team || data?.personal || data?.public) {
+          // 新的结构化响应：合并团队/个人标签和公共标签
+          combinedTags = [
             ...(data.team || []),
             ...(data.personal || []),
+            ...(data.public || []),
           ];
-          const mappedTags = combined.map((tag) => ({
-            value: tag.name,
-            label: tag.name,
-          }));
-          setTagOptions(mappedTags);
         } else if (Array.isArray(data)) {
-          const mappedTags = data.map((tag) => ({
-            value: tag.name,
-            label: tag.name,
-          }));
-          setTagOptions(mappedTags);
+          // 旧版数组响应
+          combinedTags = data;
         }
+
+        // 去重（基于标签名称）
+        const uniqueTags = Array.from(
+          new Map(combinedTags.map((tag) => [tag.name, tag])).values()
+        );
+
+        const mappedTags = uniqueTags.map((tag) => ({
+          value: tag.name,
+          label: tag.name,
+        }));
+        
+        setTagOptions(mappedTags);
       } catch (error) {
         console.error("Error fetching tags:", error);
         toast({

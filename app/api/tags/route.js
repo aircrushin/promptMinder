@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db.js'
 import { auth } from '@clerk/nextjs/server'
-import { eq, or, isNull, asc } from 'drizzle-orm'
-import { tags } from '@/drizzle/schema/index.js'
+import { eq, asc } from 'drizzle-orm'
+import { tags, publicTags } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
 export async function GET(request) {
@@ -10,21 +10,37 @@ export async function GET(request) {
     const { userId } = await auth()
     const { searchParams } = new URL(request.url)
     const teamId = searchParams.get('teamId')
+    const includePublic = searchParams.get('includePublic') !== 'false'
 
-    let rows
+    let teamRows = []
+    let personalRows = []
+    let publicRows = []
+
     if (teamId) {
       // 获取团队标签（teamId 不为 null，userId 为 null）
-      rows = await db.select().from(tags)
+      teamRows = await db.select().from(tags)
         .where(eq(tags.teamId, teamId))
         .orderBy(asc(tags.name))
     } else {
       // 获取个人标签（teamId 为 null，userId 为当前用户）
-      rows = await db.select().from(tags)
+      personalRows = await db.select().from(tags)
         .where(eq(tags.userId, userId))
         .orderBy(asc(tags.name))
     }
 
-    return NextResponse.json(rows.map(toSnakeCase))
+    // 获取公共标签
+    if (includePublic) {
+      publicRows = await db.select().from(publicTags)
+        .where(eq(publicTags.isActive, true))
+        .orderBy(asc(publicTags.sortOrder), asc(publicTags.name))
+    }
+
+    // 返回结构化的响应
+    return NextResponse.json({
+      team: teamRows.map(toSnakeCase),
+      personal: personalRows.map(toSnakeCase),
+      public: publicRows.map(toSnakeCase),
+    })
   } catch (error) {
     console.error('Error fetching tags:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })

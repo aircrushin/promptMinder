@@ -68,6 +68,29 @@ export const tags = pgTable(
   ]
 )
 
+// ─── public_tags ──────────────────────────────────────────────────────────────
+
+export const publicTags = pgTable(
+  'public_tags',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: text('name').notNull().unique(),
+    description: text('description'),
+    category: text('category').notNull().default('general'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    isActive: boolean('is_active').notNull().default(true),
+    createdBy: text('created_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check('chk_public_tag_name_not_empty', sql`char_length(trim(${table.name})) > 0`),
+    index('idx_public_tags_category').on(table.category),
+    index('idx_public_tags_is_active').on(table.isActive),
+    index('idx_public_tags_sort_order').on(table.sortOrder),
+  ]
+)
+
 // ─── favorites ────────────────────────────────────────────────────────────────
 
 export const favorites = pgTable(
