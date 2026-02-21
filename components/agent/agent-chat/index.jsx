@@ -22,6 +22,7 @@ export default function AgentChat({
   sessionId: externalSessionId,
   onConversationCreated,
   onMessagesChange,
+  onClearConversation,
 }) {
   const { toast } = useToast();
   const { user } = useUser();
@@ -237,7 +238,9 @@ export default function AgentChat({
     hasCreatedConversation.current = false;
     setCurrentConversationId(null);
     setSourcePrompt(null);
-  }, [setMessages]);
+    // 通知父组件清除对话，生成新的 session
+    onClearConversation?.();
+  }, [setMessages, onClearConversation]);
 
   const handleEditResend = useCallback((messageIndex, content) => {
     setMessages(prev => prev.slice(0, messageIndex));

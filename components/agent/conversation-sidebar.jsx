@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useTeam } from '@/contexts/team-context';
 import { apiClient } from '@/lib/api-client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,6 +102,7 @@ function groupConversationsByDate(conversations) {
 function ConversationItem({
   conversation,
   isActive,
+  isMobile,
   onClick,
   onRename,
   onDelete,
@@ -170,7 +170,7 @@ function ConversationItem({
           </p>
         </div>
         <AnimatePresence>
-          {showActions && (
+          {(isMobile || showActions) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -182,7 +182,10 @@ function ConversationItem({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className={cn(
+                      'h-6 w-6 shrink-0 transition-opacity',
+                      isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    )}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-3.5 w-3.5" />
@@ -233,10 +236,11 @@ export function ConversationSidebar({
   onSelectConversation,
   onCreateConversation,
   onConversationChange,
+  isMobile = false,
+  onRequestClose,
 }) {
   const { user } = useUser();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const { activeTeamId } = useTeam();
 
   const [conversations, setConversations] = useState([]);
@@ -247,6 +251,12 @@ export function ConversationSidebar({
   const [editingTitle, setEditingTitle] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
+
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(false);
+    }
+  }, [isMobile]);
 
   // 加载对话列表
   const loadConversations = useCallback(async () => {
@@ -302,6 +312,9 @@ export function ConversationSidebar({
       setConversations((prev) => [newConversation, ...prev]);
       onSelectConversation?.(newConversation);
       onCreateConversation?.(newConversation);
+      if (isMobile) {
+        onRequestClose?.();
+      }
       
       toast({
         description: '新对话已创建',
@@ -318,7 +331,10 @@ export function ConversationSidebar({
   // 选择对话
   const handleSelectConversation = useCallback((conversation) => {
     onSelectConversation?.(conversation);
-  }, [onSelectConversation]);
+    if (isMobile) {
+      onRequestClose?.();
+    }
+  }, [isMobile, onRequestClose, onSelectConversation]);
 
   // 开始重命名
   const handleStartRename = useCallback((conversation) => {
@@ -425,9 +441,9 @@ export function ConversationSidebar({
     };
   }, [refreshConversations]);
 
-  if (isCollapsed) {
+  if (isCollapsed && !isMobile) {
     return (
-      <div className="w-12 border-r border-zinc-200 bg-zinc-50/50 flex flex-col items-center py-3">
+      <div className="w-12 border-r border-zinc-200 bg-white flex flex-col items-center py-3">
         <Button
           size="icon"
           variant="ghost"
@@ -450,30 +466,42 @@ export function ConversationSidebar({
 
   return (
     <>
-      <div className="w-64 border-r border-zinc-200 bg-zinc-50/50 flex flex-col h-full">
+      <div className="flex h-full w-full flex-col border-r border-zinc-200 bg-white lg:w-64">
         {/* Header */}
-        <div className="p-3 border-b border-zinc-200">
-          <div className="flex items-center justify-between mb-3">
+        <div className="border-b border-zinc-200 p-3">
+          <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-700">历史对话</h2>
             <div className="flex items-center gap-1">
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 onClick={handleCreateConversation}
                 title="新建对话"
               >
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7"
-                onClick={() => setIsCollapsed(true)}
-                title="收起"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+              {isMobile ? (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 lg:hidden"
+                  onClick={onRequestClose}
+                  title="关闭"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => setIsCollapsed(true)}
+                  title="收起"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
           
@@ -484,13 +512,13 @@ export function ConversationSidebar({
               placeholder="搜索对话..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 pl-7 text-xs"
+              className="h-9 pl-8 text-sm lg:h-8 lg:pl-7 lg:text-xs"
             />
           </div>
         </div>
 
         {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto py-2">
+        <div className="flex-1 overflow-y-auto py-2 pb-4 lg:pb-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-5 w-5 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
@@ -526,6 +554,7 @@ export function ConversationSidebar({
                           key={conv.id}
                           conversation={conv}
                           isActive={conv.id === currentConversationId}
+                          isMobile={isMobile}
                           onClick={() => handleSelectConversation(conv)}
                           onRename={() => handleStartRename(conv)}
                           onDelete={() => handleDelete(conv.id)}

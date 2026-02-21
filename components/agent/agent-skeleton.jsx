@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 // 侧边栏骨架屏
 export function AgentSidebarSkeleton() {
   return (
-    <div className="w-64 border-r border-zinc-200 bg-zinc-50/50 flex flex-col h-full shrink-0">
+    <div className="hidden h-full w-64 shrink-0 flex-col border-r border-zinc-200 bg-white lg:flex">
       {/* Header */}
       <div className="p-3 border-b border-zinc-200">
         <div className="flex items-center justify-between mb-3">
@@ -89,25 +89,31 @@ export function AgentSidebarSkeleton() {
 // 聊天区域骨架屏 - 欢迎界面风格
 export function AgentChatSkeleton() {
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-white h-full">
+    <div className="flex h-full min-w-0 flex-1 flex-col bg-white">
+      <div className="flex items-center justify-between border-b border-zinc-200/80 px-3 py-2.5 lg:hidden">
+        <Skeleton className="h-9 w-9 rounded-md" />
+        <Skeleton className="h-4 w-14" />
+        <Skeleton className="h-9 w-9 rounded-md opacity-0" />
+      </div>
+
       {/* Welcome Screen Skeleton */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="flex flex-col items-center max-w-2xl w-full">
+      <div className="flex flex-1 items-center justify-center px-4">
+        <div className="flex w-full max-w-2xl flex-col items-center">
           {/* Logo */}
-          <div className="relative mb-6">
-            <Skeleton className="h-20 w-20 rounded-3xl" />
+          <div className="relative mb-5 sm:mb-6">
+            <Skeleton className="h-16 w-16 rounded-3xl sm:h-20 sm:w-20" />
           </div>
 
           {/* Title */}
-          <Skeleton className="h-9 w-48 mb-2" />
+          <Skeleton className="mb-2 h-8 w-44 sm:h-9 sm:w-48" />
           {/* Subtitle */}
-          <Skeleton className="h-6 w-64 mb-4" />
+          <Skeleton className="mb-4 h-5 w-56 sm:h-6 sm:w-64" />
           {/* Description */}
           <Skeleton className="h-5 w-full max-w-md mb-2" />
           <Skeleton className="h-5 w-[80%] max-w-sm mb-10" />
 
           {/* Suggestion Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+          <div className="grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-3.5">
               <Skeleton className="h-6 w-6 rounded-md" />
               <Skeleton className="h-4 flex-1" />
@@ -129,7 +135,7 @@ export function AgentChatSkeleton() {
       </div>
 
       {/* Input Area Skeleton */}
-      <div className="border-t border-zinc-100 bg-white px-4 py-4">
+      <div className="border-t border-zinc-100 bg-white px-3 py-3 sm:px-4 sm:py-4">
         <div className="mx-auto max-w-3xl">
           <Skeleton className="h-14 w-full rounded-2xl" />
           <div className="flex items-center justify-between mt-2.5 px-1">
