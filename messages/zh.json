@@ -1189,6 +1189,18 @@
         "onlineEducation": "万物解释器"
       }
     },
+    "promptLibrary": {
+      "buttonTitle": "从提示词库导入",
+      "buttonSubtitle": "从您的提示词库中选择一个开始对话",
+      "title": "从提示词库导入",
+      "subtitle": "选择一个提示词作为对话起点",
+      "searchPlaceholder": "搜索提示词...",
+      "allTags": "全部",
+      "loading": "加载中...",
+      "noResults": "未找到匹配的提示词",
+      "empty": "暂无提示词，去创建一个吧",
+      "usePrompt": "使用"
+    },
     "chat": {
       "inputPlaceholder": "给 Decant Agent 发送消息...",
       "keyboardHint": "按 Enter 发送，Shift+Enter 换行",

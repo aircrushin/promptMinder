@@ -1168,6 +1168,18 @@
         "onlineEducation": "Everything Explainer"
       }
     },
+    "promptLibrary": {
+      "buttonTitle": "Import from Prompt Library",
+      "buttonSubtitle": "Choose a prompt from your library to get started",
+      "title": "Import from Prompt Library",
+      "subtitle": "Select a prompt to start your conversation",
+      "searchPlaceholder": "Search prompts...",
+      "allTags": "All",
+      "loading": "Loading...",
+      "noResults": "No prompts found",
+      "empty": "No prompts yet. Create one first!",
+      "usePrompt": "Use"
+    },
     "chat": {
       "inputPlaceholder": "Message Decant Agent...",
       "keyboardHint": "Press Enter to send, Shift+Enter for new line",
