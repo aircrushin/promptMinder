@@ -1,201 +1,215 @@
 /**
- * Custom ChatTransport for Coze SSE API
- * 
- * Coze SSE 格式：
- * event: message
- * data: {"type": "message_start|answer|message_end|error|tool_request|tool_response", ...}
- * 
- * 每个事件包含：
- * - event: 事件类型（固定为 "message"）
- * - data: JSON 对象，包含具体的业务数据
+ * Coze Agent Transport for @ai-sdk/react useChat
+ *
+ * Implements the ChatTransport interface:
+ *   sendMessages()     → ReadableStream<UIMessageChunk>
+ *   reconnectToStream() → null (Coze has no resumable streams)
+ *
+ * Converts Coze SSE event types to AI SDK UIMessageChunk format:
+ *   message_start  → fires onStreamEvent callback
+ *   answer         → text-start / text-delta chunks
+ *   tool_request   → tool-input-available chunk + onToolCall callback
+ *   tool_response  → tool-output-available chunk + onToolCall callback
+ *   message_end    → fires onStreamEvent callback
+ *   error          → error chunk
  */
 
-export function createCozeTransport(sessionId, onToolCall, onStreamEvent) {
-  return {
-    sendMessages: async ({ messages, abortSignal }) => {
-      const lastMessage = messages[messages.length - 1];
-      const userText = lastMessage?.parts?.find(p => p.type === 'text')?.text || '';
+const AGENT_API_URL = '/api/agent';
 
-      if (!userText.trim()) {
-        throw new Error('Empty message');
+/**
+ * Generate a random session ID to scope a Coze conversation.
+ * Reuse the same ID across multiple turns to maintain context.
+ * @returns {string}
+ */
+function generateSessionId() {
+  return '_' + Math.random().toString(36).slice(2, 14);
+}
+
+/**
+ * Create a ChatTransport for useChat that routes through the Coze agent API.
+ *
+ * @param {string}   sessionId       Coze session ID (reuse to keep conversation context)
+ * @param {function} onToolCall      ({type:'request'|'response', toolCall?, toolResult?}) => void
+ * @param {function} onStreamEvent   ({type:'message_start'|'content_start'|'message_end'}) => void
+ * @returns {import('ai').ChatTransport}
+ */
+function createCozeTransport(sessionId, onToolCall, onStreamEvent) {
+  return {
+    /**
+     * Send messages and return an AI SDK UIMessageChunk stream.
+     */
+    async sendMessages({ messages, abortSignal }) {
+      // Extract the last user message text
+      const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
+      let text = '';
+
+      if (lastUserMsg) {
+        if (Array.isArray(lastUserMsg.parts)) {
+          text = lastUserMsg.parts
+            .filter((p) => p.type === 'text')
+            .map((p) => p.text)
+            .join('');
+        } else if (typeof lastUserMsg.content === 'string') {
+          text = lastUserMsg.content;
+        }
       }
 
-      const response = await fetch('/api/agent', {
+      const response = await fetch(AGENT_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: userText, sessionId }),
+        body: JSON.stringify({ message: text, sessionId }),
         signal: abortSignal,
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Request failed (${response.status})`);
+        let errMsg = `Agent API error: HTTP ${response.status}`;
+        try {
+          const body = await response.json();
+          errMsg = body.error || errMsg;
+        } catch {
+          // ignore parse failure
+        }
+        throw new Error(errMsg);
       }
 
-      const textId = `text-${Date.now()}`;
-      let started = false;
-      let finished = false;
-      const pendingToolCalls = new Map();
+      if (!response.body) {
+        throw new Error('No response body from agent API');
+      }
 
-      const transformStream = new TransformStream({
-        start() {},
-        
-        transform(chunk, controller) {
-          const text = new TextDecoder().decode(chunk);
-          
-          // SSE 格式：按 "\n\n" 分割事件块
-          const events = text.split('\n\n');
-          
-          for (const eventBlock of events) {
-            if (!eventBlock.trim()) continue;
-            
-            // 解析 SSE 事件块
-            const lines = eventBlock.split('\n');
-            let eventType = 'message'; // 默认事件类型
-            let dataStr = '';
-            
-            for (const line of lines) {
-              if (line.startsWith('event:')) {
-                eventType = line.slice(6).trim();
-              } else if (line.startsWith('data:')) {
-                dataStr += line.slice(5).trim();
-              }
-            }
-            
-            if (!dataStr) continue;
-            
-            try {
-              const parsed = JSON.parse(dataStr);
-              
-              switch (parsed.type) {
-                case 'message_start': {
-                  onStreamEvent?.({ type: 'message_start', data: parsed.content?.message_start });
-                  break;
+      // Stable ID for the single text block this response will produce
+      const TEXT_BLOCK_ID = 'coze-text-0';
+
+      return new ReadableStream({
+        async start(controller) {
+          controller.enqueue({ type: 'start' });
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let textStarted = false;
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              buffer += decoder.decode(value, { stream: true });
+
+              // SSE blocks are separated by blank lines
+              const blocks = buffer.split('\n\n');
+              buffer = blocks.pop() ?? '';
+
+              for (const block of blocks) {
+                if (!block.trim()) continue;
+
+                const dataLines = block
+                  .split('\n')
+                  .filter((line) => line.startsWith('data:'))
+                  .map((line) => line.slice(5).trim());
+
+                if (!dataLines.length) continue;
+
+                let parsed;
+                try {
+                  parsed = JSON.parse(dataLines.join('\n'));
+                } catch {
+                  continue;
                 }
-                
-                case 'answer': {
-                  const answerText = parsed.content?.answer ?? '';
-                  
-                  if (!started && answerText) {
-                    started = true;
-                    controller.enqueue({ type: 'text-start', id: textId });
-                  }
-                  
-                  if (answerText) {
-                    onStreamEvent?.({ type: 'content_start' });
-                    controller.enqueue({
-                      type: 'text-delta',
-                      id: textId,
-                      delta: answerText,
-                    });
-                  }
-                  break;
-                }
-                
-                case 'message_end': {
-                  const endData = parsed.content?.message_end;
-                  
-                  if (endData?.code && endData.code !== '0' && endData.code !== 0) {
-                    // 有错误
-                    if (!started) {
-                      started = true;
-                      controller.enqueue({ type: 'text-start', id: textId });
+
+                const { type, content = {} } = parsed;
+
+                switch (type) {
+                  case 'message_start':
+                    onStreamEvent?.({ type: 'message_start' });
+                    break;
+
+                  case 'answer': {
+                    const chunk = content.answer ?? '';
+                    if (chunk) {
+                      if (!textStarted) {
+                        controller.enqueue({ type: 'text-start', id: TEXT_BLOCK_ID });
+                        onStreamEvent?.({ type: 'content_start' });
+                        textStarted = true;
+                      }
+                      controller.enqueue({ type: 'text-delta', delta: chunk, id: TEXT_BLOCK_ID });
                     }
+                    break;
+                  }
+
+                  case 'tool_request':
+                    onToolCall?.({
+                      type: 'request',
+                      toolCall: {
+                        id: content.tool_call_id,
+                        name: content.tool_name,
+                        args: content.parameters,
+                      },
+                    });
+                    controller.enqueue({
+                      type: 'tool-input-available',
+                      toolCallId: content.tool_call_id,
+                      toolName: content.tool_name,
+                      input: content.parameters ?? {},
+                    });
+                    break;
+
+                  case 'tool_response':
+                    onToolCall?.({
+                      type: 'response',
+                      toolResult: {
+                        id: content.tool_call_id,
+                        result: content.result,
+                      },
+                    });
+                    controller.enqueue({
+                      type: 'tool-output-available',
+                      toolCallId: content.tool_call_id,
+                      output: content.result,
+                    });
+                    break;
+
+                  case 'message_end':
+                    onStreamEvent?.({ type: 'message_end' });
+                    break;
+
+                  case 'error':
                     controller.enqueue({
                       type: 'error',
-                      errorText: endData.message || `Agent error (code: ${endData.code})`,
+                      errorText: content.error_msg || `Error code ${content.code}`,
                     });
-                  }
-                  
-                  // 正常结束，发送 text-end
-                  if (started && !finished) {
-                    finished = true;
-                    controller.enqueue({ type: 'text-end', id: textId });
-                  }
-                  
-                  onStreamEvent?.({ type: 'message_end', data: endData });
-                  break;
-                }
-                
-                case 'error': {
-                  const errorMsg = parsed.content?.error || parsed.content?.message || 'Unknown error';
-                  if (!started) {
-                    started = true;
-                    controller.enqueue({ type: 'text-start', id: textId });
-                  }
-                  controller.enqueue({
-                    type: 'error',
-                    errorText: errorMsg,
-                  });
-                  break;
-                }
-                
-                case 'tool_request': {
-                  const toolRequest = parsed.content?.tool_request;
-                  if (toolRequest) {
-                    const toolCallId = toolRequest?.tool_call_id || `tool-${Date.now()}`;
-                    if (pendingToolCalls.has(toolCallId)) {
-                      continue;
-                    }
-                    const toolCall = {
-                      id: toolCallId,
-                      toolName: toolRequest?.tool_name,
-                      parameters: toolRequest?.parameters,
-                      isParallel: toolRequest?.is_parallel,
-                      index: toolRequest?.index,
-                      status: 'pending',
-                    };
-                    pendingToolCalls.set(toolCall.id, toolCall);
-                    onToolCall?.({ type: 'request', toolCall });
-                  }
-                  break;
-                }
-                
-                case 'tool_response': {
-                  const toolResponse = parsed.content?.tool_response;
-                  if (toolResponse) {
-                    const toolCallId = toolResponse?.tool_call_id;
-                    const pendingCall = pendingToolCalls.get(toolCallId);
-                    if (!pendingCall) {
-                      continue;
-                    }
-                    const toolResult = {
-                      id: toolCallId,
-                      code: toolResponse?.code,
-                      message: toolResponse?.message,
-                      result: toolResponse?.result,
-                      timeCost: toolResponse?.time_cost_ms,
-                      toolName: pendingCall?.toolName || toolResponse?.tool_name,
-                      status: 'success',
-                    };
-                    pendingToolCalls.delete(toolCallId);
-                    onToolCall?.({ type: 'response', toolResult });
-                  }
-                  break;
-                }
-                
-                default: {
-                  // 未知类型，忽略
-                  console.log('Unknown event type:', parsed.type);
+                    break;
+
+                  default:
+                    break;
                 }
               }
-            } catch (err) {
-              // JSON 解析失败，忽略
-              console.warn('Failed to parse SSE data:', dataStr, err);
             }
+          } catch (err) {
+            if (err?.name !== 'AbortError') {
+              controller.enqueue({ type: 'error', errorText: err.message || 'Stream error' });
+            }
+          } finally {
+            if (textStarted) {
+              controller.enqueue({ type: 'text-end', id: TEXT_BLOCK_ID });
+            }
+            controller.enqueue({ type: 'finish' });
+            controller.close();
           }
         },
-        
-        flush(controller) {
-          // 确保流正常结束
-          if (started && !finished) {
-            finished = true;
-            controller.enqueue({ type: 'text-end', id: textId });
-          }
+
+        cancel() {
+          response.body?.cancel();
         },
       });
+    },
 
-      return response.body.pipeThrough(transformStream);
+    /**
+     * Coze does not support stream resumption.
+     */
+    async reconnectToStream() {
+      return null;
     },
   };
 }
+
+export { createCozeTransport, generateSessionId };
