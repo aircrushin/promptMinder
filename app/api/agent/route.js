@@ -1,5 +1,4 @@
-const COZE_URL = 'https://6qr4z5p33z.coze.site/stream_run';
-const COZE_PROJECT_ID = '7607669951100354600';
+const COZE_URL = 'https://5kpp3mgcg4.coze.site/stream_run';
 
 export async function POST(request) {
   try {
@@ -28,7 +27,6 @@ export async function POST(request) {
       },
       type: 'query',
       session_id: sessionId,
-      project_id: parseInt(COZE_PROJECT_ID, 10),
     };
 
     const res = await fetch(COZE_URL, {
