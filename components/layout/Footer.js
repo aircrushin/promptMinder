@@ -8,6 +8,7 @@ export default function Footer({ t }) {
     privacyPolicy: 'Privacy Policy',
     termsOfUse: 'Terms of Use',
     support: 'Support',
+    community: 'Community',
     feedback: 'Feedback',
     changelog: 'Changelog',
     friendlyLinks: 'Friendly Links',
@@ -96,6 +97,14 @@ export default function Footer({ t }) {
                   {translations.support}
                 </h3>
                 <ul className="mt-4 space-y-4">
+                  <li>
+                    <Link
+                      href="/community"
+                      className="text-sm text-muted-foreground hover:text-foreground"
+                     >
+                      {translations.community}
+                    </Link>
+                  </li>
                   <li>
                     <Link
                       href="/feedback"
