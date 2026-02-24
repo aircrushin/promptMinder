@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { X, Sparkles } from "lucide-react";
 
 /* ─── animation variants ─── */
 const containerVariants = {
@@ -48,9 +50,57 @@ const cardEntrance = (x, y, rotate, delay) => ({
   },
 });
 
+function PartnerModal({ isOpen, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+          />
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.4, 0.25, 1] }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div className="relative max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl">
+              {/* Close button */}
+              <button
+                onClick={onClose}
+                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-colors hover:bg-white hover:text-gray-900"
+              >
+                <X size={18} />
+              </button>
+              {/* Image */}
+              <div className="max-h-[80vh] overflow-auto">
+                <img
+                  src="/zsxq-coupon.png"
+                  alt="whyPrompt合伙人计划"
+                  className="h-auto max-w-full"
+                />
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function HeroSection({ t }) {
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   /* ─── fallback copy ─── */
   const fallback = {
@@ -84,6 +134,24 @@ export function HeroSection({ t }) {
         animate="visible"
         className="relative z-10 flex flex-col items-center px-6 py-24 text-center"
       >
+        {/* Announcement Banner */}
+        <motion.div
+          variants={itemVariants}
+          className="mb-6"
+        >
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-4 py-2 text-sm font-medium text-blue-600 backdrop-blur-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700"
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white">
+              <Sparkles size={12} />
+            </span>
+            <span>加入 whyPrompt 合伙人计划</span>
+            <span className="text-blue-400">·</span>
+            <span className="text-blue-500 transition-colors group-hover:text-blue-700">查看详情 →</span>
+          </button>
+        </motion.div>
+
         {/* small logo icon */}
         <motion.div
           variants={itemVariants}
@@ -389,6 +457,9 @@ export function HeroSection({ t }) {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Partner Plan Modal */}
+      <PartnerModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 }
