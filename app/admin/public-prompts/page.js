@@ -49,13 +49,23 @@ import { cn } from "@/lib/utils";
 
 // 预设分类
 const CATEGORIES = [
-  "通用",
-  "编程开发",
-  "写作助手",
-  "学习教育",
-  "商业办公",
-  "创意设计",
+  "IT/编程",
+  "商业管理",
+  "写作辅助",
+  "教育培训",
+  "语言翻译",
+  "技术开发",
+  "生活服务",
+  "娱乐游戏",
+  "医疗健康",
+  "SEO",
+  "创意艺术",
+  "专业咨询",
+  "技术培训",
+  "哲学/宗教",
   "社区贡献",
+  "商业办公",
+  "通用",
   "其他",
 ];
 
@@ -68,6 +78,7 @@ export default function AdminPublicPromptsPage() {
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState(null);
   const { toast } = useToast();
@@ -112,6 +123,9 @@ export default function AdminPublicPromptsPage() {
       if (searchTerm) {
         params.set("search", searchTerm);
       }
+      if (selectedCategory) {
+        params.set("category", selectedCategory);
+      }
 
       const response = await fetch(`/api/admin/public-prompts?${params}`, {
         headers: getAdminHeaders(),
@@ -139,11 +153,16 @@ export default function AdminPublicPromptsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, getAdminHeaders, toast]);
+  }, [currentPage, searchTerm, selectedCategory, getAdminHeaders, toast]);
 
   useEffect(() => {
     fetchPrompts();
   }, [fetchPrompts]);
+
+  // 当类别改变时重置到第一页
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
 
   // 创建提示词
   const handleCreate = async () => {
@@ -359,6 +378,13 @@ export default function AdminPublicPromptsPage() {
     };
   }, [pagination, prompts]);
 
+  // 清空筛选
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("");
+    setCurrentPage(1);
+  };
+
   return (
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -416,7 +442,7 @@ export default function AdminPublicPromptsPage() {
           </div>
         </div>
 
-        {/* 搜索栏 */}
+        {/* 搜索和筛选栏 */}
         <Card className="mb-8 border-dashed">
           <CardContent className="flex flex-col gap-4 p-6">
             <div className="flex flex-col gap-4 lg:flex-row">
@@ -432,6 +458,37 @@ export default function AdminPublicPromptsPage() {
                   className="h-11 rounded-xl border-muted/60 bg-background/70 pl-11 shadow-sm"
                 />
               </div>
+              <div className="w-full lg:w-48">
+                <Select
+                  value={selectedCategory || "__all__"}
+                  onValueChange={(value) => {
+                    setSelectedCategory(value === "__all__" ? "" : value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-11 rounded-xl border-muted/60 bg-background/70 shadow-sm">
+                    <SelectValue placeholder="全部分类" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">全部分类</SelectItem>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {(searchTerm || selectedCategory) && (
+                <Button
+                  variant="ghost"
+                  onClick={clearFilters}
+                  className="h-11 px-3 text-muted-foreground hover:text-foreground"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  清空筛选
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

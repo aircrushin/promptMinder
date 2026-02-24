@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db.js'
-import { or, ilike, desc, count as countFn } from 'drizzle-orm'
+import { or, ilike, desc, count as countFn, eq, and } from 'drizzle-orm'
 import { publicPrompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
@@ -32,15 +32,27 @@ export async function GET(request) {
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = parseInt(searchParams.get('limit') || '20', 10)
     const search = searchParams.get('search') || ''
+    const category = searchParams.get('category') || ''
     const offset = (page - 1) * limit
 
-    const whereCondition = search
-      ? or(
+    // Build where conditions
+    const conditions = []
+    
+    if (search) {
+      conditions.push(
+        or(
           ilike(publicPrompts.title, `%${search}%`),
           ilike(publicPrompts.roleCategory, `%${search}%`),
           ilike(publicPrompts.content, `%${search}%`)
         )
-      : undefined
+      )
+    }
+    
+    if (category) {
+      conditions.push(eq(publicPrompts.category, category))
+    }
+    
+    const whereCondition = conditions.length > 0 ? and(...conditions) : undefined
 
     const [dataRows, countResult] = await Promise.all([
       db.select().from(publicPrompts).where(whereCondition).orderBy(desc(publicPrompts.createdAt)).limit(limit).offset(offset),
