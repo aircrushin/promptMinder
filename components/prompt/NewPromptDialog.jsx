@@ -34,7 +34,7 @@ export function NewPromptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thumb-muted/50 scrollbar-track-background">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thumb-muted/50 scrollbar-track-background">
         <VisuallyHidden.Root>
           <DialogTitle>Dialog</DialogTitle>
         </VisuallyHidden.Root>
@@ -53,11 +53,11 @@ export function NewPromptDialog({
           copy={copy}
         />
         
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onCancel}>
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+          <Button variant="outline" onClick={onCancel} className="h-10 w-full sm:w-auto">
             {copy.cancel}
           </Button>
-          <Button onClick={onSubmit} disabled={isSubmitting} className="gap-2">
+          <Button onClick={onSubmit} disabled={isSubmitting} className="h-10 w-full sm:w-auto gap-2">
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />

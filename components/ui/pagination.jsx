@@ -99,22 +99,22 @@ export function Pagination({
   const tp = t?.pagination || {};
 
   return (
-    <div className={`flex items-center justify-between gap-4 ${className}`}>
+    <div className={`flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between ${className}`}>
       {/* 总数显示 */}
       {showTotal && (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground text-center md:text-left">
           {tp.total?.replace('{total}', total) || `共 ${total} 条数据`}
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2">
         {/* 首页和上一页 */}
         <Button
           variant="outline"
           size="sm"
           onClick={handleFirst}
           disabled={currentPage <= 1}
-          className="h-8 w-8 p-0"
+          className="hidden md:inline-flex h-10 w-10 p-0"
         >
           <ChevronsLeft className="h-4 w-4" />
         </Button>
@@ -123,13 +123,13 @@ export function Pagination({
           size="sm"
           onClick={handlePrevious}
           disabled={currentPage <= 1}
-          className="h-8 w-8 p-0"
+          className="h-10 w-10 p-0"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
         {/* 页码 */}
-        <div className="flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-1">
           {getPageNumbers().map((page, index) =>
             page === "..." ? (
               <span key={index} className="px-2 text-muted-foreground">
@@ -141,12 +141,15 @@ export function Pagination({
                 variant={currentPage === page ? "default" : "outline"}
                 size="sm"
                 onClick={() => onPageChange(page)}
-                className="h-8 w-8 p-0"
+                className="h-10 w-10 p-0"
               >
                 {page}
               </Button>
             )
           )}
+        </div>
+        <div className="md:hidden min-w-[100px] text-center text-sm font-medium">
+          {currentPage} / {totalPages}
         </div>
 
         {/* 下一页和末页 */}
@@ -155,7 +158,7 @@ export function Pagination({
           size="sm"
           onClick={handleNext}
           disabled={currentPage >= totalPages}
-          className="h-8 w-8 p-0"
+          className="h-10 w-10 p-0"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -164,13 +167,13 @@ export function Pagination({
           size="sm"
           onClick={handleLast}
           disabled={currentPage >= totalPages}
-          className="h-8 w-8 p-0"
+          className="hidden md:inline-flex h-10 w-10 p-0"
         >
           <ChevronsRight className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-4">
         {/* 页面大小选择器 */}
         {showSizeChanger && (
           <div className="flex items-center gap-2">

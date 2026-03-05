@@ -220,7 +220,7 @@ export function PromptForm({
                 }
               }}
               disabled={isGeneratingMeta}
-              className="h-7 px-2 text-xs bg-muted hover:bg-muted/80 text-foreground border border-border rounded-md transition-all duration-200 hover:scale-105"
+              className="h-9 px-3 text-xs bg-muted hover:bg-muted/80 text-foreground border border-border rounded-md transition-all duration-200 hover:scale-105"
             >
               {isGeneratingMeta ? (
                 <Loader2 className="h-3 w-3 animate-spin mr-1" />

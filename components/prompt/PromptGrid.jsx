@@ -7,7 +7,7 @@ import { Copy, Share2, Trash2, Clock, PlusCircle, Heart } from "lucide-react";
 import { extractVariables } from "@/lib/promptVariables";
 
 const PromptCardSkeleton = () => (
-  <Card className="group relative p-5 hover:shadow-md transition-all bg-card border border-border/40">
+  <Card className="group relative p-4 sm:p-5 hover:shadow-md transition-all bg-card border border-border/40">
     <div className="space-y-4">
       <div className="flex justify-between items-start">
         <div className="space-y-2">
@@ -30,8 +30,8 @@ const PromptCardSkeleton = () => (
 );
 
 export const PromptGridSkeleton = () => (
-  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-    <Card className="group relative border p-5 hover:shadow-md transition-all bg-card cursor-pointer border-dashed h-[180px] flex items-center justify-center">
+  <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+    <Card className="group relative border p-4 sm:p-5 hover:shadow-md transition-all bg-card cursor-pointer border-dashed h-[160px] sm:h-[180px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-2">
         <Skeleton className="h-10 w-10 rounded-full" />
         <Skeleton className="h-5 w-24" />
@@ -46,7 +46,7 @@ export const PromptGridSkeleton = () => (
 const NewPromptCard = ({ onClick, label }) => (
   <Card
     onClick={onClick}
-    className="group relative border p-5 hover:shadow-xl transition-all duration-300 ease-in-out bg-card cursor-pointer border-dashed h-[180px] flex items-center justify-center overflow-hidden"
+    className="group relative border p-4 sm:p-5 hover:shadow-xl transition-all duration-300 ease-in-out bg-card cursor-pointer border-dashed h-[160px] sm:h-[180px] flex items-center justify-center overflow-hidden"
   >
     <div className="flex flex-col items-center gap-3 text-muted-foreground group-hover:scale-110 transition-transform duration-300">
       <div className="bg-primary/10 p-3 rounded-full">
@@ -77,7 +77,7 @@ export function PromptGrid({
   const variableTemplate = translations?.variableInputs?.variableCount;
 
   return (
-    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
       <NewPromptCard
         onClick={onCreatePrompt}
         label={pageCopy?.newPromptCard ?? "创建提示词"}
@@ -108,14 +108,14 @@ export function PromptGrid({
         return (
           <Card
             key={title}
-            className="group relative rounded-lg border p-5 hover:shadow-lg transition-all duration-300 ease-in-out bg-card cursor-pointer overflow-hidden"
+            className="group relative rounded-lg border p-4 sm:p-5 hover:shadow-lg transition-all duration-300 ease-in-out bg-card cursor-pointer overflow-hidden"
             onClick={handleCardClick}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="space-y-4 relative z-10">
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start gap-2">
                 <div>
-                  <h3 className="text-lg font-semibold line-clamp-1 mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="text-base sm:text-lg font-semibold line-clamp-1 mb-2 group-hover:text-primary transition-colors">
                     {title}
                   </h3>
                   {latestPrompt.description && (
@@ -124,7 +124,7 @@ export function PromptGrid({
                     </p>
                   )}
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 bg-background/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
+                <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 bg-background/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
                   <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
@@ -133,7 +133,7 @@ export function PromptGrid({
                         event.stopPropagation();
                         onToggleFavorite?.(latestPrompt.id, isFavorited);
                       }}
-                      className={`h-8 w-8 transition-all duration-300 ${
+                      className={`h-9 w-9 sm:h-8 sm:w-8 transition-all duration-300 ${
                         isFavorited 
                           ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' 
                           : 'text-gray-400 hover:bg-red-50 hover:text-red-500'
@@ -148,7 +148,7 @@ export function PromptGrid({
                         event.stopPropagation();
                         onCopyPrompt?.(latestPrompt.content);
                       }}
-                      className="h-8 w-8 hover:bg-accent hover:text-primary"
+                      className="h-9 w-9 sm:h-8 sm:w-8 hover:bg-accent hover:text-primary"
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -159,7 +159,7 @@ export function PromptGrid({
                         event.stopPropagation();
                         onSharePrompt?.(latestPrompt.id);
                       }}
-                      className="h-8 w-8 hover:bg-accent hover:text-primary"
+                      className="h-9 w-9 sm:h-8 sm:w-8 hover:bg-accent hover:text-primary"
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
@@ -171,7 +171,7 @@ export function PromptGrid({
                           event.stopPropagation();
                           onDeletePrompt?.(latestPrompt.id);
                         }}
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="h-9 w-9 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -194,13 +194,13 @@ export function PromptGrid({
                   </span>
                 ))}
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-1">
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {new Date(latestPrompt.updated_at).toLocaleString()}
                 </div>
                 {!isPersonal && latestPrompt.creator && (
-                  <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-border/50" title={`Created by ${latestPrompt.creator.fullName || latestPrompt.creator.email}`}>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-border/50" title={`Created by ${latestPrompt.creator.fullName || latestPrompt.creator.email}`}>
                     <div className="h-4 w-4 rounded-full overflow-hidden bg-secondary ring-1 ring-border/50 flex-shrink-0">
                         {latestPrompt.creator.imageUrl ? (
                             <img src={latestPrompt.creator.imageUrl} alt="" className="h-full w-full object-cover" />
@@ -216,7 +216,7 @@ export function PromptGrid({
                   </div>
                 )}
                 {hasVariables && (
-                  <div className="flex items-center gap-1 ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
                     <svg
                       className="h-3 w-3"
                       fill="none"
@@ -234,7 +234,7 @@ export function PromptGrid({
                   </div>
                 )}
                 {versions.length > 1 && (
-                  <div className="flex items-center gap-1 ml-2 bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                     <span>
                       {pageCopy?.versionsCount
                         ? pageCopy.versionsCount.replace("{count}", versions.length.toString())

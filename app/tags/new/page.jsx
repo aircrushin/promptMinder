@@ -40,14 +40,16 @@ export default function NewTag() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || t.newTagPage.createError);
+        const data = await response.json().catch(() => ({}));
+        const message = data.error || t.newTagPage.createError;
+        const code = data.code ? ` (${data.code})` : '';
+        throw new Error(`${message}${code}`);
       }
 
       router.push('/tags'); // 创建成功后跳转到标签列表页
       router.refresh();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || t.newTagPage.createError);
     } finally {
       setLoading(false);
     }
@@ -123,4 +125,4 @@ export default function NewTag() {
       </Modal>
     </div>
   );
-} 
+}

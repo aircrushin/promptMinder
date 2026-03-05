@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db.js'
-import { auth } from '@clerk/nextjs/server'
-import { eq, asc } from 'drizzle-orm'
+import { requireUserId } from '@/lib/auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
+import { ApiError } from '@/lib/api-error.js'
+import { eq, asc, and, inArray } from 'drizzle-orm'
 import { tags, publicTags } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
+function assertTagName(name) {
+  if (typeof name !== 'string' || !name.trim()) {
+    throw new ApiError(400, 'Tag name is required')
+  }
+}
+
 export async function GET(request) {
   try {
-    const { userId } = await auth()
+    const userId = await requireUserId()
     const { searchParams } = new URL(request.url)
     const teamId = searchParams.get('teamId')
     const includePublic = searchParams.get('includePublic') !== 'false'
@@ -42,117 +50,119 @@ export async function GET(request) {
       public: publicRows.map(toSnakeCase),
     })
   } catch (error) {
-    console.error('Error fetching tags:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return handleApiError(error, 'Unable to fetch tags', 'TAG_FETCH_FAILED')
   }
 }
 
 export async function POST(request) {
-  const { userId } = await auth()
-
   try {
+    const userId = await requireUserId()
     const { name, isPublic } = await request.json()
 
+    assertTagName(name)
+
     const result = await db.insert(tags).values({
-      name,
+      name: name.trim(),
       userId: isPublic ? null : userId,
       createdBy: userId,
     }).returning()
 
-    return NextResponse.json(toSnakeCase(result[0]))
+    return NextResponse.json(toSnakeCase(result[0]), { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return handleApiError(error, 'Unable to create tag', 'TAG_CREATE_FAILED')
   }
 }
 
 export async function DELETE(request) {
-  const { userId } = await auth()
-
   try {
+    const userId = await requireUserId()
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')
     const idsParam = searchParams.get('ids')
 
     // 批量删除
     if (idsParam) {
-      const ids = idsParam.split(',').filter(Boolean)
-      
+      const ids = idsParam.split(',').map(id => id.trim()).filter(Boolean)
+
       if (ids.length === 0) {
-        return NextResponse.json({ error: '未提供标签ID' }, { status: 400 })
+        throw new ApiError(400, 'Tag IDs are required')
       }
 
       // 验证所有标签是否存在且属于当前用户
-      const rows = await db.select().from(tags).where(eq(tags.userId, userId))
+      const rows = await db.select({ id: tags.id }).from(tags).where(and(eq(tags.userId, userId), inArray(tags.id, ids)))
       const userTagIds = new Set(rows.map(t => t.id))
-      
+
       const invalidIds = ids.filter(id => !userTagIds.has(id))
       if (invalidIds.length > 0) {
-        return NextResponse.json({ error: '部分标签不存在或无权删除' }, { status: 403 })
+        throw new ApiError(403, 'Some tags do not exist or cannot be deleted')
       }
 
       // 执行批量删除
-      for (const id of ids) {
-        await db.delete(tags).where(eq(tags.id, id))
-      }
+      await db.delete(tags).where(and(eq(tags.userId, userId), inArray(tags.id, ids)))
 
       return NextResponse.json({ success: true, deletedCount: ids.length })
     }
 
     // 单个删除
     if (!tagId) {
-      return NextResponse.json({ error: '未提供标签ID' }, { status: 400 })
+      throw new ApiError(400, 'Tag ID is required')
     }
 
     const rows = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1)
     const tag = rows[0]
 
     if (!tag) {
-      return NextResponse.json({ error: '标签不存在' }, { status: 404 })
+      throw new ApiError(404, 'Tag not found')
     }
 
     if (!tag.userId) {
-      return NextResponse.json({ error: '不能删除公共标签' }, { status: 403 })
+      throw new ApiError(403, 'Public tags cannot be deleted')
     }
 
     if (tag.userId !== userId) {
-      return NextResponse.json({ error: '无权删除此标签' }, { status: 403 })
+      throw new ApiError(403, 'You do not have permission to delete this tag')
     }
 
     await db.delete(tags).where(eq(tags.id, tagId))
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return handleApiError(error, 'Unable to delete tag', 'TAG_DELETE_FAILED')
   }
 }
 
 export async function PATCH(request) {
-  const { userId } = await auth()
-
   try {
+    const userId = await requireUserId()
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')
     const { name } = await request.json()
+
+    if (!tagId) {
+      throw new ApiError(400, 'Tag ID is required')
+    }
+
+    assertTagName(name)
 
     const rows = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1)
     const tag = rows[0]
 
     if (!tag) {
-      return NextResponse.json({ error: '标签不存在' }, { status: 404 })
+      throw new ApiError(404, 'Tag not found')
     }
 
     if (!tag.userId) {
-      return NextResponse.json({ error: '不能修改公共标签' }, { status: 403 })
+      throw new ApiError(403, 'Public tags cannot be updated')
     }
 
     if (tag.userId !== userId) {
-      return NextResponse.json({ error: '无权修改此标签' }, { status: 403 })
+      throw new ApiError(403, 'You do not have permission to update this tag')
     }
 
-    const result = await db.update(tags).set({ name }).where(eq(tags.id, tagId)).returning()
+    const result = await db.update(tags).set({ name: name.trim() }).where(eq(tags.id, tagId)).returning()
 
     return NextResponse.json(toSnakeCase(result[0]))
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return handleApiError(error, 'Unable to update tag', 'TAG_UPDATE_FAILED')
   }
 }

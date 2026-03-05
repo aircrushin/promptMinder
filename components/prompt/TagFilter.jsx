@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Badge } from "@/components/ui/badge"
+import { cn } from '@/lib/utils';
 
 function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }) {
   const toggleTag = (tag) => {
@@ -11,18 +11,22 @@ function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }) {
   };
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+    <div className={cn('flex flex-wrap items-center gap-2', className)}>
       {allTags.map((tag) => (
-        <Badge
+        <button
+          type="button"
           key={tag}
-          variant={selectedTags.includes(tag) ? "default" : "outline"}
-          className={`cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80 ${
-            selectedTags.includes(tag) ? "" : "bg-background"
-          }`}
+          aria-pressed={selectedTags.includes(tag)}
           onClick={() => toggleTag(tag)}
+          className={cn(
+            'inline-flex min-h-9 items-center rounded-full border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-8 md:px-2 md:py-1 md:text-[11px]',
+            selectedTags.includes(tag)
+              ? 'border-transparent bg-primary text-primary-foreground shadow'
+              : 'border-input bg-background text-foreground hover:bg-accent'
+          )}
         >
           {tag}
-        </Badge>
+        </button>
       ))}
     </div>
   );

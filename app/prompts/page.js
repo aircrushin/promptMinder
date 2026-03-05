@@ -27,7 +27,7 @@ import { debounce } from "@/lib/debounce-utils";
 import { PromptGrid, PromptGridSkeleton } from "@/components/prompt/PromptGrid";
 import { NewPromptDialog } from "@/components/prompt/NewPromptDialog";
 import { OptimizePromptDialog } from "@/components/prompt/OptimizePromptDialog";
-import { Search, Tags, ChevronDown, Heart } from "lucide-react";
+import { Search, Tags, ChevronDown, Heart, PlusCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TagFilter = dynamic(() => import("@/components/prompt/TagFilter"), {
@@ -545,13 +545,13 @@ export default function PromptsPage() {
   const tp = t.promptsPage;
 
   return (
-    <div className="min-h-[80vh] bg-white">
-      <div className="container px-4 py-10 sm:py-16 mx-auto max-w-7xl">
-        <div className="space-y-8">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-8">
+    <div className="min-h-[80vh] bg-white pb-24 sm:pb-0">
+      <div className="container px-4 py-6 sm:py-12 mx-auto max-w-7xl">
+        <div className="space-y-6 sm:space-y-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6 sm:space-y-8">
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <h1 className="text-3xl font-bold tracking-tight">{tp.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{tp.title}</h1>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-lg">
                   <span className="text-sm font-medium text-secondary-foreground">
@@ -569,8 +569,8 @@ export default function PromptsPage() {
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="relative w-full md:w-[320px]">
+            <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center justify-between">
+              <div className="relative w-full sm:w-[320px]">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
                   <Search className="h-4 w-4" />
                 </div>
@@ -578,16 +578,16 @@ export default function PromptsPage() {
                   type="search"
                   onChange={(e) => debouncedSearch(e.target.value)}
                   placeholder={tp.searchPlaceholder}
-                  className="w-full h-10 pl-9 pr-4 transition-all duration-200 ease-in-out border rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary"
+                  className="w-full h-11 pl-9 pr-4 transition-all duration-200 ease-in-out border rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary"
                 />
               </div>
               
-              <TabsList className="h-10 p-1 bg-secondary/20">
-                <TabsTrigger value="all" className="gap-2 h-8">
+              <TabsList className="h-11 w-full sm:w-auto p-1 bg-secondary/20 grid grid-cols-2 sm:inline-flex">
+                <TabsTrigger value="all" className="gap-2 h-9">
                   <Tags className="h-3.5 w-3.5" />
                   <span className="text-sm font-medium">{tp.title}</span>
                 </TabsTrigger>
-                <TabsTrigger value="favorites" className="gap-2 h-8">
+                <TabsTrigger value="favorites" className="gap-2 h-9">
                   <Heart className="h-3.5 w-3.5" />
                   <span className="text-sm font-medium">{t.favorites?.title || "收藏夹"}</span>
                 </TabsTrigger>
@@ -606,12 +606,11 @@ export default function PromptsPage() {
                 <Button
                   asChild
                   variant="outline"
-                  size="sm"
-                  className="group px-3 self-start md:self-auto"
+                  className="group h-9 px-2.5 self-stretch sm:self-start md:self-auto md:h-8 md:px-2"
                 >
                   <Link href="/tags">
-                    <Tags className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
-                    <span className="group-hover:text-primary transition-colors">
+                    <Tags className="mr-2 h-3.5 w-3.5 md:h-3 md:w-3 group-hover:text-primary transition-colors" />
+                    <span className="text-xs md:text-[11px] group-hover:text-primary transition-colors">
                       {tp.manageTags}
                     </span>
                   </Link>
@@ -646,7 +645,7 @@ export default function PromptsPage() {
                     />
 
                     {pagination.totalPages > 1 && (
-                      <div className="mt-8 flex justify-center">
+                      <div className="mt-6 sm:mt-8 flex justify-center">
                         <Pagination
                           currentPage={pagination.page}
                           totalPages={pagination.totalPages}
@@ -712,7 +711,7 @@ export default function PromptsPage() {
                     />
 
                     {favoritesPagination.totalPages > 1 && (
-                      <div className="mt-8 flex justify-center">
+                      <div className="mt-6 sm:mt-8 flex justify-center">
                         <Pagination
                           currentPage={favoritesPagination.page}
                           totalPages={favoritesPagination.totalPages}
@@ -738,15 +737,15 @@ export default function PromptsPage() {
         open={!!selectedVersions}
         onOpenChange={() => setSelectedVersions(null)}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:max-w-md">
           <VisuallyHidden.Root>
             <DialogTitle>Dialog</DialogTitle>
           </VisuallyHidden.Root>
-          <DialogHeader className="flex items-center justify-between">
+          <DialogHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <DialogTitle className="text-xl">
               {tp.versionHistoryTitle}
             </DialogTitle>
-            <Button size="sm" onClick={handleCreateNewVersion}>
+            <Button onClick={handleCreateNewVersion} className="h-10 w-full sm:w-auto sm:h-9">
               {tp.createNewVersion}
             </Button>
           </DialogHeader>
@@ -776,7 +775,7 @@ export default function PromptsPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:max-w-md">
           <VisuallyHidden.Root>
             <DialogTitle>Dialog</DialogTitle>
           </VisuallyHidden.Root>
@@ -786,19 +785,29 @@ export default function PromptsPage() {
             </DialogTitle>
             <DialogDescription>{tp.deleteConfirmDescription}</DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 gap-2">
+          <DialogFooter className="mt-4 flex-col-reverse sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
+              className="h-10 w-full sm:w-auto"
             >
               {tp.cancel}
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button variant="destructive" onClick={confirmDelete} className="h-10 w-full sm:w-auto">
               {tp.delete}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <div className="fixed inset-x-4 bottom-4 z-40 sm:hidden">
+        <Button
+          onClick={() => setShowNewPromptDialog(true)}
+          className="h-11 w-full shadow-lg shadow-primary/20"
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {tp.create}
+        </Button>
+      </div>
       <NewPromptDialog
         open={showNewPromptDialog}
         onOpenChange={setShowNewPromptDialog}
