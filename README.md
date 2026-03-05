@@ -18,6 +18,9 @@
 
 - ✅ **提示词版本管理** - 支持版本回溯和历史记录查看
 - ✅ **版本差异对比** - 类似 Git diff 的并排对比视图，快速识别提示词更新变化
+- ✅ **版本审批流** - 团队空间支持可配置审批开关，支持提交/审批/拒绝/撤回
+- ✅ **审批讨论与 @提及** - 审批单线程评论，支持 `@团队成员` 协作评审
+- ✅ **变更订阅与通知中心** - 支持按提示词订阅变更，站内通知统一收敛
 - ✅ **标签化管理** - 自定义标签，快速分类和检索
 - ✅ **公私有模式** - 支持私有提示词和公共分享
 - ✅ **AI 智能生成** - 集成 AI 模型，智能生成优质提示词
@@ -94,7 +97,15 @@ GITHUB_SECRET=your_github_app_secret
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-4. **启动开发服务器**
+4. **执行数据库迁移**
+
+   首次拉取最新代码后，请先执行数据库迁移（尤其是审批流升级后）：
+
+```bash
+pnpm db:migrate
+```
+
+5. **启动开发服务器**
 
 ```bash
 npm run dev
@@ -164,9 +175,17 @@ pnpm db:studio     # 打开 Drizzle Studio 可视化管理数据库
 
    数据库表结构定义在 `drizzle/schema/` 目录中：
    - `teams.js` — teams、team_members、projects 表
-   - `prompts.js` — prompts、tags、favorites 表
+   - `prompts.js` — prompt_lineages、prompts、tags、favorites 表
+   - `workflow.js` — 审批流与协作表（审批单、评论、提及、订阅、通知、审计事件）
    - `public.js` — public_prompts、prompt_likes、prompt_contributions 表
    - `user.js` — user_feedback、provider_keys 表
+
+## 🔄 团队审批协作说明
+
+- 团队可在「团队管理」页面开启/关闭版本审批流（存量团队默认关闭，新团队默认开启）。
+- 开启后，团队内新建/改版会进入审批单，不会直接发布到版本列表。
+- 审批权限：`owner/admin`；支持审批单评论与 `@成员` 协作。
+- 支持按提示词订阅变更，并在通知中心查看未读/已读消息。
 
 ### Supabase Storage (文件上传)
 

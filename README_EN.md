@@ -18,10 +18,13 @@ A professional prompt management platform that makes AI prompt management simple
 
 - ✅ **Prompt Version Management** - Support for version history and rollback
 - ✅ **Version Diff Comparison** - Git-like side-by-side diff view to quickly identify prompt changes
+- ✅ **Version Approval Workflow** - Team workspaces support configurable approval flow (submit/approve/reject/withdraw)
+- ✅ **Review Thread with @Mentions** - Change-request-level comments with `@team member` mentions
+- ✅ **Change Subscription & Notification Center** - Subscribe to prompt changes and receive in-app notifications
 - ✅ **Tag Management** - Custom tags for quick categorization and retrieval
 - ✅ **Public/Private Mode** - Support for private prompts and public sharing
 - ✅ **AI Smart Generation** - Integrated AI models for generating quality prompts
-- ✅ **Team Collaboration** - Support for team creation and member management (in development)
+- ✅ **Team Collaboration** - Team creation, member management, and role-based permissions
 - ✅ **Prompt Contributions** - Community contribution features with review and publishing process
 
 ### User Experience
@@ -94,7 +97,15 @@ GITHUB_SECRET=your_github_app_secret
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-4. **Start the development server**
+4. **Run database migrations**
+
+   After pulling the latest code, run migrations before starting the app (required for workflow tables/columns):
+
+```bash
+pnpm db:migrate
+```
+
+5. **Start the development server**
 
 ```bash
 npm run dev
@@ -164,9 +175,18 @@ pnpm db:studio     # Open Drizzle Studio for visual database management
 
    Database table definitions are located in `drizzle/schema/`:
    - `teams.js` — teams, team_members, projects tables
-   - `prompts.js` — prompts, tags, favorites tables
+   - `prompts.js` — prompt_lineages, prompts, tags, favorites tables
+   - `workflow.js` — approval/collaboration tables (change requests, comments, mentions, subscriptions, notifications, audit events)
    - `public.js` — public_prompts, prompt_likes, prompt_contributions tables
    - `user.js` — user_feedback, provider_keys tables
+
+## 🔄 Team Workflow Notes
+
+- Team managers can enable/disable the version approval workflow in Team Management.
+- Existing teams are default `OFF`; newly created teams are default `ON`.
+- When enabled, new prompts and edits are submitted as change requests instead of being published directly.
+- Approval permissions: `owner/admin`; review threads support `@mentions`.
+- Prompt-level subscriptions and the Notification Center are available for in-app updates.
 
 ### Supabase Storage (File Uploads)
 
