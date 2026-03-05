@@ -27,6 +27,7 @@ import { debounce } from "@/lib/debounce-utils";
 import { PromptGrid, PromptGridSkeleton } from "@/components/prompt/PromptGrid";
 import { NewPromptDialog } from "@/components/prompt/NewPromptDialog";
 import { OptimizePromptDialog } from "@/components/prompt/OptimizePromptDialog";
+import { OnboardingDialog } from "@/components/prompt/OnboardingDialog";
 import { Search, Tags, ChevronDown, Heart, PlusCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -34,6 +35,8 @@ const TagFilter = dynamic(() => import("@/components/prompt/TagFilter"), {
   loading: () => <Skeleton className="h-10 w-32" />,
   ssr: false,
 });
+
+const ONBOARDING_STORAGE_PREFIX = "promptminder:onboarding:v1";
 
 export default function PromptsPage() {
   const { t } = useLanguage();
@@ -50,6 +53,8 @@ export default function PromptsPage() {
   const [promptToDelete, setPromptToDelete] = useState(null);
   const [selectedVersions, setSelectedVersions] = useState(null);
   const [showNewPromptDialog, setShowNewPromptDialog] = useState(false);
+  const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
+  const [isImportingConversation, setIsImportingConversation] = useState(false);
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -307,6 +312,105 @@ export default function PromptsPage() {
     }
   }, [newPrompt, toast, t?.promptsPage, fetchPrompts, activeTeamId]);
 
+  const markOnboardingCompleted = useCallback(() => {
+    if (typeof window === "undefined" || !user?.id) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      `${ONBOARDING_STORAGE_PREFIX}:${user.id}`,
+      "done"
+    );
+  }, [user?.id]);
+
+  const handleOnboardingOpenChange = useCallback(
+    (open) => {
+      setShowOnboardingDialog(open);
+      if (!open) {
+        markOnboardingCompleted();
+      }
+    },
+    [markOnboardingCompleted]
+  );
+
+  const handleApplyRoleTemplate = useCallback(
+    (roleTemplate) => {
+      const tags = Array.isArray(roleTemplate?.tags)
+        ? roleTemplate.tags.join(",")
+        : roleTemplate?.tags || "Chatbot";
+
+      setNewPrompt({
+        title: roleTemplate?.promptTitle || roleTemplate?.title || "",
+        content: roleTemplate?.promptContent || "",
+        description: roleTemplate?.promptDescription || roleTemplate?.description || "",
+        tags,
+        version: "1.0.0",
+        cover_img: "",
+      });
+
+      setShowOnboardingDialog(false);
+      markOnboardingCompleted();
+      setShowNewPromptDialog(true);
+    },
+    [markOnboardingCompleted]
+  );
+
+  const handleImportConversation = useCallback(
+    async ({ source, conversation }) => {
+      if (!conversation?.trim() || conversation.trim().length < 20) {
+        toast({
+          variant: "destructive",
+          description:
+            t?.promptsPage?.onboarding?.validationConversation ||
+            "请先粘贴至少 20 个字符的对话内容",
+          duration: 2000,
+        });
+        return;
+      }
+
+      setIsImportingConversation(true);
+      try {
+        const data = await apiClient.importConversationToPrompt({
+          source,
+          conversation,
+        });
+
+        setNewPrompt({
+          title: data?.title || "",
+          content: data?.content || "",
+          description: data?.description || "",
+          tags: data?.tags || "Chatbot",
+          version: data?.version || "1.0.0",
+          cover_img: "",
+        });
+
+        setShowOnboardingDialog(false);
+        markOnboardingCompleted();
+        setShowNewPromptDialog(true);
+
+        toast({
+          description:
+            t?.promptsPage?.onboarding?.importSuccess ||
+            "已根据对话生成提示词草稿",
+          duration: 2000,
+        });
+      } catch (error) {
+        console.error("Error importing conversation:", error);
+        toast({
+          variant: "destructive",
+          description:
+            error.message ||
+            t?.promptsPage?.onboarding?.importError ||
+            "导入失败，请稍后重试",
+          duration: 2000,
+        });
+      } finally {
+        setIsImportingConversation(false);
+      }
+    },
+    [markOnboardingCompleted, t?.promptsPage?.onboarding, toast]
+  );
+
   const handleCreateTag = useCallback(async (inputValue) => {
     try {
       await apiClient.createTag(
@@ -541,6 +645,34 @@ export default function PromptsPage() {
     fetchTags();
   }, [toast, activeTeamId]);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id || isLoading) {
+      return;
+    }
+    if (activeTab !== "all") {
+      return;
+    }
+    if (searchQuery.trim() || selectedTags.length > 0) {
+      return;
+    }
+    if ((pagination?.total || 0) > 0) {
+      return;
+    }
+
+    const key = `${ONBOARDING_STORAGE_PREFIX}:${user.id}`;
+    const onboardingState = window.localStorage.getItem(key);
+    if (onboardingState !== "done") {
+      setShowOnboardingDialog(true);
+    }
+  }, [
+    activeTab,
+    isLoading,
+    pagination?.total,
+    searchQuery,
+    selectedTags,
+    user?.id,
+  ]);
+
   if (!t) return null;
   const tp = t.promptsPage;
 
@@ -548,122 +680,131 @@ export default function PromptsPage() {
     <div className="min-h-[80vh] bg-white pb-24 sm:pb-0">
       <div className="container px-4 py-6 sm:py-12 mx-auto max-w-7xl">
         <div className="space-y-6 sm:space-y-8">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6 sm:space-y-8">
-          <div className="flex flex-col space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{tp.title}</h1>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-lg">
-                  <span className="text-sm font-medium text-secondary-foreground">
-                    {tp.totalPrompts.replace(
-                      "{count}",
-                      pagination.total.toString()
-                    )}
-                  </span>
-                </div>
-                {!isPersonal && activeTeamId && (
-                  <Button asChild variant="outline" className="whitespace-nowrap">
-                    <Link href="/teams">{tp.manageTeam}</Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center justify-between">
-              <div className="relative w-full sm:w-[320px]">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                  <Search className="h-4 w-4" />
-                </div>
-                <Input
-                  type="search"
-                  onChange={(e) => debouncedSearch(e.target.value)}
-                  placeholder={tp.searchPlaceholder}
-                  className="w-full h-11 pl-9 pr-4 transition-all duration-200 ease-in-out border rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary"
-                />
-              </div>
-              
-              <TabsList className="h-11 w-full sm:w-auto p-1 bg-secondary/20 grid grid-cols-2 sm:inline-flex">
-                <TabsTrigger value="all" className="gap-2 h-9">
-                  <Tags className="h-3.5 w-3.5" />
-                  <span className="text-sm font-medium">{tp.title}</span>
-                </TabsTrigger>
-                <TabsTrigger value="favorites" className="gap-2 h-9">
-                  <Heart className="h-3.5 w-3.5" />
-                  <span className="text-sm font-medium">{t.favorites?.title || "收藏夹"}</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            {!isLoading && (
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-                <TagFilter
-                  allTags={allTags}
-                  selectedTags={selectedTags}
-                  onTagSelect={setSelectedTags}
-                  className="touch-manipulation w-full md:w-auto"
-                  t={t}
-                />
-                <Button
-                  asChild
-                  variant="outline"
-                  className="group h-9 px-2.5 self-stretch sm:self-start md:self-auto md:h-8 md:px-2"
-                >
-                  <Link href="/tags">
-                    <Tags className="mr-2 h-3.5 w-3.5 md:h-3 md:w-3 group-hover:text-primary transition-colors" />
-                    <span className="text-xs md:text-[11px] group-hover:text-primary transition-colors">
-                      {tp.manageTags}
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6 sm:space-y-8">
+            <div className="flex flex-col space-y-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{tp.title}</h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-lg">
+                    <span className="text-sm font-medium text-secondary-foreground">
+                      {tp.totalPrompts.replace(
+                        "{count}",
+                        pagination.total.toString()
+                      )}
                     </span>
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="w-full">
-            {activeTab === "all" && (
-              <>
-                {isLoading ? (
-                  <div className="mt-8">
-                    <PromptGridSkeleton />
                   </div>
-                ) : (
-                  <>
-                    <PromptGrid
-                      groups={groupedPrompts}
-                      onCreatePrompt={() => setShowNewPromptDialog(true)}
-                      onCopyPrompt={handleCopy}
-                      onSharePrompt={handleShare}
-                      onDeletePrompt={handleDelete}
-                      onOpenVersions={showVersions}
-                      onOpenPrompt={handleOpenPrompt}
-                      onToggleFavorite={handleToggleFavorite}
-                      favoriteStatus={favoriteStatus}
-                      translations={t}
-                      user={user}
-                      role={activeMembership?.role}
-                      isPersonal={isPersonal}
-                    />
+                  {!isPersonal && activeTeamId && (
+                    <Button asChild variant="outline" className="whitespace-nowrap">
+                      <Link href="/teams">{tp.manageTeam}</Link>
+                    </Button>
+                  )}
+                  {!isLoading && pagination.total === 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowOnboardingDialog(true)}
+                      className="whitespace-nowrap"
+                    >
+                      {tp?.onboarding?.trigger || "首次引导"}
+                    </Button>
+                  )}
+                </div>
+              </div>
 
-                    {pagination.totalPages > 1 && (
-                      <div className="mt-6 sm:mt-8 flex justify-center">
-                        <Pagination
-                          currentPage={pagination.page}
-                          totalPages={pagination.totalPages}
-                          total={pagination.total}
-                          pageSize={pagination.limit}
-                          onPageChange={handlePageChange}
-                          onPageSizeChange={handlePageSizeChange}
-                          showSizeChanger={true}
-                          pageSizeOptions={[10, 20, 50]}
-                          className="w-full"
-                          t={t}
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
-              </>
-            )}
+              <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center justify-between">
+                <div className="relative w-full sm:w-[320px]">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                    <Search className="h-4 w-4" />
+                  </div>
+                  <Input
+                    type="search"
+                    onChange={(e) => debouncedSearch(e.target.value)}
+                    placeholder={tp.searchPlaceholder}
+                    className="w-full h-11 pl-9 pr-4 transition-all duration-200 ease-in-out border rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary"
+                  />
+                </div>
+
+                <TabsList className="h-11 w-full sm:w-auto p-1 bg-secondary/20 grid grid-cols-2 sm:inline-flex">
+                  <TabsTrigger value="all" className="gap-2 h-9">
+                    <Tags className="h-3.5 w-3.5" />
+                    <span className="text-sm font-medium">{tp.title}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="favorites" className="gap-2 h-9">
+                    <Heart className="h-3.5 w-3.5" />
+                    <span className="text-sm font-medium">{t.favorites?.title || "收藏夹"}</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {!isLoading && (
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                  <TagFilter
+                    allTags={allTags}
+                    selectedTags={selectedTags}
+                    onTagSelect={setSelectedTags}
+                    className="touch-manipulation w-full md:w-auto"
+                    t={t}
+                  />
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="group h-9 px-2.5 self-stretch sm:self-start md:self-auto md:h-8 md:px-2"
+                  >
+                    <Link href="/tags">
+                      <Tags className="mr-2 h-3.5 w-3.5 md:h-3 md:w-3 group-hover:text-primary transition-colors" />
+                      <span className="text-xs md:text-[11px] group-hover:text-primary transition-colors">
+                        {tp.manageTags}
+                      </span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full">
+              {activeTab === "all" && (
+                <>
+                  {isLoading ? (
+                    <div className="mt-8">
+                      <PromptGridSkeleton />
+                    </div>
+                  ) : (
+                    <>
+                      <PromptGrid
+                        groups={groupedPrompts}
+                        onCreatePrompt={() => setShowNewPromptDialog(true)}
+                        onCopyPrompt={handleCopy}
+                        onSharePrompt={handleShare}
+                        onDeletePrompt={handleDelete}
+                        onOpenVersions={showVersions}
+                        onOpenPrompt={handleOpenPrompt}
+                        onToggleFavorite={handleToggleFavorite}
+                        favoriteStatus={favoriteStatus}
+                        translations={t}
+                        user={user}
+                        role={activeMembership?.role}
+                        isPersonal={isPersonal}
+                      />
+
+                      {pagination.totalPages > 1 && (
+                        <div className="mt-6 sm:mt-8 flex justify-center">
+                          <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.totalPages}
+                            total={pagination.total}
+                            pageSize={pagination.limit}
+                            onPageChange={handlePageChange}
+                            onPageSizeChange={handlePageSizeChange}
+                            showSizeChanger={true}
+                            pageSizeOptions={[10, 20, 50]}
+                            className="w-full"
+                            t={t}
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
 
             {activeTab === "favorites" && (
               <>
@@ -730,9 +871,9 @@ export default function PromptsPage() {
                 )}
               </>
             )}
-          </div>
-        </Tabs>
-      </div>
+            </div>
+          </Tabs>
+        </div>
       <Dialog
         open={!!selectedVersions}
         onOpenChange={() => setSelectedVersions(null)}
@@ -822,6 +963,23 @@ export default function PromptsPage() {
         onCreateTag={handleCreateTag}
         copy={tp}
       />
+      <OnboardingDialog
+        open={showOnboardingDialog}
+        onOpenChange={handleOnboardingOpenChange}
+        copy={tp?.onboarding}
+        isImporting={isImportingConversation}
+        onApplyRole={handleApplyRoleTemplate}
+        onImportConversation={handleImportConversation}
+        onConversationInvalid={() => {
+          toast({
+            variant: "destructive",
+            description:
+              t?.promptsPage?.onboarding?.validationConversation ||
+              "请先粘贴至少 20 个字符的对话内容",
+            duration: 2000,
+          });
+        }}
+      />
       <OptimizePromptDialog
         open={showOptimizeModal}
         onOpenChange={(open) => {
@@ -842,5 +1000,5 @@ export default function PromptsPage() {
       />
     </div>
   </div>
-);
-} 
+  );
+}

@@ -426,7 +426,75 @@
     "optimizeButton": "Optimize Prompt",
     "optimizePreviewTitle": "Optimization Result Preview",
     "optimizePlaceholder": "Generating optimized content...",
-    "applyOptimization": "Apply Optimization Result"
+    "applyOptimization": "Apply Optimization Result",
+    "onboarding": {
+      "trigger": "Quick Start",
+      "headline": "First Value in Minutes",
+      "title": "Welcome to Prompt Minder",
+      "description": "Pick a role template or paste a ChatGPT/Claude chat to create your first useful prompt in minutes.",
+      "skip": "Maybe later",
+      "startRole": "Start by Role",
+      "importFromChat": "Import Chat",
+      "roleCountSuffix": "role templates",
+      "recommended": "Recommended",
+      "roleHint": "Choose a role and we will prefill title, content, and tags for you.",
+      "applyRole": "Use This Template",
+      "sourceLabel": "Chat Source",
+      "sourceChatgpt": "ChatGPT",
+      "sourceClaude": "Claude",
+      "importSteps": [
+        "Copy your ChatGPT/Claude conversation",
+        "Paste it into the input area",
+        "Generate a reusable prompt draft automatically"
+      ],
+      "conversationLabel": "Paste Conversation",
+      "conversationPlaceholder": "Example:\nUser: Help me draft a launch campaign\nAssistant: Who is your primary audience?",
+      "convert": "Convert to Prompt",
+      "converting": "Converting...",
+      "importTip": "After importing, refine once with your own business context.",
+      "footerHint": "You can reopen onboarding from the empty library state anytime.",
+      "importSuccess": "Draft generated from conversation. Review and create it.",
+      "importError": "Import failed. Please check the conversation and try again.",
+      "validationConversation": "Please paste at least 20 characters of conversation",
+      "roles": [
+        {
+          "id": "developer",
+          "title": "AI Developer",
+          "description": "For coding, debugging, refactoring, and architecture tasks.",
+          "promptTitle": "Development Task Assistant",
+          "promptDescription": "Break down development tasks and return executable implementation plans.",
+          "tags": "Development,Chatbot",
+          "promptContent": "You are a senior full-stack engineer. Produce an actionable implementation plan.\n\nInput:\n- Goal: {{goal}}\n- Stack: {{stack}}\n- Constraints: {{constraints}}\n\nOutput requirements:\n1. High-level approach (max 5 bullets)\n2. Step-by-step execution plan\n3. Key code snippets\n4. Risks and rollback strategy"
+        },
+        {
+          "id": "product",
+          "title": "Product Manager",
+          "description": "Great for requirement analysis, PRD drafting, and feature prioritization.",
+          "promptTitle": "Requirement & PRD Assistant",
+          "promptDescription": "Turn ideas into structured requirements and delivery plans.",
+          "tags": "Product,Requirement",
+          "promptContent": "You are a senior product manager. Turn the input into an executable requirement doc.\n\nInput:\n- Business goal: {{business_goal}}\n- Target users: {{target_user}}\n- Scenario/problem: {{scenario}}\n\nOutput requirements:\n1. Problem statement and objective\n2. Functional and non-functional requirements\n3. User flow\n4. Acceptance criteria\n5. Milestones and risks"
+        },
+        {
+          "id": "operations",
+          "title": "Growth Operator",
+          "description": "Best for campaign planning, channel execution, and growth experiments.",
+          "promptTitle": "Growth Campaign Assistant",
+          "promptDescription": "Generate growth plans, content directions, and review metrics quickly.",
+          "tags": "Operations,Growth",
+          "promptContent": "You are a growth operations lead. Design a practical growth plan.\n\nInput:\n- Growth goal: {{goal}}\n- Audience: {{audience}}\n- Available channels: {{channels}}\n\nOutput requirements:\n1. Goal breakdown and strategy\n2. Weekly execution rhythm\n3. Core content and creative ideas\n4. Metrics dashboard and post-mortem template"
+        },
+        {
+          "id": "content",
+          "title": "Content Creator",
+          "description": "For long-form writing, short video scripts, and social posts.",
+          "promptTitle": "Content Creation Assistant",
+          "promptDescription": "Generate clear and publish-ready content drafts.",
+          "tags": "Writing,Content",
+          "promptContent": "You are a senior content strategist. Generate a high-quality draft from the topic.\n\nInput:\n- Topic: {{topic}}\n- Audience: {{audience}}\n- Channel: {{channel}}\n\nOutput requirements:\n1. At least 5 title options\n2. Structured outline\n3. Full draft\n4. CTA and engagement questions\n5. One reusable rewrite version"
+        }
+      ]
+    }
   },
   "newPromptPage": {
     "title": "Create New Prompt",

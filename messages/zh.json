@@ -426,7 +426,75 @@
     "optimizeButton": "优化提示词",
     "optimizePreviewTitle": "优化结果预览",
     "optimizePlaceholder": "正在生成优化内容...",
-    "applyOptimization": "应用优化结果"
+    "applyOptimization": "应用优化结果",
+    "onboarding": {
+      "trigger": "首次引导",
+      "headline": "1 分钟看到价值",
+      "title": "欢迎使用 Prompt Minder",
+      "description": "选择你的角色，或粘贴 ChatGPT/Claude 对话，1 分钟完成第一个可用提示词。",
+      "skip": "稍后再说",
+      "startRole": "按角色开始",
+      "importFromChat": "导入对话",
+      "roleCountSuffix": "种角色模板",
+      "recommended": "推荐",
+      "roleHint": "选择一个角色模板，系统会自动填充标题、内容和标签。",
+      "applyRole": "使用此模板",
+      "sourceLabel": "对话来源",
+      "sourceChatgpt": "ChatGPT",
+      "sourceClaude": "Claude",
+      "importSteps": [
+        "复制你在 ChatGPT/Claude 的对话",
+        "粘贴到输入框",
+        "自动提炼为可复用提示词"
+      ],
+      "conversationLabel": "粘贴对话记录",
+      "conversationPlaceholder": "示例：\nUser: 帮我写一个新品发布计划\nAssistant: 你希望面向哪些用户群？",
+      "convert": "转换为提示词",
+      "converting": "转换中...",
+      "importTip": "建议导入后再微调一次，保留你的业务上下文。",
+      "footerHint": "你也可以随时在空库页面再次打开首次引导",
+      "importSuccess": "已根据对话生成草稿，请确认后创建。",
+      "importError": "导入失败，请检查对话内容后重试。",
+      "validationConversation": "请先粘贴至少 20 个字符的对话内容",
+      "roles": [
+        {
+          "id": "developer",
+          "title": "AI 开发工程师",
+          "description": "面向代码生成、重构、调试和架构讨论。",
+          "promptTitle": "开发任务执行助手",
+          "promptDescription": "用于拆解开发任务并输出可执行代码方案。",
+          "tags": "开发,Chatbot",
+          "promptContent": "你是一名资深全栈工程师。请根据输入任务输出可执行方案。\n\n输入信息：\n- 目标：{{goal}}\n- 技术栈：{{stack}}\n- 约束：{{constraints}}\n\n输出要求：\n1. 先给出方案概览（不超过 5 点）\n2. 再给出分步骤实现\n3. 提供关键代码片段\n4. 列出风险与回滚建议"
+        },
+        {
+          "id": "product",
+          "title": "产品经理",
+          "description": "适合需求分析、PRD 草稿和功能优先级规划。",
+          "promptTitle": "需求分析与 PRD 助手",
+          "promptDescription": "将想法转化为结构化需求文档和执行计划。",
+          "tags": "产品,需求分析",
+          "promptContent": "你是一名资深产品经理。请把输入内容整理成可执行需求文档。\n\n输入信息：\n- 业务目标：{{business_goal}}\n- 目标用户：{{target_user}}\n- 场景与问题：{{scenario}}\n\n输出要求：\n1. 问题定义与目标\n2. 核心功能与非功能需求\n3. 用户流程\n4. 验收标准\n5. 里程碑与风险"
+        },
+        {
+          "id": "operations",
+          "title": "增长运营",
+          "description": "适合活动策划、投放文案和增长实验设计。",
+          "promptTitle": "增长活动策划助手",
+          "promptDescription": "快速生成增长活动方案、内容和复盘指标。",
+          "tags": "运营,增长",
+          "promptContent": "你是一名增长运营负责人。请针对目标设计增长方案。\n\n输入信息：\n- 增长目标：{{goal}}\n- 目标人群：{{audience}}\n- 渠道资源：{{channels}}\n\n输出要求：\n1. 目标拆解与策略\n2. 执行节奏（按周）\n3. 关键内容与素材建议\n4. 指标监控与复盘模板"
+        },
+        {
+          "id": "content",
+          "title": "内容创作者",
+          "description": "适合长文、短视频脚本和社媒文案创作。",
+          "promptTitle": "内容创作助手",
+          "promptDescription": "生成清晰、有传播力的内容草稿。",
+          "tags": "写作,内容",
+          "promptContent": "你是一名资深内容策划。请根据输入主题输出高质量内容草稿。\n\n输入信息：\n- 主题：{{topic}}\n- 受众：{{audience}}\n- 发布渠道：{{channel}}\n\n输出要求：\n1. 标题备选（至少 5 个）\n2. 内容大纲\n3. 完整正文\n4. CTA 与互动问题\n5. 可复用的改写版本"
+        }
+      ]
+    }
   },
   "newPromptPage": {
     "title": "创建新提示词",
