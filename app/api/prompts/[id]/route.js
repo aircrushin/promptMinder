@@ -6,6 +6,7 @@ import { TEAM_ROLES } from '@/lib/team-service.js'
 import { eq, or, and } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { createChangeRequest, isTeamApprovalEnabled } from '@/lib/prompt-workflow.js'
 
 async function getPromptId(paramsPromise) {
   const { id } = await paramsPromise
@@ -90,6 +91,31 @@ export async function POST(request, { params }) {
     }
 
     const payload = await request.json()
+
+    if (teamId && (await isTeamApprovalEnabled(db, teamId))) {
+      const proposal = {
+        title: payload.title ?? prompt.title,
+        content: payload.content ?? prompt.content,
+        description: payload.description ?? prompt.description,
+        tags: payload.tags ?? prompt.tags,
+        version: payload.version ?? prompt.version,
+        projectId: payload.projectId ?? prompt.project_id ?? null,
+      }
+
+      const changeRequest = await createChangeRequest(db, {
+        teamId,
+        lineageId: prompt.lineage_id,
+        basePromptId: prompt.id,
+        requestType: 'create_version',
+        submitterUserId: userId,
+        proposal,
+      })
+
+      return NextResponse.json({
+        mode: 'approval_required',
+        change_request: changeRequest,
+      })
+    }
 
     const updateData = { updatedAt: new Date() }
 

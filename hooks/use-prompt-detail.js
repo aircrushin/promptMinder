@@ -39,21 +39,17 @@ export function usePromptDetail(id) {
         setSelectedVersion(normalizedPrompt.version);
 
         try {
-          const versionsResponse = await apiClient.getPrompts({
-            search: data.title,
-            limit: 100,
-          });
+          const versionsResponse = await apiClient.getPromptVersions(id);
 
           if (cancelled) return;
 
-          const list = Array.isArray(versionsResponse?.prompts)
-            ? versionsResponse.prompts
+          const list = Array.isArray(versionsResponse?.versions)
+            ? versionsResponse.versions
             : Array.isArray(versionsResponse)
             ? versionsResponse
             : [];
 
-          const sameTitle = list.filter((item) => item.title === data.title);
-          const sorted = sameTitle.sort(
+          const sorted = list.sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
           setVersions(sorted);

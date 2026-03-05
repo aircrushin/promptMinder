@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Share2, Trash2, Clock, PlusCircle, Heart } from "lucide-react";
+import { Copy, Share2, Trash2, Clock, PlusCircle, Heart, Bell } from "lucide-react";
 import { extractVariables } from "@/lib/promptVariables";
 
 const PromptCardSkeleton = () => (
@@ -67,6 +67,7 @@ export function PromptGrid({
   onOpenVersions,
   onOpenPrompt,
   onToggleFavorite,
+  onToggleSubscription,
   favoriteStatus = {},
   translations,
   user,
@@ -96,6 +97,7 @@ export function PromptGrid({
         const isManager = role === 'admin' || role === 'owner';
         const canManage = isPersonal || isCreator || isManager;
         const isFavorited = favoriteStatus[latestPrompt.id] || false;
+        const isSubscribed = latestPrompt.is_subscribed || false;
 
         const handleCardClick = () => {
           if (versions.length > 1) {
@@ -163,6 +165,21 @@ export function PromptGrid({
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
+                    {!isPersonal && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onToggleSubscription?.(latestPrompt.id, isSubscribed);
+                        }}
+                        className={`h-9 w-9 sm:h-8 sm:w-8 ${
+                          isSubscribed ? 'text-blue-600 bg-blue-50' : 'hover:bg-accent hover:text-primary'
+                        }`}
+                      >
+                        <Bell className={`h-4 w-4 ${isSubscribed ? 'fill-current' : ''}`} />
+                      </Button>
+                    )}
                     {canManage && (
                       <Button
                         variant="ghost"
@@ -240,6 +257,11 @@ export function PromptGrid({
                         ? pageCopy.versionsCount.replace("{count}", versions.length.toString())
                         : `${versions.length} versions`}
                     </span>
+                  </div>
+                )}
+                {latestPrompt.pending_count > 0 && (
+                  <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                    <span>{latestPrompt.pending_count} 待审批</span>
                   </div>
                 )}
               </div>

@@ -37,6 +37,55 @@ const TagFilter = dynamic(() => import("@/components/prompt/TagFilter"), {
 });
 
 const ONBOARDING_STORAGE_PREFIX = "promptminder:onboarding:v1";
+const DEFAULT_PROMPT_VERSION = "1.0.0";
+const DEFAULT_PROMPT_TAGS = "Chatbot";
+const DEFAULT_PAGINATION = {
+  page: 1,
+  limit: 20,
+  total: 0,
+  totalPages: 0,
+};
+const DEFAULT_NEW_PROMPT = {
+  title: "",
+  content: "",
+  description: "",
+  tags: DEFAULT_PROMPT_TAGS,
+  version: DEFAULT_PROMPT_VERSION,
+  cover_img: "",
+};
+
+function normalizePrompt(prompt) {
+  return {
+    ...prompt,
+    version: prompt.version || "1.0",
+    cover_img: prompt.cover_img || "/default-cover.jpg",
+    tags: Array.isArray(prompt.tags)
+      ? prompt.tags
+      : (prompt.tags || "").split(",").filter(Boolean),
+  };
+}
+
+function groupPromptsByTitle(promptList) {
+  const groups = promptList.reduce((acc, prompt) => {
+    const groupKey = prompt.lineage_id || prompt.title || "Untitled";
+    if (!acc[groupKey]) {
+      acc[groupKey] = [];
+    }
+    acc[groupKey].push(prompt);
+    return acc;
+  }, {});
+
+  return Object.entries(groups).map(([, versions]) => ({
+    title: versions[0]?.title || "Untitled",
+    versions: [...versions].sort(
+      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    ),
+  }));
+}
+
+function getTeamRequestOptions(activeTeamId) {
+  return activeTeamId ? { teamId: activeTeamId } : {};
+}
 
 export default function PromptsPage() {
   const { t } = useLanguage();
@@ -58,14 +107,7 @@ export default function PromptsPage() {
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [newPrompt, setNewPrompt] = useState({
-    title: "",
-    content: "",
-    description: "",
-    tags: "Chatbot",
-    version: "1.0.0",
-    cover_img: "",
-  });
+  const [newPrompt, setNewPrompt] = useState({ ...DEFAULT_NEW_PROMPT });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -73,21 +115,13 @@ export default function PromptsPage() {
   const [favorites, setFavorites] = useState([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [favoritesPagination, setFavoritesPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0
+    ...DEFAULT_PAGINATION,
   });
   
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0
-  });
+  const [pagination, setPagination] = useState({ ...DEFAULT_PAGINATION });
 
   // Optimize debounced search with proper cleanup
   const debouncedSearch = useMemo(
@@ -111,14 +145,6 @@ export default function PromptsPage() {
   const fetchPrompts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const normalizePrompt = (prompt) => ({
-        ...prompt,
-        version: prompt.version || "1.0",
-        cover_img: prompt.cover_img || "/default-cover.jpg",
-        tags: Array.isArray(prompt.tags)
-          ? prompt.tags
-          : (prompt.tags || "").split(",").filter(Boolean),
-      });
       const params = {
         page: currentPage,
         limit: pageSize,
@@ -132,8 +158,10 @@ export default function PromptsPage() {
         params.search = searchQuery.trim();
       }
 
-      const options = activeTeamId ? { teamId: activeTeamId } : {};
-      const data = await apiClient.getPrompts(params, options);
+      const data = await apiClient.getPrompts(
+        params,
+        getTeamRequestOptions(activeTeamId)
+      );
 
       if (data.prompts) {
         setPrompts(data.prompts.map(normalizePrompt));
@@ -167,7 +195,10 @@ export default function PromptsPage() {
     if (!t?.promptsPage) return;
     
     try {
-      await apiClient.deletePrompt(promptToDelete, activeTeamId ? { teamId: activeTeamId } : {});
+      await apiClient.deletePrompt(
+        promptToDelete,
+        getTeamRequestOptions(activeTeamId)
+      );
       fetchPrompts();
       setDeleteDialogOpen(false);
       toast({
@@ -209,7 +240,7 @@ export default function PromptsPage() {
     if (!t?.promptsPage) return;
     
     try {
-      await apiClient.sharePrompt(id, activeTeamId ? { teamId: activeTeamId } : {});
+      await apiClient.sharePrompt(id, getTeamRequestOptions(activeTeamId));
       const shareUrl = `${window.location.origin}/share/${id}`;
       await copy(shareUrl);
     } catch (error) {
@@ -222,24 +253,9 @@ export default function PromptsPage() {
     }
   }, [copy, toast, t?.promptsPage, activeTeamId]);
 
-  // Group prompts by title for easier rendering
+  // Group prompts by lineage (fallback to title) for version rendering
   const groupedPrompts = useMemo(() => {
-    const groups = prompts.reduce((acc, prompt) => {
-      const title = prompt.title || "Untitled";
-      if (!acc[title]) {
-        acc[title] = [];
-      }
-      acc[title].push(prompt);
-      return acc;
-    }, {});
-
-    return Object.entries(groups).map(([title, versions]) => ({
-      title,
-      versions: [...versions].sort(
-        (a, b) =>
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ),
-    }));
+    return groupPromptsByTitle(prompts);
   }, [prompts]);
 
   const showVersions = useCallback((versions) => {
@@ -273,7 +289,7 @@ export default function PromptsPage() {
 
     setIsSubmitting(true);
     try {
-      await apiClient.createPrompt(
+      const result = await apiClient.createPrompt(
         {
           ...newPrompt,
           id: crypto.randomUUID(),
@@ -281,25 +297,27 @@ export default function PromptsPage() {
           updated_at: new Date().toISOString(),
           is_public: true,
         },
-        activeTeamId ? { teamId: activeTeamId } : {}
+        getTeamRequestOptions(activeTeamId)
       );
 
-      fetchPrompts();
+      if (result?.mode === "approval_required" && result?.change_request?.id) {
+        setShowNewPromptDialog(false);
+        toast({
+          description: t.promptsPage.createPendingApproval || "已提交审批请求",
+          duration: 2000,
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+      } else {
+        fetchPrompts();
 
-      setShowNewPromptDialog(false);
-      setNewPrompt({
-        title: "",
-        content: "",
-        description: "",
-        tags: "Chatbot",
-        version: "1.0.0",
-        cover_img: "",
-      });
+        setShowNewPromptDialog(false);
+        setNewPrompt({ ...DEFAULT_NEW_PROMPT });
 
-      toast({
-        description: t.promptsPage.createSuccess,
-        duration: 2000,
-      });
+        toast({
+          description: t.promptsPage.createSuccess,
+          duration: 2000,
+        });
+      }
     } catch (error) {
       console.error("Error creating prompt:", error);
       toast({
@@ -310,7 +328,7 @@ export default function PromptsPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [newPrompt, toast, t?.promptsPage, fetchPrompts, activeTeamId]);
+  }, [newPrompt, toast, t?.promptsPage, fetchPrompts, activeTeamId, router]);
 
   const markOnboardingCompleted = useCallback(() => {
     if (typeof window === "undefined" || !user?.id) {
@@ -344,8 +362,8 @@ export default function PromptsPage() {
         content: roleTemplate?.promptContent || "",
         description: roleTemplate?.promptDescription || roleTemplate?.description || "",
         tags,
-        version: "1.0.0",
-        cover_img: "",
+        version: DEFAULT_PROMPT_VERSION,
+        cover_img: DEFAULT_NEW_PROMPT.cover_img,
       });
 
       setShowOnboardingDialog(false);
@@ -379,9 +397,9 @@ export default function PromptsPage() {
           title: data?.title || "",
           content: data?.content || "",
           description: data?.description || "",
-          tags: data?.tags || "Chatbot",
-          version: data?.version || "1.0.0",
-          cover_img: "",
+          tags: data?.tags || DEFAULT_PROMPT_TAGS,
+          version: data?.version || DEFAULT_PROMPT_VERSION,
+          cover_img: DEFAULT_NEW_PROMPT.cover_img,
         });
 
         setShowOnboardingDialog(false);
@@ -415,7 +433,7 @@ export default function PromptsPage() {
     try {
       await apiClient.createTag(
         { name: inputValue, scope: activeTeamId ? 'team' : 'personal' },
-        activeTeamId ? { teamId: activeTeamId } : {}
+        getTeamRequestOptions(activeTeamId)
       );
       const newOption = { value: inputValue, label: inputValue };
       setTagOptions((prev) => [...prev, newOption]);
@@ -495,16 +513,7 @@ export default function PromptsPage() {
         page: favoritesPagination.page,
         limit: favoritesPagination.limit
       });
-      
-      const normalizePrompt = (prompt) => ({
-        ...prompt,
-        version: prompt.version || "1.0",
-        cover_img: prompt.cover_img || "/default-cover.jpg",
-        tags: Array.isArray(prompt.tags)
-          ? prompt.tags
-          : (prompt.tags || "").split(",").filter(Boolean),
-      });
-      
+
       if (data.prompts) {
         setFavorites(data.prompts.map(normalizePrompt));
         setFavoritesPagination(data.pagination);
@@ -580,16 +589,78 @@ export default function PromptsPage() {
     }
   }, [toast, t?.favorites, activeTab, favorites]);
 
+  const handleToggleSubscription = useCallback(async (promptId, currentStatus) => {
+    if (!activeTeamId) {
+      toast({
+        variant: "destructive",
+        description: t?.promptsPage?.subscriptionTeamOnly || "仅团队空间支持订阅",
+        duration: 2000,
+      });
+      return;
+    }
+
+    setPrompts((prev) =>
+      prev.map((item) =>
+        item.id === promptId ? { ...item, is_subscribed: !currentStatus } : item
+      )
+    );
+    setFavorites((prev) =>
+      prev.map((item) =>
+        item.id === promptId ? { ...item, is_subscribed: !currentStatus } : item
+      )
+    );
+
+    try {
+      if (currentStatus) {
+        await apiClient.unsubscribePrompt(promptId, { teamId: activeTeamId });
+        toast({
+          description: t?.promptsPage?.unsubscribeSuccess || "已取消订阅",
+          duration: 2000,
+        });
+      } else {
+        await apiClient.subscribePrompt(promptId, { teamId: activeTeamId });
+        toast({
+          description: t?.promptsPage?.subscribeSuccess || "已订阅变更通知",
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling subscription:", error);
+      setPrompts((prev) =>
+        prev.map((item) =>
+          item.id === promptId ? { ...item, is_subscribed: currentStatus } : item
+        )
+      );
+      setFavorites((prev) =>
+        prev.map((item) =>
+          item.id === promptId ? { ...item, is_subscribed: currentStatus } : item
+        )
+      );
+      toast({
+        variant: "destructive",
+        description:
+          error.message ||
+          (currentStatus
+            ? t?.promptsPage?.unsubscribeError || "取消订阅失败"
+            : t?.promptsPage?.subscribeError || "订阅失败"),
+        duration: 2000,
+      });
+    }
+  }, [activeTeamId, t?.promptsPage, toast]);
+
   const handleTabChange = useCallback((value) => {
     setActiveTab(value);
-    if (value === "favorites") {
-      fetchFavorites();
-    }
-  }, [fetchFavorites]);
+  }, []);
 
   useEffect(() => {
     fetchPrompts();
   }, [fetchPrompts]);
+
+  useEffect(() => {
+    if (activeTab === "favorites") {
+      fetchFavorites();
+    }
+  }, [activeTab, fetchFavorites]);
 
   useEffect(() => {
     if (prompts.length > 0) {
@@ -605,7 +676,7 @@ export default function PromptsPage() {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const data = await apiClient.getTags(activeTeamId ? { teamId: activeTeamId } : {});
+        const data = await apiClient.getTags(getTeamRequestOptions(activeTeamId));
 
         let combinedTags = [];
         
@@ -675,6 +746,15 @@ export default function PromptsPage() {
 
   if (!t) return null;
   const tp = t.promptsPage;
+  const groupedFavorites = useMemo(() => {
+    return groupPromptsByTitle(favorites);
+  }, [favorites]);
+  const favoriteMapInFavoritesTab = useMemo(() => {
+    return favorites.reduce((acc, prompt) => {
+      acc[prompt.id] = true;
+      return acc;
+    }, {});
+  }, [favorites]);
 
   return (
     <div className="min-h-[80vh] bg-white pb-24 sm:pb-0">
@@ -696,6 +776,11 @@ export default function PromptsPage() {
                   {!isPersonal && activeTeamId && (
                     <Button asChild variant="outline" className="whitespace-nowrap">
                       <Link href="/teams">{tp.manageTeam}</Link>
+                    </Button>
+                  )}
+                  {!isPersonal && activeTeamId && (
+                    <Button asChild variant="outline" className="whitespace-nowrap">
+                      <Link href="/prompts/reviews">{tp.reviewCenter || "审批工作台"}</Link>
                     </Button>
                   )}
                   {!isLoading && pagination.total === 0 && (
@@ -778,6 +863,7 @@ export default function PromptsPage() {
                         onOpenVersions={showVersions}
                         onOpenPrompt={handleOpenPrompt}
                         onToggleFavorite={handleToggleFavorite}
+                        onToggleSubscription={handleToggleSubscription}
                         favoriteStatus={favoriteStatus}
                         translations={t}
                         user={user}
@@ -827,16 +913,7 @@ export default function PromptsPage() {
                 ) : (
                   <>
                     <PromptGrid
-                      groups={favorites.reduce((acc, prompt) => {
-                        const title = prompt.title || "Untitled";
-                        const existing = acc.find(g => g.title === title);
-                        if (existing) {
-                          existing.versions.push(prompt);
-                        } else {
-                          acc.push({ title, versions: [prompt] });
-                        }
-                        return acc;
-                      }, [])}
+                      groups={groupedFavorites}
                       onCreatePrompt={() => setShowNewPromptDialog(true)}
                       onCopyPrompt={handleCopy}
                       onSharePrompt={handleShare}
@@ -844,7 +921,8 @@ export default function PromptsPage() {
                       onOpenVersions={showVersions}
                       onOpenPrompt={handleOpenPrompt}
                       onToggleFavorite={handleToggleFavorite}
-                      favoriteStatus={favorites.reduce((acc, p) => ({ ...acc, [p.id]: true }), {})}
+                      onToggleSubscription={handleToggleSubscription}
+                      favoriteStatus={favoriteMapInFavoritesTab}
                       translations={t}
                       user={user}
                       role={activeMembership?.role}

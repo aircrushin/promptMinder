@@ -12,6 +12,7 @@ import VariableInputs from '@/components/prompt/VariableInputs';
 import { replaceVariables } from '@/lib/promptVariables';
 import PromptHeader from '@/components/prompt/PromptHeader';
 import PromptContent from '@/components/prompt/PromptContent';
+import PromptWorkflowPanel from '@/components/prompt/PromptWorkflowPanel';
 import DeleteConfirmDialog from '@/components/prompt/DeleteConfirmDialog';
 import { PromptSkeleton } from '@/components/prompt/PromptSkeleton';
 import { usePromptDetail } from '@/hooks/use-prompt-detail';
@@ -114,6 +115,8 @@ export default function PromptDetail({ params }) {
                 t={t}
                 canManage={canManage}
               />
+
+              <PromptWorkflowPanel promptId={prompt.id} />
             </CardContent>
           </Card>
         </div>

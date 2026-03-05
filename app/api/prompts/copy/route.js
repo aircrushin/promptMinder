@@ -4,7 +4,7 @@ import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { eq, and } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
-import { toSnakeCase } from '@/lib/case-utils.js'
+import { createChangeRequest, createPromptDirect, ensureLineage, isTeamApprovalEnabled } from '@/lib/prompt-workflow.js'
 
 export async function POST(request) {
   try {
@@ -72,26 +72,52 @@ export async function POST(request) {
       }
     }
 
-    const result = await db
-      .insert(prompts)
-      .values({
+    if (targetTeamId && (await isTeamApprovalEnabled(db, targetTeamId))) {
+      const lineageId = await ensureLineage(db, {
         teamId: targetTeamId,
-        projectId: targetTeamId ? dataToCopy.projectId || null : null,
+        title: dataToCopy.title,
+        userId,
+      })
+
+      const changeRequest = await createChangeRequest(db, {
+        teamId: targetTeamId,
+        lineageId,
+        requestType: 'create_prompt',
+        submitterUserId: userId,
+        proposal: {
+          title: dataToCopy.title,
+          content: dataToCopy.content,
+          description: dataToCopy.description || null,
+          tags: dataToCopy.tags || null,
+          version: '1.0.0',
+          projectId: dataToCopy.projectId || null,
+        },
+      })
+
+      return NextResponse.json({
+        mode: 'approval_required',
+        change_request: changeRequest,
+      }, { status: 201 })
+    }
+
+    const prompt = await createPromptDirect(db, {
+      teamId: targetTeamId,
+      userId,
+      data: {
         title: dataToCopy.title,
         content: dataToCopy.content,
         description: dataToCopy.description,
         tags: dataToCopy.tags,
         version: '1.0.0',
-        userId,
-        createdBy: userId,
-        isPublic: false,
-        coverImg: dataToCopy.coverImg,
-      })
-      .returning()
+        projectId: dataToCopy.projectId || null,
+        is_public: false,
+        cover_img: dataToCopy.coverImg,
+      },
+    })
 
     return NextResponse.json({
       message: 'Prompt copied successfully',
-      prompt: toSnakeCase(result[0]),
+      prompt,
     })
   } catch (error) {
     return handleApiError(error, 'Unable to copy prompt')

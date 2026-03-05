@@ -133,13 +133,23 @@ export default function EditPrompt({ params }) {
         };
         delete newPromptPayload.team_id;
         result = await apiClient.createPrompt(newPromptPayload, activeTeamId ? { teamId: activeTeamId } : {});
-        toast({ title: '成功', description: tp.createVersionSuccess });
-        router.push(`/prompts/${result.id}`);
+        if (result?.mode === 'approval_required' && result?.change_request?.id) {
+          toast({ title: '成功', description: tp.submitApprovalSuccess || '版本变更已提交审批' });
+          router.push(`/prompts/reviews/${result.change_request.id}`);
+        } else {
+          toast({ title: '成功', description: tp.createVersionSuccess });
+          router.push(`/prompts/${result.id}`);
+        }
       } else {
         const updatePayload = { ...prompt };
         result = await apiClient.updatePrompt(promptId, updatePayload, activeTeamId ? { teamId: activeTeamId } : {});
-        toast({ title: '成功', description: tp.updateSuccess });
-        router.push('/prompts');
+        if (result?.mode === 'approval_required' && result?.change_request?.id) {
+          toast({ title: '成功', description: tp.submitApprovalSuccess || '版本变更已提交审批' });
+          router.push(`/prompts/reviews/${result.change_request.id}`);
+        } else {
+          toast({ title: '成功', description: tp.updateSuccess });
+          router.push('/prompts');
+        }
       }
     } catch (error) {
       console.error('Error updating prompt:', error);

@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -169,6 +170,8 @@ export default function TeamsPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [approvalEnabled, setApprovalEnabled] = useState(false);
+  const [approvalSaving, setApprovalSaving] = useState(false);
 
   const isManager = useMemo(() => {
     return (
@@ -200,7 +203,6 @@ export default function TeamsPage() {
     } else {
       setTeamDetails(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTeamId, refreshKey]);
 
   const handleDeleteDialogChange = useCallback((nextOpen) => {
@@ -219,12 +221,19 @@ export default function TeamsPage() {
 
     setMembersLoading(true);
     try {
-      const response = await fetch(`/api/teams/${teamId}`);
+      const [response, workflowResponse] = await Promise.all([
+        fetch(`/api/teams/${teamId}`),
+        fetch(`/api/teams/${teamId}/workflow`),
+      ]);
+
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
         throw new Error(payload?.error || safeT.teamsPage.loadTeamError);
       }
       const payload = await response.json();
+      const workflowPayload = workflowResponse.ok
+        ? await workflowResponse.json().catch(() => ({}))
+        : {};
       
       // 验证数据完整性
       if (!payload.team || typeof payload.team !== 'object') {
@@ -237,6 +246,7 @@ export default function TeamsPage() {
       }
       
       setTeamDetails(payload);
+      setApprovalEnabled(Boolean(workflowPayload?.approval_enabled));
       setEditForm({
         name: payload.team.name || "",
         description: payload.team.description || "",
@@ -251,6 +261,38 @@ export default function TeamsPage() {
       setTeamDetails(null);
     } finally {
       setMembersLoading(false);
+    }
+  };
+
+  const handleToggleApproval = async (enabled) => {
+    if (!activeTeamId) return;
+
+    setApprovalSaving(true);
+    setApprovalEnabled(enabled);
+    try {
+      const response = await fetch(`/api/teams/${activeTeamId}/workflow`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approval_enabled: enabled }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.error || "更新审批设置失败");
+      }
+
+      toast({
+        description: enabled ? "已开启版本审批流" : "已关闭版本审批流",
+      });
+    } catch (error) {
+      console.error("[TeamsPage] update workflow error", error);
+      setApprovalEnabled((prev) => !prev);
+      toast({
+        variant: "destructive",
+        description: error.message || "更新审批设置失败",
+      });
+    } finally {
+      setApprovalSaving(false);
     }
   };
 
@@ -640,6 +682,24 @@ export default function TeamsPage() {
               )}
 
               <div className="flex flex-wrap gap-3">
+                {isManager && !isPersonalTeam && (
+                  <div className="w-full rounded-lg border border-border/50 p-4 bg-muted/20">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium">版本审批流</p>
+                        <p className="text-xs text-muted-foreground">
+                          开启后，团队内新建/改版将进入审批，不会直接发布
+                        </p>
+                      </div>
+                      <Switch
+                        checked={approvalEnabled}
+                        onCheckedChange={handleToggleApproval}
+                        disabled={approvalSaving}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {isManager && !isPersonalTeam && (
                   <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
                     <DialogTrigger asChild>

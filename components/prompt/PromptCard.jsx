@@ -142,11 +142,19 @@ function PromptCardComponent({ prompt }) {
     
     setIsImporting(true);
     try {
-      await apiClient.copyPrompt(prompt);
-      toast({
-        title: t.publicPage.importSuccessTitle,
-        description: t.publicPage.importSuccessDescription,
-      });
+      const result = await apiClient.copyPrompt(prompt);
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        toast({
+          title: t.publicPage.importSuccessTitle,
+          description: t.publicPage.importPendingApprovalDescription || '已提交审批请求',
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+      } else {
+        toast({
+          title: t.publicPage.importSuccessTitle,
+          description: t.publicPage.importSuccessDescription,
+        });
+      }
     } catch (error) {
       toast({
         title: t.publicPage.importErrorTitle,

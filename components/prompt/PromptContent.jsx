@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +18,7 @@ export default function PromptContent({
   canManage = true
 }) {
   const { toast } = useToast();
+  const router = useRouter();
   const [copySuccess, setCopySuccess] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
@@ -51,7 +53,17 @@ export default function PromptContent({
     setIsEditing(false);
 
     try {
-      await apiClient.updatePrompt(prompt.id, { content: editedContent });
+      const result = await apiClient.updatePrompt(prompt.id, { content: editedContent });
+
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        onPromptUpdate({ ...prompt, content: previousContent });
+        toast({
+          title: tp.saveSuccessTitle || "Submitted",
+          description: tp.savePendingApproval || "变更已提交审批。",
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+        return;
+      }
       
       toast({
         title: "Success",

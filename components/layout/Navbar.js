@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -10,9 +10,9 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { Menu, Library, LayoutGrid, Languages, FlaskConical } from "lucide-react";
+import { Menu, Library, LayoutGrid, Languages, FlaskConical, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TeamSwitcher } from '@/components/team/TeamSwitcher';
 
@@ -20,6 +20,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const showTeamSwitcher = pathname?.startsWith('/prompts');
   const { toggleLanguage, t } = useLanguage();
+  const { isSignedIn } = useUser();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,6 +32,37 @@ export default function Navbar() {
     };
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setUnreadCount(0);
+      return;
+    }
+
+    let active = true;
+
+    const loadUnreadCount = async () => {
+      try {
+        const response = await fetch('/api/notifications?unread_only=true&page=1&limit=1', {
+          cache: 'no-store',
+        });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (active) {
+          setUnreadCount(payload?.unread_count || 0);
+        }
+      } catch (error) {
+        console.error('Failed to load unread notifications:', error);
+      }
+    };
+
+    loadUnreadCount();
+    const timer = setInterval(loadUnreadCount, 30000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [isSignedIn]);
 
   const fallbackTranslations = {
     header: {
@@ -200,6 +233,19 @@ export default function Navbar() {
           >
             <Languages className="h-5 w-5" />
           </Button>
+
+          <SignedIn>
+            <Button asChild variant="ghost" size="icon" className="relative rounded-xl text-slate-600 hover:bg-slate-100">
+              <Link href="/notifications">
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 min-w-4 h-4 px-1 rounded-full bg-red-500 text-[10px] text-white leading-4 text-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            </Button>
+          </SignedIn>
 
           <SignedOut>
             <SignInButton mode="modal" redirectUrl="/prompts">

@@ -20,6 +20,7 @@ export const teams = pgTable(
     description: text('description'),
     avatarUrl: text('avatar_url'),
     isPersonal: boolean('is_personal').notNull().default(false),
+    approvalEnabled: boolean('approval_enabled').notNull().default(true),
     createdBy: text('created_by').notNull(),
     ownerId: text('owner_id').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

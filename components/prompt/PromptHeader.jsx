@@ -59,9 +59,19 @@ export default function PromptHeader({
 
     setIsSaving(true);
     try {
-      await apiClient.updatePrompt(prompt.id, {
+      const result = await apiClient.updatePrompt(prompt.id, {
         description: editedDescription,
       });
+
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        setIsEditingDescription(false);
+        toast({
+          title: tp.descriptionSaveSuccess || '已提交审批',
+          description: tp.descriptionPendingApproval || '描述变更已提交审批',
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+        return;
+      }
       
       const freshPrompt = await apiClient.getPrompt(prompt.id);
       const normalizedPrompt = {

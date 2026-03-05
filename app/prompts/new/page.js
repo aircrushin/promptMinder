@@ -99,7 +99,7 @@ export default function NewPrompt() {
 
     setIsSubmitting(true);
     try {
-      await apiClient.createPrompt(
+      const result = await apiClient.createPrompt(
         {
           ...prompt,
           id: crypto.randomUUID(),
@@ -109,8 +109,13 @@ export default function NewPrompt() {
         activeTeamId ? { teamId: activeTeamId } : {}
       );
 
-      toast({ description: '提示词创建成功', duration: 2000 });
-      router.push('/prompts');
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        toast({ description: '已提交审批请求', duration: 2000 });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+      } else {
+        toast({ description: '提示词创建成功', duration: 2000 });
+        router.push('/prompts');
+      }
     } catch (error) {
       console.error('Error creating prompt:', error);
       toast({

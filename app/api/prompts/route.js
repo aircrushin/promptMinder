@@ -6,6 +6,14 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { eq, or, and, ilike, desc, count as countFn } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import {
+  createChangeRequest,
+  createPromptDirect,
+  ensureLineage,
+  isTeamApprovalEnabled,
+  listPendingCountsByLineage,
+  listSubscriptionsByLineageForUser,
+} from '@/lib/prompt-workflow.js'
 
 function buildPromptConditions({ teamId, userId, tag, search }) {
   const conditions = []
@@ -55,6 +63,31 @@ export async function GET(request) {
 
     let promptList = dataResult.map(toSnakeCase)
     const total = countResult[0]?.value || 0
+
+    if (teamId && promptList.length > 0) {
+      const lineageIds = Array.from(new Set(promptList.map((item) => item.lineage_id).filter(Boolean)))
+      const [pendingCountsMap, subscriptionSet] = await Promise.all([
+        listPendingCountsByLineage(db, { teamId, lineageIds }),
+        listSubscriptionsByLineageForUser(db, { teamId, lineageIds, userId }),
+      ])
+
+      promptList = promptList.map((prompt) => {
+        const pendingCount = pendingCountsMap.get(prompt.lineage_id) || 0
+        return {
+          ...prompt,
+          pending_count: pendingCount,
+          has_pending_requests: pendingCount > 0,
+          is_subscribed: subscriptionSet.has(prompt.lineage_id),
+        }
+      })
+    } else {
+      promptList = promptList.map((prompt) => ({
+        ...prompt,
+        pending_count: 0,
+        has_pending_requests: false,
+        is_subscribed: false,
+      }))
+    }
 
     // Enrich prompts with creator info if possible
     if (promptList.length > 0) {
@@ -134,24 +167,48 @@ export async function POST(request) {
 
     const data = await request.json()
 
-    const result = await db
-      .insert(prompts)
-      .values({
-        teamId: targetTeamId,
-        projectId: targetTeamId ? data.projectId || null : null,
-        title: data.title,
-        content: data.content,
-        description: data.description || null,
-        createdBy: userId,
-        userId: userId,
-        version: data.version || null,
-        tags: data.tags || null,
-        isPublic: data.is_public ?? false,
-        coverImg: data.cover_img || data.image_url || null,
-      })
-      .returning()
+    if (!data?.title || !data?.content) {
+      return NextResponse.json({ error: 'title and content are required' }, { status: 400 })
+    }
 
-    return NextResponse.json(toSnakeCase(result[0]), { status: 201 })
+    if (targetTeamId && (await isTeamApprovalEnabled(db, targetTeamId))) {
+      const lineageId = await ensureLineage(db, {
+        teamId: targetTeamId,
+        title: data.title,
+        userId,
+      })
+
+      const changeRequest = await createChangeRequest(db, {
+        teamId: targetTeamId,
+        lineageId,
+        requestType: 'create_prompt',
+        submitterUserId: userId,
+        proposal: {
+          title: data.title,
+          content: data.content,
+          description: data.description || null,
+          tags: data.tags || null,
+          version: data.version || null,
+          projectId: data.projectId || null,
+        },
+      })
+
+      return NextResponse.json(
+        {
+          mode: 'approval_required',
+          change_request: changeRequest,
+        },
+        { status: 201 }
+      )
+    }
+
+    const prompt = await createPromptDirect(db, {
+      teamId: targetTeamId,
+      userId,
+      data,
+    })
+
+    return NextResponse.json(prompt, { status: 201 })
   } catch (error) {
     return handleApiError(error, 'Unable to create prompt')
   }

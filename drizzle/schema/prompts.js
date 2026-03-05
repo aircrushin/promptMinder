@@ -12,6 +12,25 @@ import {
 import { sql } from 'drizzle-orm'
 import { teams, projects } from './teams.js'
 
+// ─── prompt_lineages ──────────────────────────────────────────────────────────
+
+export const promptLineages = pgTable(
+  'prompt_lineages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    createdBy: text('created_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check('chk_prompt_lineage_name_not_empty', sql`char_length(trim(${table.name})) > 0`),
+    index('idx_prompt_lineages_team_id').on(table.teamId),
+    index('idx_prompt_lineages_team_name').on(table.teamId, sql`lower(${table.name})`),
+  ]
+)
+
 // ─── prompts ──────────────────────────────────────────────────────────────────
 
 export const prompts = pgTable(
@@ -19,6 +38,9 @@ export const prompts = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
+    lineageId: uuid('lineage_id')
+      .notNull()
+      .references(() => promptLineages.id, { onDelete: 'cascade' }),
     projectId: uuid('project_id').references(() => projects.id, {
       onDelete: 'set null',
     }),
@@ -38,6 +60,7 @@ export const prompts = pgTable(
   (table) => [
     check('chk_prompt_title_not_empty', sql`char_length(trim(${table.title})) > 0`),
     index('idx_prompts_team_id').on(table.teamId),
+    index('idx_prompts_lineage_id').on(table.lineageId),
     index('idx_prompts_created_by').on(table.createdBy),
     index('idx_prompts_project_id').on(table.projectId),
   ]

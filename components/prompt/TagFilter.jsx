@@ -19,7 +19,7 @@ function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }) {
           aria-pressed={selectedTags.includes(tag)}
           onClick={() => toggleTag(tag)}
           className={cn(
-            'inline-flex min-h-9 items-center rounded-full border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-8 md:px-2 md:py-1 md:text-[11px]',
+            'inline-flex min-h-9 items-center rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-8 md:px-2 md:py-1 md:text-[11px]',
             selectedTags.includes(tag)
               ? 'border-transparent bg-primary text-primary-foreground shadow'
               : 'border-input bg-background text-foreground hover:bg-accent'
