@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Filter, Clock, Heart } from 'lucide-react';
+import { Search, X, ChevronUp, Plus, ChevronLeft, ChevronRight, Filter, Clock, Heart, Sparkles, TrendingUp } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -159,6 +159,65 @@ export default function PublicPromptsClient() {
         );
     }, [prompts, searchQuery]);
 
+    const noResultSuggestions = useMemo(() => {
+        if (!searchQuery.trim() || filteredPrompts.length > 0) {
+            return {
+                keywords: [],
+                relatedCategories: [],
+                trendingPrompts: [],
+            };
+        }
+
+        const normalizedQuery = searchQuery.toLowerCase().trim();
+        const keywordFrequency = new Map();
+
+        prompts.forEach((prompt) => {
+            const sourceText = [prompt.title, prompt.role].filter(Boolean).join(' ');
+            sourceText
+                .split(/[\s,/、，。.!?;:()\[\]{}\-_|]+/)
+                .map((word) => word.trim())
+                .filter((word) => word.length >= 2)
+                .forEach((word) => {
+                    keywordFrequency.set(word, (keywordFrequency.get(word) || 0) + 1);
+                });
+        });
+
+        let keywords = Array.from(keywordFrequency.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([word]) => word)
+            .filter((word) => !normalizedQuery.includes(word.toLowerCase()));
+
+        const queryRelatedKeywords = keywords.filter((word) => {
+            const normalizedWord = word.toLowerCase();
+            return normalizedWord.includes(normalizedQuery) || normalizedQuery.includes(normalizedWord);
+        });
+
+        if (queryRelatedKeywords.length > 0) {
+            keywords = [...queryRelatedKeywords, ...keywords.filter((word) => !queryRelatedKeywords.includes(word))];
+        }
+
+        const keywordsResult = keywords.slice(0, 6);
+
+        let relatedCategories = categories.filter((category) => {
+            const normalizedCategory = category.toLowerCase();
+            return normalizedCategory.includes(normalizedQuery) || normalizedQuery.includes(normalizedCategory);
+        });
+
+        if (relatedCategories.length === 0) {
+            relatedCategories = categories.slice(0, 6);
+        }
+
+        const trendingPrompts = [...prompts]
+            .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+            .slice(0, 3);
+
+        return {
+            keywords: keywordsResult,
+            relatedCategories,
+            trendingPrompts,
+        };
+    }, [searchQuery, filteredPrompts.length, prompts, categories]);
+
     // 生成GEO优化的结构化数据
     // 注意：Hooks 必须在所有条件 return 之前调用，避免 Hook 顺序变化导致崩溃
     const structuredData = useMemo(() => {
@@ -200,6 +259,19 @@ export default function PublicPromptsClient() {
     // 清空搜索
     const clearSearch = () => {
         setSearchQuery('');
+    };
+
+    const handleSuggestedKeywordClick = (keyword) => {
+        setSearchQuery(keyword);
+    };
+
+    const handleRelatedCategoryClick = (category) => {
+        handleCategoryChange(category);
+        setSearchQuery('');
+    };
+
+    const handleTrendingPromptClick = (prompt) => {
+        setSearchQuery(prompt.title || prompt.role || '');
     };
 
     // 处理贡献表单提交
@@ -574,20 +646,91 @@ export default function PublicPromptsClient() {
                         </div>
                     ) : searchQuery ? (
                         // 搜索无结果提示
-                        (<div className="text-center py-16">
-                            <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">🔍</div>
-                            <h3 className="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">
-                                {t.publicPage.noResults}
-                            </h3>
-                            <p className="text-gray-500 dark:text-gray-500 mb-6">
-                                {t.publicPage.tryOtherKeywords}{' '}
-                                <button 
-                                    onClick={clearSearch}
-                                    className="text-foreground underline hover:text-foreground/70 dark:text-white dark:hover:text-white/80"
-                                >
-                                    {t.publicPage.clearSearch}
-                                </button>
-                            </p>
+                        (<div className="mx-auto max-w-4xl py-16">
+                            <div className="text-center mb-8">
+                                <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">🔍</div>
+                                <h3 className="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                    {t.publicPage.noResults}
+                                </h3>
+                                <p className="text-gray-500 dark:text-gray-500 mb-6">
+                                    {t.publicPage.tryOtherKeywords}{' '}
+                                    <button
+                                        onClick={clearSearch}
+                                        className="text-foreground underline hover:text-foreground/70 dark:text-white dark:hover:text-white/80"
+                                    >
+                                        {t.publicPage.clearSearch}
+                                    </button>
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div className="rounded-2xl border border-border/70 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
+                                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                        <Sparkles className="h-4 w-4" />
+                                        {t.publicPage.recommendedKeywordsTitle}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {noResultSuggestions.keywords.length > 0 ? noResultSuggestions.keywords.map((keyword) => (
+                                            <button
+                                                key={keyword}
+                                                onClick={() => handleSuggestedKeywordClick(keyword)}
+                                                className="rounded-full border border-border bg-background px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-slate-900 hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-100 dark:hover:text-gray-900"
+                                            >
+                                                {keyword}
+                                            </button>
+                                        )) : (
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                {t.publicPage.noSuggestions}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-border/70 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
+                                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                        <Filter className="h-4 w-4" />
+                                        {t.publicPage.relatedCategoriesTitle}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {noResultSuggestions.relatedCategories.length > 0 ? noResultSuggestions.relatedCategories.map((category) => (
+                                            <button
+                                                key={category}
+                                                onClick={() => handleRelatedCategoryClick(category)}
+                                                className="rounded-full border border-border bg-background px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-slate-900 hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-100 dark:hover:text-gray-900"
+                                            >
+                                                {category}
+                                            </button>
+                                        )) : (
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                {t.publicPage.noCategories}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-border/70 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
+                                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                        <TrendingUp className="h-4 w-4" />
+                                        {t.publicPage.trendingContentTitle}
+                                    </div>
+                                    <div className="space-y-2">
+                                        {noResultSuggestions.trendingPrompts.length > 0 ? noResultSuggestions.trendingPrompts.map((prompt) => (
+                                            <button
+                                                key={prompt.id}
+                                                onClick={() => handleTrendingPromptClick(prompt)}
+                                                className="flex w-full items-start justify-between gap-2 rounded-xl border border-border bg-background px-3 py-2 text-left transition-colors hover:bg-slate-900 hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-100 dark:hover:text-gray-900"
+                                            >
+                                                <span className="line-clamp-1 text-sm">{prompt.title || prompt.role}</span>
+                                                <span className="shrink-0 text-xs opacity-80">♥ {prompt.likes || 0}</span>
+                                            </button>
+                                        )) : (
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                {t.publicPage.noTrendingContent}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         </div>)
                     ) : null}
 

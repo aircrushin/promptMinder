@@ -3,9 +3,13 @@ import { db } from '@/lib/db.js'
 import { eq, desc, count as countFn } from 'drizzle-orm'
 import { promptContributions } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { requireUserId } from '@/lib/auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function POST(request) {
   try {
+    await requireUserId()
+
     const { title, role, content, language, contributorEmail, contributorName } = await request.json()
 
     if (!title || !title.trim()) {
@@ -37,8 +41,7 @@ export async function POST(request) {
       created_at: newContribution.created_at
     })
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleApiError(error, 'Unable to submit contribution')
   }
 }
 
