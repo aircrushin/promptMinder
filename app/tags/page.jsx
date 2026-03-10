@@ -122,7 +122,10 @@ export default function TagsPage() {
 
   const confirmDelete = async () => {
     try {
-      await apiClient.deleteTag(selectedTagId);
+      await apiClient.deleteTag(
+        selectedTagId,
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
       setDeleteModalOpen(false);
       fetchTags();
     } catch (err) {
@@ -138,7 +141,10 @@ export default function TagsPage() {
 
   const confirmBatchDelete = async () => {
     try {
-      await apiClient.deleteTags(Array.from(selectedTags));
+      await apiClient.deleteTags(
+        Array.from(selectedTags),
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
       setBatchDeleteModalOpen(false);
       setSelectedTags(new Set());
       setIsBatchMode(false);
@@ -156,7 +162,11 @@ export default function TagsPage() {
 
   const confirmEdit = async () => {
     try {
-      await apiClient.updateTag(editingTag.id, { name: editingTag.name });
+      await apiClient.updateTag(
+        editingTag.id,
+        { name: editingTag.name },
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
       setEditModalOpen(false);
       fetchTags();
     } catch (err) {
