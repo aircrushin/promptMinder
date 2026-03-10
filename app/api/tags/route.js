@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db.js'
 import { requireUserId } from '@/lib/auth.js'
+import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { ApiError } from '@/lib/api-error.js'
-import { eq, asc, and, inArray } from 'drizzle-orm'
-import { tags, publicTags } from '@/drizzle/schema/index.js'
+import { eq, asc, and, inArray, or, ilike, isNull } from 'drizzle-orm'
+import { tags, publicTags, prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 
 function assertTagName(name) {
@@ -13,11 +14,180 @@ function assertTagName(name) {
   }
 }
 
+function parsePromptTagList(tagsValue) {
+  if (typeof tagsValue !== 'string' || !tagsValue.trim()) {
+    return []
+  }
+
+  return tagsValue
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function serializePromptTagList(tagList) {
+  return tagList.join(',')
+}
+
+function hasTagListChanged(currentList, nextList) {
+  if (currentList.length !== nextList.length) {
+    return true
+  }
+
+  for (let i = 0; i < currentList.length; i += 1) {
+    if (currentList[i] !== nextList[i]) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function dedupeTagList(tagList) {
+  const seen = new Set()
+  const deduped = []
+
+  for (const tagName of tagList) {
+    const normalized = tagName.toLowerCase()
+    if (seen.has(normalized)) {
+      continue
+    }
+    seen.add(normalized)
+    deduped.push(tagName)
+  }
+
+  return deduped
+}
+
+function buildPromptScopeConditionForUser(userId) {
+  return and(
+    isNull(prompts.teamId),
+    or(eq(prompts.createdBy, userId), eq(prompts.userId, userId))
+  )
+}
+
+function buildPromptScopeCondition({ teamId, userId }) {
+  if (teamId) {
+    return eq(prompts.teamId, teamId)
+  }
+
+  return buildPromptScopeConditionForUser(userId)
+}
+
+async function replaceTagNameInPrompts(scopeCondition, oldTagName, newTagName) {
+  const oldNameNormalized = oldTagName.toLowerCase()
+  const candidatePrompts = await db
+    .select({ id: prompts.id, tags: prompts.tags })
+    .from(prompts)
+    .where(and(scopeCondition, ilike(prompts.tags, `%${oldTagName}%`)))
+
+  let updatedCount = 0
+
+  for (const prompt of candidatePrompts) {
+    const currentTags = parsePromptTagList(prompt.tags)
+    if (currentTags.length === 0) {
+      continue
+    }
+
+    const replacedTags = currentTags.map((item) =>
+      item.toLowerCase() === oldNameNormalized ? newTagName : item
+    )
+    const nextTags = dedupeTagList(replacedTags)
+
+    if (!hasTagListChanged(currentTags, nextTags)) {
+      continue
+    }
+
+    await db
+      .update(prompts)
+      .set({
+        tags: serializePromptTagList(nextTags),
+        updatedAt: new Date(),
+      })
+      .where(eq(prompts.id, prompt.id))
+    updatedCount += 1
+  }
+
+  return updatedCount
+}
+
+async function removeTagNamesFromPrompts(scopeCondition, namesToRemove) {
+  const normalizedNames = namesToRemove
+    .map((name) => (typeof name === 'string' ? name.trim() : ''))
+    .filter(Boolean)
+    .map((name) => name.toLowerCase())
+
+  if (normalizedNames.length === 0) {
+    return 0
+  }
+
+  const likeConditions = normalizedNames.map((name) => ilike(prompts.tags, `%${name}%`))
+  const promptMatchCondition = likeConditions.length === 1 ? likeConditions[0] : or(...likeConditions)
+
+  const candidatePrompts = await db
+    .select({ id: prompts.id, tags: prompts.tags })
+    .from(prompts)
+    .where(and(scopeCondition, promptMatchCondition))
+
+  const removeSet = new Set(normalizedNames)
+  let updatedCount = 0
+
+  for (const prompt of candidatePrompts) {
+    const currentTags = parsePromptTagList(prompt.tags)
+    if (currentTags.length === 0) {
+      continue
+    }
+
+    const nextTags = currentTags.filter((item) => !removeSet.has(item.toLowerCase()))
+
+    if (!hasTagListChanged(currentTags, nextTags)) {
+      continue
+    }
+
+    await db
+      .update(prompts)
+      .set({
+        tags: nextTags.length > 0 ? serializePromptTagList(nextTags) : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(prompts.id, prompt.id))
+    updatedCount += 1
+  }
+
+  return updatedCount
+}
+
+function ensureTagMutationAllowed({ tag, userId, requestedTeamId }) {
+  if (!tag) {
+    throw new ApiError(404, 'Tag not found')
+  }
+
+  if (tag.teamId) {
+    if (requestedTeamId && requestedTeamId !== tag.teamId) {
+      throw new ApiError(403, 'You do not have permission to modify this tag')
+    }
+    return { scopeTeamId: tag.teamId }
+  }
+
+  if (tag.userId !== userId) {
+    throw new ApiError(403, 'You do not have permission to modify this tag')
+  }
+
+  return { scopeTeamId: null }
+}
+
 export async function GET(request) {
   try {
     const userId = await requireUserId()
+    const { teamId, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
+    if (teamId) {
+      await teamService.requireMembership(teamId, userId)
+    }
+
     const { searchParams } = new URL(request.url)
-    const teamId = searchParams.get('teamId')
     const includePublic = searchParams.get('includePublic') !== 'false'
 
     let teamRows = []
@@ -57,13 +227,27 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const userId = await requireUserId()
-    const { name, isPublic } = await request.json()
+    const { teamId, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
+    if (teamId) {
+      await teamService.requireMembership(teamId, userId)
+    }
+
+    const { name, scope } = await request.json()
 
     assertTagName(name)
 
+    if (scope === 'team' && !teamId) {
+      throw new ApiError(400, 'Team ID is required for team tags')
+    }
+
+    const createInTeamScope = scope === 'team' || Boolean(teamId)
     const result = await db.insert(tags).values({
       name: name.trim(),
-      userId: isPublic ? null : userId,
+      teamId: createInTeamScope ? teamId : null,
+      userId: createInTeamScope ? null : userId,
       createdBy: userId,
     }).returning()
 
@@ -76,6 +260,14 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const userId = await requireUserId()
+    const { teamId: requestedTeamId, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
+    if (requestedTeamId) {
+      await teamService.requireMembership(requestedTeamId, userId)
+    }
+
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')
     const idsParam = searchParams.get('ids')
@@ -88,17 +280,38 @@ export async function DELETE(request) {
         throw new ApiError(400, 'Tag IDs are required')
       }
 
-      // 验证所有标签是否存在且属于当前用户
-      const rows = await db.select({ id: tags.id }).from(tags).where(and(eq(tags.userId, userId), inArray(tags.id, ids)))
-      const userTagIds = new Set(rows.map(t => t.id))
+      const rows = await db.select().from(tags).where(inArray(tags.id, ids))
+      const existingTagIds = new Set(rows.map((tag) => tag.id))
+      const missingIds = ids.filter((id) => !existingTagIds.has(id))
+      if (missingIds.length > 0) {
+        throw new ApiError(404, 'Some tags do not exist')
+      }
 
-      const invalidIds = ids.filter(id => !userTagIds.has(id))
+      const invalidIds = rows
+        .filter((tag) => {
+          if (requestedTeamId) {
+            return tag.teamId !== requestedTeamId
+          }
+          return tag.userId !== userId || Boolean(tag.teamId)
+        })
+        .map((tag) => tag.id)
       if (invalidIds.length > 0) {
         throw new ApiError(403, 'Some tags do not exist or cannot be deleted')
       }
 
+      const scopeCondition = buildPromptScopeCondition({
+        teamId: requestedTeamId,
+        userId,
+      })
+      const removedNames = rows.map((tag) => tag.name)
+      await removeTagNamesFromPrompts(scopeCondition, removedNames)
+
       // 执行批量删除
-      await db.delete(tags).where(and(eq(tags.userId, userId), inArray(tags.id, ids)))
+      if (requestedTeamId) {
+        await db.delete(tags).where(and(eq(tags.teamId, requestedTeamId), inArray(tags.id, ids)))
+      } else {
+        await db.delete(tags).where(and(eq(tags.userId, userId), inArray(tags.id, ids)))
+      }
 
       return NextResponse.json({ success: true, deletedCount: ids.length })
     }
@@ -110,18 +323,20 @@ export async function DELETE(request) {
 
     const rows = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1)
     const tag = rows[0]
-
-    if (!tag) {
-      throw new ApiError(404, 'Tag not found')
+    const { scopeTeamId } = ensureTagMutationAllowed({
+      tag,
+      userId,
+      requestedTeamId,
+    })
+    if (scopeTeamId) {
+      await teamService.requireMembership(scopeTeamId, userId)
     }
 
-    if (!tag.userId) {
-      throw new ApiError(403, 'Public tags cannot be deleted')
-    }
-
-    if (tag.userId !== userId) {
-      throw new ApiError(403, 'You do not have permission to delete this tag')
-    }
+    const scopeCondition = buildPromptScopeCondition({
+      teamId: scopeTeamId,
+      userId,
+    })
+    await removeTagNamesFromPrompts(scopeCondition, [tag.name])
 
     await db.delete(tags).where(eq(tags.id, tagId))
 
@@ -134,6 +349,14 @@ export async function DELETE(request) {
 export async function PATCH(request) {
   try {
     const userId = await requireUserId()
+    const { teamId: requestedTeamId, teamService } = await resolveTeamContext(request, userId, {
+      requireMembership: false,
+      allowMissingTeam: true,
+    })
+    if (requestedTeamId) {
+      await teamService.requireMembership(requestedTeamId, userId)
+    }
+
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')
     const { name } = await request.json()
@@ -146,20 +369,29 @@ export async function PATCH(request) {
 
     const rows = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1)
     const tag = rows[0]
-
-    if (!tag) {
-      throw new ApiError(404, 'Tag not found')
+    const { scopeTeamId } = ensureTagMutationAllowed({
+      tag,
+      userId,
+      requestedTeamId,
+    })
+    if (scopeTeamId) {
+      await teamService.requireMembership(scopeTeamId, userId)
     }
 
-    if (!tag.userId) {
-      throw new ApiError(403, 'Public tags cannot be updated')
-    }
+    const nextName = name.trim()
+    const result = await db
+      .update(tags)
+      .set({ name: nextName, updatedAt: new Date() })
+      .where(eq(tags.id, tagId))
+      .returning()
 
-    if (tag.userId !== userId) {
-      throw new ApiError(403, 'You do not have permission to update this tag')
+    if (tag.name !== nextName) {
+      const scopeCondition = buildPromptScopeCondition({
+        teamId: scopeTeamId,
+        userId,
+      })
+      await replaceTagNameInPrompts(scopeCondition, tag.name, nextName)
     }
-
-    const result = await db.update(tags).set({ name: name.trim() }).where(eq(tags.id, tagId)).returning()
 
     return NextResponse.json(toSnakeCase(result[0]))
   } catch (error) {
