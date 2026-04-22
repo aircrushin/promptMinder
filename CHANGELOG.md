@@ -28,7 +28,6 @@
 
 ### Bug Fix
 
-1. **Agent Coze API URL** — 修复 Coze API 端点地址
 2. **Theme 颜色** — 更新主题色以保持品牌一致性
 3. **Tag 管理** — 改进 Tag 批量删除和错误处理
 
@@ -41,8 +40,6 @@
 
 0.2.0
 ===
-
-DB 需要进行 Migrate
 
 ### New Feature
 
@@ -78,4 +75,3 @@ DB 需要进行 Migrate
 4. **`lib/team-request.js`** — `resolveTeamContext()` 返回 `{ teamId, db, teamService }` 替代 `{ teamId, supabase, teamService }`
 5. **`.env.example`** — 更新 `DATABASE_URL` 为 Neon 连接字符串格式
 6. 删除 `lib/supabaseServer.js` , `@supabase/auth-helpers-nextjs` , `@supabase/auth-ui-react` , `@supabase/auth-ui-shared`
-
