@@ -892,6 +892,51 @@
       "error": "Failed to load"
     }
   },
+  "gptImage2Page": {
+    "badge": "GPT Image 2 Prompt Library",
+    "title": "GPT Image 2 Prompts",
+    "description": "A curated GPT Image 2 gallery collected from source pages. Browse sample images and full prompts, then quickly filter, reuse, rewrite, and import to your prompt library.",
+    "featuredSample": "Featured sample",
+    "searchSrOnly": "Search prompts",
+    "searchPlaceholder": "Search title, category, or prompt",
+    "previewAriaLabel": "Preview {title}",
+    "sourcePrefix": "Source: ",
+    "metrics": {
+      "cases": "Cases",
+      "categories": "Categories",
+      "sourcePages": "Source Pages"
+    },
+    "filters": {
+      "all": "All",
+      "portrait": "Portrait",
+      "poster": "Poster",
+      "illustration": "Illustration",
+      "typography": "Typography"
+    },
+    "categories": {
+      "portrait": "Portrait",
+      "poster": "Poster",
+      "illustration": "Illustration",
+      "typography": "Typography"
+    },
+    "buttons": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "import": "Import",
+      "importing": "Importing..."
+    },
+    "toasts": {
+      "importSuccessTitle": "Import successful",
+      "importSuccessDescription": "Prompt imported to your prompt library",
+      "approvalRequiredDescription": "Approval request submitted",
+      "importErrorTitle": "Import failed",
+      "importErrorDescription": "Import failed. Please try again later."
+    },
+    "emptyState": {
+      "title": "No matching prompts",
+      "description": "Try another keyword or switch back to all categories."
+    }
+  },
   "admin": {
     "contributions": {
       "title": "Contribution Management",

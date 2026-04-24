@@ -917,6 +917,51 @@
       "error": "加载失败"
     }
   },
+  "gptImage2Page": {
+    "badge": "GPT Image 2 提示词库",
+    "title": "GPT Image 2 Prompts",
+    "description": "从目标页面抓取并整理的 GPT Image 2 案例库。保留示例图与完整提示词，方便快速筛选、复用、改写并导入到你的提示词库。",
+    "featuredSample": "精选案例",
+    "searchSrOnly": "搜索提示词",
+    "searchPlaceholder": "搜索标题、分类或提示词",
+    "previewAriaLabel": "预览 {title}",
+    "sourcePrefix": "来源：",
+    "metrics": {
+      "cases": "案例",
+      "categories": "分类",
+      "sourcePages": "来源页"
+    },
+    "filters": {
+      "all": "全部",
+      "portrait": "人像",
+      "poster": "海报",
+      "illustration": "插画",
+      "typography": "字体"
+    },
+    "categories": {
+      "portrait": "人像",
+      "poster": "海报",
+      "illustration": "插画",
+      "typography": "字体"
+    },
+    "buttons": {
+      "copy": "复制",
+      "copied": "已复制",
+      "import": "导入",
+      "importing": "导入中..."
+    },
+    "toasts": {
+      "importSuccessTitle": "导入成功",
+      "importSuccessDescription": "提示词已导入到你的提示词库",
+      "approvalRequiredDescription": "已提交审批请求",
+      "importErrorTitle": "导入失败",
+      "importErrorDescription": "导入失败，请稍后重试"
+    },
+    "emptyState": {
+      "title": "没有匹配的提示词",
+      "description": "换个关键词或切回全部分类。"
+    }
+  },
   "admin": {
     "contributions": {
       "title": "贡献管理",

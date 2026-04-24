@@ -124,6 +124,10 @@ const nextConfig = {
         hostname: "cdn.buymeacoffee.com",
         pathname: "/buttons/**",
       },
+      {
+        protocol: "https",
+        hostname: "static.mkanime.ai",
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
