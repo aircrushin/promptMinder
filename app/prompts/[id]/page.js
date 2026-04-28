@@ -93,6 +93,7 @@ export default function PromptDetail({ params }) {
                 onVersionChange={handleVersionChange}
                 onDelete={() => setShowDeleteConfirm(true)}
                 onPromptUpdate={updatePrompt}
+                onAddTag={updatePrompt}
                 t={t}
                 canManage={canManage}
               />

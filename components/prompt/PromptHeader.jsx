@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from '@/lib/api-client';
-import { Pencil, Check, X, FlaskConical } from 'lucide-react';
+import { Pencil, Check, X, FlaskConical, Plus } from 'lucide-react';
 
 export default function PromptHeader({ 
   prompt, 
@@ -27,8 +27,10 @@ export default function PromptHeader({
   onVersionChange, 
   onDelete,
   onPromptUpdate,
+  onAddTag,
   t,
-  canManage = true
+  canManage = true,
+  canAddTag = true
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -36,7 +38,12 @@ export default function PromptHeader({
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState(prompt.description || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTag, setNewTag] = useState('');
+  const [availableTags, setAvailableTags] = useState([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
   const inputRef = useRef(null);
+  const tagInputRef = useRef(null);
   const tp = t.promptDetailPage;
 
   useEffect(() => {
@@ -44,6 +51,172 @@ export default function PromptHeader({
       inputRef.current.focus();
     }
   }, [isEditingDescription]);
+
+  useEffect(() => {
+    if (isAddingTag && tagInputRef.current) {
+      tagInputRef.current.focus();
+    }
+  }, [isAddingTag]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const data = await apiClient.getTags({ includePublic: true });
+        setAvailableTags(data || []);
+      } catch (error) {
+        console.error('Failed to fetch tags:', error);
+      }
+    };
+    if (showTagDropdown && availableTags.length === 0) {
+      fetchTags();
+    }
+  }, [showTagDropdown]);
+
+  const handleAddTagClick = useCallback(() => {
+    if (!canAddTag || !canManage) return;
+    setIsAddingTag(true);
+    setNewTag('');
+  }, [canAddTag, canManage]);
+
+  const handleTagSubmit = useCallback(async () => {
+    const tagValue = newTag.trim();
+    if (!tagValue) {
+      setIsAddingTag(false);
+      return;
+    }
+
+    const currentTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    
+    if (currentTags.includes(tagValue)) {
+      toast({
+        title: tp.tagExists || '标签已存在',
+        description: tp.tagExistsDesc || '该标签已添加到提示词',
+      });
+      setIsAddingTag(false);
+      return;
+    }
+
+    const updatedTags = [...currentTags, tagValue].join(',');
+    
+    try {
+      const result = await apiClient.updatePrompt(prompt.id, {
+        tags: updatedTags,
+      });
+
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        toast({
+          title: tp.tagSaveSuccess || '已提交审批',
+          description: tp.tagPendingApproval || '标签变更已提交审批',
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+        setIsAddingTag(false);
+        return;
+      }
+
+      const freshPrompt = await apiClient.getPrompt(prompt.id);
+      const normalizedPrompt = {
+        ...freshPrompt,
+        tags: Array.isArray(freshPrompt.tags)
+          ? freshPrompt.tags
+          : (freshPrompt.tags || '')
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+      };
+      
+      if (onAddTag) {
+        onAddTag(normalizedPrompt);
+      }
+      
+      toast({
+        title: tp.tagSaveSuccess || '标签已添加',
+        description: tp.tagSaveSuccessDesc || '标签已成功添加到提示词',
+      });
+    } catch (error) {
+      console.error('Failed to add tag:', error);
+      toast({
+        title: tp.saveError || '保存失败',
+        description: tp.tagSaveErrorDesc || '无法添加标签，请稍后重试',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAddingTag(false);
+    }
+  }, [newTag, prompt, onAddTag, toast, tp, router]);
+
+  const handleTagCancel = useCallback(() => {
+    setIsAddingTag(false);
+    setNewTag('');
+  }, []);
+
+  const handleTagKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTagSubmit();
+    } else if (e.key === 'Escape') {
+      handleTagCancel();
+    }
+  }, [handleTagSubmit, handleTagCancel]);
+
+  const handleSelectExistingTag = useCallback(async (tagName) => {
+    const currentTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    
+    if (currentTags.includes(tagName)) {
+      toast({
+        title: tp.tagExists || '标签已存在',
+        description: tp.tagExistsDesc || '该标签已添加到提示词',
+      });
+      setShowTagDropdown(false);
+      return;
+    }
+
+    const updatedTags = [...currentTags, tagName].join(',');
+    
+    try {
+      const result = await apiClient.updatePrompt(prompt.id, {
+        tags: updatedTags,
+      });
+
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        toast({
+          title: tp.tagSaveSuccess || '已提交审批',
+          description: tp.tagPendingApproval || '标签变更已提交审批',
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+        setShowTagDropdown(false);
+        return;
+      }
+
+      const freshPrompt = await apiClient.getPrompt(prompt.id);
+      const normalizedPrompt = {
+        ...freshPrompt,
+        tags: Array.isArray(freshPrompt.tags)
+          ? freshPrompt.tags
+          : (freshPrompt.tags || '')
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+      };
+      
+      if (onAddTag) {
+        onAddTag(normalizedPrompt);
+      }
+      
+      toast({
+        title: tp.tagSaveSuccess || '标签已添加',
+        description: tp.tagSaveSuccessDesc || '标签已成功添加到提示词',
+      });
+    } catch (error) {
+      console.error('Failed to add tag:', error);
+      toast({
+        title: tp.saveError || '保存失败',
+        description: tp.tagSaveErrorDesc || '无法添加标签，请稍后重试',
+        variant: 'destructive',
+      });
+    } finally {
+      setShowTagDropdown(false);
+    }
+  }, [prompt, onAddTag, toast, tp, router]);
 
   const handleDescriptionEdit = () => {
     if (!canManage) return;
@@ -272,6 +445,96 @@ export default function PromptHeader({
             >
               +{prompt.tags.length - 3}
             </Badge>
+          )}
+          {canManage && canAddTag && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => setShowTagDropdown(!showTagDropdown)}
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{tp.addTagTooltip || '添加标签'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {(isAddingTag || showTagDropdown) && (
+            <div className="relative">
+              {isAddingTag ? (
+                <div className="flex items-center gap-1">
+                  <Input
+                    ref={tagInputRef}
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    placeholder={tp.newTagPlaceholder || '新标签...'}
+                    className="h-6 text-xs w-24"
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6"
+                    onClick={handleTagSubmit}
+                  >
+                    <Check className="h-3 w-3 text-green-600" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6"
+                    onClick={handleTagCancel}
+                  >
+                    <X className="h-3 w-3 text-red-600" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="absolute top-0 left-0 z-50 mt-1 w-48 rounded-md border bg-popover shadow-md">
+                  <div className="p-1">
+                    <Input
+                      ref={tagInputRef}
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={handleTagKeyDown}
+                      placeholder={tp.searchTagPlaceholder || '搜索或创建标签...'}
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                  <div className="max-h-40 overflow-y-auto p-1">
+                    {availableTags
+                      .filter(tag => {
+                        const currentTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                        return !currentTags.includes(tag.name);
+                      })
+                      .slice(0, 10)
+                      .map((tag) => (
+                        <button
+                          key={tag.id}
+                          onClick={() => handleSelectExistingTag(tag.name)}
+                          className="w-full text-left text-xs px-2 py-1 rounded hover:bg-accent"
+                        >
+                          {tag.name}
+                        </button>
+                      ))}
+                    {newTag && !availableTags.some(t => t.name === newTag.trim()) && (
+                      <button
+                        onClick={handleTagSubmit}
+                        className="w-full text-left text-xs px-2 py-1 rounded text-primary hover:bg-accent"
+                      >
+                        <Plus className="h-3 w-3 inline mr-1" />
+                        {tp.createNewTag || '创建'} "{newTag.trim()}"
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
