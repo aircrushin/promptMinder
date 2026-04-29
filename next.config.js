@@ -128,6 +128,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "static.mkanime.ai",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
