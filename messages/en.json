@@ -182,6 +182,25 @@
     "buttonLoggedOut": "Sign Up for Free",
     "promptCollections": "Prompt Collections"
   },
+  "gptImage2": {
+    "badge": "GPT Image 2 Prompt Library",
+    "title": "Curated GPT Image 2 Prompt Gallery",
+    "description": "A community-curated collection of high-quality GPT Image 2 cases. Browse sample images and full prompts, quickly filter, reuse, and import into your prompt library.",
+    "ctaButton": "Explore All Cases",
+    "ctaAriaLabel": "View GPT Image 2 prompt gallery",
+    "featured": "Featured",
+    "categories": {
+      "portrait": "Portrait",
+      "poster": "Poster",
+      "illustration": "Illustration",
+      "typography": "Typography"
+    },
+    "metrics": {
+      "cases": "Cases",
+      "categories": "Categories",
+      "xPosts": "X Posts"
+    }
+  },
   "language": {
     "switchTo": "切换到中文",
     "current": "English"

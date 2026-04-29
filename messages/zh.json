@@ -186,6 +186,25 @@
     "buttonLoggedOut": "免费注册",
     "promptCollections": "提示词合集"
   },
+  "gptImage2": {
+    "badge": "GPT Image 2 提示词库",
+    "title": "精选 GPT Image 2 提示词案例",
+    "description": "从社区收集的 GPT Image 2 高质量案例库。浏览示例图像与完整提示词，快速筛选、复用并导入到你的提示词库。",
+    "ctaButton": "浏览全部案例",
+    "ctaAriaLabel": "查看 GPT Image 2 提示词图库",
+    "featured": "精选",
+    "categories": {
+      "portrait": "人像",
+      "poster": "海报",
+      "illustration": "插画",
+      "typography": "字体"
+    },
+    "metrics": {
+      "cases": "案例",
+      "categories": "分类",
+      "xPosts": "X 帖源"
+    }
+  },
   "language": {
     "switchTo": "Switch to English",
     "current": "中文"

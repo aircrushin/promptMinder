@@ -95,6 +95,34 @@ const CTASection = dynamic(() => import("@/components/landing/cta-section").then
   )
 });
 
+const GptImage2Section = dynamic(() => import("@/components/landing/gpt-image2-section").then(mod => ({ default: mod.GptImage2Section })), {
+  loading: () => (
+    <div className="py-28 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.7fr)]">
+          <div className="space-y-6">
+            <Skeleton className="h-6 w-48 rounded-full bg-slate-100" />
+            <Skeleton className="h-12 w-80 bg-slate-100" />
+            <Skeleton className="h-16 w-full max-w-lg bg-slate-100" />
+            <div className="flex gap-3">
+              <Skeleton className="h-7 w-16 rounded-full bg-slate-100" />
+              <Skeleton className="h-7 w-16 rounded-full bg-slate-100" />
+              <Skeleton className="h-7 w-16 rounded-full bg-slate-100" />
+              <Skeleton className="h-7 w-16 rounded-full bg-slate-100" />
+            </div>
+            <div className="flex gap-10">
+              <Skeleton className="h-12 w-16 bg-slate-100" />
+              <Skeleton className="h-12 w-16 bg-slate-100" />
+              <Skeleton className="h-12 w-16 bg-slate-100" />
+            </div>
+          </div>
+          <Skeleton className="h-72 w-full rounded-xl bg-slate-100" />
+        </div>
+      </div>
+    </div>
+  )
+});
+
 const CLISection = dynamic(() => import("@/components/landing/cli-section").then(mod => ({ default: mod.CLISection })), {
   loading: () => (
     <div className="py-28 bg-slate-950">
@@ -132,6 +160,7 @@ export default function Home() {
   const safeT = t || {
     hero: { title: "Prompt Minder", subtitle: "专业的AI提示词管理平台", cta: "开始使用" },
     features: { title: "核心功能", items: [] },
+    gptImage2: { title: "GPT Image 2 提示词库", ctaButton: "浏览全部案例" },
     cli: { title: "One command to rule your prompts" },
     testimonials: { title: "用户评价", items: [] },
     faq: { title: "常见问题", items: [] },
@@ -150,6 +179,9 @@ export default function Home() {
         </Suspense>
         <Suspense fallback={<div className="py-16 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
           <FeatureSection t={safeT.features} />
+        </Suspense>
+        <Suspense fallback={<div className="py-28 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-amber-400"></div></div>}>
+          <GptImage2Section t={safeT.gptImage2} />
         </Suspense>
         {/* <PricingSection /> */}
         <Suspense fallback={<div className="py-28 bg-slate-950 flex justify-center"><div className="rounded-full h-6 w-6 border-b-2 border-indigo-400"></div></div>}>
