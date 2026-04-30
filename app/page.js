@@ -160,7 +160,7 @@ export default function Home() {
   const safeT = t || {
     hero: { title: "Prompt Minder", subtitle: "专业的AI提示词管理平台", cta: "开始使用" },
     features: { title: "核心功能", items: [] },
-    gptImage2: { title: "GPT Image 2 提示词库", ctaButton: "浏览全部案例" },
+    gptImage2: { title: "GPT Image2 + Suno Prompts", primaryCta: "浏览 GPT Image2", secondaryCta: "浏览 Suno" },
     cli: { title: "One command to rule your prompts" },
     testimonials: { title: "用户评价", items: [] },
     faq: { title: "常见问题", items: [] },

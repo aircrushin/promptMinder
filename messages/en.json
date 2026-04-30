@@ -183,22 +183,33 @@
     "promptCollections": "Prompt Collections"
   },
   "gptImage2": {
-    "badge": "GPT Image 2 Prompt Library",
-    "title": "Curated GPT Image 2 Prompt Gallery",
-    "description": "A community-curated collection of high-quality GPT Image 2 cases. Browse sample images and full prompts, quickly filter, reuse, and import into your prompt library.",
-    "ctaButton": "Explore All Cases",
-    "ctaAriaLabel": "View GPT Image 2 prompt gallery",
-    "featured": "Featured",
+    "badge": "Prompt Collections",
+    "title": "GPT Image2 + Suno Prompts",
+    "description": "One landing section for high-quality image and music prompts. Browse GPT Image2 examples with full prompts, then switch to Suno templates for genre, mood, BPM, and production direction.",
+    "primaryCta": "Explore GPT Image2",
+    "secondaryCta": "Explore Suno",
+    "ctaAriaLabel": "View GPT Image2 prompt gallery",
+    "sunoCtaAriaLabel": "View Suno music prompt templates",
+    "featured": "Dual library",
     "categories": {
-      "portrait": "Portrait",
-      "poster": "Poster",
-      "illustration": "Illustration",
-      "typography": "Typography"
+      "imagePrompts": "Image prompts",
+      "musicPrompts": "Music prompts",
+      "copyReady": "Copy-ready",
+      "importReady": "Import-ready"
     },
     "metrics": {
-      "cases": "Cases",
-      "categories": "Categories",
-      "xPosts": "X Posts"
+      "imagePrompts": "Image",
+      "musicPrompts": "Music",
+      "libraries": "Libraries"
+    },
+    "collections": {
+      "gptImage2Eyebrow": "Visual prompts",
+      "gptImage2Title": "GPT Image2",
+      "gptImage2Description": "Sample images, full prompts, and reusable visual direction for posters, portraits, illustrations, and typography.",
+      "sunoEyebrow": "Music prompts",
+      "sunoTitle": "Suno",
+      "sunoDescription": "Genre, mood, BPM, instrumentation, and production notes for fast music prompt drafting.",
+      "importNote": "Keep image and music prompts in one working library."
     }
   },
   "language": {

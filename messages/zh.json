@@ -187,22 +187,33 @@
     "promptCollections": "提示词合集"
   },
   "gptImage2": {
-    "badge": "GPT Image 2 提示词库",
-    "title": "精选 GPT Image 2 提示词案例",
-    "description": "从社区收集的 GPT Image 2 高质量案例库。浏览示例图像与完整提示词，快速筛选、复用并导入到你的提示词库。",
-    "ctaButton": "浏览全部案例",
-    "ctaAriaLabel": "查看 GPT Image 2 提示词图库",
-    "featured": "精选",
+    "badge": "Prompt Collections",
+    "title": "GPT Image2 + Suno Prompts",
+    "description": "把图像生成和音乐创作的高质量 prompt 放在同一个入口。浏览 GPT Image2 示例图与完整提示词，也可以直接挑选 Suno 曲风、情绪、BPM 和制作模板。",
+    "primaryCta": "浏览 GPT Image2",
+    "secondaryCta": "浏览 Suno",
+    "ctaAriaLabel": "查看 GPT Image2 提示词图库",
+    "sunoCtaAriaLabel": "查看 Suno 音乐提示词模板",
+    "featured": "双库精选",
     "categories": {
-      "portrait": "人像",
-      "poster": "海报",
-      "illustration": "插画",
-      "typography": "字体"
+      "imagePrompts": "图像 prompt",
+      "musicPrompts": "音乐 prompt",
+      "copyReady": "可复制",
+      "importReady": "可导入"
     },
     "metrics": {
-      "cases": "案例",
-      "categories": "分类",
-      "xPosts": "X 帖源"
+      "imagePrompts": "图像",
+      "musicPrompts": "音乐",
+      "libraries": "库"
+    },
+    "collections": {
+      "gptImage2Eyebrow": "Visual prompts",
+      "gptImage2Title": "GPT Image2",
+      "gptImage2Description": "带示例图、完整提示词和可复用视觉方向，适合海报、人像、插画和字体设计。",
+      "sunoEyebrow": "Music prompts",
+      "sunoTitle": "Suno",
+      "sunoDescription": "整理曲风、情绪、BPM、配器和制作质感，快速生成可改写的音乐 prompt。",
+      "importNote": "图像和音乐 prompt 都能沉淀到一个库。"
     }
   },
   "language": {
