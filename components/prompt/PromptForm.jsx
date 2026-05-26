@@ -2,13 +2,12 @@
 
 import { Suspense, useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bot, Loader2, Wand2, Sparkles } from 'lucide-react';
+import { Loader2, Wand2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -268,19 +267,6 @@ export function PromptForm({
             required
           />
           <div className="absolute right-2 top-2 flex gap-1">
-            <Link href="/agent">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className={isCompact ? 'hover:bg-accent hover:text-primary' : 'hover:bg-primary/10'}
-                title={copy.agentEntry}
-                aria-label={copy.agentEntry}
-              >
-                <Bot className="h-4 w-4" />
-                <span className="sr-only">{copy.agentEntry}</span>
-              </Button>
-            </Link>
             <Button
               type="button"
               size="icon"
