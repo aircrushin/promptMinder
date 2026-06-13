@@ -3,7 +3,7 @@
  * 针对传统搜索引擎和AI搜索引擎（GEO）优化
  */
 export default function robots() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.prompt-minder.com';
   
   return {
     rules: [

@@ -11,7 +11,7 @@
  * - 0.5: 认证页面
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://prompt-minder.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.prompt-minder.com';
 
 export default async function sitemap() {
   const now = new Date().toISOString();

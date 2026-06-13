@@ -137,7 +137,7 @@ function CliIntroModal({ isOpen, onClose }) {
                     <Link
                       href="https://www.npmjs.com/package/@aircrushin/promptminder-cli"
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:text-slate-950"
                     >
                       NPM 安装入口
@@ -145,7 +145,7 @@ function CliIntroModal({ isOpen, onClose }) {
                     <Link
                       href="https://github.com/aircrushin/promptMinder/tree/main/packages/promptminder-cli"
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
                     >
                       查看源码
@@ -299,26 +299,20 @@ export function HeroSection({ t }) {
           </svg>
         </motion.div>
 
-        {/* two-line heading */}
-        <motion.h1
-          variants={itemVariants}
-          className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
-        >
+        {/* two-line heading — static for fast LCP (no opacity animation) */}
+        <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
           <span className="block text-gray-900">
             {heroCopy.headingLine1 || fallback.headingLine1}
           </span>
           <span className="block font-medium text-gray-400">
             {heroCopy.headingLine2 || fallback.headingLine2}
           </span>
-        </motion.h1>
+        </h1>
 
-        {/* subtitle */}
-        <motion.p
-          variants={itemVariants}
-          className="mt-5 max-w-lg text-base leading-relaxed text-gray-500 sm:text-lg"
-        >
+        {/* subtitle — visible on first paint */}
+        <p className="hero-description mt-5 max-w-lg text-base leading-relaxed text-gray-500 sm:text-lg">
           {heroCopy.description}
-        </motion.p>
+        </p>
 
         {/* CTA button */}
         <motion.div variants={itemVariants} className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:gap-4">

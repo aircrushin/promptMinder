@@ -445,6 +445,7 @@ export default function CliTokensDocsPage() {
             <Link
               href="https://github.com/aircrushin/promptminder-cli-skill"
               target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
             >
               {translations.repoAction}

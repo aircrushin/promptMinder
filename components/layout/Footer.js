@@ -44,6 +44,7 @@ export default function Footer({ t }) {
               <Link
                 href="https://github.com/aircrushin/promptMinder"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 <svg
@@ -174,6 +175,7 @@ export default function Footer({ t }) {
                     <Link
                       href="https://prompt-minder.canny.io/changelog"
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="text-sm text-muted-foreground hover:text-foreground"
                     >
                       {translations.changelog}
@@ -193,6 +195,7 @@ export default function Footer({ t }) {
                   <Link
                     href="https://code.lucids.top/"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {translations.promptCoder}
@@ -202,6 +205,7 @@ export default function Footer({ t }) {
                   <Link
                     href="https://www.promptingguide.ai/zh"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {translations.promptGuide}
@@ -211,6 +215,7 @@ export default function Footer({ t }) {
                   <Link
                     href="https://www.aishort.top/"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {translations.aiShort}
@@ -220,6 +225,7 @@ export default function Footer({ t }) {
                   <Link
                     href="https://reader.prompt-minder.com/"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {translations.llmReadify}

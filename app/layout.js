@@ -10,7 +10,7 @@ import {
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
-const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://prompt-minder.com";
+const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.prompt-minder.com";
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
@@ -19,7 +19,7 @@ export const metadata = {
     template: "%s | Prompt Minder",
   },
   description:
-    "Prompt Minder是为AI从业者打造的专业提示词管理工具。支持版本控制、团队协作、智能分类、多模型测试等功能。免费开始使用，管理您的ChatGPT、Claude、GPT-4提示词库。",
+    "Prompt Minder 是专为 AI 从业者打造的专业提示词管理平台，支持版本控制、团队协作、智能分类与多模型测试。免费开始管理您的 ChatGPT、Claude、GPT-4 提示词库，提升 Prompt Engineering 效率，助力个人与团队高效协作。",
   keywords: [
     "AI提示词",
     "Prompt工程",
@@ -59,7 +59,7 @@ export const metadata = {
     url: siteUrl,
     title: "Prompt Minder - 专业的AI提示词管理平台",
     description:
-      "为AI从业者打造的提示词管理工具，支持版本控制、团队协作、智能分类等功能。免费开始使用。",
+      "Prompt Minder 是专为 AI 从业者打造的专业提示词管理平台，支持版本控制、团队协作、智能分类与多模型测试。免费开始管理您的 ChatGPT、Claude、GPT-4 提示词库，提升 Prompt Engineering 效率。",
     siteName: "Prompt Minder",
     locale: "zh_CN",
     alternateLocale: "en_US",
@@ -77,7 +77,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Prompt Minder - 专业的AI提示词管理平台",
     description:
-      "为AI从业者打造的提示词管理工具，支持版本控制、团队协作、智能分类等功能",
+      "Prompt Minder 是专为 AI 从业者打造的专业提示词管理平台，支持版本控制、团队协作、智能分类与多模型测试。免费管理 ChatGPT、Claude、GPT-4 提示词库。",
     images: ["/main-page.png"],
     creator: "@promptminder",
   },
@@ -156,9 +156,6 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        {/* 预连接优化 */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* DNS预取 - 针对常用AI服务 */}
         <link rel="dns-prefetch" href="https://api.openai.com" />
         <link rel="dns-prefetch" href="https://api.anthropic.com" />

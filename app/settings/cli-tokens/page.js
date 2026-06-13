@@ -311,6 +311,7 @@ export default function CliTokensPage() {
               <Link
                 href="https://www.prompt-minder.com"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-2 border border-black text-sm font-mono font-medium hover:bg-black hover:text-white transition-colors"
               >
                 {translations.officialSite}

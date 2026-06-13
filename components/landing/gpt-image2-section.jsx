@@ -145,17 +145,15 @@ export function GptImage2Section({ t }) {
                 {images.map((item) => (
                   <div
                     key={item.id}
-                    className={`group relative overflow-hidden rounded-md bg-slate-100 ${item.className || ''}`}
+                    className={`group relative aspect-square overflow-hidden rounded-md bg-slate-100 ${item.className || ""}`}
                   >
-                    <div className="relative h-full min-h-28">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        sizes="(min-width: 1024px) 28vw, 70vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(min-width: 1024px) 180px, 30vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/62 via-transparent to-transparent" />
                     <p className="absolute bottom-2 left-2 right-2 line-clamp-2 text-[11px] font-semibold leading-tight text-white">
                       {item.title}
