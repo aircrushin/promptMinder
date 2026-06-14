@@ -199,6 +199,8 @@ importers:
         specifier: ^4.10.2
         version: 4.10.2
 
+  packages/promptminder-cli: {}
+
 packages:
 
   '@adobe/css-tools@4.4.3':
