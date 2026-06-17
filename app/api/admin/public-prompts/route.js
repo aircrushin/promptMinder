@@ -3,30 +3,12 @@ import { db } from '@/lib/db.js'
 import { or, ilike, desc, count as countFn, eq, and } from 'drizzle-orm'
 import { publicPrompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
-
-async function verifyAdmin(request) {
-  const adminEmail = request.headers.get('x-admin-email')
-  const adminToken = request.headers.get('x-admin-token')
-
-  if (!adminEmail || !adminToken) {
-    return { success: false, error: '未授权访问' }
-  }
-
-  const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase())
-
-  if (!adminEmails.includes(adminEmail.toLowerCase())) {
-    return { success: false, error: '无管理员权限' }
-  }
-
-  return { success: true }
-}
+import { requireAdmin } from '@/lib/admin-auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function GET(request) {
   try {
-    const authResult = await verifyAdmin(request)
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 })
-    }
+    requireAdmin(request)
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -66,17 +48,13 @@ export async function GET(request) {
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
     })
   } catch (error) {
-    console.error('Error in public prompts API:', error)
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+    return handleApiError(error, 'Unable to load public prompts')
   }
 }
 
 export async function POST(request) {
   try {
-    const authResult = await verifyAdmin(request)
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 })
-    }
+    const adminEmail = requireAdmin(request)
 
     const body = await request.json()
     const { title, role_category, content, category, language } = body
@@ -87,8 +65,6 @@ export async function POST(request) {
     if (!content?.trim()) {
       return NextResponse.json({ error: '内容不能为空' }, { status: 400 })
     }
-
-    const adminEmail = request.headers.get('x-admin-email')
 
     const result = await db.insert(publicPrompts).values({
       title: title.trim(),
@@ -101,7 +77,6 @@ export async function POST(request) {
 
     return NextResponse.json(toSnakeCase(result[0]), { status: 201 })
   } catch (error) {
-    console.error('Error in create public prompt:', error)
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+    return handleApiError(error, 'Unable to create public prompt')
   }
 }

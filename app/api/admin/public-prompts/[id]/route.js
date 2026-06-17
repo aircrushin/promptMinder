@@ -3,30 +3,12 @@ import { db } from '@/lib/db.js'
 import { eq } from 'drizzle-orm'
 import { publicPrompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
-
-async function verifyAdmin(request) {
-  const adminEmail = request.headers.get('x-admin-email')
-  const adminToken = request.headers.get('x-admin-token')
-
-  if (!adminEmail || !adminToken) {
-    return { success: false, error: '未授权访问' }
-  }
-
-  const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase())
-
-  if (!adminEmails.includes(adminEmail.toLowerCase())) {
-    return { success: false, error: '无管理员权限' }
-  }
-
-  return { success: true }
-}
+import { requireAdmin } from '@/lib/admin-auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function GET(request, { params }) {
   try {
-    const authResult = await verifyAdmin(request)
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 })
-    }
+    requireAdmin(request)
 
     const { id } = await params
 
@@ -38,17 +20,13 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(toSnakeCase(rows[0]))
   } catch (error) {
-    console.error('Error in get public prompt:', error)
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+    return handleApiError(error, 'Unable to load public prompt')
   }
 }
 
 export async function PATCH(request, { params }) {
   try {
-    const authResult = await verifyAdmin(request)
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 })
-    }
+    requireAdmin(request)
 
     const { id } = await params
 
@@ -78,17 +56,13 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json(toSnakeCase(result[0]))
   } catch (error) {
-    console.error('Error in update public prompt:', error)
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+    return handleApiError(error, 'Unable to update public prompt')
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    const authResult = await verifyAdmin(request)
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 })
-    }
+    requireAdmin(request)
 
     const { id } = await params
 
@@ -96,7 +70,6 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ success: true, message: '提示词已删除' })
   } catch (error) {
-    console.error('Error in delete public prompt:', error)
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+    return handleApiError(error, 'Unable to delete public prompt')
   }
 }

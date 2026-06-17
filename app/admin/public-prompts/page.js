@@ -46,6 +46,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Pagination } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { getAdminHeaders } from "@/lib/admin-client";
 
 // 预设分类
 const CATEGORIES = [
@@ -101,17 +102,6 @@ export default function AdminPublicPromptsPage() {
     language: "zh",
   });
 
-  // 获取管理员凭证
-  const getAdminHeaders = useCallback(() => {
-    const adminEmail = localStorage.getItem("admin_email");
-    const adminToken = localStorage.getItem("admin_token");
-    return {
-      "Content-Type": "application/json",
-      "x-admin-email": adminEmail || "",
-      "x-admin-token": adminToken || "",
-    };
-  }, []);
-
   // 获取提示词列表
   const fetchPrompts = useCallback(async () => {
     setLoading(true);
@@ -128,7 +118,7 @@ export default function AdminPublicPromptsPage() {
       }
 
       const response = await fetch(`/api/admin/public-prompts?${params}`, {
-        headers: getAdminHeaders(),
+        headers: getAdminHeaders({ json: false }),
       });
 
       if (response.ok) {
@@ -153,7 +143,7 @@ export default function AdminPublicPromptsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, selectedCategory, getAdminHeaders, toast]);
+  }, [currentPage, searchTerm, selectedCategory, toast]);
 
   useEffect(() => {
     fetchPrompts();

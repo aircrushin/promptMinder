@@ -5,6 +5,7 @@ import { auth } from '@clerk/nextjs/server'
 import { eq, desc, count as countFn } from 'drizzle-orm'
 import { userFeedback } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { requireAdmin } from '@/lib/admin-auth.js'
 
 export async function POST(request) {
   try {
@@ -43,6 +44,8 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
+    requireAdmin(request)
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -69,6 +72,8 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
+    requireAdmin(request)
+
     const data = await request.json()
     const { id, status } = data
 
@@ -84,6 +89,10 @@ export async function PATCH(request) {
       .set({ status, updatedAt: new Date() })
       .where(eq(userFeedback.id, id))
       .returning()
+
+    if (!result[0]) {
+      return NextResponse.json({ error: 'Feedback not found' }, { status: 404 })
+    }
 
     return NextResponse.json(toSnakeCase(result[0]))
   } catch (error) {

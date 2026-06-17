@@ -3,10 +3,13 @@ import { db } from '@/lib/db.js'
 import { eq, gte, desc, asc } from 'drizzle-orm'
 import { promptContributions } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { requireAdmin } from '@/lib/admin-auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function GET(request) {
   try {
-    // Get all statuses
+    requireAdmin(request)
+
     const allRows = await db.select({ status: promptContributions.status }).from(promptContributions)
 
     const statusStats = { pending: 0, approved: 0, rejected: 0, total: allRows.length }
@@ -14,7 +17,6 @@ export async function GET(request) {
       statusStats[item.status] = (statusStats[item.status] || 0) + 1
     })
 
-    // Recent 7 days trend
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
@@ -29,7 +31,6 @@ export async function GET(request) {
       dailyStats[date] = (dailyStats[date] || 0) + 1
     })
 
-    // Pending preview
     const pendingPreview = await db
       .select({
         id: promptContributions.id,
@@ -49,7 +50,6 @@ export async function GET(request) {
       lastUpdated: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleApiError(error, 'Unable to load contribution stats')
   }
 }

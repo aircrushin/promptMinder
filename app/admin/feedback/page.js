@@ -27,6 +27,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Bug, Lightbulb, RefreshCw, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { getAdminHeaders } from '@/lib/admin-client';
 
 const STATUS_OPTIONS = [
   { value: 'all', label: '全部状态' },
@@ -75,7 +76,9 @@ export default function AdminFeedbackPage() {
         params.set('status', statusFilter);
       }
 
-      const response = await fetch(`/api/feedback?${params.toString()}`);
+      const response = await fetch(`/api/feedback?${params.toString()}`, {
+        headers: getAdminHeaders({ json: false }),
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch feedback');
       }
@@ -106,9 +109,7 @@ export default function AdminFeedbackPage() {
     try {
       const response = await fetch('/api/feedback', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ id, status: newStatus }),
       });
 

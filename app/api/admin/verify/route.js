@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-
-// 管理员邮箱列表（从环境变量读取）
-const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim()) || [];
+import { getAdminEmails, parseAdminToken } from '@/lib/admin-auth.js';
 
 export async function POST(request) {
   try {
@@ -15,16 +13,11 @@ export async function POST(request) {
     }
 
     const trimmedEmail = email.trim().toLowerCase();
-    
-    // 检查邮箱是否在管理员列表中
-    const isAdmin = ADMIN_EMAILS.some(
-      adminEmail => adminEmail.toLowerCase() === trimmedEmail
-    );
+    const adminEmails = getAdminEmails();
 
-    if (isAdmin) {
-      // 生成简单的 session token（生产环境建议使用更安全的方案）
+    if (adminEmails.includes(trimmedEmail)) {
       const token = Buffer.from(`${trimmedEmail}:${Date.now()}`).toString('base64');
-      
+
       return NextResponse.json({
         success: true,
         email: trimmedEmail,
@@ -45,7 +38,6 @@ export async function POST(request) {
   }
 }
 
-// 验证 token
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -58,44 +50,26 @@ export async function GET(request) {
       );
     }
 
-    // 解析 token
-    try {
-      const decoded = Buffer.from(token, 'base64').toString();
-      const [email, timestamp] = decoded.split(':');
-
-      // 检查 token 是否过期（24小时）
-      const tokenAge = Date.now() - parseInt(timestamp);
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-      if (tokenAge > maxAge) {
-        return NextResponse.json(
-          { error: 'Token 已过期，请重新验证' },
-          { status: 401 }
-        );
-      }
-
-      // 验证邮箱是否仍在管理员列表中
-      const isAdmin = ADMIN_EMAILS.some(
-        adminEmail => adminEmail.toLowerCase() === email.toLowerCase()
-      );
-
-      if (isAdmin) {
-        return NextResponse.json({
-          success: true,
-          email
-        });
-      }
-
+    const parsed = parseAdminToken(token);
+    if (!parsed) {
       return NextResponse.json(
-        { error: '权限已失效' },
-        { status: 403 }
-      );
-    } catch (e) {
-      return NextResponse.json(
-        { error: 'Token 无效' },
+        { error: 'Token 无效或已过期' },
         { status: 401 }
       );
     }
+
+    const adminEmails = getAdminEmails();
+    if (adminEmails.includes(parsed.email)) {
+      return NextResponse.json({
+        success: true,
+        email: parsed.email
+      });
+    }
+
+    return NextResponse.json(
+      { error: '权限已失效' },
+      { status: 403 }
+    );
   } catch (error) {
     console.error('Token verify error:', error);
     return NextResponse.json(

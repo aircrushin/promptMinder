@@ -3,9 +3,13 @@ import { db } from '@/lib/db.js'
 import { eq } from 'drizzle-orm'
 import { promptContributions, publicPrompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { requireAdmin } from '@/lib/admin-auth.js'
+import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function GET(request, { params }) {
   try {
+    requireAdmin(request)
+
     const { id } = await params
 
     const rows = await db.select().from(promptContributions).where(eq(promptContributions.id, id)).limit(1)
@@ -16,15 +20,15 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(toSnakeCase(rows[0]))
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleApiError(error, 'Unable to load contribution')
   }
 }
 
 export async function PATCH(request, { params }) {
   try {
+    const adminEmail = requireAdmin(request)
+
     const { id } = await params
-    const adminEmail = request.headers.get('x-admin-email')
 
     const { status, adminNotes, publishToPrompts } = await request.json()
 
@@ -43,7 +47,7 @@ export async function PATCH(request, { params }) {
       status,
       adminNotes: adminNotes || null,
       reviewedAt: new Date(),
-      reviewedBy: adminEmail || 'admin',
+      reviewedBy: adminEmail,
       updatedAt: new Date(),
     }
 
@@ -72,13 +76,14 @@ export async function PATCH(request, { params }) {
       publishedPromptId
     })
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleApiError(error, 'Unable to update contribution')
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
+    requireAdmin(request)
+
     const { id } = await params
 
     const rows = await db.select({ id: promptContributions.id }).from(promptContributions)
@@ -92,7 +97,6 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ message: 'Contribution deleted successfully' })
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleApiError(error, 'Unable to delete contribution')
   }
 }

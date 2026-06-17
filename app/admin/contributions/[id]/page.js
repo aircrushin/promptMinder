@@ -24,6 +24,7 @@ import {
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { getAdminHeaders } from "@/lib/admin-client";
 
 export default function ContributionDetailPage() {
   const params = useParams();
@@ -42,7 +43,9 @@ export default function ContributionDetailPage() {
 
   const fetchContribution = async () => {
     try {
-      const response = await fetch(`/api/contributions/${params.id}`);
+      const response = await fetch(`/api/contributions/${params.id}`, {
+        headers: getAdminHeaders({ json: false }),
+      });
       if (response.ok) {
         const data = await response.json();
         setContribution(data);
@@ -68,15 +71,11 @@ export default function ContributionDetailPage() {
 
   const handleReview = async (status) => {
     setProcessing(true);
-    const adminEmail = localStorage.getItem("admin_email");
 
     try {
       const response = await fetch(`/api/contributions/${params.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-email": adminEmail || "",
-        },
+        headers: getAdminHeaders(),
         body: JSON.stringify({
           status,
           adminNotes: adminNotes.trim(),

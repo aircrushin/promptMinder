@@ -4,6 +4,7 @@ import { eq, desc, count as countFn } from 'drizzle-orm'
 import { promptContributions } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 import { requireUserId } from '@/lib/auth.js'
+import { requireAdmin } from '@/lib/admin-auth.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 
 export async function POST(request) {
@@ -47,6 +48,8 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
+    requireAdmin(request)
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') || 'pending'
     const page = parseInt(searchParams.get('page') || '1')
@@ -75,7 +78,6 @@ export async function GET(request) {
       }
     })
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleApiError(error, 'Unable to load contributions')
   }
 }

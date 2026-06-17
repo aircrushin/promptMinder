@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Pagination } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminHeaders } from "@/lib/admin-client";
 
 const STATUS_THEMES = {
   pending: {
@@ -128,7 +129,9 @@ export default function AdminContributionsPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch("/api/contributions/stats");
+      const response = await fetch("/api/contributions/stats", {
+        headers: getAdminHeaders({ json: false }),
+      });
       if (response.ok) {
         const data = await response.json();
         setStats(data.statusStats);
@@ -142,7 +145,10 @@ export default function AdminContributionsPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/contributions?status=${statusFilter}&page=${currentPage}&limit=20`
+        `/api/contributions?status=${statusFilter}&page=${currentPage}&limit=20`,
+        {
+          headers: getAdminHeaders({ json: false }),
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -260,15 +266,11 @@ export default function AdminContributionsPage() {
 
   const handleQuickReview = async (contributionId, status) => {
     setReviewingId(contributionId);
-    const adminEmail = localStorage.getItem("admin_email");
-    
+
     try {
       const response = await fetch(`/api/contributions/${contributionId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-email": adminEmail || "",
-        },
+        headers: getAdminHeaders(),
         body: JSON.stringify({
           status,
           adminNotes: reviewNotes[contributionId]?.trim() || "",
