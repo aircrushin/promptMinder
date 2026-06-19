@@ -230,6 +230,37 @@
     "models": []
   },
   {
+    "value": "requesty",
+    "label": "Requesty",
+    "description": "Requesty OpenAI-compatible gateway (https://requesty.ai).",
+    "baseURL": "https://router.requesty.ai/v1",
+    "endpoints": [
+      {
+        "value": "requesty",
+        "label": "Requesty",
+        "url": "https://router.requesty.ai/v1"
+      }
+    ],
+    "models": [
+      {
+        "value": "openai/gpt-4o-mini",
+        "label": "GPT-4o Mini"
+      },
+      {
+        "value": "anthropic/claude-sonnet-4-5",
+        "label": "Claude Sonnet 4.5"
+      },
+      {
+        "value": "google/gemini-2.5-flash",
+        "label": "Gemini 2.5 Flash"
+      },
+      {
+        "value": "deepseek/deepseek-chat",
+        "label": "DeepSeek Chat"
+      }
+    ]
+  },
+  {
     "value": "custom",
     "label": "Custom Provider",
     "description": "Use any OpenAI-compatible API by configuring the endpoint and key manually.",
