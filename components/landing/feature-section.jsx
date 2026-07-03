@@ -2,44 +2,44 @@
 
 import { motion } from "framer-motion";
 import {
-  FolderOpenIcon,
-  ArrowPathIcon,
-  UsersIcon,
-  CpuChipIcon,
-  LockClosedIcon,
-  LightBulbIcon,
-} from "@heroicons/react/24/outline";
+  Cpu,
+  FolderOpen,
+  Lightbulb,
+  Lock,
+  RefreshCw,
+  Users,
+} from "lucide-react";
 
 const baseFeatureData = [
   {
     defaultTitle: "Smart Category Management",
     defaultDescription: "Organize prompts efficiently with intuitive categories and tags for quick access.",
-    IconComponent: FolderOpenIcon
+    IconComponent: FolderOpen
   },
   {
     defaultTitle: "Version Control",
     defaultDescription: "Track every change. Revert to previous prompt versions easily with a single click.",
-    IconComponent: ArrowPathIcon
+    IconComponent: RefreshCw
   },
   {
     defaultTitle: "Team Collaboration",
     defaultDescription: "Share, discuss, and refine prompts with your team in a centralized workspace.",
-    IconComponent: UsersIcon
+    IconComponent: Users
   },
   {
     defaultTitle: "AI Model Support",
     defaultDescription: "Seamlessly integrate with various AI models. Use your prompts where you need them.",
-    IconComponent: CpuChipIcon
+    IconComponent: Cpu
   },
   {
     defaultTitle: "Data Security",
     defaultDescription: "Enterprise-level data encryption ensures your prompts and sensitive data are always protected.",
-    IconComponent: LockClosedIcon
+    IconComponent: Lock
   },
   {
     defaultTitle: "Prompt Optimization",
     defaultDescription: "Leverage built-in tools and suggestions to enhance the effectiveness of your prompts.",
-    IconComponent: LightBulbIcon
+    IconComponent: Lightbulb
   },
 ];
 

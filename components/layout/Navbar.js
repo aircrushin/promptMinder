@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { OptimizedImage } from '@/components/ui/optimized-image';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
@@ -254,7 +254,7 @@ export default function Navbar() {
     <nav className="border-b border-white/20 bg-white/70 backdrop-blur-xl shadow-sm">
       <div className="mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
-          <OptimizedImage 
+          <Image
             src="/logo2.png" 
             alt="PromptMinder" 
             width={40} 

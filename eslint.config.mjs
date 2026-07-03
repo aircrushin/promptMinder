@@ -4,6 +4,13 @@ import globals from "globals";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
+    ignores: [
+      '.next/**',
+      'node_modules/**',
+      'coverage/**',
+    ],
+  },
+  {
     files: ["**/*.{js,mjs,cjs,jsx}"],
     languageOptions: {
       globals: {

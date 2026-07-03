@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateFAQPageSchema } from "@/lib/geo-utils";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDown } from "lucide-react";
 
 export function FAQSection({ t, language = 'zh' }) {
   const [openIndex, setOpenIndex] = useState(null);
@@ -149,7 +149,7 @@ export function FAQSection({ t, language = 'zh' }) {
                     }`}
                     aria-hidden="true"
                   >
-                    <ChevronDownIcon className="h-5 w-5" />
+                    <ChevronDown className="h-5 w-5" />
                   </motion.span>
                 </div>
                 

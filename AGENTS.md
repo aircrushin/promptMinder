@@ -45,8 +45,6 @@ Use **pnpm** for all package management:
 
 ### Analysis & Performance
 - `pnpm analyze` - Build with bundle analyzer
-- `pnpm css:optimize` - Optimize CSS for production
-- `pnpm performance:test` - Run performance tests
 
 ## Project Structure
 
@@ -74,15 +72,11 @@ prompt-manager/
 │   ├── layout/            # Layout components (Navbar, Footer)
 │   ├── admin/             # Admin dashboard components
 │   ├── playground/        # Prompt testing components
-│   ├── performance/       # Performance monitoring components
 │   └── common/            # Shared utility components
 ├── hooks/                 # Custom React hooks
 │   ├── use-prompts.js     # Prompt data fetching
 │   ├── use-prompt-detail.js
-│   ├── use-toast.js       # Toast notifications
-│   ├── use-api-cache.js   # API caching
-│   ├── use-lazy-loading.js
-│   └── use-performance.js
+│   └── use-toast.js       # Toast notifications
 ├── lib/                   # Utility functions and configurations
 │   ├── api-client.js      # Centralized API client
 │   ├── api-error.js       # Error handling utilities
@@ -95,8 +89,7 @@ prompt-manager/
 │   └── prompts.js         # Prompt utilities
 ├── contexts/              # React Context providers
 │   ├── LanguageContext.js # Internationalization
-│   ├── team-context.js    # Team state management
-│   └── PerformanceContext.js
+│   └── team-context.js    # Team state management
 ├── messages/              # Internationalization files
 │   ├── zh.json            # Chinese translations
 │   └── en.json            # English translations
@@ -285,7 +278,6 @@ const newPrompt = await apiClient.createPrompt(promptData, { teamId: 'xxx' })
 
 **Utility hooks:**
 - `useToast()` - Show notifications
-- `usePerformance()` - Performance monitoring
 
 ## Database Schema
 
@@ -325,11 +317,9 @@ const newPrompt = await apiClient.createPrompt(promptData, { teamId: 'xxx' })
 ## Performance Optimizations
 
 - Lazy load routes and heavy components with `next/dynamic`
-- Virtualize long lists (VirtualPromptList, VirtualList)
 - Use useMemo/useCallback to prevent re-renders
 - Optimized images with next/image
 - CSS-in-JS via Tailwind for minimal bundle
-- Webpack chunk splitting configured in `next.config.js`
 - PWA support with service worker
 
 ## Security Considerations

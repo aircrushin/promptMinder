@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { ParticleButton } from "../ui/particle-button";
-import { SparklesIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -83,7 +83,7 @@ export function CTASection({ t }) {
               variants={itemVariants}
               className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm"
             >
-              <SparklesIcon className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" />
               Prompt Minder
             </motion.div>
             
@@ -114,7 +114,7 @@ export function CTASection({ t }) {
                 <span className="relative z-10">
                   {isSignedIn ? translations.buttonLoggedIn : translations.buttonLoggedOut}
                 </span>
-                <ArrowRightIcon className="relative z-10 h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight className="relative z-10 h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-slate-800 to-slate-700 transition-transform duration-300 group-hover:translate-x-0" />
               </ParticleButton>
               
@@ -123,7 +123,7 @@ export function CTASection({ t }) {
                 className="group relative inline-flex h-14 items-center justify-center gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white px-8 text-lg font-semibold text-slate-900 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
               >
                 <span className="relative z-10">{translations.promptCollections}</span>
-                <ArrowRightIcon className="h-5 w-5 text-slate-500 transition-all duration-200 group-hover:text-slate-700 group-hover:translate-x-0.5" />
+                <ArrowRight className="h-5 w-5 text-slate-500 transition-all duration-200 group-hover:text-slate-700 group-hover:translate-x-0.5" />
               </Link>
             </motion.div>
           </div>

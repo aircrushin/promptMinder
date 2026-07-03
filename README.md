@@ -157,7 +157,6 @@ pnpm lint              # 运行 ESLint
 pnpm test              # 运行 Jest 测试
 pnpm test:coverage     # 生成覆盖率报告
 pnpm analyze           # 分析构建产物体积
-pnpm performance:test  # 运行性能测试脚本
 pnpm cli:agent -- prompt.list
 ```
 

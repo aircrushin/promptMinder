@@ -42,9 +42,9 @@ describe('TestCaseList', () => {
   describe('Module structure', () => {
     it('should export TestCaseList component', () => {
       // Test that the module exports correctly
-      const module = require('@/components/playground/TestCaseList');
-      expect(module.TestCaseList).toBeDefined();
-      expect(typeof module.TestCaseList).toBe('function');
+      const testCaseListModule = require('@/components/playground/TestCaseList');
+      expect(testCaseListModule.TestCaseList).toBeDefined();
+      expect(typeof testCaseListModule.TestCaseList).toBe('function');
     });
   });
 

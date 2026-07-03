@@ -157,7 +157,6 @@ pnpm lint              # Run ESLint
 pnpm test              # Run Jest tests
 pnpm test:coverage     # Generate a coverage report
 pnpm analyze           # Analyze build output size
-pnpm performance:test  # Run the performance test script
 pnpm cli:agent -- prompt.list
 ```
 

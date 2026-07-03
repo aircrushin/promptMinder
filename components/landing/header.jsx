@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Library, LayoutGrid, Languages } from "lucide-react";
-import { OptimizedImage } from "@/components/ui/optimized-image";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import {
   NavigationMenu,
@@ -42,7 +42,7 @@ export function Header() {
           href="/"
           className="flex items-center gap-2.5"
         >
-          <OptimizedImage
+          <Image
             src="/logo2.png"
             alt="PromptMinder"
             width={32}

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { ChatBubbleOvalLeftIcon } from "@heroicons/react/24/solid";
+import { MessageCircle } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -110,7 +110,7 @@ export function TestimonialSection({ t }) {
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 via-indigo-50/0 to-indigo-100/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               
               <div className="relative">
-                <ChatBubbleOvalLeftIcon className="mb-4 h-8 w-8 text-indigo-200 transition-colors duration-300 group-hover:text-indigo-300" />
+                <MessageCircle className="mb-4 h-8 w-8 text-indigo-200 transition-colors duration-300 group-hover:text-indigo-300" />
                 <p className="text-lg leading-relaxed text-slate-700 font-medium">
                   &ldquo;{testimonial.content}&rdquo;
                 </p>

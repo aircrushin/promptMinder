@@ -143,15 +143,6 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }) => children,
 }))
 
-// Mock lucide-react icons
-jest.mock('lucide-react', () => ({
-  Import: (props) => <div data-testid="import-icon" {...props}>Import</div>,
-  Copy: (props) => <div data-testid="copy-icon" {...props}>Copy</div>,
-  Share2: (props) => <div data-testid="share-icon" {...props}>Share</div>,
-  Trash2: (props) => <div data-testid="trash-icon" {...props}>Trash</div>,
-  ChevronDown: (props) => <div data-testid="chevron-down-icon" {...props}>ChevronDown</div>,
-}))
-
 // 全局测试环境变量
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'

@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  CommandLineIcon,
-  ClipboardDocumentIcon,
-  CheckIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/24/outline";
+  Check,
+  Clipboard,
+  ExternalLink,
+  Terminal,
+} from "lucide-react";
 
 const DEFAULT_TRANSLATIONS = {
   badge: "Developer Tools",
@@ -106,7 +106,7 @@ export function CLISection({ t }) {
             {/* Badge */}
             <motion.div variants={itemVariants} className="mb-5">
               <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm">
-                <CommandLineIcon className="h-3.5 w-3.5" />
+                <Terminal className="h-3.5 w-3.5" />
                 {tr.badge}
               </span>
             </motion.div>
@@ -153,9 +153,9 @@ export function CLISection({ t }) {
                         className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                       >
                         {isCopied ? (
-                          <CheckIcon className="h-4 w-4 text-emerald-500" />
+                          <Check className="h-4 w-4 text-emerald-500" />
                         ) : (
-                          <ClipboardDocumentIcon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                          <Clipboard className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                         )}
                       </button>
                     </div>
@@ -181,7 +181,7 @@ export function CLISection({ t }) {
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 underline-offset-4 transition-colors hover:text-indigo-700 hover:underline"
               >
                 {tr.npmLink}
-                <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
               <span className="h-4 w-px bg-slate-200" />
               <a
@@ -191,7 +191,7 @@ export function CLISection({ t }) {
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 hover:underline"
               >
                 {tr.docsLink}
-                <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </motion.div>
           </div>
