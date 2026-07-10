@@ -46,6 +46,7 @@ next-env.d.ts
 .swc
 .vscode
 .idea
+.superpowers
 # clerk configuration (can include secrets)
 /.clerk/
 .claude
