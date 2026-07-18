@@ -3,10 +3,11 @@ import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { clerkClient } from '@clerk/nextjs/server'
-import { eq, or, and, ilike, desc, count as countFn } from 'drizzle-orm'
+import { or, and, ilike, desc, count as countFn } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 import {
+  buildPromptAccessScope,
   createChangeRequest,
   createPromptDirect,
   ensureLineage,
@@ -16,13 +17,7 @@ import {
 } from '@/lib/prompt-workflow.js'
 
 function buildPromptConditions({ teamId, userId, tag, search }) {
-  const conditions = []
-
-  if (teamId) {
-    conditions.push(eq(prompts.teamId, teamId))
-  } else {
-    conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
-  }
+  const conditions = [buildPromptAccessScope({ teamId, userId })]
 
   if (tag) {
     conditions.push(ilike(prompts.tags, `%${tag}%`))

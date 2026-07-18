@@ -3,9 +3,10 @@ import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { TEAM_ROLES } from '@/lib/team-service.js'
-import { eq, or, and } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { buildPromptAccessScope } from '@/lib/prompt-workflow.js'
 
 export async function POST(request, { params }) {
   try {
@@ -25,17 +26,10 @@ export async function POST(request, { params }) {
       membership = await teamService.requireMembership(teamId, userId)
     }
 
-    const conditions = [eq(prompts.id, promptId)]
-    if (teamId) {
-      conditions.push(eq(prompts.teamId, teamId))
-    } else {
-      conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
-    }
-
     const rows = await db
       .select({ id: prompts.id, createdBy: prompts.createdBy, userId: prompts.userId, teamId: prompts.teamId, isPublic: prompts.isPublic })
       .from(prompts)
-      .where(and(...conditions))
+      .where(and(eq(prompts.id, promptId), buildPromptAccessScope({ teamId, userId })))
       .limit(1)
     const prompt = rows[0] ? toSnakeCase(rows[0]) : null
 

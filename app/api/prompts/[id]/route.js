@@ -3,10 +3,14 @@ import { requireUserId } from '@/lib/auth.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { TEAM_ROLES } from '@/lib/team-service.js'
-import { eq, or, and } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
-import { createChangeRequest, isTeamApprovalEnabled } from '@/lib/prompt-workflow.js'
+import {
+  buildPromptAccessScope,
+  createChangeRequest,
+  isTeamApprovalEnabled,
+} from '@/lib/prompt-workflow.js'
 
 async function getPromptId(paramsPromise) {
   const { id } = await paramsPromise
@@ -38,14 +42,11 @@ export async function GET(request, { params }) {
       membership = await teamService.requireMembership(teamId, userId)
     }
 
-    const conditions = [eq(prompts.id, id)]
-    if (teamId) {
-      conditions.push(eq(prompts.teamId, teamId))
-    } else {
-      conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
-    }
-
-    const rows = await db.select().from(prompts).where(and(...conditions)).limit(1)
+    const rows = await db
+      .select()
+      .from(prompts)
+      .where(and(eq(prompts.id, id), buildPromptAccessScope({ teamId, userId })))
+      .limit(1)
     const prompt = rows[0] ? toSnakeCase(rows[0]) : null
 
     if (!prompt) {
@@ -72,14 +73,11 @@ export async function POST(request, { params }) {
       membership = await teamService.requireMembership(teamId, userId)
     }
 
-    const conditions = [eq(prompts.id, id)]
-    if (teamId) {
-      conditions.push(eq(prompts.teamId, teamId))
-    } else {
-      conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
-    }
-
-    const rows = await db.select().from(prompts).where(and(...conditions)).limit(1)
+    const rows = await db
+      .select()
+      .from(prompts)
+      .where(and(eq(prompts.id, id), buildPromptAccessScope({ teamId, userId })))
+      .limit(1)
     const prompt = rows[0] ? toSnakeCase(rows[0]) : null
 
     if (!prompt) {
@@ -161,17 +159,10 @@ export async function DELETE(request, { params }) {
       membership = await teamService.requireMembership(teamId, userId)
     }
 
-    const conditions = [eq(prompts.id, id)]
-    if (teamId) {
-      conditions.push(eq(prompts.teamId, teamId))
-    } else {
-      conditions.push(or(eq(prompts.createdBy, userId), eq(prompts.userId, userId)))
-    }
-
     const rows = await db
       .select({ id: prompts.id, createdBy: prompts.createdBy, userId: prompts.userId, teamId: prompts.teamId })
       .from(prompts)
-      .where(and(...conditions))
+      .where(and(eq(prompts.id, id), buildPromptAccessScope({ teamId, userId })))
       .limit(1)
     const prompt = rows[0] ? toSnakeCase(rows[0]) : null
 

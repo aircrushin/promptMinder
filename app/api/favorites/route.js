@@ -4,9 +4,10 @@ import { db } from '@/lib/db.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { clerkClient } from '@clerk/nextjs/server'
-import { eq, or, and, desc, inArray, count as countFn } from 'drizzle-orm'
+import { eq, and, desc, inArray, count as countFn } from 'drizzle-orm'
 import { favorites, prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
+import { buildPromptAccessScope } from '@/lib/prompt-workflow.js'
 
 export async function GET(request) {
   try {
@@ -25,10 +26,7 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit') || '20', 10)
     const offset = (page - 1) * limit
 
-    // Build team filter for prompts
-    const teamCondition = teamId
-      ? eq(prompts.teamId, teamId)
-      : or(eq(prompts.createdBy, userId), eq(prompts.userId, userId))
+    const teamCondition = buildPromptAccessScope({ teamId, userId })
 
     // Join favorites with prompts to filter by team and count correctly
     const [favRows, countResult] = await Promise.all([

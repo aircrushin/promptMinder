@@ -3,9 +3,11 @@ import {
   WORKFLOW_EVENT_TYPES,
   addSubscription,
   applyChangeRequestAction,
+  buildPromptAccessScope,
   createChangeRequest,
   createCommentOnChangeRequest,
   createNotifications,
+  getPromptByScope,
   getSubscriptionState,
   getTeamApprovalSettings,
   isTeamApprovalEnabled,
@@ -19,11 +21,66 @@ import {
 } from '@/lib/prompt-workflow.js'
 import { createMockDb } from '../helpers/mock-drizzle.js'
 
+function collectSqlText(node, parts = []) {
+  if (!node || typeof node !== 'object') {
+    return parts
+  }
+  if (typeof node.name === 'string') {
+    parts.push(node.name)
+  }
+  if (typeof node.value === 'string') {
+    parts.push(node.value)
+  } else if (Array.isArray(node.value)) {
+    node.value.forEach((chunk) => {
+      if (typeof chunk === 'string') {
+        parts.push(chunk)
+      }
+    })
+  }
+  if (Array.isArray(node.queryChunks)) {
+    node.queryChunks.forEach((chunk) => collectSqlText(chunk, parts))
+  }
+  return parts
+}
+
 describe('prompt-workflow', () => {
   let db
 
   beforeEach(() => {
     db = createMockDb()
+  })
+
+  describe('buildPromptAccessScope / getPromptByScope', () => {
+    it('个人作用域应要求 team_id 为空且归属当前用户', () => {
+      const scope = buildPromptAccessScope({ teamId: null, userId: 'user-1' })
+      const sqlText = collectSqlText(scope).join('').toLowerCase()
+
+      expect(sqlText).toContain('team_id')
+      expect(sqlText).toContain('is null')
+      expect(sqlText).toContain('created_by')
+      expect(sqlText).toContain('user_id')
+    })
+
+    it('团队作用域只应按 team_id 过滤', () => {
+      const scope = buildPromptAccessScope({ teamId: 'team-1', userId: 'user-1' })
+      const sqlText = collectSqlText(scope).join('').toLowerCase()
+
+      expect(sqlText).toContain('team_id')
+      expect(sqlText).not.toContain('is null')
+      expect(sqlText).not.toContain('created_by')
+    })
+
+    it('getPromptByScope 在个人作用域应使用含 team_id is null 的条件', async () => {
+      db.enqueueSelect([])
+      await getPromptByScope(db, { promptId: 'prompt-1', teamId: null, userId: 'user-1' })
+
+      const selectChain = db.select.mock.results[0].value
+      const whereArg = selectChain.where.mock.calls[0][0]
+      const sqlText = collectSqlText(whereArg).join('').toLowerCase()
+
+      expect(sqlText).toContain('is null')
+      expect(sqlText).toContain('team_id')
+    })
   })
 
   describe('approval settings', () => {

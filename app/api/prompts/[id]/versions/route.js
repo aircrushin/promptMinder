@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { and, desc, eq, or } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
-import { getPromptByScope } from '@/lib/prompt-workflow.js'
+import { buildPromptAccessScope, getPromptByScope } from '@/lib/prompt-workflow.js'
 
 async function getPromptId(paramsPromise) {
   const { id } = await paramsPromise
@@ -50,7 +50,7 @@ export async function GET(request, { params }) {
         .where(
           and(
             eq(prompts.title, prompt.title),
-            or(eq(prompts.createdBy, userId), eq(prompts.userId, userId))
+            buildPromptAccessScope({ teamId: null, userId })
           )
         )
         .orderBy(desc(prompts.createdAt))
