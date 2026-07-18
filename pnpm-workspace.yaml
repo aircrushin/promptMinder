@@ -8,7 +8,8 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
-# pnpm 11+: overrides must live here (package.json#pnpm is ignored)
+# pnpm 11+: canonical overrides live here.
+# package.json#pnpm.overrides is kept in sync for Vercel (pnpm 9) frozen installs.
 overrides:
   esbuild: 0.25.12
   postcss: 8.5.19
