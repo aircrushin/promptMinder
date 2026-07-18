@@ -7,3 +7,10 @@ allowBuilds:
   msw: true
   sharp: true
   unrs-resolver: true
+
+# pnpm 11+: overrides must live here (package.json#pnpm is ignored)
+overrides:
+  esbuild: 0.25.12
+  postcss: 8.5.19
+  prismjs: 1.30.0
+  serialize-javascript: 7.0.5

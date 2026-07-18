@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import { NextRequest } from 'next/server'
 import {
   ADMIN_TOKEN_MAX_AGE_MS,

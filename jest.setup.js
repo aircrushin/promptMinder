@@ -1,39 +1,44 @@
 import '@testing-library/jest-dom'
 
-// Mock Next.js Request and Response
-global.Request = class Request {
-  constructor(url, options = {}) {
-    this.url = url
-    this.method = options.method || 'GET'
-    this.headers = new Map(Object.entries(options.headers || {}))
-    this.body = options.body
-  }
+// Prefer the runtime Fetch API (Node / undici). Overwriting native Request breaks
+// Next.js 16.2+ NextRequest/NextResponse. Only polyfill when missing (e.g. older jsdom).
+if (typeof globalThis.Request === 'undefined') {
+  globalThis.Request = class Request {
+    constructor(url, options = {}) {
+      this.url = url
+      this.method = options.method || 'GET'
+      this.headers = new Map(Object.entries(options.headers || {}))
+      this.body = options.body
+    }
 
-  async json() {
-    return JSON.parse(this.body || '{}')
+    async json() {
+      return JSON.parse(this.body || '{}')
+    }
   }
 }
 
-global.Response = class Response {
-  constructor(body, options = {}) {
-    this.body = body
-    this.status = options.status || 200
-    this.headers = new Map(Object.entries(options.headers || {}))
-  }
+if (typeof globalThis.Response === 'undefined') {
+  globalThis.Response = class Response {
+    constructor(body, options = {}) {
+      this.body = body
+      this.status = options.status || 200
+      this.headers = new Map(Object.entries(options.headers || {}))
+    }
 
-  static json(data, init = {}) {
-    const body = JSON.stringify(data)
-    return new global.Response(body, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init.headers,
-      },
-    })
-  }
+    static json(data, init = {}) {
+      const body = JSON.stringify(data)
+      return new globalThis.Response(body, {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          ...init.headers,
+        },
+      })
+    }
 
-  async json() {
-    return JSON.parse(this.body || '{}')
+    async json() {
+      return JSON.parse(this.body || '{}')
+    }
   }
 }
 

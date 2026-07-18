@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import { GET, POST } from '@/app/api/cli-tokens/route'
 import { DELETE } from '@/app/api/cli-tokens/[id]/route'
 import { requireUserId } from '@/lib/auth.js'
