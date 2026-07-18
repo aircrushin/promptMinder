@@ -28,7 +28,8 @@ import { PromptGrid, PromptGridSkeleton } from "@/components/prompt/PromptGrid";
 import { NewPromptDialog } from "@/components/prompt/NewPromptDialog";
 import { OptimizePromptDialog } from "@/components/prompt/OptimizePromptDialog";
 import { OnboardingDialog } from "@/components/prompt/OnboardingDialog";
-import { Search, Tags, ChevronDown, Heart, PlusCircle } from "lucide-react";
+import { VersionHistoryDialog } from "@/components/prompt/VersionHistoryDialog";
+import { Search, Tags, Heart, PlusCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TagFilter = dynamic(() => import("@/components/prompt/TagFilter"), {
@@ -101,6 +102,7 @@ export default function PromptsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [promptToDelete, setPromptToDelete] = useState(null);
   const [selectedVersions, setSelectedVersions] = useState(null);
+  const [restoringVersionId, setRestoringVersionId] = useState(null);
   const [showNewPromptDialog, setShowNewPromptDialog] = useState(false);
   const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
   const [isImportingConversation, setIsImportingConversation] = useState(false);
@@ -275,6 +277,52 @@ export default function PromptsPage() {
       router.push(`/prompts/${latest.id}/edit`);
     }
   }, [router, selectedVersions]);
+
+  const handleRestoreVersion = useCallback(async (version) => {
+    if (!version?.id || !t?.promptsPage) return;
+
+    setRestoringVersionId(version.id);
+    try {
+      const result = await apiClient.restorePromptVersion(
+        version.id,
+        getTeamRequestOptions(activeTeamId)
+      );
+
+      if (result?.mode === "approval_required" && result?.change_request?.id) {
+        setSelectedVersions(null);
+        toast({
+          description: t.promptsPage.restorePendingApproval || "恢复请求已提交审批",
+          duration: 2000,
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+        return;
+      }
+
+      const newVersion = result?.prompt?.version || result?.proposed_version || "";
+      setSelectedVersions(null);
+      await fetchPrompts();
+      toast({
+        description: (t.promptsPage.restoreSuccess || "已恢复为新版本 v{version}").replace(
+          "{version}",
+          newVersion
+        ),
+        duration: 2000,
+      });
+
+      if (result?.prompt?.id) {
+        router.push(`/prompts/${result.prompt.id}`);
+      }
+    } catch (error) {
+      console.error("Error restoring prompt version:", error);
+      toast({
+        variant: "destructive",
+        description: error.message || t.promptsPage.restoreError || "恢复失败，请重试",
+        duration: 2000,
+      });
+    } finally {
+      setRestoringVersionId(null);
+    }
+  }, [activeTeamId, fetchPrompts, router, t?.promptsPage, toast]);
 
   const handleCreatePrompt = useCallback(async () => {
     if (!t?.promptsPage) return;
@@ -952,47 +1000,31 @@ export default function PromptsPage() {
             </div>
           </Tabs>
         </div>
-      <Dialog
+      <VersionHistoryDialog
         open={!!selectedVersions}
-        onOpenChange={() => setSelectedVersions(null)}
-      >
-        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:max-w-md">
-          <VisuallyHidden.Root>
-            <DialogTitle>Dialog</DialogTitle>
-          </VisuallyHidden.Root>
-          <DialogHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <DialogTitle className="text-xl">
-              {tp.versionHistoryTitle}
-            </DialogTitle>
-            <Button onClick={handleCreateNewVersion} className="h-10 w-full sm:w-auto sm:h-9">
-              {tp.createNewVersion}
-            </Button>
-          </DialogHeader>
-          <div className="space-y-3 mt-4 max-h-[60vh] overflow-y-auto pr-1">
-            {selectedVersions?.map((version) => (
-              <Link
-                key={version.id}
-                href={`/prompts/${version.id}`}
-                className="block"
-              >
-                <Card className="p-4 hover:bg-accent/50 cursor-pointer transition-colors border border-border/50 hover:border-primary/30">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-medium text-primary">
-                        v{version.version}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(version.created_at).toLocaleString()}
-                      </div>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={(open) => {
+          if (!open) setSelectedVersions(null);
+        }}
+        versions={selectedVersions || []}
+        title={tp.versionHistoryTitle}
+        description={
+          selectedVersions?.length
+            ? (tp.versionHistoryDescription || "").replace(
+                "{count}",
+                String(selectedVersions.length)
+              )
+            : undefined
+        }
+        createNewVersionLabel={tp.createNewVersion}
+        restoreLabel={tp.restoreVersion}
+        restoringLabel={tp.restoringVersion}
+        latestLabel={tp.latestVersion}
+        viewDetailsLabel={tp.viewVersionDetails}
+        onCreateNewVersion={handleCreateNewVersion}
+        onRestoreVersion={handleRestoreVersion}
+        restoringVersionId={restoringVersionId}
+        canRestore={Boolean(user)}
+      />
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:max-w-md">
           <VisuallyHidden.Root>

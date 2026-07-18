@@ -40,7 +40,7 @@ describe('VersionHistoryDialog', () => {
 
     expect(screen.getByRole('heading', { name: '版本历史' })).toBeInTheDocument();
     expect(screen.getByText('内容运营助手')).toBeInTheDocument();
-    expect(screen.getByText('共 2 个版本，选择一个版本查看详情或基于最新版本继续编辑。')).toBeInTheDocument();
+    expect(screen.getByText('共 2 个版本，可查看详情、创建新版本，或一键恢复到历史版本。')).toBeInTheDocument();
     expect(screen.getByText('最新版本')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /创建新版本/ }));
@@ -48,6 +48,24 @@ describe('VersionHistoryDialog', () => {
 
     expect(screen.getByRole('link', { name: /v1\.3\.0/ })).toHaveAttribute('href', '/prompts/prompt-3');
     expect(screen.getAllByTestId('chevronright-icon')).toHaveLength(2);
-    expect(screen.queryByTestId('chevrondown-icon')).not.toBeInTheDocument();
+  });
+
+  it('应该支持对历史版本一键恢复', () => {
+    const handleRestoreVersion = jest.fn();
+
+    render(
+      <VersionHistoryDialog
+        open={true}
+        onOpenChange={jest.fn()}
+        versions={versions}
+        title="版本历史"
+        restoreLabel="恢复此版本"
+        onRestoreVersion={handleRestoreVersion}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /恢复此版本/ }));
+    expect(handleRestoreVersion).toHaveBeenCalledTimes(1);
+    expect(handleRestoreVersion).toHaveBeenCalledWith(versions[1]);
   });
 });

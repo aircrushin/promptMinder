@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, History, Loader2, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,14 +18,23 @@ function VersionHistoryDialog({
   onOpenChange,
   versions = [],
   title = '版本历史',
+  description,
   createNewVersionLabel = '创建新版本',
+  restoreLabel = '恢复此版本',
+  restoringLabel = '恢复中...',
+  latestLabel = '最新版本',
+  viewDetailsLabel = '查看详情',
   onCreateNewVersion,
+  onRestoreVersion,
+  restoringVersionId = null,
+  canRestore = true,
 }) {
   const latestVersion = versions[0] || null;
   const promptTitle = latestVersion?.title || '当前提示词';
-  const description = versions.length
-    ? `共 ${versions.length} 个版本，选择一个版本查看详情或基于最新版本继续编辑。`
-    : '暂无版本记录。';
+  const resolvedDescription = description
+    || (versions.length
+      ? `共 ${versions.length} 个版本，可查看详情、创建新版本，或一键恢复到历史版本。`
+      : '暂无版本记录。');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,49 +44,82 @@ function VersionHistoryDialog({
             <div className="space-y-1">
               <DialogTitle className="text-xl sm:text-2xl">{title}</DialogTitle>
               <p className="text-sm font-medium text-foreground/90">{promptTitle}</p>
-              <DialogDescription>{description}</DialogDescription>
+              <DialogDescription>{resolvedDescription}</DialogDescription>
             </div>
-            <Button
-              onClick={onCreateNewVersion}
-              className="h-10 w-full shrink-0 sm:h-9 sm:w-auto"
-            >
-              <Plus className="h-4 w-4" />
-              {createNewVersionLabel}
-            </Button>
+            {onCreateNewVersion && (
+              <Button
+                onClick={onCreateNewVersion}
+                className="h-10 w-full shrink-0 sm:h-9 sm:w-auto"
+              >
+                <Plus className="h-4 w-4" />
+                {createNewVersionLabel}
+              </Button>
+            )}
           </div>
         </DialogHeader>
         <ScrollArea className="max-h-[min(60vh,28rem)]">
           <div className="space-y-3 p-4 sm:p-6">
-            {versions.map((version, index) => (
-              <Link
-                key={version.id}
-                href={`/prompts/${version.id}`}
-                aria-label={`查看 v${version.version} 详情`}
-                className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-background px-4 py-3 transition-colors duration-200 hover:border-primary/30 hover:bg-accent/40">
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-base font-semibold text-foreground">
-                        v{version.version}
-                      </span>
-                      {index === 0 && (
-                        <Badge variant="secondary" className="rounded-full px-2 py-0 text-[11px]">
-                          最新版本
-                        </Badge>
-                      )}
+            {versions.map((version, index) => {
+              const isLatest = index === 0;
+              const isRestoring = restoringVersionId === version.id;
+
+              return (
+                <div
+                  key={version.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background px-4 py-3 transition-colors duration-200 hover:border-primary/30 hover:bg-accent/40"
+                >
+                  <Link
+                    href={`/prompts/${version.id}`}
+                    aria-label={`查看 v${version.version} 详情`}
+                    className="group min-w-0 flex-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-base font-semibold text-foreground">
+                            v{version.version}
+                          </span>
+                          {isLatest && (
+                            <Badge variant="secondary" className="rounded-full px-2 py-0 text-[11px]">
+                              {latestLabel}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(version.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
+                        <span>{viewDetailsLabel}</span>
+                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(version.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="hidden sm:inline">查看详情</span>
-                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                  </div>
+                  </Link>
+
+                  {!isLatest && canRestore && onRestoreVersion && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0"
+                      disabled={Boolean(restoringVersionId)}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onRestoreVersion(version);
+                      }}
+                    >
+                      {isRestoring ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <History className="h-3.5 w-3.5" />
+                      )}
+                      {isRestoring ? restoringLabel : restoreLabel}
+                    </Button>
+                  )}
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </ScrollArea>
       </DialogContent>

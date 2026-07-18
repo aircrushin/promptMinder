@@ -3,11 +3,23 @@ import { useRouter } from 'next/navigation';
 import { useState, use } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { ArrowLeft, History, Loader2 } from "lucide-react"
 import ChatTestWrapper from '@/components/chat/ChatTestWrapper';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTeam } from '@/contexts/team-context';
 import { useUser } from "@clerk/nextjs";
+import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
 import VariableInputs from '@/components/prompt/VariableInputs';
 import { replaceVariables } from '@/lib/promptVariables';
 import PromptHeader from '@/components/prompt/PromptHeader';
@@ -21,9 +33,12 @@ export default function PromptDetail({ params }) {
   const { id } = use(params);
   const router = useRouter();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const { user } = useUser();
-  const { activeMembership, isPersonal } = useTeam();
+  const { activeTeamId, activeMembership, isPersonal } = useTeam();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
   
   const {
     prompt,
@@ -54,12 +69,50 @@ export default function PromptDetail({ params }) {
   const role = activeMembership?.role;
   const isManager = role === 'admin' || role === 'owner';
   const canManage = isPersonal || isCreator || isManager;
+  const latestVersion = versions[0] || null;
+  const isHistoricalVersion = Boolean(latestVersion && latestVersion.id !== prompt.id);
 
   const tp = t.promptDetailPage;
 
+  const handleRestore = async () => {
+    setIsRestoring(true);
+    try {
+      const result = await apiClient.restorePromptVersion(
+        prompt.id,
+        activeTeamId ? { teamId: activeTeamId } : {}
+      );
+
+      if (result?.mode === 'approval_required' && result?.change_request?.id) {
+        toast({
+          description: tp.restorePendingApproval || '恢复请求已提交审批',
+        });
+        router.push(`/prompts/reviews/${result.change_request.id}`);
+        return;
+      }
+
+      const newVersion = result?.prompt?.version || '';
+      toast({
+        description: (tp.restoreSuccess || '已恢复为新版本 v{version}').replace('{version}', newVersion),
+      });
+
+      if (result?.prompt?.id) {
+        router.push(`/prompts/${result.prompt.id}`);
+      }
+    } catch (error) {
+      console.error('Error restoring prompt version:', error);
+      toast({
+        variant: 'destructive',
+        description: error.message || tp.restoreError || '恢复失败，请重试',
+      });
+    } finally {
+      setIsRestoring(false);
+      setShowRestoreConfirm(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <Button
           variant="ghost"
           className="text-muted-foreground hover:bg-secondary"
@@ -68,18 +121,35 @@ export default function PromptDetail({ params }) {
           <ArrowLeft className="h-4 w-4 mr-2" />
           {tp.backToList}
         </Button>
-        {versions.length > 1 && (
-          <Button
-            variant="outline"
-            className="text-sm"
-            onClick={() => router.push(`/prompts/${id}/diff`)}
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-            </svg>
-            {tp.viewDiffButton || "查看差异"}
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {isHistoricalVersion && canManage && (
+            <Button
+              variant="default"
+              className="text-sm"
+              onClick={() => setShowRestoreConfirm(true)}
+              disabled={isRestoring}
+            >
+              {isRestoring ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <History className="h-4 w-4 mr-2" />
+              )}
+              {isRestoring ? (tp.restoringVersion || '恢复中...') : (tp.restoreVersion || '恢复此版本')}
+            </Button>
+          )}
+          {versions.length > 1 && (
+            <Button
+              variant="outline"
+              className="text-sm"
+              onClick={() => router.push(`/prompts/${id}/diff`)}
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+              </svg>
+              {tp.viewDiffButton || "查看差异"}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -138,6 +208,36 @@ export default function PromptDetail({ params }) {
         promptId={id}
         t={t}
       />
+
+      <AlertDialog open={showRestoreConfirm} onOpenChange={setShowRestoreConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {tp.restoreConfirmTitle || '确认恢复版本'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {(tp.restoreConfirmDescription || '将基于 v{version} 创建一条新的最新版本，不会删除现有历史。')
+                .replace('{version}', prompt.version || '')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRestoring}>
+              {tp.cancel || '取消'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isRestoring}
+              onClick={(event) => {
+                event.preventDefault();
+                handleRestore();
+              }}
+            >
+              {isRestoring
+                ? (tp.restoringVersion || '恢复中...')
+                : (tp.restoreConfirm || '确认恢复')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
