@@ -42,10 +42,6 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "emqozkcwoekqiibyempf.supabase.co",
-      },
-      {
-        protocol: "https",
         hostname: "cdn.buymeacoffee.com",
       },
       {
