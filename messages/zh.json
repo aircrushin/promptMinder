@@ -3,6 +3,7 @@
     "manage": "管理",
     "new": "新建",
     "public": "合集",
+    "skills": "Skills",
     "menuTitle": "主导航",
     "menuSubtitle": "快速访问您的工作空间",
     "teamSection": "团队空间",
@@ -16,6 +17,7 @@
     "manage": "控制台",
     "new": "新建",
     "public": "合集",
+    "skills": "Skills",
     "playground": "工作台"
   },
   "auth": {
