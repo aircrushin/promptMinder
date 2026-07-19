@@ -114,6 +114,14 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 pnpm db:migrate
 ```
 
+同步首批官方 Skills（需要 skills.sh 的 Vercel OIDC token）：
+
+```bash
+pnpm skills:sync
+```
+
+默认同步前 50 个精选 Skill。仅许可证明确且安全状态可接受的来源会保存完整内容；其余来源只保存索引和出处。使用 `--limit=0` 同步全部精选项，或加 `--all` 切换到完整目录。
+
 5. **启动开发服务器**
 
 ```bash
