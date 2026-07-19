@@ -16,6 +16,7 @@ const SYNC_CONCURRENCY = 5
 
 function readArguments(argv) {
   const all = argv.includes('--all')
+  const skipExisting = argv.includes('--skip-existing')
   const limitArg = argv.find((arg) => arg.startsWith('--limit='))
   const startArg = argv.find((arg) => arg.startsWith('--start='))
   const limit = limitArg ? Number.parseInt(limitArg.split('=')[1], 10) : 50
@@ -26,7 +27,7 @@ function readArguments(argv) {
   if (!Number.isInteger(start) || start < 0) {
     throw new Error('--start must be a non-negative integer')
   }
-  return { all, limit, start }
+  return { all, skipExisting, limit, start }
 }
 
 function wait(ms) {
@@ -104,7 +105,7 @@ function safeFiles(files = []) {
 }
 
 async function main() {
-  const { all, limit, start } = readArguments(process.argv.slice(2))
+  const { all, skipExisting, limit, start } = readArguments(process.argv.slice(2))
   const skillsToken = process.env.SKILLS_SH_TOKEN || process.env.VERCEL_OIDC_TOKEN
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required')
   if (!skillsToken) throw new Error('SKILLS_SH_TOKEN or VERCEL_OIDC_TOKEN is required')
@@ -133,7 +134,21 @@ async function main() {
 
   try {
     const listedSkills = await listSkills(skillsHeaders, { all, limit })
-    const skills = listedSkills.slice(start)
+    let existingIds = new Set()
+    if (skipExisting) {
+      const rows = await sql`SELECT external_id FROM catalog_skills`
+      existingIds = new Set(rows.map((row) => row.external_id))
+      console.log(`Found ${existingIds.size} skills already in database; skipping them.`)
+    }
+
+    const skills = listedSkills
+      .slice(start)
+      .filter((skill) => !existingIds.has(skill.id))
+    const skipped = listedSkills.slice(start).length - skills.length
+    if (skipExisting) {
+      console.log(`Queued ${skills.length} new skills (${skipped} skipped).`)
+    }
+
     let nextIndex = 0
     let imported = 0
 
@@ -212,7 +227,11 @@ async function main() {
       () => worker()
     ))
 
-    console.log(`Synced ${imported} skills.`)
+    console.log(
+      skipExisting
+        ? `Synced ${imported} new skills (${skipped} already present skipped).`
+        : `Synced ${imported} skills.`
+    )
   } finally {
     await sql.end({ timeout: 5 })
   }

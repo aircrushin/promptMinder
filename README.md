@@ -120,7 +120,11 @@ pnpm db:migrate
 pnpm skills:sync
 ```
 
-默认同步前 50 个精选 Skill。仅许可证明确且安全状态可接受的来源会保存完整内容；其余来源只保存索引和出处。使用 `--limit=0` 同步全部精选项，或加 `--all` 切换到完整目录。
+默认同步前 50 个精选 Skill。仅许可证明确且安全状态可接受的来源会保存完整内容；其余来源只保存索引和出处。使用 `--limit=0` 同步全部精选项，或加 `--all` 切换到完整目录。加 `--skip-existing` 可跳过数据库中已有的 Skill，避免重复同步：
+
+```bash
+pnpm skills:sync -- --all --limit=0 --skip-existing
+```
 
 5. **启动开发服务器**
 
