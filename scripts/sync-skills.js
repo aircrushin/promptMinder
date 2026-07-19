@@ -105,7 +105,8 @@ function safeFiles(files = []) {
 }
 
 async function main() {
-  const { all, skipExisting, limit, start } = readArguments(process.argv.slice(2))
+  const argv = process.argv.slice(2).filter((arg) => arg !== '--')
+  const { all, skipExisting, limit, start } = readArguments(argv)
   const skillsToken = process.env.SKILLS_SH_TOKEN || process.env.VERCEL_OIDC_TOKEN
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required')
   if (!skillsToken) throw new Error('SKILLS_SH_TOKEN or VERCEL_OIDC_TOKEN is required')
