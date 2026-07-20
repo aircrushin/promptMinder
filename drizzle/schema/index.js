@@ -3,6 +3,7 @@ export { promptLineages, prompts, tags, publicTags, favorites } from './prompts.
 export { publicPrompts, promptLikes, promptContributions } from './public.js'
 export { userFeedback, providerKeys, cliTokens } from './user.js'
 export { agentConversations, agentMessages } from './agent.js'
+export { catalogSkills } from './skills.js'
 export {
   promptChangeRequests,
   promptChangeComments,

@@ -27,6 +27,7 @@
     "cli:link": "pnpm link --global",
     "cli:unlink": "pnpm unlink --global",
     "cli:agent": "node ./scripts/promptminder-agent.js",
+    "skills:sync": "node ./scripts/sync-skills.js",
     "cli:pack": "npm pack ./packages/promptminder-cli",
     "cli:token": "node ./scripts/create-cli-token.js",
     "cli:whoami": "node ./scripts/cli-whoami.js"

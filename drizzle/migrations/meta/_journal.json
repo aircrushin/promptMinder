@@ -29,6 +29,13 @@
       "when": 1775260800000,
       "tag": "0003_cli_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784458864000,
+      "tag": "0004_catalog_skills",
+      "breakpoints": true
     }
   ]
 }

@@ -10,7 +10,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { Menu, Library, LayoutGrid, Languages, FlaskConical, Bell, Terminal } from "lucide-react";
+import { Menu, Library, LayoutGrid, Languages, FlaskConical, Bell, Terminal, Puzzle } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -247,6 +247,11 @@ export default function Navbar() {
       href: '/public',
       label: translations.header?.public || translations.navbar.public,
       icon: LayoutGrid
+    },
+    {
+      href: '/skills',
+      label: translations.header?.skills || translations.navbar.skills || 'Skills',
+      icon: Puzzle
     }
   ];
 
@@ -274,7 +279,7 @@ export default function Navbar() {
                 <NavigationMenuItem key={href}>
                   <NavigationMenuLink
                     asChild
-                    className={`${pathname === href
+                    className={`${pathname === href || pathname?.startsWith(`${href}/`)
                       ? 'bg-slate-100 text-slate-900'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     } flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors`}
@@ -329,7 +334,7 @@ export default function Navbar() {
                     <Link
                       key={href}
                       href={href}
-                      className={`${pathname === href
+                      className={`${pathname === href || pathname?.startsWith(`${href}/`)
                         ? 'bg-primary/10 text-primary font-medium border-l-2 border-primary'
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                       } flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200`}

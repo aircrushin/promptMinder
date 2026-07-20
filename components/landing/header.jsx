@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Library, LayoutGrid, Languages } from "lucide-react";
+import { Library, LayoutGrid, Languages, Puzzle } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import {
   NavigationMenu,
@@ -92,6 +92,17 @@ export function Header() {
             >
               <LayoutGrid className="h-4 w-4" />
               {t.header.public}
+            </Link>
+            <Link
+              href="/skills"
+              className={`hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 sm:flex ${
+                pathname?.startsWith('/skills')
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              <Puzzle className="h-4 w-4" />
+              {t.header.skills || 'Skills'}
             </Link>
           </SignedIn>
 

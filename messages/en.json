@@ -3,6 +3,7 @@
     "manage": "Manage",
     "new": "New",
     "public": "Collections",
+    "skills": "Skills",
     "menuTitle": "Navigation menu",
     "menuSubtitle": "Quick access to your workspace",
     "teamSection": "Team Space",
@@ -16,6 +17,7 @@
     "manage": "Console",
     "new": "New Prompt",
     "public": "Collections",
+    "skills": "Skills",
     "playground": "Playground"
   },
   "auth": {

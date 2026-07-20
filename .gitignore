@@ -54,3 +54,4 @@ next-env.d.ts
 #playwright
 .playwright-cli
 output
+.env*
