@@ -14,7 +14,7 @@ export default function Footer({ t }) {
     changelog: "Changelog",
     friendlyLinks: "Friendly Links",
     promptCoder: "PromptCoder - Code Prompts",
-    promptGuide: "PromptGuide - Prompt Guide",
+    liveDrop: "LiveDrop - Real-Time Event Social Layer",
     aiShort: "AIshort - Excellent Prompt Collection",
     promptate: "Promptate - Prompt Generator",
     llmReadify: "LLM Readify - Web to Text Tool",
@@ -203,12 +203,12 @@ export default function Footer({ t }) {
                 </li>
                 <li>
                   <Link
-                    href="https://www.promptingguide.ai/zh"
+                    href="https://live.lucids.top/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
-                    {translations.promptGuide}
+                    {translations.liveDrop}
                   </Link>
                 </li>
                 <li>
