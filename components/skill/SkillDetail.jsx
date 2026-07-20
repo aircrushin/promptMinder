@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { AddSkillButton } from '@/components/skill/AddSkillButton'
+import { SkillInstallMethods } from '@/components/skill/SkillInstallMethods'
 
 export function SkillDetail({ skill }) {
   const { language } = useLanguage()
@@ -35,20 +36,24 @@ export function SkillDetail({ skill }) {
               {skill.description && <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">{skill.description}</p>}
             </div>
 
-            {skill.content ? (
-              <article className="prose prose-slate mt-8 max-w-none prose-headings:scroll-mt-20 prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:bg-slate-950">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{skill.content}</ReactMarkdown>
-              </article>
-            ) : (
-              <div className="mt-8 border border-slate-200 bg-white p-8">
-                <h2 className="font-semibold text-slate-950">{zh ? '完整内容未托管' : 'Full content is not hosted'}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {zh
-                    ? '该来源的许可证或安全状态尚不满足同步条件，请前往原始来源查看。'
-                    : 'This source does not yet meet the license or security requirements for content sync. View it at the original source.'}
-                </p>
-              </div>
-            )}
+            <div className="mt-8 flex flex-col gap-6">
+              <SkillInstallMethods skill={skill} />
+
+              {skill.content ? (
+                <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:bg-slate-950">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{skill.content}</ReactMarkdown>
+                </article>
+              ) : (
+                <div className="border border-slate-200 bg-white p-8">
+                  <h2 className="font-semibold text-slate-950">{zh ? '完整内容未托管' : 'Full content is not hosted'}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {zh
+                      ? '该来源的许可证或安全状态尚不满足同步条件，请前往原始来源查看。'
+                      : 'This source does not yet meet the license or security requirements for content sync. View it at the original source.'}
+                  </p>
+                </div>
+              )}
+            </div>
 
             {supportingFiles.length > 0 && (
               <section className="mt-12 border-t border-slate-200 pt-8">
