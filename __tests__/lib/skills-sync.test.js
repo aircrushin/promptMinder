@@ -1,7 +1,9 @@
 import {
   assessSkillAudits,
+  buildSkillInstallMethods,
   canRedistributeSkill,
   parseSkillFrontmatter,
+  resolveSkillPackageUrl,
 } from '@/lib/skills-sync.js'
 
 describe('skills sync policy', () => {
@@ -34,5 +36,38 @@ description: >
 
     expect(assessment.status).toBe('curated')
     expect(canRedistributeSkill({ licenseSpdx: 'MIT', auditStatus: assessment.status })).toBe(true)
+  })
+
+  it('应该按 skills.sh 格式生成 Command 与 Prompt 安装方式', () => {
+    const methods = buildSkillInstallMethods({
+      slug: 'find-skills',
+      source: 'vercel-labs/skills',
+      sourceType: 'github',
+      installUrl: 'https://github.com/vercel-labs/skills',
+    })
+
+    expect(resolveSkillPackageUrl({
+      source: 'vercel-labs/skills',
+      sourceType: 'github',
+    })).toBe('https://github.com/vercel-labs/skills')
+
+    expect(methods).toEqual({
+      command: 'npx skills add https://github.com/vercel-labs/skills --skill find-skills',
+      prompt: 'Run `npx skills use "https://github.com/vercel-labs/skills" --skill "find-skills"` and follow the generated skill instructions now. Read its complete output, redirecting it to a temporary file first if necessary. Resolve relative paths from the supporting-files directory it provides.',
+    })
+  })
+
+  it('缺少 slug 或安装源时不应生成安装方式', () => {
+    expect(buildSkillInstallMethods({
+      slug: 'lark-approval',
+      source: 'open.feishu.cn',
+      sourceType: 'well-known',
+      installUrl: null,
+    })).toBeNull()
+
+    expect(buildSkillInstallMethods({
+      source: 'vercel-labs/skills',
+      sourceType: 'github',
+    })).toBeNull()
   })
 })
