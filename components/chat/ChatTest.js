@@ -30,6 +30,7 @@ import { replaceVariables } from '@/lib/promptVariables';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import providerOptions from '@/components/playground/providerOptions.json';
+import { PROVIDER_TO_MODELS_DEV } from '@/lib/models-dev';
 
 // Message loading animation component
 function MessageLoading() {
@@ -125,6 +126,7 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
   const [customModel, setCustomModel] = useState('');
   const [customEndpoint, setCustomEndpoint] = useState('');
   const [catalogModels, setCatalogModels] = useState([]);
+  const [modelsSource, setModelsSource] = useState(null);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -149,8 +151,14 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
     return hasCustom ? endpoints : [...endpoints, CUSTOM_ENDPOINT_OPTION];
   }, [selectedProviderConfig]);
 
-  // Compute model options
-  const providerModels = catalogModels.length > 0 ? catalogModels : (selectedProviderConfig?.models || []);
+  // Compute model options — prefer models.dev catalog; hardcoded seeds are fallback only
+  const canUseModelsDev = Boolean(PROVIDER_TO_MODELS_DEV[selectedProvider]);
+  const seedModels = selectedProviderConfig?.models || [];
+  const providerModels = useMemo(() => {
+    if (catalogModels.length > 0) return catalogModels;
+    if (canUseModelsDev && (isLoadingModels || modelsSource === null)) return [];
+    return seedModels;
+  }, [canUseModelsDev, catalogModels, isLoadingModels, modelsSource, seedModels]);
   const modelOptions = useMemo(() => {
     return [...providerModels, CUSTOM_MODEL_OPTION];
   }, [providerModels]);
@@ -166,17 +174,26 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
     async function loadModels() {
       if (!selectedProvider || selectedProvider === 'custom') {
         setCatalogModels([]);
+        setModelsSource('fallback');
         return;
       }
       setIsLoadingModels(true);
+      setCatalogModels([]);
+      setModelsSource(null);
       try {
         const response = await fetch(`/api/playground/models?provider=${encodeURIComponent(selectedProvider)}`);
         if (!response.ok) throw new Error('Failed to load models');
         const payload = await response.json();
-        if (!cancelled) setCatalogModels(payload.models || []);
+        if (!cancelled) {
+          setCatalogModels(payload.models || []);
+          setModelsSource(payload.source || 'fallback');
+        }
       } catch (error) {
         console.error('Model catalog fetch error:', error);
-        if (!cancelled) setCatalogModels([]);
+        if (!cancelled) {
+          setCatalogModels([]);
+          setModelsSource('error');
+        }
       } finally {
         if (!cancelled) setIsLoadingModels(false);
       }
@@ -216,6 +233,21 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, []);
 
+  useEffect(() => {
+    if (isLoadingModels || providerModels.length === 0 || customModel !== '') return;
+    const inList = providerModels.some((model) => model.value === selectedModel);
+    if (!selectedModel || !inList) {
+      const nextModel = providerModels[0].value;
+      setSelectedModel(nextModel);
+      saveSettings({
+        provider: selectedProvider,
+        model: nextModel,
+        baseURL,
+        apiKey,
+      });
+    }
+  }, [apiKey, baseURL, customModel, isLoadingModels, providerModels, saveSettings, selectedModel, selectedProvider]);
+
   // Handle provider change
   const handleProviderChange = useCallback((value) => {
     setSelectedProvider(value);
@@ -224,7 +256,10 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
     
     const newProviderConfig = PROVIDER_OPTIONS.find(p => p.value === value);
     const newBaseURL = newProviderConfig?.baseURL || newProviderConfig?.endpoints?.[0]?.url || '';
-    const newModel = newProviderConfig?.models?.[0]?.value || '';
+    const usesModelsDev = Boolean(PROVIDER_TO_MODELS_DEV[value]);
+    const newModel = usesModelsDev
+      ? ''
+      : (newProviderConfig?.models?.[0]?.value || '');
     
     setBaseURL(newBaseURL);
     setSelectedModel(newModel);

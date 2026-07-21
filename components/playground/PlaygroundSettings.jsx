@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { Settings2, Eye, EyeOff, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import providerOptions from './providerOptions.json';
+import { PROVIDER_TO_MODELS_DEV } from '@/lib/models-dev';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const CUSTOM_MODEL_OPTION = { value: 'custom', label: 'Custom Model...' };
@@ -43,6 +44,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   const [providerKeyInput, setProviderKeyInput] = useState('');
   const [isSavingKey, setIsSavingKey] = useState(false);
   const [catalogModels, setCatalogModels] = useState([]);
+  const [modelsSource, setModelsSource] = useState(null);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   const formatMessage = useCallback((template, values = {}) => {
@@ -77,9 +79,19 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   const endpointOptions = providerEndpoints.some((endpoint) => endpoint.value === 'custom')
     ? providerEndpoints
     : [...providerEndpoints, customEndpointOption];
+  const canUseModelsDev = Boolean(PROVIDER_TO_MODELS_DEV[selectedProvider]);
   const seedModels = selectedProviderConfig?.models || [];
-  const providerModels = catalogModels.length > 0 ? catalogModels : seedModels;
-  const modelOptions = [...providerModels, customModelOption];
+  // Prefer models.dev catalog when available; only fall back to hardcoded seeds
+  // when the provider has no catalog mapping, or after a failed/empty catalog load.
+  const providerModels = useMemo(() => {
+    if (catalogModels.length > 0) return catalogModels;
+    if (canUseModelsDev && (isLoadingModels || modelsSource === null)) return [];
+    return seedModels;
+  }, [canUseModelsDev, catalogModels, isLoadingModels, modelsSource, seedModels]);
+  const modelOptions = useMemo(
+    () => [...providerModels, customModelOption],
+    [customModelOption, providerModels]
+  );
 
   const providerStatus = providerStatuses[selectedProvider];
   const canUseStoredCredential = Boolean(providerStatus?.connected);
@@ -87,9 +99,12 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   const loadCatalogModels = useCallback(async (provider, { refresh = false } = {}) => {
     if (!provider || provider === 'custom') {
       setCatalogModels([]);
+      setModelsSource('fallback');
       return;
     }
     setIsLoadingModels(true);
+    setCatalogModels([]);
+    setModelsSource(null);
     try {
       const url = `/api/playground/models?provider=${encodeURIComponent(provider)}${refresh ? '&refresh=1' : ''}`;
       const response = await fetch(url);
@@ -98,9 +113,11 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
       }
       const payload = await response.json();
       setCatalogModels(payload.models || []);
+      setModelsSource(payload.source || 'fallback');
     } catch (error) {
       console.error('Model catalog fetch error:', error);
       setCatalogModels([]);
+      setModelsSource('error');
     } finally {
       setIsLoadingModels(false);
     }
@@ -133,6 +150,14 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   useEffect(() => {
     loadCatalogModels(selectedProvider);
   }, [loadCatalogModels, selectedProvider]);
+
+  useEffect(() => {
+    if (isLoadingModels || providerModels.length === 0 || customModel !== '') return;
+    const inList = providerModels.some((model) => model.value === settings.model);
+    if (!settings.model || !inList) {
+      updateSetting('model', providerModels[0].value);
+    }
+  }, [customModel, isLoadingModels, providerModels, settings.model]);
 
   useEffect(() => {
     if (selectedProvider === 'custom') return;
@@ -205,13 +230,16 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
 
   const handleProviderChange = (value) => {
     setCustomEndpoint('');
-    
+    setCustomModel('');
+
     // Find the configuration for the new provider
     const newProviderConfig = PROVIDER_OPTIONS.find((option) => option.value === value);
-    
-    // Automatically select the first model if available
-    let newModel = settings.model;
-    if (newProviderConfig?.models?.length > 0) {
+    const usesModelsDev = Boolean(PROVIDER_TO_MODELS_DEV[value]);
+
+    // Only seed the model from hardcoded options when models.dev is unavailable.
+    // Catalog providers wait for /api/playground/models, then auto-select.
+    let newModel = '';
+    if (!usesModelsDev && newProviderConfig?.models?.length > 0) {
       newModel = newProviderConfig.models[0].value;
     }
 
