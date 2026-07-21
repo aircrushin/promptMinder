@@ -54,8 +54,8 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600">
             {zh
-              ? '同步自公开来源。仅在许可证明确且安全状态可接受时托管完整内容，所有 Skill 均保留原始出处。'
-              : 'Synced from public sources. Full content is hosted only when licensing and security status allow it, with original attribution preserved.'}
+              ? '同步自公开来源。'
+              : 'Synced from public sources.'}
           </p>
 
           <form className="mt-9 flex max-w-3xl flex-col gap-3 sm:flex-row" action="/skills">
