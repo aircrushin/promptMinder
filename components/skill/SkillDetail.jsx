@@ -81,10 +81,6 @@ export function SkillDetail({ skill }) {
                 <dd className="mt-1 font-medium text-slate-950">{skill.installs.toLocaleString()}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">{zh ? '安全状态' : 'Security status'}</dt>
-                <dd className="mt-1 font-medium text-slate-950">{skill.auditStatus}</dd>
-              </div>
-              <div>
                 <dt className="text-slate-500">{zh ? '最近同步' : 'Last synced'}</dt>
                 <dd className="mt-1 font-medium text-slate-950">{new Date(skill.syncedAt).toLocaleDateString()}</dd>
               </div>

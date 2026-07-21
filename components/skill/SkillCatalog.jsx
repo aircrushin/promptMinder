@@ -101,7 +101,6 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
                   <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
                     <span>{skill.source}</span>
                     {skill.licenseSpdx && <span>{skill.licenseSpdx}</span>}
-                    <span>{zh ? '安全状态' : 'Security'}: {skill.auditStatus}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 self-center text-sm text-slate-500">
