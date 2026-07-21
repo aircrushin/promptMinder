@@ -1,8 +1,16 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Search, ShieldCheck, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const numberFormatter = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
 
@@ -18,6 +26,7 @@ function pageHref({ search, sort, page }) {
 export function SkillCatalog({ skills, pagination, search, sort }) {
   const { language } = useLanguage()
   const zh = language === 'zh'
+  const [sortValue, setSortValue] = useState(sort)
 
   return (
     <div className="min-h-screen bg-slate-50/60">
@@ -43,14 +52,26 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
                 className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-950 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
               />
             </div>
-            <select
-              name="sort"
-              defaultValue={sort}
-              className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
-            >
-              <option value="popular">{zh ? '最多安装' : 'Most installed'}</option>
-              <option value="latest">{zh ? '最近同步' : 'Recently synced'}</option>
-            </select>
+            <input type="hidden" name="sort" value={sortValue} />
+            <Select value={sortValue} onValueChange={setSortValue}>
+              <SelectTrigger className="h-11 w-full rounded-lg border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-none focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 focus:ring-offset-0 sm:w-[11.5rem]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-slate-200 bg-white text-slate-900 shadow-lg">
+                <SelectItem
+                  value="popular"
+                  className="cursor-pointer rounded-md py-2.5 focus:bg-slate-100 focus:text-slate-950"
+                >
+                  {zh ? '最多安装' : 'Most installed'}
+                </SelectItem>
+                <SelectItem
+                  value="latest"
+                  className="cursor-pointer rounded-md py-2.5 focus:bg-slate-100 focus:text-slate-950"
+                >
+                  {zh ? '最近同步' : 'Recently synced'}
+                </SelectItem>
+              </SelectContent>
+            </Select>
             <button className="h-11 rounded-lg bg-slate-950 px-5 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2">
               {zh ? '搜索' : 'Search'}
             </button>
