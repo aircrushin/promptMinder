@@ -70,7 +70,7 @@ export function TeamSwitcher({ className }) {
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="w-[220px]">
+        <SelectTrigger className="w-[160px]">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <SelectValue placeholder={safeT.teamsPage?.selectTeam || '选择团队'} />

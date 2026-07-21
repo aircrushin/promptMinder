@@ -274,7 +274,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3 sm:gap-6">
           <NavigationMenu className="hidden sm:flex">
-            <NavigationMenuList className="space-x-2">
+            <NavigationMenuList className="space-x-1">
               {navItems.map(({ href, label, icon: Icon }) => (
                 <NavigationMenuItem key={href}>
                   <NavigationMenuLink
@@ -282,7 +282,7 @@ export default function Navbar() {
                     className={`${pathname === href || pathname?.startsWith(`${href}/`)
                       ? 'bg-slate-100 text-slate-900'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    } flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors`}
+                    } flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors`}
                   >
                     <Link href={href}>
                       <Icon className="h-4 w-4" />
