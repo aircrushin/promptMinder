@@ -23,6 +23,22 @@ function pageHref({ search, sort, page }) {
   return `/skills${query ? `?${query}` : ''}`
 }
 
+function getPageNumbers(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+
+  const pages = new Set([1, total, current, current - 1, current + 1])
+  if (current <= 3) [2, 3, 4].forEach((p) => pages.add(p))
+  if (current >= total - 2) [total - 3, total - 2, total - 1].forEach((p) => pages.add(p))
+
+  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b)
+  const result = []
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('...')
+    result.push(sorted[i])
+  }
+  return result
+}
+
 export function SkillCatalog({ skills, pagination, search, sort }) {
   const { language } = useLanguage()
   const zh = language === 'zh'
@@ -82,7 +98,11 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-4 flex items-center justify-between text-sm text-slate-500">
           <span>{zh ? `共 ${pagination.total} 个 Skills` : `${pagination.total} skills`}</span>
-          <span>{zh ? `第 ${pagination.page} 页` : `Page ${pagination.page}`}</span>
+          <span>
+            {zh
+              ? `第 ${pagination.page} / ${pagination.totalPages} 页`
+              : `Page ${pagination.page} of ${pagination.totalPages}`}
+          </span>
         </div>
 
         {skills.length === 0 ? (
@@ -134,23 +154,55 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
         )}
 
         {pagination.totalPages > 1 && (
-          <nav className="mt-8 flex items-center justify-between" aria-label={zh ? '分页' : 'Pagination'}>
-            {pagination.page > 1 ? (
-              <Link
-                href={pageHref({ search, sort, page: pagination.page - 1 })}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-950 hover:text-slate-950"
-              >
-                <ChevronLeft className="h-4 w-4" /> {zh ? '上一页' : 'Previous'}
-              </Link>
-            ) : <span />}
-            {pagination.page < pagination.totalPages && (
-              <Link
-                href={pageHref({ search, sort, page: pagination.page + 1 })}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-950 hover:text-slate-950"
-              >
-                {zh ? '下一页' : 'Next'} <ChevronRight className="h-4 w-4" />
-              </Link>
+          <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label={zh ? '分页' : 'Pagination'}>
+            <Link
+              href={pageHref({ search, sort, page: pagination.page - 1 })}
+              aria-disabled={pagination.page <= 1}
+              tabIndex={pagination.page <= 1 ? -1 : undefined}
+              className={`inline-flex h-10 items-center gap-1 rounded-lg border px-3 text-sm font-medium transition ${
+                pagination.page <= 1
+                  ? 'pointer-events-none border-slate-200 text-slate-300'
+                  : 'border-slate-300 bg-white text-slate-700 hover:border-slate-950 hover:text-slate-950'
+              }`}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">{zh ? '上一页' : 'Previous'}</span>
+            </Link>
+
+            {getPageNumbers(pagination.page, pagination.totalPages).map((item, index) =>
+              item === '...' ? (
+                <span key={`ellipsis-${index}`} className="px-1 text-sm text-slate-400">
+                  …
+                </span>
+              ) : (
+                <Link
+                  key={item}
+                  href={pageHref({ search, sort, page: item })}
+                  aria-current={item === pagination.page ? 'page' : undefined}
+                  className={`inline-flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition ${
+                    item === pagination.page
+                      ? 'bg-slate-950 text-white'
+                      : 'border border-slate-300 bg-white text-slate-700 hover:border-slate-950 hover:text-slate-950'
+                  }`}
+                >
+                  {item}
+                </Link>
+              )
             )}
+
+            <Link
+              href={pageHref({ search, sort, page: pagination.page + 1 })}
+              aria-disabled={pagination.page >= pagination.totalPages}
+              tabIndex={pagination.page >= pagination.totalPages ? -1 : undefined}
+              className={`inline-flex h-10 items-center gap-1 rounded-lg border px-3 text-sm font-medium transition ${
+                pagination.page >= pagination.totalPages
+                  ? 'pointer-events-none border-slate-200 text-slate-300'
+                  : 'border-slate-300 bg-white text-slate-700 hover:border-slate-950 hover:text-slate-950'
+              }`}
+            >
+              <span className="hidden sm:inline">{zh ? '下一页' : 'Next'}</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
           </nav>
         )}
       </section>
