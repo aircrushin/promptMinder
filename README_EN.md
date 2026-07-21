@@ -26,6 +26,7 @@ A professional prompt management platform that makes AI prompt management simple
 - ✅ **AI Smart Generation** - Integrated AI models for generating quality prompts
 - ✅ **Team Collaboration** - Team creation, member management, and role-based permissions
 - ✅ **Prompt Contributions** - Community contribution features with review and publishing process
+- ✅ **Agent Skills Catalog** - Browse synced public skills, install them, or add them to your workspace
 
 ### User Experience
 
@@ -113,6 +114,14 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```bash
 pnpm db:migrate
 ```
+
+Sync the first batch of official Skills (requires a skills.sh Vercel OIDC token):
+
+```bash
+pnpm skills:sync
+```
+
+By default this syncs the first 50 curated skills. Full content is stored only for sources with a clear redistributable license and acceptable security status; other sources keep index metadata and attribution. Use `--limit=0` to sync all curated items, or add `--all` for the full catalog.
 
 5. **Start the development server**
 
@@ -234,6 +243,36 @@ pnpm db:studio     # Open Drizzle Studio for visual database management
 - When enabled, new prompts and edits are submitted as change requests instead of being published directly.
 - Approval permissions: `owner/admin`; review threads support `@mentions`.
 - Prompt-level subscriptions and the Notification Center are available for in-app updates.
+
+## 🧩 Agent Skills Catalog
+
+PromptMinder includes a Skills catalog at `/skills` for discovering, reviewing, and reusing public Agent Skills.
+
+### What it supports
+
+- **Browse**: Paginated catalog with search by name, description, or source
+- **Sort**: By install count (most popular) or recently synced
+- **Detail pages**: Source, license, install count, Markdown body, and supporting files
+- **Install methods**: Command / Prompt snippets aligned with [skills.sh](https://skills.sh), with one-click copy
+- **Add to workspace**: Signed-in users can add available content as a prompt and continue editing in the library
+- **Content policy**: Full content is hosted only for clearly redistributable, acceptable sources; other entries keep index metadata and link back to the original repository
+
+### Syncing data
+
+Sync the catalog from public sources with:
+
+```bash
+pnpm skills:sync
+```
+
+Defaults to the first 50 curated skills. Use `--limit=0` for all curated items, or `--all` for the full catalog. A skills.sh Vercel OIDC token is required.
+
+### Relationship to the CLI Skill
+
+- **Site Skills catalog**: Browse public/community skills and optionally add them to a PromptMinder workspace
+- **PromptMinder CLI Skill**: Teaches AI agents how to use the PromptMinder CLI (see “CLI Agent Skill” above)
+
+They complement each other and are not substitutes.
 
 ## 🔐 Authentication Configuration
 
