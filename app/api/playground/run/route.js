@@ -14,6 +14,13 @@ const PROVIDER_BASE_URLS = {
   zhipu: 'https://open.bigmodel.cn/api/paas/v4',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/',
   claude: 'https://api.anthropic.com/v1',
+  kimi: 'https://api.moonshot.cn/v1',
+  doubao: 'https://ark.cn-beijing.volces.com/api/v3',
+  minimax: 'https://api.minimaxi.com/v1',
+  qwen: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  siliconflow: 'https://api.siliconflow.cn/v1',
+  stepfun: 'https://api.stepfun.com/v1',
+  xai: 'https://api.x.ai/v1',
 }
 
 async function getStoredProviderKey(userId, provider) {

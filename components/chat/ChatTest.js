@@ -124,6 +124,8 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
   });
   const [customModel, setCustomModel] = useState('');
   const [customEndpoint, setCustomEndpoint] = useState('');
+  const [catalogModels, setCatalogModels] = useState([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
   const [useCustomKey, setUseCustomKey] = useState(false);
@@ -148,17 +150,40 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
   }, [selectedProviderConfig]);
 
   // Compute model options
+  const providerModels = catalogModels.length > 0 ? catalogModels : (selectedProviderConfig?.models || []);
   const modelOptions = useMemo(() => {
-    const models = selectedProviderConfig?.models || [];
-    return [...models, CUSTOM_MODEL_OPTION];
-  }, [selectedProviderConfig]);
+    return [...providerModels, CUSTOM_MODEL_OPTION];
+  }, [providerModels]);
 
   // Determine if using custom model
   const isCustomModel = useMemo(() => {
     if (customModel !== '') return true;
-    const providerModels = selectedProviderConfig?.models || [];
     return !selectedModel || !providerModels.some(m => m.value === selectedModel);
-  }, [customModel, selectedModel, selectedProviderConfig]);
+  }, [customModel, selectedModel, providerModels]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadModels() {
+      if (!selectedProvider || selectedProvider === 'custom') {
+        setCatalogModels([]);
+        return;
+      }
+      setIsLoadingModels(true);
+      try {
+        const response = await fetch(`/api/playground/models?provider=${encodeURIComponent(selectedProvider)}`);
+        if (!response.ok) throw new Error('Failed to load models');
+        const payload = await response.json();
+        if (!cancelled) setCatalogModels(payload.models || []);
+      } catch (error) {
+        console.error('Model catalog fetch error:', error);
+        if (!cancelled) setCatalogModels([]);
+      } finally {
+        if (!cancelled) setIsLoadingModels(false);
+      }
+    }
+    loadModels();
+    return () => { cancelled = true; };
+  }, [selectedProvider]);
 
   // Determine if using custom endpoint
   const isCustomEndpoint = useMemo(() => {
@@ -704,9 +729,16 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
                     <Select 
                       value={isCustomModel ? 'custom' : selectedModel} 
                       onValueChange={handleModelChange}
+                      disabled={isLoadingModels && providerModels.length === 0}
                     >
                       <SelectTrigger className="h-8 text-sm">
-                        <SelectValue placeholder={t.chatTest.selectModelPlaceholder || 'Select model'} />
+                        <SelectValue
+                          placeholder={
+                            isLoadingModels
+                              ? (t.chatTest.loadingModels || 'Loading models…')
+                              : (t.chatTest.selectModelPlaceholder || 'Select model')
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent className="max-h-60 overflow-y-auto">
                         {modelOptions.map(model => (

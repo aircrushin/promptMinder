@@ -42,6 +42,8 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   const [isManagingKey, setIsManagingKey] = useState(false);
   const [providerKeyInput, setProviderKeyInput] = useState('');
   const [isSavingKey, setIsSavingKey] = useState(false);
+  const [catalogModels, setCatalogModels] = useState([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   const formatMessage = useCallback((template, values = {}) => {
     if (!template) return '';
@@ -75,11 +77,34 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   const endpointOptions = providerEndpoints.some((endpoint) => endpoint.value === 'custom')
     ? providerEndpoints
     : [...providerEndpoints, customEndpointOption];
-  const providerModels = selectedProviderConfig?.models || [];
+  const seedModels = selectedProviderConfig?.models || [];
+  const providerModels = catalogModels.length > 0 ? catalogModels : seedModels;
   const modelOptions = [...providerModels, customModelOption];
 
   const providerStatus = providerStatuses[selectedProvider];
   const canUseStoredCredential = Boolean(providerStatus?.connected);
+
+  const loadCatalogModels = useCallback(async (provider, { refresh = false } = {}) => {
+    if (!provider || provider === 'custom') {
+      setCatalogModels([]);
+      return;
+    }
+    setIsLoadingModels(true);
+    try {
+      const url = `/api/playground/models?provider=${encodeURIComponent(provider)}${refresh ? '&refresh=1' : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to load models');
+      }
+      const payload = await response.json();
+      setCatalogModels(payload.models || []);
+    } catch (error) {
+      console.error('Model catalog fetch error:', error);
+      setCatalogModels([]);
+    } finally {
+      setIsLoadingModels(false);
+    }
+  }, []);
 
   const loadProviderStatuses = useCallback(async () => {
     setIsLoadingProviders(true);
@@ -104,6 +129,10 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   useEffect(() => {
     loadProviderStatuses();
   }, [loadProviderStatuses]);
+
+  useEffect(() => {
+    loadCatalogModels(selectedProvider);
+  }, [loadCatalogModels, selectedProvider]);
 
   useEffect(() => {
     if (selectedProvider === 'custom') return;
@@ -458,15 +487,36 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
 
           {/* Model */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">{pg.model || 'Model'}</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label className="text-sm font-medium">{pg.model || 'Model'}</Label>
+              {selectedProvider !== 'custom' && (
+                <button
+                  type="button"
+                  onClick={() => loadCatalogModels(selectedProvider, { refresh: true })}
+                  disabled={isLoadingModels}
+                  className="text-xs text-slate-500 hover:text-slate-950 disabled:opacity-50"
+                >
+                  {isLoadingModels
+                    ? (pg.loadingModels || 'Loading…')
+                    : (pg.refreshModels || 'Refresh')}
+                </button>
+              )}
+            </div>
             <Select
               value={isCustomModel ? 'custom' : settings.model}
               onValueChange={handleModelChange}
+              disabled={isLoadingModels && providerModels.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={pg.selectModel || 'Select model'} />
+                <SelectValue
+                  placeholder={
+                    isLoadingModels
+                      ? (pg.loadingModels || 'Loading models…')
+                      : (pg.selectModel || 'Select model')
+                  }
+                />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-72 overflow-y-auto">
                 {modelOptions.map((model) => (
                   <SelectItem key={model.value} value={model.value}>
                     {model.label}
