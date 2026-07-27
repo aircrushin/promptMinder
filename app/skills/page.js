@@ -1,7 +1,7 @@
 import { SkillCatalog } from '@/components/skill/SkillCatalog'
 import { listCatalogSkills } from '@/lib/skills-catalog'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export const metadata = {
   title: 'Agent Skills 专区',
@@ -9,14 +9,8 @@ export const metadata = {
   alternates: { canonical: '/skills' },
 }
 
-export default async function SkillsPage({ searchParams }) {
-  const params = await searchParams
-  const search = typeof params.q === 'string' ? params.q : ''
-  const sort = params.sort === 'latest' ? 'latest' : 'popular'
-  const parsedPage = Number.parseInt(params.page || '1', 10)
-  const page = Number.isInteger(parsedPage) ? parsedPage : 1
-  const result = await listCatalogSkills({ search, sort, page })
+export default async function SkillsPage() {
+  const result = await listCatalogSkills()
 
-  return <SkillCatalog {...result} search={search} sort={sort} />
+  return <SkillCatalog {...result} search="" sort="popular" />
 }
-

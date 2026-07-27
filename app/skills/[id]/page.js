@@ -2,7 +2,11 @@ import { notFound } from 'next/navigation'
 import { SkillDetail } from '@/components/skill/SkillDetail'
 import { getCatalogSkill } from '@/lib/skills-catalog'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
+
+export function generateStaticParams() {
+  return []
+}
 
 export async function generateMetadata({ params }) {
   const { id } = await params

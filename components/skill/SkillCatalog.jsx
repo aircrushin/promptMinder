@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Search, ShieldCheck, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import {
@@ -39,13 +40,64 @@ function getPageNumbers(current, total) {
   return result
 }
 
+function SearchParamsSync({ onChange }) {
+  const params = useSearchParams()
+
+  useEffect(() => {
+    const parsedPage = Number.parseInt(params.get('page') || '1', 10)
+    onChange({
+      search: params.get('q') || '',
+      sort: params.get('sort') === 'latest' ? 'latest' : 'popular',
+      page: Number.isInteger(parsedPage) ? Math.max(1, parsedPage) : 1,
+    })
+  }, [onChange, params])
+
+  return null
+}
+
 export function SkillCatalog({ skills, pagination, search, sort }) {
   const { language } = useLanguage()
   const zh = language === 'zh'
   const [sortValue, setSortValue] = useState(sort)
+  const [query, setQuery] = useState({ search, sort, page: pagination.page })
+  const [result, setResult] = useState({ skills, pagination })
+  const syncQuery = useCallback((nextQuery) => setQuery(nextQuery), [])
+
+  useEffect(() => {
+    setSortValue(query.sort)
+
+    if (query.search === search && query.sort === sort && query.page === pagination.page) {
+      setResult({ skills, pagination })
+      return
+    }
+
+    const controller = new AbortController()
+    const params = new URLSearchParams()
+    if (query.search) params.set('q', query.search)
+    if (query.sort !== 'popular') params.set('sort', query.sort)
+    if (query.page > 1) params.set('page', String(query.page))
+
+    fetch(`/api/skills?${params.toString()}`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Unable to load skills: ${response.status}`)
+        return response.json()
+      })
+      .then((data) => setResult(data))
+      .catch((error) => {
+        if (error.name !== 'AbortError') console.error('Error fetching skills:', error)
+      })
+
+    return () => controller.abort()
+  }, [pagination, query, search, skills, sort])
+
+  const currentSkills = result.skills
+  const currentPagination = result.pagination
 
   return (
     <div className="min-h-screen bg-slate-50/60">
+      <Suspense fallback={null}>
+        <SearchParamsSync onChange={syncQuery} />
+      </Suspense>
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
           <p className="mb-3 text-sm font-medium text-slate-500">PromptMinder Skills</p>
@@ -62,8 +114,9 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
+                key={query.search}
                 name="q"
-                defaultValue={search}
+                defaultValue={query.search}
                 placeholder={zh ? '搜索名称、描述或来源' : 'Search name, description, or source'}
                 className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-950 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
               />
@@ -97,15 +150,15 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
 
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-4 flex items-center justify-between text-sm text-slate-500">
-          <span>{zh ? `共 ${pagination.total} 个 Skills` : `${pagination.total} skills`}</span>
+          <span>{zh ? `共 ${currentPagination.total} 个 Skills` : `${currentPagination.total} skills`}</span>
           <span>
             {zh
-              ? `第 ${pagination.page} / ${pagination.totalPages} 页`
-              : `Page ${pagination.page} of ${pagination.totalPages}`}
+              ? `第 ${currentPagination.page} / ${currentPagination.totalPages} 页`
+              : `Page ${currentPagination.page} of ${currentPagination.totalPages}`}
           </span>
         </div>
 
-        {skills.length === 0 ? (
+        {currentSkills.length === 0 ? (
           <div className="border-y border-slate-200 py-20 text-center">
             <p className="font-medium text-slate-900">{zh ? '还没有可展示的 Skill' : 'No skills to show yet'}</p>
             <p className="mt-2 text-sm text-slate-500">
@@ -114,7 +167,7 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
           </div>
         ) : (
           <div className="divide-y divide-slate-200 border-y border-slate-200">
-            {skills.map((skill) => (
+            {currentSkills.map((skill) => (
               <Link
                 key={skill.id}
                 href={`/skills/${skill.id}`}
@@ -153,14 +206,14 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
           </div>
         )}
 
-        {pagination.totalPages > 1 && (
+        {currentPagination.totalPages > 1 && (
           <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label={zh ? '分页' : 'Pagination'}>
             <Link
-              href={pageHref({ search, sort, page: pagination.page - 1 })}
-              aria-disabled={pagination.page <= 1}
-              tabIndex={pagination.page <= 1 ? -1 : undefined}
+              href={pageHref({ search: query.search, sort: query.sort, page: currentPagination.page - 1 })}
+              aria-disabled={currentPagination.page <= 1}
+              tabIndex={currentPagination.page <= 1 ? -1 : undefined}
               className={`inline-flex h-10 items-center gap-1 rounded-lg border px-3 text-sm font-medium transition ${
-                pagination.page <= 1
+                currentPagination.page <= 1
                   ? 'pointer-events-none border-slate-200 text-slate-300'
                   : 'border-slate-300 bg-white text-slate-700 hover:border-slate-950 hover:text-slate-950'
               }`}
@@ -169,7 +222,7 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
               <span className="hidden sm:inline">{zh ? '上一页' : 'Previous'}</span>
             </Link>
 
-            {getPageNumbers(pagination.page, pagination.totalPages).map((item, index) =>
+            {getPageNumbers(currentPagination.page, currentPagination.totalPages).map((item, index) =>
               item === '...' ? (
                 <span key={`ellipsis-${index}`} className="px-1 text-sm text-slate-400">
                   …
@@ -177,10 +230,10 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
               ) : (
                 <Link
                   key={item}
-                  href={pageHref({ search, sort, page: item })}
-                  aria-current={item === pagination.page ? 'page' : undefined}
+                  href={pageHref({ search: query.search, sort: query.sort, page: item })}
+                  aria-current={item === currentPagination.page ? 'page' : undefined}
                   className={`inline-flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition ${
-                    item === pagination.page
+                    item === currentPagination.page
                       ? 'bg-slate-950 text-white'
                       : 'border border-slate-300 bg-white text-slate-700 hover:border-slate-950 hover:text-slate-950'
                   }`}
@@ -191,11 +244,11 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
             )}
 
             <Link
-              href={pageHref({ search, sort, page: pagination.page + 1 })}
-              aria-disabled={pagination.page >= pagination.totalPages}
-              tabIndex={pagination.page >= pagination.totalPages ? -1 : undefined}
+              href={pageHref({ search: query.search, sort: query.sort, page: currentPagination.page + 1 })}
+              aria-disabled={currentPagination.page >= currentPagination.totalPages}
+              tabIndex={currentPagination.page >= currentPagination.totalPages ? -1 : undefined}
               className={`inline-flex h-10 items-center gap-1 rounded-lg border px-3 text-sm font-medium transition ${
-                pagination.page >= pagination.totalPages
+                currentPagination.page >= currentPagination.totalPages
                   ? 'pointer-events-none border-slate-200 text-slate-300'
                   : 'border-slate-300 bg-white text-slate-700 hover:border-slate-950 hover:text-slate-950'
               }`}
@@ -209,4 +262,3 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
     </div>
   )
 }
-
