@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-28T07:47:00.000Z",
+  "title": "Design System: Prompt Minder",
+  "extensions": {
+    "colorMeta": {
+      "near-black-ink": {
+        "role": "primary",
+        "displayName": "Near-Black Ink",
+        "canonical": "hsl(225 15% 12%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.012 255)",
+          "oklch(28.0% 0.012 255)",
+          "oklch(38.0% 0.012 255)",
+          "oklch(48.0% 0.012 255)",
+          "oklch(58.0% 0.012 255)",
+          "oklch(72.0% 0.012 255)",
+          "oklch(86.0% 0.012 255)",
+          "oklch(96.0% 0.012 255)"
+        ]
+      },
+      "pure-paper": {
+        "role": "neutral",
+        "displayName": "Pure Paper",
+        "canonical": "hsl(0 0% 100%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.006 255)",
+          "oklch(28.0% 0.006 255)",
+          "oklch(38.0% 0.006 255)",
+          "oklch(48.0% 0.006 255)",
+          "oklch(58.0% 0.006 255)",
+          "oklch(72.0% 0.006 255)",
+          "oklch(86.0% 0.006 255)",
+          "oklch(96.0% 0.006 255)"
+        ]
+      },
+      "cool-paper": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "canonical": "hsl(230 12% 96%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.006 255)",
+          "oklch(28.0% 0.006 255)",
+          "oklch(38.0% 0.006 255)",
+          "oklch(48.0% 0.006 255)",
+          "oklch(58.0% 0.006 255)",
+          "oklch(72.0% 0.006 255)",
+          "oklch(86.0% 0.006 255)",
+          "oklch(96.0% 0.006 255)"
+        ]
+      },
+      "cool-muted": {
+        "role": "neutral",
+        "displayName": "Cool Muted",
+        "canonical": "hsl(220 10% 94%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.006 255)",
+          "oklch(28.0% 0.006 255)",
+          "oklch(38.0% 0.006 255)",
+          "oklch(48.0% 0.006 255)",
+          "oklch(58.0% 0.006 255)",
+          "oklch(72.0% 0.006 255)",
+          "oklch(86.0% 0.006 255)",
+          "oklch(96.0% 0.006 255)"
+        ]
+      },
+      "cool-border": {
+        "role": "neutral",
+        "displayName": "Cool Border",
+        "canonical": "hsl(220 12% 88%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.006 255)",
+          "oklch(28.0% 0.006 255)",
+          "oklch(38.0% 0.006 255)",
+          "oklch(48.0% 0.006 255)",
+          "oklch(58.0% 0.006 255)",
+          "oklch(72.0% 0.006 255)",
+          "oklch(86.0% 0.006 255)",
+          "oklch(96.0% 0.006 255)"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "canonical": "hsl(225 15% 22%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.012 255)",
+          "oklch(28.0% 0.012 255)",
+          "oklch(38.0% 0.012 255)",
+          "oklch(48.0% 0.012 255)",
+          "oklch(58.0% 0.012 255)",
+          "oklch(72.0% 0.012 255)",
+          "oklch(86.0% 0.012 255)",
+          "oklch(96.0% 0.012 255)"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "hsl(225 10% 42%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.012 255)",
+          "oklch(28.0% 0.012 255)",
+          "oklch(38.0% 0.012 255)",
+          "oklch(48.0% 0.012 255)",
+          "oklch(58.0% 0.012 255)",
+          "oklch(72.0% 0.012 255)",
+          "oklch(86.0% 0.012 255)",
+          "oklch(96.0% 0.012 255)"
+        ]
+      },
+      "sidebar-paper": {
+        "role": "neutral",
+        "displayName": "Sidebar Paper",
+        "canonical": "hsl(230 12% 97%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.006 255)",
+          "oklch(28.0% 0.006 255)",
+          "oklch(38.0% 0.006 255)",
+          "oklch(48.0% 0.006 255)",
+          "oklch(58.0% 0.006 255)",
+          "oklch(72.0% 0.006 255)",
+          "oklch(86.0% 0.006 255)",
+          "oklch(96.0% 0.006 255)"
+        ]
+      },
+      "signal-red": {
+        "role": "tertiary",
+        "displayName": "Signal Red",
+        "canonical": "hsl(0 72% 50%)",
+        "tonalRamp": [
+          "oklch(18.0% 0.18 25)",
+          "oklch(28.0% 0.18 25)",
+          "oklch(38.0% 0.18 25)",
+          "oklch(48.0% 0.18 25)",
+          "oklch(58.0% 0.18 25)",
+          "oklch(72.0% 0.18 25)",
+          "oklch(86.0% 0.18 25)",
+          "oklch(96.0% 0.18 25)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Dialog and page titles that open a task." },
+      "headline": { "displayName": "Headline", "purpose": "Section headers inside dense product views." },
+      "title": { "displayName": "Title", "purpose": "Card titles, list item names, compact headings." },
+      "body": { "displayName": "Body", "purpose": "Primary reading and form copy." },
+      "label": { "displayName": "Label", "purpose": "Eyebrows, meta, quiet status; often uppercase with tracking." }
+    },
+    "shadows": [
+      {
+        "name": "none-preferred",
+        "value": "none",
+        "purpose": "Border-led default. Prefer Cool Border strokes over lift."
+      },
+      {
+        "name": "card-primitive",
+        "value": "0 1px 2px rgba(26, 28, 35, 0.06)",
+        "purpose": "Legacy Card primitive only; do not amplify or stack."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-state",
+        "value": "ease-out",
+        "purpose": "Color and opacity state changes, 150–200ms."
+      },
+      {
+        "name": "duration-state",
+        "value": "150ms",
+        "purpose": "Default interactive feedback duration."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Near-Black Ink fill for primary actions.",
+      "html": "<button class=\"ds-btn-primary\">Create Prompt</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: #1a1c23; color: #ffffff; border: none; border-radius: 6px; font-family: Inter, -apple-system, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: #17191f; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 1px #1a1c23; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Bordered paper button for secondary commitment.",
+      "html": "<button class=\"ds-btn-outline\">Use This Template</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: #ffffff; color: #1a1c23; border: 1px solid #dddfe4; border-radius: 6px; font-family: Inter, -apple-system, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out; } .ds-btn-outline:hover { background: #1a1c23; border-color: #1a1c23; color: #ffffff; } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 1px #1a1c23; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Quiet skip/dismiss action without fill.",
+      "html": "<button class=\"ds-btn-ghost\">Maybe later</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 12px; background: transparent; color: #606676; border: none; border-radius: 6px; font-family: Inter, -apple-system, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: color 150ms ease-out; } .ds-btn-ghost:hover { color: #1a1c23; } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 1px #1a1c23; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Transparent field with Cool Border stroke.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search prompts\" />",
+      "css": ".ds-input { display: flex; width: 100%; height: 36px; padding: 4px 12px; background: transparent; color: #1a1c23; border: 1px solid #dddfe4; border-radius: 6px; font-family: Inter, -apple-system, sans-serif; font-size: 14px; transition: border-color 150ms ease-out, box-shadow 150ms ease-out; } .ds-input::placeholder { color: #606676; } .ds-input:focus-visible { outline: none; border-color: #1a1c23; box-shadow: 0 0 0 1px #1a1c23; } .ds-input:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Badge",
+      "kind": "chip",
+      "refersTo": "badge-secondary",
+      "description": "Quiet meta chip on Cool Paper.",
+      "html": "<span class=\"ds-badge-secondary\">Recommended</span>",
+      "css": ".ds-badge-secondary { display: inline-flex; align-items: center; padding: 2px 10px; background: #f4f4f6; color: #303441; border: 1px solid transparent; border-radius: 6px; font-family: Inter, -apple-system, sans-serif; font-size: 12px; font-weight: 600; }"
+    },
+    {
+      "name": "Default Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Pure Paper container with Cool Border; border-led, not shadow-led.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">AI Developer</h3><p class=\"ds-card-body\">Code generation, refactoring, and architecture discussion.</p></div>",
+      "css": ".ds-card { background: #ffffff; color: #1a1c23; border: 1px solid #dddfe4; border-radius: 12px; padding: 24px; } .ds-card-title { margin: 0 0 8px; font-family: Inter, -apple-system, sans-serif; font-size: 16px; font-weight: 600; line-height: 1.4; } .ds-card-body { margin: 0; font-family: Inter, -apple-system, sans-serif; font-size: 14px; line-height: 1.6; color: #606676; } .ds-card:hover { border-color: #1a1c23; }"
+    },
+    {
+      "name": "Segmented Tab",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "Inverted active segment for decisive product selection.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-active\">Start by Role</button><button class=\"ds-tab\">Import Chat</button></div>",
+      "css": ".ds-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; height: 44px; padding: 4px; background: #ffffff; border: 1px solid #dddfe4; border-radius: 8px; } .ds-tab { border: none; border-radius: 6px; background: transparent; color: #606676; font-family: Inter, -apple-system, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-tab:hover { color: #1a1c23; } .ds-tab-active { background: #1a1c23; color: #ffffff; } .ds-tab:focus-visible { outline: none; box-shadow: 0 0 0 1px #1a1c23; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Monochrome Workbench",
+    "overview": "Prompt Minder is a light-mode-first product UI for solo prompt power users. The surface should feel like a clean black-and-white workbench: sharp, minimal, and professional, with Vercel-level restraint as the visual reference. Contrast and whitespace do the talking; decoration does not.\n\nThe system reinforces confidence, precision, and control. Density stays disciplined enough for scanning libraries and editing prompts, never sparse for marketing theater and never noisy for consumer novelty. Motion exists only to orient and confirm state.\n\nThis system explicitly rejects generic \"AI-style\" visuals: neon gradients, glowing effects, sci-fi motifs, and overly futuristic marketing aesthetics.",
+    "keyCharacteristics": [
+      "Monochrome foundation (Near-Black Ink on Cool Paper Neutrals)",
+      "Single sans stack (Inter) across all roles",
+      "Border-led hierarchy over shadow theater",
+      "Restrained, refined components with intentional contrast",
+      "Workflow clarity before spectacle"
+    ],
+    "rules": [
+      {
+        "name": "The One Ink Rule",
+        "body": "Near-Black Ink is the only accent of weight. Colored decoration (purple, emerald, neon) is forbidden on product surfaces.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cool Paper Rule",
+        "body": "Backgrounds stay in the cool paper family. Warm cream, purple-tinted whites, and gradient washes are prohibited.",
+        "section": "colors"
+      },
+      {
+        "name": "The Single Family Rule",
+        "body": "Do not introduce a second display face in product UI. Inter (or its system fallbacks) is the only UI typeface.",
+        "section": "typography"
+      },
+      {
+        "name": "The Border-Led Rule",
+        "body": "If a surface needs separation, draw a full 1px Cool Border or shift to a Cool Paper/Muted fill. Do not invent ambient glow, multi-layer shadows, or glass blur to fake depth.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do design for confidence first: every screen should feel reliable, clear, and deliberate.",
+      "Do keep the visual language minimal: disciplined spacing, typography, and hierarchy over decorative excess.",
+      "Do use monochrome as the default: black, white, and slate neutrals carry most of the interface.",
+      "Do prioritize workflow clarity over spectacle: fast scanning, efficient actions, strong readability.",
+      "Do keep motion subtle and functional: orientation and feedback only.",
+      "Do separate surfaces with Cool Border and Cool Paper tonal steps.",
+      "Do use Near-Black Ink for primary actions and focus."
+    ],
+    "donts": [
+      "Don't use generic \"AI-style\" visuals such as neon gradients, glowing effects, sci-fi motifs, or overly futuristic marketing aesthetics.",
+      "Don't introduce purple-on-white, purple-to-indigo gradients, or emerald/neon accent decoration on product surfaces.",
+      "Don't rely on glassmorphism, blur orbs, or multi-layer shadows to create hierarchy.",
+      "Don't use side-stripe borders (border-left / border-right > 1px) as colored accents.",
+      "Don't use gradient text or display-font theatrics in product UI.",
+      "Don't nest cards inside cards or wrap every block in a shadowed container.",
+      "Don't make playfulness or novelty the emotional goal; trust, competence, and control come first."
+    ]
+  }
+}

@@ -12,9 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Loader2, Rocket, Sparkles, Upload } from 'lucide-react';
+import { Check, Loader2, Upload } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_COPY = {
   headline: 'First Value in Minutes',
@@ -149,119 +148,138 @@ export function OnboardingDialog({
     });
   };
 
-  const tabRoleLabel = uiCopy.startRole;
-  const tabImportLabel = uiCopy.importFromChat;
-  const roleCountLabel = `${roles.length} ${uiCopy.roleCountSuffix}`;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] max-w-4xl max-h-[92vh] overflow-y-auto p-0">
-        <div className="relative isolate overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.16),transparent_35%),radial-gradient(circle_at_20%_25%,rgba(16,185,129,0.12),transparent_30%)]" />
-          <div className="absolute -left-10 top-20 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -right-10 bottom-10 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl" />
-
-          <div className="relative z-10 p-4 sm:p-6 md:p-7">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-3xl max-h-[92vh] overflow-y-auto border-border bg-white p-0 shadow-2xl sm:rounded-xl">
+        <div className="bg-white">
+          <div className="border-b border-border px-5 pb-5 pt-6 sm:px-8 sm:pb-6 sm:pt-8">
             <DialogHeader className="space-y-3 text-left">
-              <DialogTitle className="text-2xl leading-tight tracking-tight sm:text-[1.75rem]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                {uiCopy.headline}
+              </p>
+              <DialogTitle className="text-[1.625rem] font-semibold leading-tight tracking-tight text-foreground sm:text-[1.75rem]">
                 {uiCopy.title}
               </DialogTitle>
-              <DialogDescription className="text-[15px] leading-6 text-muted-foreground max-w-3xl">
+              <DialogDescription className="max-w-xl text-[15px] leading-relaxed text-muted-foreground">
                 {uiCopy.description}
               </DialogDescription>
             </DialogHeader>
+          </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 space-y-4">
-              <TabsList className="grid h-12 w-full grid-cols-2 rounded-xl bg-muted/70 p-1">
+          <div className="px-5 py-5 sm:px-8 sm:py-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+              <TabsList className="grid h-11 w-full grid-cols-2 rounded-lg border border-border bg-white p-1">
                 <TabsTrigger
                   value="role"
-                  className="h-10 gap-2 rounded-lg text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  className="h-9 rounded-md text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-none"
                 >
-                  <Rocket className="h-4 w-4" />
-                  <span>{tabRoleLabel}</span>
+                  {uiCopy.startRole}
                 </TabsTrigger>
                 <TabsTrigger
                   value="import"
-                  className="h-10 gap-2 rounded-lg text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  className="h-9 rounded-md text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-none"
                 >
-                  <Upload className="h-4 w-4" />
-                  <span>{tabImportLabel}</span>
+                  {uiCopy.importFromChat}
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="role" className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <p>{uiCopy.roleHint}</p>
+              <TabsContent value="role" className="mt-0 space-y-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">{uiCopy.roleHint}</p>
+                  <span className="shrink-0 text-xs tabular-nums text-muted-foreground/80">
+                    {roles.length} {uiCopy.roleCountSuffix}
+                  </span>
                 </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {roles.map((role) => (
-                    <Card
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {roles.map((role, index) => (
+                    <div
                       key={role.id}
-                      className="group relative overflow-hidden border-border/70 bg-card/90 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                      className="group flex flex-col border border-border bg-white p-4 transition-colors duration-150 hover:border-foreground"
                     >
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-emerald-500/[0.05] opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-                      <div className="relative space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-base font-semibold leading-5">{role.title}</h3>
-                          <Badge variant="secondary" className="rounded-full">
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border border-border text-[11px] font-medium tabular-nums text-muted-foreground transition-colors duration-150 group-hover:border-foreground group-hover:text-foreground">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <h3 className="text-[15px] font-semibold leading-snug tracking-tight text-foreground">
+                            {role.title}
+                          </h3>
+                        </div>
+                        {index === 0 ? (
+                          <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
                             {uiCopy.recommended}
-                          </Badge>
-                        </div>
-                        <p className="min-h-8 text-sm text-muted-foreground">{role.description}</p>
-                        <div className="rounded-lg border border-border/70 bg-background/70 p-2.5">
-                          <p className="line-clamp-2 text-xs leading-5 text-foreground/85">{role.promptTitle}</p>
-                        </div>
-                        <Button
-                          className="h-11 w-full gap-2 text-sm focus-visible:ring-2 focus-visible:ring-primary/40"
-                          onClick={() => handleApplyRole(role)}
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                          {uiCopy.applyRole}
-                        </Button>
+                          </span>
+                        ) : null}
                       </div>
-                    </Card>
+                      <p className="mb-3 min-h-[2.5rem] flex-1 text-sm leading-relaxed text-muted-foreground">
+                        {role.description}
+                      </p>
+                      <p className="mb-4 border-t border-border pt-3 text-xs leading-5 text-foreground/70">
+                        {role.promptTitle}
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="h-10 w-full gap-2 border-border text-sm font-medium transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:ring-1 focus-visible:ring-foreground"
+                        onClick={() => handleApplyRole(role)}
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                        {uiCopy.applyRole}
+                      </Button>
+                    </div>
                   ))}
                 </div>
               </TabsContent>
 
-              <TabsContent value="import" className="space-y-4">
-                <div className="grid gap-3 rounded-xl border border-border/70 bg-card/70 p-4 md:grid-cols-[1.2fr_2fr]">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">{uiCopy.sourceLabel}</p>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={source === 'chatgpt' ? 'default' : 'outline'}
-                        onClick={() => setSource('chatgpt')}
-                        className="h-11 min-w-[96px]"
-                      >
-                        {uiCopy.sourceChatgpt}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={source === 'claude' ? 'default' : 'outline'}
-                        onClick={() => setSource('claude')}
-                        className="h-11 min-w-[96px]"
-                      >
-                        {uiCopy.sourceClaude}
-                      </Button>
-                    </div>
-                    <div className="rounded-lg border border-border/70 bg-background/80 p-3">
-                      <ol className="space-y-1 text-xs leading-5 text-muted-foreground">
-                        {uiCopy.importSteps.map((step, index) => (
-                          <li key={`${step}-${index}`}>{index + 1}. {step}</li>
+              <TabsContent value="import" className="mt-0 space-y-5">
+                <div className="grid gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+                  <div className="space-y-4">
+                    <div className="space-y-2.5">
+                      <p className="text-sm font-medium text-foreground">{uiCopy.sourceLabel}</p>
+                      <div className="flex gap-2">
+                        {[
+                          { id: 'chatgpt', label: uiCopy.sourceChatgpt },
+                          { id: 'claude', label: uiCopy.sourceClaude },
+                        ].map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            onClick={() => setSource(option.id)}
+                            className={cn(
+                              'h-10 min-w-[96px] border px-4 text-sm font-medium transition-colors duration-150',
+                              source === option.id
+                                ? 'border-foreground bg-foreground text-background'
+                                : 'border-border bg-white text-muted-foreground hover:border-foreground hover:text-foreground'
+                            )}
+                          >
+                            {option.label}
+                          </button>
                         ))}
-                      </ol>
+                      </div>
                     </div>
+
+                    <ol className="space-y-0 border border-border">
+                      {uiCopy.importSteps.map((step, index) => (
+                        <li
+                          key={`${step}-${index}`}
+                          className={cn(
+                            'flex gap-3 px-3.5 py-3 text-sm leading-relaxed text-muted-foreground',
+                            index < uiCopy.importSteps.length - 1 && 'border-b border-border'
+                          )}
+                        >
+                          <span className="w-4 shrink-0 text-xs font-medium tabular-nums text-foreground">
+                            {index + 1}
+                          </span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ol>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium">{uiCopy.conversationLabel}</p>
-                      <span className="text-xs text-muted-foreground">
+                      <p className="text-sm font-medium text-foreground">{uiCopy.conversationLabel}</p>
+                      <span className="text-xs tabular-nums text-muted-foreground">
                         {trimmedConversation.length} / 50000
                       </span>
                     </div>
@@ -269,7 +287,7 @@ export function OnboardingDialog({
                       value={conversation}
                       onChange={(event) => setConversation(event.target.value)}
                       placeholder={uiCopy.conversationPlaceholder}
-                      className="min-h-[210px] bg-background/90 text-sm leading-6 focus-visible:ring-2 focus-visible:ring-primary/30"
+                      className="min-h-[220px] resize-none rounded-none border-border bg-white text-sm leading-6 focus-visible:ring-1 focus-visible:ring-foreground"
                     />
                   </div>
                 </div>
@@ -279,7 +297,7 @@ export function OnboardingDialog({
                 <Button
                   onClick={handleConvert}
                   disabled={isImporting}
-                  className="h-12 w-full gap-2 text-sm focus-visible:ring-2 focus-visible:ring-primary/40"
+                  className="h-11 w-full gap-2 text-sm font-medium focus-visible:ring-1 focus-visible:ring-foreground"
                   variant={isConversationValid ? 'default' : 'secondary'}
                 >
                   {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
@@ -287,16 +305,18 @@ export function OnboardingDialog({
                 </Button>
               </TabsContent>
             </Tabs>
-
-            <DialogFooter className="mt-6 flex-col-reverse gap-2 sm:flex-row sm:justify-between sm:space-x-0">
-              <Button variant="ghost" onClick={() => onOpenChange(false)} className="h-11 px-5">
-                {uiCopy.skip}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                {uiCopy.footerHint}
-              </p>
-            </DialogFooter>
           </div>
+
+          <DialogFooter className="flex-col-reverse gap-3 border-t border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:space-x-0 sm:px-8">
+            <Button
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              className="h-10 px-3 text-muted-foreground hover:bg-transparent hover:text-foreground"
+            >
+              {uiCopy.skip}
+            </Button>
+            <p className="text-xs leading-5 text-muted-foreground">{uiCopy.footerHint}</p>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
