@@ -1,3 +1,7 @@
+import { desc } from 'drizzle-orm';
+import { publicPrompts } from '@/drizzle/schema/index.js';
+import { db } from '@/lib/db.js';
+
 /**
  * Sitemap 配置
  * 针对搜索引擎和AI搜索引擎（GEO）优化
@@ -94,42 +98,26 @@ export default async function sitemap() {
   const dynamicRoutes = [];
   
   try {
-    // 获取公开提示词列表
-    const res = await fetch(`${BASE_URL}/api/prompts/public?pageSize=500`, { 
-      next: { revalidate: 3600 }, // 1小时缓存
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
-    
-    if (res.ok) {
-      const data = await res.json();
-      const prompts = data?.prompts || [];
-      
-      for (const prompt of prompts) {
-        if (prompt?.id) {
-          // 根据提示词的热度/新鲜度计算优先级
-          const updatedDate = new Date(prompt.updated_at || prompt.created_at);
-          const daysSinceUpdate = Math.floor((Date.now() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
-          
-          // 新内容优先级更高
-          let priority = 0.7;
-          if (daysSinceUpdate < 7) {
-            priority = 0.8;
-          } else if (daysSinceUpdate < 30) {
-            priority = 0.7;
-          } else {
-            priority = 0.6;
-          }
+    const prompts = await db
+      .select({
+        id: publicPrompts.id,
+        createdAt: publicPrompts.createdAt,
+        updatedAt: publicPrompts.updatedAt,
+      })
+      .from(publicPrompts)
+      .orderBy(desc(publicPrompts.updatedAt))
+      .limit(500);
 
-          dynamicRoutes.push({
-            url: `${BASE_URL}/share/${prompt.id}`,
-            lastModified: prompt.updated_at || prompt.created_at || now,
-            changeFrequency: 'weekly',
-            priority,
-          });
-        }
-      }
+    for (const prompt of prompts) {
+      const updatedDate = prompt.updatedAt || prompt.createdAt;
+      const daysSinceUpdate = Math.floor((Date.now() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      dynamicRoutes.push({
+        url: `${BASE_URL}/share/${prompt.id}`,
+        lastModified: updatedDate,
+        changeFrequency: 'weekly',
+        priority: daysSinceUpdate < 7 ? 0.8 : daysSinceUpdate < 30 ? 0.7 : 0.6,
+      });
     }
   } catch (error) {
     // 静默处理错误，避免破坏sitemap生成
@@ -148,5 +136,4 @@ export default async function sitemap() {
  * Sitemap 配置
  * 支持多语言sitemap索引
  */
-export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // 1小时重新验证
