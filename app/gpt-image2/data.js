@@ -1,5 +1,121 @@
 export const gptImage2Prompts = [
   {
+    id: 'cross-device-social-media-feed',
+    category: 'illustration',
+    title: '跨设备社交媒体界面',
+    image:
+      'https://static.mkanime.ai/gpt-image2-prompts/youmind/youmind_13492/2026/04/28/asset_9T6gtuCoPKbD_1369bb542b933ed8668b71373d7dbe1497165e913d5c38f84e7a957f44da6810.jpg',
+    source: 'https://x.com/lizhanning/status/2046052296866648195#reversed-0',
+    prompt: `A realistic over-the-shoulder shot of a person with dark hair wearing a grey shirt, sitting at a desk and looking at a large computer monitor while holding a black smartphone. On the desk in the bottom left corner is a {argument name="drink on desk" default="white mug filled with black coffee"}. The monitor displays a split-screen social media interface. The left column has the header "{argument name="left column header" default="English Post"}" with blurred-out feed items below it. The right column is in sharp focus with the header "{argument name="right column header" default="中文文案"}". Below this right header are 2 distinct social media posts: the top post features an avatar, pseudo-Chinese text, {argument name="first post image" default="a landscape photo of a mountain lake"}, and a heart icon with "2.5K"; the bottom post features an avatar, pseudo-Chinese text, {argument name="second post image" default="a photo of dumplings on a plate"}, and a heart icon with "1.8K". The person is holding the smartphone in their left hand and tapping the screen with their right index finger. The phone screen displays the exact same mountain lake social media post seen on the monitor. The image has a shallow depth of field, blurring the left side of the screen to emphasize the right column and the phone.`,
+  },
+  {
+    id: 'photorealistic-anime-schoolgirl-portrait',
+    category: 'portrait',
+    title: '写实动漫少女低机位人像',
+    image:
+      'https://static.mkanime.ai/gpt-image2-prompts/youmind/youmind_14233/2026/04/28/asset_ONXvTVUj4kz1_c0a47b7abb26350076e9d17a4a81dce8aedaaeb551e925fae1e0022d46451065.jpg',
+    source: 'https://x.com/jun_kongo/status/2046055289074630941#reversed-0',
+    prompt: `A highly detailed, photorealistic anime-style portrait of a young woman crouching down and looking slightly down at the camera from a low angle. She has long, flowing {argument name="hair color" default="ash-blonde"} hair blowing gently in the wind, pale skin, and large, expressive eyes. She is wearing a {argument name="outfit" default="Japanese school uniform with a light grey cardigan, white shirt, dark plaid bow tie, dark plaid pleated skirt, dark knee-high socks, and black leather loafers"}. Her arms are resting casually on her knees. The background is a bright {argument name="sky condition" default="clear blue sky with scattered white clouds"}, with a blurred {argument name="background setting" default="chain-link fence and green trees"} visible at the very bottom, suggesting a schoolyard. The lighting is bright, natural daylight with soft, cinematic shadows, emphasizing the realistic textures of her clothing and skin.`,
+  },
+  {
+    id: 'sci-fi-deep-sea-reference-sheet',
+    category: 'illustration',
+    title: '科幻深海设定参考板',
+    image:
+      'https://static.mkanime.ai/gpt-image2-prompts/youmind/youmind_14216/2026/04/28/asset_LnViuTIHVuue_82cc084b0ef95342e34e0dddfd4e664d92f1ed48ac6a7417ac07a33e46649c6e.jpg',
+    source: 'https://x.com/old_pgmrs_will/status/2046078922258100558#reversed-0',
+    prompt: `{
+  "type": "cinematic illustration and comprehensive concept art reference sheet",
+  "overall_theme": "sci-fi deep sea exploration",
+  "layout": {
+    "top_half": "cinematic key visual",
+    "bottom_half": "dense multi-panel reference sheet"
+  },
+  "top_half_details": {
+    "typography": {
+      "main_title": "{argument name=\"main title\" default=\"深淵の地平線 ABYSS HORIZON\"}",
+      "taglines": ["人類は、深海の扉を開けた。そこは、想像を超える世界だった。", "暗黒は、終わりじゃない。人類の新しい始まりだ。"]
+    },
+    "scene": "Two characters on a balcony overlooking a massive deep-sea environment.",
+    "characters": [
+      {
+        "description": "Male, dark hair, back turned, wearing dark blue jacket",
+        "jacket_text": "NEREIS-01 RESEARCH TEAM LEAD {argument name=\"male character name\" default=\"FUKAMI YOU\"}"
+      },
+      {
+        "description": "Female, brown hair in bun, profile view, wearing dark blue jacket",
+        "jacket_text": "I.D.T.O. OBSERVER {argument name=\"female character name\" default=\"A. VOLKOV\"}"
+      }
+    ],
+    "background_elements": [
+      {
+        "type": "massive submarine",
+        "label": "{argument name=\"submarine name\" default=\"NEREIS-01\"}"
+      },
+      {
+        "type": "enormous glowing biomechanical structure",
+        "label": "{argument name=\"base structure name\" default=\"ABYSS ANCHOR\"} -13,000m"
+      }
+    ]
+  },
+  "bottom_half_details": {
+    "sections": [
+      {
+        "title": "WORLD SETTING SHEET",
+        "content": "Scale comparison showing 2 characters, 2 submarines, and 1 creature."
+      },
+      {
+        "title": "アナ・ヴォルコフ ANA VOLKOV",
+        "content": "Female character reference. Includes 3 full-body turnarounds (front, back, side), 4 facial expressions, and 3 detail shots of boots and accessories."
+      },
+      {
+        "title": "深見 陽 FUKAMI YOU",
+        "content": "Male character reference. Includes 3 full-body turnarounds (front, back, side), 4 facial expressions, and 3 detail shots of gloves and wrist device."
+      },
+      {
+        "title": "ヴォイドクラウン VOID CROWN",
+        "content": "Creature design sheet. Includes 4 detailed views of a spiked, tentacled deep-sea organism."
+      },
+      {
+        "title": "超深海前線調査基地 アビス・アンカー ABYSS ANCHOR",
+        "content": "Structure schematics. Includes 3 detailed architectural views of the deep-sea base."
+      },
+      {
+        "title": "深海探査艇「ネレイス」 NEREIS",
+        "content": "Submarine schematics. Includes 4 detailed orthographic and perspective views of the main vessel."
+      }
+    ]
+  }
+}`,
+  },
+  {
+    id: 'sci-fi-anime-detective-poster',
+    category: 'poster',
+    title: '科幻动漫侦探海报',
+    image:
+      'https://static.mkanime.ai/gpt-image2-prompts/youmind/youmind_14203/2026/04/28/asset_0bc4_a2ZLe4__ec9a123cda1e5aed93dc002f7770f5fc25fcd1184e0a14dcc9922a24c9ef64f8.jpg',
+    source: 'https://x.com/noriyang_crypt/status/2046083802058166616#reversed-0',
+    prompt: `A cinematic anime-style sci-fi movie poster. In the center, a young woman with {argument name="hair color" default="long silver"} hair and blue eyes sits confidently in a massive, futuristic grey armchair with glowing light blue neon accents. She wears a black trench coat over a white high-collared shirt, black pants, and black heeled boots. The chair rests on a glowing blue circular holographic platform floating in deep space filled with stars. Behind her, translucent blue holographic screens display data and planetary images. At the top center, the series title {argument name="series title" default="『電脳椅子探偵シャルロット』"} is written in small white text, above the large main title {argument name="main title" default="『天使の涙』"} in an elegant serif font. Below the main title is the tagline {argument name="subtitle" default="すべての記録は、この出会いから始まった。"}. At the bottom center of the poster, a block of text reads "This is the first record of Charlotte and W.A.T.S.O.N." followed by a large stylized title {argument name="bottom text" default="シャルロット & W.A.T.S.O.N."} and credits "Original Story / Screenplay / Director noriyang" at the very bottom. The overall atmosphere is mysterious, high-tech, and epic.`,
+  },
+  {
+    id: 'multilingual-font-specimen-sheet',
+    category: 'typography',
+    title: '多语言字体样张',
+    image:
+      'https://static.mkanime.ai/gpt-image2-prompts/youmind/youmind_14142/2026/04/28/asset_0Tj4FEQ34k-I_2ff76b2684610c87e7ef617348532b7e4f15c4ee0fdb554c86c072328b026129.jpg',
+    source: 'https://x.com/aiehon_aya/status/2046108588318597233',
+    prompt: `この文字デザインをもとに、{argument name="文字の種類" default="ひらがな・カタカナ・英字・簡単な漢字"}を並べたフォント見本帳画像をつくって。 Format {argument name="アスペクト比" default="16:9"} 画像生成モデルは {argument name="モデル名" default="duct-tape-1か duct-tape-2、3"} を指定したいです。`,
+  },
+  {
+    id: 'identical-baseball-players-lineup',
+    category: 'portrait',
+    title: '五位相同棒球运动员',
+    image:
+      'https://static.mkanime.ai/gpt-image2-prompts/youmind/youmind_14213/2026/04/28/asset_LFJ6eBU556tU_9d6eee5368791b4332b1f2387835c4ffc4cfc342baa1065b8f07c55df096da02.jpg',
+    source: 'https://x.com/hosiken/status/2046111712009720205#reversed-0',
+    prompt: `A realistic sports photograph of exactly 5 identical young Asian men standing in a neat row. They have shaved heads and are wearing {argument name="uniform style" default="white baseball uniforms with thin dark pinstripes"}, navy undershirts, and black belts. The word "{argument name="team name" default="KANAKO"}" is arched across their chests in navy lettering with a gold outline. They are standing at attention with their hands behind their backs, all facing slightly to the left with serious expressions. The background features {argument name="background" default="blurred green stadium seating"}, indicating a baseball field in bright daylight.`,
+  },
+  {
     id: 'cinematic-minimal-portrait',
     category: 'portrait',
     title: '电影感极简人像',
