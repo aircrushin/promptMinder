@@ -26,6 +26,7 @@ describe('models-dev', () => {
     expect(PROVIDER_TO_MODELS_DEV.siliconflow).toBe('siliconflow-cn')
     expect(PROVIDER_TO_MODELS_DEV.stepfun).toBe('stepfun')
     expect(PROVIDER_TO_MODELS_DEV.xai).toBe('xai')
+    expect(PROVIDER_TO_MODELS_DEV.orcarouter).toBe('orcarouter')
     expect(PROVIDER_TO_MODELS_DEV.doubao).toBeUndefined()
   })
 
@@ -62,11 +63,50 @@ describe('models-dev', () => {
     expect(models[0].label).toBe('New')
   })
 
+  it('orcarouter 无目录时应回退免费模型 seed', () => {
+    const seeds = getSeedModels('orcarouter')
+    expect(seeds.map((model) => model.value)).toEqual([
+      'orcarouter/free',
+      'orcarouter/auto',
+      'deepseek/deepseek-v4-flash-free',
+      'openai/gpt-4o-mini',
+    ])
+  })
+
   it('doubao 无 models.dev 映射时应回退 seed', async () => {
     const result = await listModelsForProvider('doubao')
     expect(result.source).toBe('fallback')
     expect(result.models.length).toBeGreaterThan(0)
     expect(result.models[0].value).toMatch(/^doubao-/)
+  })
+
+  it('应该从 models.dev 返回 orcarouter 模型', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        orcarouter: {
+          models: {
+            'orcarouter/free': {
+              id: 'orcarouter/free',
+              name: 'OrcaRouter Free',
+              release_date: '2026-01-01',
+              modalities: { output: ['text'] },
+            },
+            'kling/kling-v3-omni': {
+              id: 'kling/kling-v3-omni',
+              name: 'Kling Video',
+              modalities: { output: ['video'] },
+            },
+          },
+        },
+      }),
+    })
+
+    const result = await listModelsForProvider('orcarouter', { fetchImpl })
+    expect(result.source).toBe('models.dev')
+    expect(result.models).toEqual([
+      { value: 'orcarouter/free', label: 'OrcaRouter Free', releaseDate: '2026-01-01' },
+    ])
   })
 
   it('应该从 models.dev 目录返回模型', async () => {
