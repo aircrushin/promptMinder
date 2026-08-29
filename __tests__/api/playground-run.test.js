@@ -160,6 +160,35 @@ describe('POST /api/playground/run', () => {
       });
     });
 
+    it('should use OrcaRouter default base URL and attribution headers', async () => {
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],
+        usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+        model: 'orcarouter/free',
+      });
+
+      const request = createRequest({
+        prompt: 'Test prompt',
+        stream: false,
+        settings: {
+          apiKey: 'sk-orca-test',
+          provider: 'orcarouter',
+          model: 'orcarouter/free',
+        },
+      });
+
+      await POST(request);
+
+      expect(OpenAI).toHaveBeenCalledWith({
+        apiKey: 'sk-orca-test',
+        baseURL: 'https://api.orcarouter.ai/v1',
+        defaultHeaders: {
+          'HTTP-Referer': 'https://www.prompt-minder.com',
+          'X-Title': 'PromptMinder',
+        },
+      });
+    });
+
     it('should use default settings when not provided', async () => {
       mockCreate.mockResolvedValue({
         choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }],

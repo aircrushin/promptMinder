@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getOpenAIClientConfig } from '@/lib/openai-compat';
 
 const DEFAULT_API_KEY = process.env.ZHIPU_API_KEY;
 const DEFAULT_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4';
@@ -24,10 +25,10 @@ export async function POST(request) {
     }
 
     // 创建 OpenAI 客户端实例，使用传入的 baseURL
-    const openai = new OpenAI({
+    const openai = new OpenAI(getOpenAIClientConfig({
       apiKey: finalApiKey,
-      baseURL: baseURL,
-    });
+      baseURL,
+    }));
     // 准备发送给 AI 的消息
     const aiMessages = [
       { role: 'system', content: systemPrompt },

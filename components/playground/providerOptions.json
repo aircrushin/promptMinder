@@ -275,6 +275,25 @@
     ]
   },
   {
+    "value": "orcarouter",
+    "label": "OrcaRouter",
+    "description": "OrcaRouter OpenAI-compatible gateway with free models and multi-provider routing (https://www.orcarouter.ai).",
+    "baseURL": "https://api.orcarouter.ai/v1",
+    "endpoints": [
+      {
+        "value": "orcarouter",
+        "label": "OrcaRouter",
+        "url": "https://api.orcarouter.ai/v1"
+      }
+    ],
+    "models": [
+      { "value": "orcarouter/free", "label": "OrcaRouter Free" },
+      { "value": "orcarouter/auto", "label": "OrcaRouter Auto" },
+      { "value": "deepseek/deepseek-v4-flash-free", "label": "DeepSeek V4 Flash (Free)" },
+      { "value": "openai/gpt-4o-mini", "label": "GPT-4o Mini" }
+    ]
+  },
+  {
     "value": "custom",
     "label": "Custom Provider",
     "description": "Use any OpenAI-compatible API by configuring the endpoint and key manually.",

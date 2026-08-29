@@ -5,6 +5,7 @@ import { requireUserId } from '@/lib/auth'
 import { db } from '@/lib/db.js'
 import { eq, and } from 'drizzle-orm'
 import { providerKeys } from '@/drizzle/schema/index.js'
+import { getOpenAIClientConfig, ORCAROUTER_BASE_URL } from '@/lib/openai-compat'
 
 const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || ''
 const DEFAULT_BASE_URL = process.env.OPENAI_COMPAT_URL || 'https://api.openai.com/v1'
@@ -21,6 +22,7 @@ const PROVIDER_BASE_URLS = {
   siliconflow: 'https://api.siliconflow.cn/v1',
   stepfun: 'https://api.stepfun.com/v1',
   xai: 'https://api.x.ai/v1',
+  orcarouter: ORCAROUTER_BASE_URL,
 }
 
 async function getStoredProviderKey(userId, provider) {
@@ -180,7 +182,11 @@ export async function POST(request) {
             const anthropic = new Anthropic({ apiKey: finalApiKey })
             await handleClaudeStream(anthropic, model, systemMessage, userMessage, temperature, maxTokens, topP, startTime, controller, send)
           } else {
-            const openai = new OpenAI({ apiKey: finalApiKey, baseURL: resolvedBaseURL || DEFAULT_BASE_URL })
+            const openai = new OpenAI(getOpenAIClientConfig({
+              apiKey: finalApiKey,
+              baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
+              provider: normalizedProvider,
+            }))
             await handleOpenAIStream(openai, model, messages, temperature, maxTokens, topP, startTime, controller, send)
           }
         },
@@ -210,7 +216,11 @@ export async function POST(request) {
         model: response.model, duration, finishReason: response.stop_reason,
       })
     } else {
-      const openai = new OpenAI({ apiKey: finalApiKey, baseURL: resolvedBaseURL || DEFAULT_BASE_URL })
+      const openai = new OpenAI(getOpenAIClientConfig({
+        apiKey: finalApiKey,
+        baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
+        provider: normalizedProvider,
+      }))
       const completion = await openai.chat.completions.create({ model, messages, temperature, max_tokens: maxTokens, top_p: topP })
       const duration = Date.now() - startTime
       const output = completion.choices?.[0]?.message?.content || ''
