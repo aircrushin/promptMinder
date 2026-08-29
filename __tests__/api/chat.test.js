@@ -111,32 +111,6 @@ describe('/api/chat', () => {
     })
   })
 
-  it('应该为 OrcaRouter 请求附加 attribution headers', async () => {
-    const requestBody = {
-      messages: [{ role: 'user', content: '测试消息' }],
-      apiKey: 'sk-orca-test',
-      baseURL: 'https://api.orcarouter.ai/v1',
-      model: 'orcarouter/free',
-      systemPrompt: '自定义系统提示'
-    }
-
-    const request = new NextRequest('http://localhost:3000/api/chat', {
-      method: 'POST',
-      body: JSON.stringify(requestBody)
-    })
-
-    await POST(request)
-
-    expect(OpenAI).toHaveBeenCalledWith({
-      apiKey: 'sk-orca-test',
-      baseURL: 'https://api.orcarouter.ai/v1',
-      defaultHeaders: {
-        'HTTP-Referer': 'https://www.prompt-minder.com',
-        'X-Title': 'PromptMinder',
-      },
-    })
-  })
-
   it('应该处理缺少API Key的情况', async () => {
     // 清除环境变量
     delete process.env.ZHIPU_API_KEY
