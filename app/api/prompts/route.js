@@ -3,7 +3,7 @@ import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { clerkClient } from '@clerk/nextjs/server'
-import { or, and, ilike, desc, count as countFn } from 'drizzle-orm'
+import { or, and, ilike, desc, count as countFn, getTableColumns, isNotNull } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
 import {
@@ -30,6 +30,9 @@ function buildPromptConditions({ teamId, userId, tag, search }) {
   return and(...conditions)
 }
 
+const summaryColumns = { ...getTableColumns(prompts), hasSkillPackage: isNotNull(prompts.skillPackage) };
+delete summaryColumns.skillPackage;
+
 export async function GET(request) {
   try {
     const userId = await requireUserId(request)
@@ -52,7 +55,7 @@ export async function GET(request) {
     const whereCondition = buildPromptConditions({ teamId, userId, tag, search })
 
     const [dataResult, countResult] = await Promise.all([
-      db.select().from(prompts).where(whereCondition).orderBy(desc(prompts.createdAt)).limit(limit).offset(offset),
+      db.select(summaryColumns).from(prompts).where(whereCondition).orderBy(desc(prompts.createdAt)).limit(limit).offset(offset),
       db.select({ value: countFn() }).from(prompts).where(whereCondition)
     ])
 
@@ -140,7 +143,7 @@ export async function GET(request) {
         total,
         totalPages: Math.ceil(total / limit)
       }
-    })
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     return handleApiError(error, 'Unable to load prompts')
   }
@@ -181,6 +184,7 @@ export async function POST(request) {
         proposal: {
           title: data.title,
           content: data.content,
+          skill_package: data.skill_package,
           description: data.description || null,
           tags: data.tags || null,
           version: data.version || null,

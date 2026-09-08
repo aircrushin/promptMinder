@@ -21,6 +21,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { SkillFiles, SkillFolderInput } from '@/components/skill/SkillFiles';
 import { useTeam } from '@/contexts/team-context';
 
 const CreatableSelect = dynamic(() => import('react-select/creatable'), {
@@ -61,6 +62,8 @@ export default function EditPrompt({ params }) {
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setPrompt(null);
     const fetchInitialData = async () => {
       if (!promptId) {
         return;
@@ -68,10 +71,11 @@ export default function EditPrompt({ params }) {
 
       try {
         const [promptData, tagsData] = await Promise.all([
-          apiClient.request(`/api/prompts/${promptId}`, activeTeamId ? { teamId: activeTeamId } : {}),
-          apiClient.getTags(activeTeamId ? { teamId: activeTeamId } : {}),
+          apiClient.request(`/api/prompts/${promptId}`, { teamId: activeTeamId }),
+          apiClient.getTags({ teamId: activeTeamId }),
         ]);
 
+        if (cancelled) return;
         setPrompt(promptData);
         setOriginalVersion(promptData.version);
 
@@ -88,6 +92,7 @@ export default function EditPrompt({ params }) {
         const uniqueTags = Array.from(new Map(tagList.map((tag) => [tag.name, tag])).values());
         setTagOptions(uniqueTags.map((tag) => ({ value: tag.name, label: tag.name })));
       } catch (error) {
+        if (cancelled) return;
         console.error('Error fetching prompt:', error);
         toast({
           variant: 'destructive',
@@ -97,6 +102,7 @@ export default function EditPrompt({ params }) {
     };
 
     fetchInitialData();
+    return () => { cancelled = true; };
   }, [promptId, activeTeamId, toast]);
 
   if (!t) {
@@ -124,7 +130,7 @@ export default function EditPrompt({ params }) {
       const isNewVersion = originalVersion !== prompt.version;
       let result;
 
-      if (isNewVersion) {
+      if (isNewVersion && !prompt.skill_package) {
         const newPromptPayload = {
           ...prompt,
           id: crypto.randomUUID(),
@@ -132,7 +138,7 @@ export default function EditPrompt({ params }) {
           updated_at: new Date().toISOString(),
         };
         delete newPromptPayload.team_id;
-        result = await apiClient.createPrompt(newPromptPayload, activeTeamId ? { teamId: activeTeamId } : {});
+        result = await apiClient.createPrompt(newPromptPayload, { teamId: activeTeamId });
         if (result?.mode === 'approval_required' && result?.change_request?.id) {
           toast({ title: '成功', description: tp.submitApprovalSuccess || '版本变更已提交审批' });
           router.push(`/prompts/reviews/${result.change_request.id}`);
@@ -142,13 +148,13 @@ export default function EditPrompt({ params }) {
         }
       } else {
         const updatePayload = { ...prompt };
-        result = await apiClient.updatePrompt(promptId, updatePayload, activeTeamId ? { teamId: activeTeamId } : {});
+        result = await apiClient.updatePrompt(promptId, updatePayload, { teamId: activeTeamId });
         if (result?.mode === 'approval_required' && result?.change_request?.id) {
           toast({ title: '成功', description: tp.submitApprovalSuccess || '版本变更已提交审批' });
           router.push(`/prompts/reviews/${result.change_request.id}`);
         } else {
           toast({ title: '成功', description: tp.updateSuccess });
-          router.push('/prompts');
+          router.push(result?.prompt?.id ? `/prompts/${result.prompt.id}` : '/prompts');
         }
       }
     } catch (error) {
@@ -177,7 +183,7 @@ export default function EditPrompt({ params }) {
     },
     onCreateOption: async (inputValue) => {
       try {
-        await apiClient.createTag({ name: inputValue }, activeTeamId ? { teamId: activeTeamId } : {});
+        await apiClient.createTag({ name: inputValue }, { teamId: activeTeamId });
         const newOption = { value: inputValue, label: inputValue };
         setTagOptions((prev) => [...prev, newOption]);
 
@@ -310,6 +316,12 @@ export default function EditPrompt({ params }) {
                   </div>
                   <p className="text-sm text-muted-foreground">{tp.variableTip}</p>
                 </MotionDiv>
+
+                {prompt.skill_package && <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">{t.workspaceSkills.versionHint}</p>
+                  <SkillFolderInput source={prompt.skill_package.source} onChange={(value) => setPrompt({ ...prompt, skill_package: value, content: value.files.find((file) => file.path === 'SKILL.md').contents })} />
+                  <SkillFiles value={prompt.skill_package} hideMain onChange={(value) => setPrompt({ ...prompt, skill_package: value })} />
+                </div>}
 
                 <Suspense fallback={<Skeleton className="h-16 w-full" />}>
                   <VariableInputs content={prompt.content} className="my-4" />

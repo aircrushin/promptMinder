@@ -11,6 +11,7 @@ import {
 import { Loader2, PlusCircle } from "lucide-react";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { PromptForm } from "./PromptForm";
+import { ExportSkillButton } from '@/components/skill/ExportSkillButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 /**
@@ -57,6 +58,7 @@ export function NewPromptDialog({
         
         {prompt.is_public === false && <p className="text-sm text-muted-foreground">{t.conversationMethod.privateHint}</p>}
         <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+          <ExportSkillButton prompt={prompt} />
           <Button variant="outline" onClick={onCancel} className="h-10 w-full sm:w-auto">
             {copy.cancel}
           </Button>

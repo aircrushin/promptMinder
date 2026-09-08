@@ -82,4 +82,12 @@ describe('ApiClient team scoping', () => {
       })
     )
   })
+  it('包装方法未传 teamId 时应保留当前团队，显式 null 则使用个人工作区', async () => {
+    window.localStorage.setItem(TEAM_STORAGE_KEY, 'team-a');
+    await client.updatePrompt('id', { content: 'x' });
+    expect(fetch.mock.calls[0][1].headers['X-Team-Id']).toBe('team-a');
+    await client.updatePrompt('id', { content: 'x' }, { teamId: null });
+    expect(fetch.mock.calls[1][1].headers['X-Team-Id']).toBeUndefined();
+  });
+
 })

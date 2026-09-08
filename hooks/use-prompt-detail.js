@@ -1,9 +1,11 @@
+import { useTeam } from '@/contexts/team-context';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 
 export function usePromptDetail(id) {
   const router = useRouter();
+  const { activeTeamId } = useTeam();
   const [prompt, setPrompt] = useState(null);
   const [versions, setVersions] = useState([]);
   const [selectedVersion, setSelectedVersion] = useState(null);
@@ -20,9 +22,11 @@ export function usePromptDetail(id) {
 
     const loadPrompt = async () => {
       setIsLoading(true);
+      setPrompt(null);
+      setVersions([]);
 
       try {
-        const data = await apiClient.getPrompt(id);
+        const data = await apiClient.getPrompt(id, { teamId: activeTeamId });
         if (cancelled) return;
 
         const normalizedPrompt = {
@@ -36,10 +40,10 @@ export function usePromptDetail(id) {
         };
 
         setPrompt(normalizedPrompt);
-        setSelectedVersion(normalizedPrompt.version);
+        setSelectedVersion(normalizedPrompt.id);
 
         try {
-          const versionsResponse = await apiClient.getPromptVersions(id);
+          const versionsResponse = await apiClient.getPromptVersions(id, { teamId: activeTeamId });
 
           if (cancelled) return;
 
@@ -76,10 +80,10 @@ export function usePromptDetail(id) {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, activeTeamId]);
 
   const handleVersionChange = (version) => {
-    const selectedPrompt = versions.find(v => v.version === version);
+    const selectedPrompt = versions.find(v => v.id === version);
     if (selectedPrompt) {
       router.push(`/prompts/${selectedPrompt.id}`);
     }

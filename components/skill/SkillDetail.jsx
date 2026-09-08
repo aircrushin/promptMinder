@@ -7,6 +7,8 @@ import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { AddSkillButton } from '@/components/skill/AddSkillButton'
 import { SkillInstallMethods } from '@/components/skill/SkillInstallMethods'
+import { CatalogSkillExportButton } from '@/components/skill/ExportSkillButton'
+import { canRedistributeSkill } from '@/lib/skills-sync'
 
 export function SkillDetail({ skill }) {
   const { language } = useLanguage()
@@ -87,6 +89,7 @@ export function SkillDetail({ skill }) {
             </dl>
 
             <div className="mt-6 flex flex-col gap-3">
+              {skill.content && canRedistributeSkill(skill) && <CatalogSkillExportButton skill={skill} />}
               {skill.content && <AddSkillButton skill={{ id: skill.id, name: skill.name, source: skill.source, content: skill.content }} />}
               <a
                 href={skill.skillsShUrl}
@@ -108,4 +111,3 @@ export function SkillDetail({ skill }) {
     </div>
   )
 }
-

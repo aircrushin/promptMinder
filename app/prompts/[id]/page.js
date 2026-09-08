@@ -28,6 +28,8 @@ import PromptWorkflowPanel from '@/components/prompt/PromptWorkflowPanel';
 import DeleteConfirmDialog from '@/components/prompt/DeleteConfirmDialog';
 import { PromptSkeleton } from '@/components/prompt/PromptSkeleton';
 import { usePromptDetail } from '@/hooks/use-prompt-detail';
+import { WorkspaceSkillPanel } from '@/components/skill/WorkspaceSkillPanel';
+import { ExportSkillButton } from '@/components/skill/ExportSkillButton';
 
 export default function PromptDetail({ params }) {
   const { id } = use(params);
@@ -122,6 +124,7 @@ export default function PromptDetail({ params }) {
           {tp.backToList}
         </Button>
         <div className="flex flex-wrap items-center gap-2">
+          <ExportSkillButton prompt={prompt} />
           {isHistoricalVersion && canManage && (
             <Button
               variant="default"
@@ -201,6 +204,8 @@ export default function PromptDetail({ params }) {
           />
         </div>
       </div>
+
+      <WorkspaceSkillPanel key={`${prompt.id}:${activeTeamId || 'personal'}`} prompt={prompt} />
 
       <DeleteConfirmDialog
         open={showDeleteConfirm}

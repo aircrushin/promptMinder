@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import { SkillFilesDiff } from '@/components/skill/SkillFiles';
 import PromptDiffViewer from '@/components/prompt/PromptDiffViewer'
 
 function statusVariant(status) {
@@ -211,6 +212,7 @@ export default function PromptReviewDetailPage({ params }) {
         </CardHeader>
         <CardContent>
           <PromptDiffViewer oldContent={basePrompt?.content || ''} newContent={request.proposed_content || ''} t={t} />
+          <SkillFilesDiff before={basePrompt?.skill_package} after={request.proposed_skill_package} />
         </CardContent>
       </Card>
 

@@ -103,6 +103,11 @@ export default function PromptHeader({
         tags: updatedTags,
       });
 
+      if (result?.mode === 'version_created' && result?.prompt?.id) {
+        router.push(`/prompts/${result.prompt.id}`);
+        return;
+      }
+
       if (result?.mode === 'approval_required' && result?.change_request?.id) {
         toast({
           title: tp.tagSaveSuccess || '已提交审批',
@@ -177,6 +182,11 @@ export default function PromptHeader({
         tags: updatedTags,
       });
 
+      if (result?.mode === 'version_created' && result?.prompt?.id) {
+        router.push(`/prompts/${result.prompt.id}`);
+        return;
+      }
+
       if (result?.mode === 'approval_required' && result?.change_request?.id) {
         toast({
           title: tp.tagSaveSuccess || '已提交审批',
@@ -235,6 +245,11 @@ export default function PromptHeader({
       const result = await apiClient.updatePrompt(prompt.id, {
         description: editedDescription,
       });
+
+      if (result?.mode === 'version_created' && result?.prompt?.id) {
+        router.push(`/prompts/${result.prompt.id}`);
+        return;
+      }
 
       if (result?.mode === 'approval_required' && result?.change_request?.id) {
         setIsEditingDescription(false);
@@ -297,13 +312,7 @@ export default function PromptHeader({
 
   const handleShare = async () => {
     try {
-      const response = await fetch(`/api/prompts/share/${prompt.id}`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        throw new Error('Share failed');
-      }
+      await apiClient.sharePrompt(prompt.id);
 
       const shareUrl = `${window.location.origin}/share/${prompt.id}`;
       await navigator.clipboard.writeText(shareUrl);
@@ -409,17 +418,17 @@ export default function PromptHeader({
                 >
                   <SelectTrigger className="h-5 text-xs border-none bg-transparent hover:bg-secondary/50 transition-colors">
                     <SelectValue placeholder={tp.selectVersionPlaceholder}>
-                      v{selectedVersion}
+                      v{prompt.version}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {versions.map((version) => (
                       <SelectItem 
                         key={version.id} 
-                        value={version.version}
+                        value={version.id}
                         className="text-xs"
                       >
-                        v{version.version} ({new Date(version.created_at).toLocaleDateString()})
+                        v{version.version} ({new Date(version.created_at).toLocaleDateString()}){version.has_skill_package ? ` · ${version.id.slice(0, 8)}` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -577,6 +586,7 @@ export default function PromptHeader({
             <TooltipTrigger asChild>
               <Button
                 onClick={handleShare}
+                aria-label={prompt.skill_package ? t.workspaceSkills.share : tp.shareTooltip}
                 variant={shareSuccess ? "success" : "secondary"}
                 className="relative overflow-hidden group w-8 h-8 p-0"
               >
@@ -586,7 +596,7 @@ export default function PromptHeader({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{tp.shareTooltip}</p>
+              <p>{prompt.skill_package ? t.workspaceSkills.share : tp.shareTooltip}</p>
             </TooltipContent>
           </Tooltip>
 

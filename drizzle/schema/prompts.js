@@ -1,5 +1,6 @@
 import {
   pgTable,
+  jsonb,
   uuid,
   text,
   boolean,
@@ -45,6 +46,7 @@ export const prompts = pgTable(
       onDelete: 'set null',
     }),
     title: text('title').notNull(),
+    skillPackage: jsonb('skill_package'),
     content: text('content').notNull(),
     description: text('description'),
     createdBy: text('created_by'),

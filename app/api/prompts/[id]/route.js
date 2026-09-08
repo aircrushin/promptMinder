@@ -1,3 +1,4 @@
+import { prepareSkillVersion } from '@/lib/skill-version';
 import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
@@ -9,6 +10,7 @@ import { toSnakeCase } from '@/lib/case-utils.js'
 import {
   buildPromptAccessScope,
   createChangeRequest,
+  createPromptDirect,
   isTeamApprovalEnabled,
 } from '@/lib/prompt-workflow.js'
 
@@ -53,7 +55,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 })
     }
 
-    return NextResponse.json(prompt)
+    return NextResponse.json(prompt, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     return handleApiError(error, 'Unable to load prompt')
   }
@@ -84,22 +86,14 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 })
     }
 
-    if (!isCreator(prompt, userId) && !ensureManagerPermission(membership)) {
-      return NextResponse.json({ error: 'Only the creator or team managers can update this prompt' }, { status: 403 })
+    const payload = await request.json();
+    const approvalEnabled = teamId && await isTeamApprovalEnabled(db, teamId);
+    if (!isCreator(prompt, userId) && !ensureManagerPermission(membership)
+      && !(approvalEnabled && prompt.skill_package)) {
+      return NextResponse.json({ error: 'Only the creator or team managers can update this prompt' }, { status: 403 });
     }
-
-    const payload = await request.json()
-
-    if (teamId && (await isTeamApprovalEnabled(db, teamId))) {
-      const proposal = {
-        title: payload.title ?? prompt.title,
-        content: payload.content ?? prompt.content,
-        description: payload.description ?? prompt.description,
-        tags: payload.tags ?? prompt.tags,
-        version: payload.version ?? prompt.version,
-        projectId: payload.projectId ?? prompt.project_id ?? null,
-      }
-
+    const proposal = await prepareSkillVersion(db, payload, prompt, { teamId, userId });
+    if (approvalEnabled) {
       const changeRequest = await createChangeRequest(db, {
         teamId,
         lineageId: prompt.lineage_id,
@@ -113,6 +107,13 @@ export async function POST(request, { params }) {
         mode: 'approval_required',
         change_request: changeRequest,
       })
+    }
+
+    if (proposal.skill_package) {
+      const published = await createPromptDirect(db, {
+        teamId, userId, lineageId: prompt.lineage_id, data: { ...proposal, is_public: false },
+      });
+      return NextResponse.json({ mode: 'version_created', prompt: published }, { status: 201 });
     }
 
     const updateData = { updatedAt: new Date() }

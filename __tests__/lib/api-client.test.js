@@ -9,6 +9,14 @@ describe('ApiClient', () => {
   })
 
   describe('request method', () => {
+    it('应该读取二进制下载且仍解析下载失败时的 JSON 错误', async () => {
+      const bytes = new ArrayBuffer(4);
+      fetch.mockResolvedValueOnce({ ok: true, arrayBuffer: async () => bytes });
+      expect(await apiClient.request('/download', { responseType: 'arrayBuffer' })).toBe(bytes);
+      expect(fetch.mock.calls[0][1]).not.toHaveProperty('responseType');
+      fetch.mockResolvedValueOnce({ ok: false, status: 403, json: async () => ({ error: 'Export denied' }) });
+      await expect(apiClient.request('/download', { responseType: 'arrayBuffer' })).rejects.toThrow('Export denied');
+    });
     it('应该发送基本的GET请求', async () => {
       const mockResponse = { data: 'test' }
       fetch.mockResolvedValueOnce({

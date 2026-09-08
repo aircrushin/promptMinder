@@ -10,7 +10,7 @@ import {
 
 export async function POST(request) {
   try {
-    const userId = await requireUserId()
+    const userId = await requireUserId(request)
     const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: true,
       allowMissingTeam: false,
@@ -43,6 +43,7 @@ export async function POST(request) {
       proposal: {
         title: payload.title,
         content: payload.content,
+          skill_package: payload.skill_package,
         description: payload.description || null,
         tags: payload.tags || null,
         version: payload.version || null,

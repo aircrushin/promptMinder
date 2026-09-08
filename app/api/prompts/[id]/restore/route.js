@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { and, desc, eq } from 'drizzle-orm'
+import { desc } from 'drizzle-orm'
 import { requireUserId } from '@/lib/auth.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
@@ -10,7 +10,7 @@ import { toSnakeCase } from '@/lib/case-utils.js'
 import { allocateNextVersion } from '@/lib/prompt-versions.js'
 import {
   WORKFLOW_EVENT_TYPES,
-  buildPromptAccessScope,
+  buildPromptVersionScope,
   createChangeRequest,
   createPromptDirect,
   getPromptByScope,
@@ -35,27 +35,10 @@ function ensureManagerPermission(membership) {
 }
 
 async function listSiblingVersions(db, { teamId, userId, source }) {
-  if (teamId && source.lineage_id) {
-    const rows = await db
-      .select()
-      .from(prompts)
-      .where(and(eq(prompts.teamId, teamId), eq(prompts.lineageId, source.lineage_id)))
-      .orderBy(desc(prompts.createdAt))
-    return rows.map(toSnakeCase)
-  }
-
-  const rows = await db
-    .select()
-    .from(prompts)
-    .where(
-      and(
-        eq(prompts.title, source.title),
-        buildPromptAccessScope({ teamId: null, userId })
-      )
-    )
-    .orderBy(desc(prompts.createdAt))
-
-  return rows.map(toSnakeCase)
+  const rows = await db.select().from(prompts)
+    .where(buildPromptVersionScope({ prompt: source, teamId, userId }))
+    .orderBy(desc(prompts.createdAt));
+  return rows.map(toSnakeCase);
 }
 
 export async function POST(request, { params }) {
@@ -92,6 +75,7 @@ export async function POST(request, { params }) {
     const proposal = {
       title: latest.title,
       content: source.content,
+      skill_package: source.skill_package,
       description: source.description || null,
       tags: source.tags || null,
       version: nextVersion,
@@ -110,6 +94,7 @@ export async function POST(request, { params }) {
         proposal: {
           title: proposal.title,
           content: proposal.content,
+          skill_package: proposal.skill_package,
           description: proposal.description,
           tags: proposal.tags,
           version: proposal.version,

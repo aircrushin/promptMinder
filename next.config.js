@@ -10,6 +10,13 @@ const withPWA = require("next-pwa")({
   skipWaiting: true,
   sw: "service-worker.js",
   buildExcludes: [/middleware-manifest.json$/],
+  runtimeCaching: [
+    {
+      urlPattern: ({ url }) => /^\/(?:api\/(?:prompts|workspace-skills)(?:\/|$)|prompts(?:\/|$))/.test(url.pathname),
+      handler: 'NetworkOnly',
+    },
+    ...require('next-pwa/cache'),
+  ],
 });
 
 const nextConfig = {

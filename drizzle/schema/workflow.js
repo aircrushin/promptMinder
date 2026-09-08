@@ -28,6 +28,7 @@ export const promptChangeRequests = pgTable(
     basePromptId: uuid('base_prompt_id').references(() => prompts.id, { onDelete: 'set null' }),
     requestType: text('request_type').notNull(),
     proposedTitle: text('proposed_title').notNull(),
+    proposedSkillPackage: jsonb('proposed_skill_package'),
     proposedContent: text('proposed_content').notNull(),
     proposedDescription: text('proposed_description'),
     proposedTags: text('proposed_tags'),

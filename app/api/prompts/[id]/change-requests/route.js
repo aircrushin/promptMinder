@@ -1,3 +1,4 @@
+import { prepareSkillVersion } from '@/lib/skill-version';
 import { NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/auth.js'
 import { resolveTeamContext } from '@/lib/team-request.js'
@@ -17,21 +18,10 @@ async function getPromptId(paramsPromise) {
   return id
 }
 
-function normalizeProposal(prompt, payload = {}) {
-  return {
-    title: payload.title ?? prompt.title,
-    content: payload.content ?? prompt.content,
-    description: payload.description ?? prompt.description,
-    tags: payload.tags ?? prompt.tags,
-    version: payload.version ?? prompt.version,
-    projectId: payload.projectId ?? prompt.project_id ?? null,
-  }
-}
-
 export async function GET(request, { params }) {
   try {
     const promptId = await getPromptId(params)
-    const userId = await requireUserId()
+    const userId = await requireUserId(request)
 
     const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: true,
@@ -64,7 +54,7 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     const promptId = await getPromptId(params)
-    const userId = await requireUserId()
+    const userId = await requireUserId(request)
 
     const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: true,
@@ -85,7 +75,7 @@ export async function POST(request, { params }) {
     }
 
     const payload = await request.json().catch(() => ({}))
-    const proposal = normalizeProposal(prompt, payload)
+    const proposal = await prepareSkillVersion(db, payload, prompt, { teamId, userId })
 
     const changeRequest = await createChangeRequest(db, {
       teamId,

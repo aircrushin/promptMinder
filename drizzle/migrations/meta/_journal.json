@@ -36,6 +36,13 @@
       "when": 1784458864000,
       "tag": "0004_catalog_skills",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788566400000,
+      "tag": "0005_workspace_skills",
+      "breakpoints": true
     }
   ]
 }

@@ -878,6 +878,7 @@ export default function PromptsPage() {
                     className="touch-manipulation w-full md:w-auto"
                     t={t}
                   />
+                  <Button variant="outline" asChild><Link href="/prompts/skills">{t.workspaceSkills.title}</Link></Button>
                   <Button
                     asChild
                     variant="outline"

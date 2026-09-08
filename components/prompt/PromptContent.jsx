@@ -55,6 +55,12 @@ export default function PromptContent({
     try {
       const result = await apiClient.updatePrompt(prompt.id, { content: editedContent });
 
+      if (result?.mode === 'version_created' && result?.prompt?.id) {
+        onPromptUpdate({ ...prompt, content: previousContent });
+        router.push(`/prompts/${result.prompt.id}`);
+        return;
+      }
+
       if (result?.mode === 'approval_required' && result?.change_request?.id) {
         onPromptUpdate({ ...prompt, content: previousContent });
         toast({

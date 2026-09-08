@@ -13,6 +13,7 @@ import {
 import { ArrowLeft, GitCompare, Clock, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromptDetail } from '@/hooks/use-prompt-detail';
+import { SkillFilesDiff } from '@/components/skill/SkillFiles';
 import PromptDiffViewer from '@/components/prompt/PromptDiffViewer';
 import { PromptSkeleton } from '@/components/prompt/PromptSkeleton';
 import { apiClient } from '@/lib/api-client';
@@ -27,6 +28,8 @@ export default function PromptDiffPage({ params }) {
   const [leftContent, setLeftContent] = useState('');
   const [rightContent, setRightContent] = useState('');
   const [loadingContent, setLoadingContent] = useState(false);
+  const [filePackages, setFilePackages] = useState([null, null]);
+  const [contentError, setContentError] = useState('');
 
   // 初始化版本选择：默认选择最新版本作为右侧，上一个版本作为左侧
   useEffect(() => {
@@ -36,74 +39,38 @@ export default function PromptDiffPage({ params }) {
       );
       
       if (sortedVersions.length >= 2) {
-        setRightVersion(sortedVersions[0].version);
-        setLeftVersion(sortedVersions[1].version);
+        setRightVersion(sortedVersions[0].id);
+        setLeftVersion(sortedVersions[1].id);
       } else if (sortedVersions.length === 1) {
-        setRightVersion(sortedVersions[0].version);
-        setLeftVersion(sortedVersions[0].version);
+        setRightVersion(sortedVersions[0].id);
+        setLeftVersion(sortedVersions[0].id);
       }
     }
   }, [versions, leftVersion, rightVersion]);
 
-  // 加载选中版本的内容
+  // Fetch only the two selected packages, rather than every historical attachment.
   useEffect(() => {
-    const loadVersionContent = async () => {
-      if (!leftVersion || !rightVersion || !versions || versions.length === 0) return;
-
+    let cancelled = false;
+    const load = async () => {
+      const chosen = [leftVersion, rightVersion].map((version) => versions.find((item) => item.id === version));
+      if (chosen.some((item) => !item)) return;
       setLoadingContent(true);
+      setContentError('');
+      setFilePackages([null, null]);
       try {
-        const leftPrompt = versions.find(v => v.version === leftVersion);
-        const rightPrompt = versions.find(v => v.version === rightVersion);
-
-        if (!leftPrompt || !rightPrompt) {
-          setLeftContent('');
-          setRightContent('');
-          return;
-        }
-
-        // 优先使用版本对象中已有的 content
-        let leftContentValue = leftPrompt.content;
-        let rightContentValue = rightPrompt.content;
-
-        // 如果缺少 content，通过 API 获取
-        const promises = [];
-        if (!leftContentValue && leftPrompt.id) {
-          promises.push(
-            apiClient.getPrompt(leftPrompt.id).then(data => {
-              leftContentValue = data.content || '';
-            }).catch(err => {
-              console.error('Error loading left version content:', err);
-              leftContentValue = '';
-            })
-          );
-        }
-        if (!rightContentValue && rightPrompt.id) {
-          promises.push(
-            apiClient.getPrompt(rightPrompt.id).then(data => {
-              rightContentValue = data.content || '';
-            }).catch(err => {
-              console.error('Error loading right version content:', err);
-              rightContentValue = '';
-            })
-          );
-        }
-
-        if (promises.length > 0) {
-          await Promise.all(promises);
-        }
-
-        setLeftContent(leftContentValue || '');
-        setRightContent(rightContentValue || '');
+        const pair = await Promise.all(chosen.map((item) => item.has_skill_package || !item.content ? apiClient.getPrompt(item.id) : item));
+        if (cancelled) return;
+        setLeftContent(pair[0].content || '');
+        setRightContent(pair[1].content || '');
+        setFilePackages(pair.map((item) => item.skill_package));
       } catch (error) {
-        console.error('Error loading version content:', error);
-        setLeftContent('');
-        setRightContent('');
+        if (!cancelled) setContentError(error.message);
       } finally {
-        setLoadingContent(false);
+        if (!cancelled) setLoadingContent(false);
       }
     };
-
-    loadVersionContent();
+    load();
+    return () => { cancelled = true; };
   }, [leftVersion, rightVersion, versions]);
 
   if (!t || isLoading) {
@@ -192,10 +159,10 @@ export default function PromptDiffPage({ params }) {
                   <SelectValue placeholder={tp.selectVersionPlaceholder || '选择版本'}>
                     {leftVersion ? (
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-mono text-orange-600">v{leftVersion}</span>
-                        {versions.find(v => v.version === leftVersion) && (
+                        <span className="font-mono text-orange-600">v{versions.find((item) => item.id === leftVersion)?.version}</span>
+                        {versions.find(v => v.id === leftVersion) && (
                           <span className="text-xs text-gray-500 ml-2">
-                            {new Date(versions.find(v => v.version === leftVersion).created_at).toLocaleDateString()}
+                            {new Date(versions.find(v => v.id === leftVersion).created_at).toLocaleDateString()}
                           </span>
                         )}
                       </div>
@@ -204,10 +171,10 @@ export default function PromptDiffPage({ params }) {
                 </SelectTrigger>
                 <SelectContent>
                   {sortedVersions.map((version, index) => (
-                    <SelectItem key={version.id} value={version.version}>
+                    <SelectItem key={version.id} value={version.id}>
                       <div className="flex items-center justify-between gap-4 w-full">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono">v{version.version}</span>
+                          <span className="font-mono">v{version.version}{version.has_skill_package ? ` · ${version.id.slice(0, 8)}` : ''}</span>
                           {index === 0 && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded border border-green-200">
                               {tp.latestBadge || '最新'}
@@ -240,10 +207,10 @@ export default function PromptDiffPage({ params }) {
                   <SelectValue placeholder={tp.selectVersionPlaceholder || '选择版本'}>
                     {rightVersion ? (
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-mono text-green-600">v{rightVersion}</span>
-                        {versions.find(v => v.version === rightVersion) && (
+                        <span className="font-mono text-green-600">v{versions.find((item) => item.id === rightVersion)?.version}</span>
+                        {versions.find(v => v.id === rightVersion) && (
                           <span className="text-xs text-gray-500 ml-2">
-                            {new Date(versions.find(v => v.version === rightVersion).created_at).toLocaleDateString()}
+                            {new Date(versions.find(v => v.id === rightVersion).created_at).toLocaleDateString()}
                           </span>
                         )}
                       </div>
@@ -252,10 +219,10 @@ export default function PromptDiffPage({ params }) {
                 </SelectTrigger>
                 <SelectContent>
                   {sortedVersions.map((version, index) => (
-                    <SelectItem key={version.id} value={version.version}>
+                    <SelectItem key={version.id} value={version.id}>
                       <div className="flex items-center justify-between gap-4 w-full">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono">v{version.version}</span>
+                          <span className="font-mono">v{version.version}{version.has_skill_package ? ` · ${version.id.slice(0, 8)}` : ''}</span>
                           {index === 0 && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded border border-green-200">
                               {tp.latestBadge || '最新'}
@@ -296,9 +263,9 @@ export default function PromptDiffPage({ params }) {
             <div className="h-4 w-px bg-gray-300" />
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-500">{tp.versionComparison || '对比'}</span>
-              <span className="font-mono text-orange-600">v{leftVersion || '-'}</span>
+              <span className="font-mono text-orange-600">v{versions.find((item) => item.id === leftVersion)?.version || '-'}</span>
               <span className="text-gray-400">→</span>
-              <span className="font-mono text-green-600">v{rightVersion || '-'}</span>
+              <span className="font-mono text-green-600">v{versions.find((item) => item.id === rightVersion)?.version || '-'}</span>
             </div>
           </div>
 
@@ -311,7 +278,7 @@ export default function PromptDiffPage({ params }) {
         </div>
 
         <div className="h-[calc(100vh-28rem)] min-h-[500px]">
-          {loadingContent ? (
+          {contentError ? <p role="alert" className="p-4 text-destructive">{contentError}</p> : loadingContent ? (
             <div className="h-full flex flex-col items-center justify-center gap-4">
               <div className="relative">
                 <div className="w-16 h-16 border-4 border-gray-200 rounded-full" />
@@ -330,6 +297,7 @@ export default function PromptDiffPage({ params }) {
           )}
         </div>
       </Card>
+      <SkillFilesDiff before={filePackages[0]} after={filePackages[1]} />
     </div>
   );
 }

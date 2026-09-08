@@ -22,6 +22,7 @@ jest.mock('@/lib/team-request.js', () => ({
 }))
 
 jest.mock('@/lib/prompt-workflow.js', () => ({
+  buildPromptVersionScope: jest.requireActual('@/lib/prompt-workflow.js').buildPromptVersionScope,
   WORKFLOW_EVENT_TYPES: {
     VERSION_RESTORED: 'version_restored',
   },
@@ -205,4 +206,18 @@ describe('/api/prompts/[id]/restore', () => {
     )
     expect(recordWorkflowEvent).toHaveBeenCalled()
   })
+  it('恢复 Skill 版本时应该保留当时的正文和全部附件', async () => {
+    const skillContent = '---\nname: restored-skill\ndescription: Old method\n---\nUse assets/example.bin';
+    const skillPackage = { format: 1, files: [{ path: 'SKILL.md', contents: skillContent }, { path: 'assets/example.bin', encoding: 'base64', contents: 'AP+A' }], source: { revision: 'old' } };
+    const db = { select: jest.fn() };
+    resolveTeamContext.mockResolvedValue({ teamId: 'team-1', db, teamService });
+    getPromptByScope.mockResolvedValue({ ...source, content: skillContent, skill_package: skillPackage });
+    mockSiblingQuery(db, [latest, source]);
+    isTeamApprovalEnabled.mockResolvedValue(false);
+    createPromptDirect.mockResolvedValue({ id: 'restored', lineage_id: 'line-1', version: '1.1.1' });
+    const response = await POST(new NextRequest('http://localhost/api/prompts/prompt-old/restore', { method: 'POST' }), { params: Promise.resolve({ id: 'prompt-old' }) });
+    expect(response.status).toBe(201);
+    expect(createPromptDirect).toHaveBeenCalledWith(db, expect.objectContaining({ data: expect.objectContaining({ content: skillContent, skill_package: skillPackage }) }));
+  });
+
 })

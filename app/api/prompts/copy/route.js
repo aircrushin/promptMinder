@@ -4,11 +4,11 @@ import { resolveTeamContext } from '@/lib/team-request.js'
 import { handleApiError } from '@/lib/handle-api-error.js'
 import { eq, and } from 'drizzle-orm'
 import { prompts } from '@/drizzle/schema/index.js'
-import { createChangeRequest, createPromptDirect, ensureLineage, isTeamApprovalEnabled } from '@/lib/prompt-workflow.js'
+import { buildPromptAccessScope, createChangeRequest, createPromptDirect, ensureLineage, isTeamApprovalEnabled } from '@/lib/prompt-workflow.js'
 
 export async function POST(request) {
   try {
-    const userId = await requireUserId()
+    const userId = await requireUserId(request)
     const { teamId, db, teamService } = await resolveTeamContext(request, userId, {
       requireMembership: false,
       allowMissingTeam: true,
@@ -39,9 +39,9 @@ export async function POST(request) {
     } else if (sourceId) {
       let sourcePrompt = null
 
-      if (teamId) {
+      {
         const rows = await db.select().from(prompts)
-          .where(and(eq(prompts.id, sourceId), eq(prompts.teamId, teamId)))
+          .where(and(eq(prompts.id, sourceId), buildPromptAccessScope({ teamId, userId })))
           .limit(1)
         sourcePrompt = rows[0] || null
       }
@@ -65,6 +65,7 @@ export async function POST(request) {
       dataToCopy = {
         title: sourcePrompt.title,
         content: sourcePrompt.content,
+        skill_package: sourcePrompt.skillPackage,
         description: sourcePrompt.description,
         tags: sourcePrompt.tags,
         coverImg: sourcePrompt.coverImg,
@@ -87,6 +88,7 @@ export async function POST(request) {
         proposal: {
           title: dataToCopy.title,
           content: dataToCopy.content,
+          skill_package: dataToCopy.skill_package,
           description: dataToCopy.description || null,
           tags: dataToCopy.tags || null,
           version: '1.0.0',
@@ -106,6 +108,7 @@ export async function POST(request) {
       data: {
         title: dataToCopy.title,
         content: dataToCopy.content,
+          skill_package: dataToCopy.skill_package,
         description: dataToCopy.description,
         tags: dataToCopy.tags,
         version: '1.0.0',
