@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SkillFilesDiff } from '@/components/skill/SkillFiles';
+import { ApprovalEvaluations } from '@/components/evaluation/EvaluationWorkspace';
 import PromptDiffViewer from '@/components/prompt/PromptDiffViewer'
 
 function statusVariant(status) {
@@ -215,6 +216,8 @@ export default function PromptReviewDetailPage({ params }) {
           <SkillFilesDiff before={basePrompt?.skill_package} after={request.proposed_skill_package} />
         </CardContent>
       </Card>
+
+      {basePrompt && <ApprovalEvaluations key={`${activeTeamId}:${request.id}`} teamId={activeTeamId} changeRequestId={request.id} />}
 
       {(canReview || canWithdraw) && (
         <Card>

@@ -125,6 +125,7 @@ export default function PromptDetail({ params }) {
         </Button>
         <div className="flex flex-wrap items-center gap-2">
           <ExportSkillButton prompt={prompt} />
+          <Button variant="outline" onClick={() => router.push(`/prompts/evaluations?promptId=${prompt.id}`)}>{t.evaluations.title}</Button>
           {isHistoricalVersion && canManage && (
             <Button
               variant="default"

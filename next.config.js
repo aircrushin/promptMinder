@@ -12,7 +12,7 @@ const withPWA = require("next-pwa")({
   buildExcludes: [/middleware-manifest.json$/],
   runtimeCaching: [
     {
-      urlPattern: ({ url }) => /^\/(?:api\/(?:prompts|workspace-skills)(?:\/|$)|prompts(?:\/|$))/.test(url.pathname),
+      urlPattern: ({ url }) => /^\/(?:api\/(?:prompts|workspace-skills|evaluations)(?:\/|$)|prompts(?:\/|$))/.test(url.pathname),
       handler: 'NetworkOnly',
     },
     ...require('next-pwa/cache'),

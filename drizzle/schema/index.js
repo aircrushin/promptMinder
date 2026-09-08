@@ -12,3 +12,5 @@ export {
   inAppNotifications,
   promptWorkflowEvents,
 } from './workflow.js'
+
+export { evaluationSuites, evaluationReports } from './evaluations.js';

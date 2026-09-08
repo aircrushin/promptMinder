@@ -1,39 +1,13 @@
+import { PROVIDER_BASE_URLS, getStoredProviderKey, runPlaygroundCompletion } from '@/lib/playground-provider';
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireUserId } from '@/lib/auth'
 import { db } from '@/lib/db.js'
-import { eq, and } from 'drizzle-orm'
-import { providerKeys } from '@/drizzle/schema/index.js'
-import { getOpenAIClientConfig, ORCAROUTER_BASE_URL } from '@/lib/openai-compat'
+import { getOpenAIClientConfig } from '@/lib/openai-compat'
 
 const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || ''
 const DEFAULT_BASE_URL = process.env.OPENAI_COMPAT_URL || 'https://api.openai.com/v1'
-const PROVIDER_BASE_URLS = {
-  openai: 'https://api.openai.com/v1',
-  deepseek: 'https://api.deepseek.com/v1',
-  zhipu: 'https://open.bigmodel.cn/api/paas/v4',
-  gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-  claude: 'https://api.anthropic.com/v1',
-  kimi: 'https://api.moonshot.cn/v1',
-  doubao: 'https://ark.cn-beijing.volces.com/api/v3',
-  minimax: 'https://api.minimaxi.com/v1',
-  qwen: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-  siliconflow: 'https://api.siliconflow.cn/v1',
-  stepfun: 'https://api.stepfun.com/v1',
-  xai: 'https://api.x.ai/v1',
-  orcarouter: ORCAROUTER_BASE_URL,
-}
-
-async function getStoredProviderKey(userId, provider) {
-  const rows = await db.select({ apiKey: providerKeys.apiKey })
-    .from(providerKeys)
-    .where(and(eq(providerKeys.userId, userId), eq(providerKeys.provider, provider)))
-    .limit(1)
-
-  return rows[0]?.apiKey || null
-}
-
 async function handleClaudeStream(anthropic, model, systemPrompt, userPrompt, temperature, maxTokens, topP, startTime, controller, send) {
   try {
     const messages = []
@@ -146,8 +120,8 @@ export async function POST(request) {
       if (normalizedProvider === 'custom') {
         return NextResponse.json({ error: 'Stored credentials are only supported for known providers.' }, { status: 400 })
       }
-      const userId = await requireUserId()
-      const storedKey = await getStoredProviderKey(userId, normalizedProvider)
+      const userId = await requireUserId(request)
+      const storedKey = await getStoredProviderKey(db, userId, normalizedProvider)
       if (!storedKey) {
         return NextResponse.json({ error: `No saved API key found for ${normalizedProvider}.` }, { status: 400 })
       }
@@ -197,41 +171,12 @@ export async function POST(request) {
       })
     }
 
-    if (isClaude) {
-      const anthropic = new Anthropic({ apiKey: finalApiKey })
-      const messageParams = {
-        model, max_tokens: maxTokens, temperature, top_p: topP,
-        messages: [{ role: 'user', content: userMessage }],
-      }
-      if (systemMessage) messageParams.system = systemMessage
+    return NextResponse.json(await runPlaygroundCompletion({
+      apiKey: finalApiKey, baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
+      provider: normalizedProvider, model, systemPrompt: systemMessage,
+      userPrompt: userMessage || (prompt && !systemMessage ? prompt : ''), temperature, maxTokens, topP,
+    }));
 
-      const response = await anthropic.messages.create(messageParams)
-      const duration = Date.now() - startTime
-      const output = response.content?.[0]?.text || ''
-      const usage = response.usage || {}
-
-      return NextResponse.json({
-        output,
-        usage: { promptTokens: usage.input_tokens || 0, completionTokens: usage.output_tokens || 0, totalTokens: (usage.input_tokens || 0) + (usage.output_tokens || 0) },
-        model: response.model, duration, finishReason: response.stop_reason,
-      })
-    } else {
-      const openai = new OpenAI(getOpenAIClientConfig({
-        apiKey: finalApiKey,
-        baseURL: resolvedBaseURL || DEFAULT_BASE_URL,
-        provider: normalizedProvider,
-      }))
-      const completion = await openai.chat.completions.create({ model, messages, temperature, max_tokens: maxTokens, top_p: topP })
-      const duration = Date.now() - startTime
-      const output = completion.choices?.[0]?.message?.content || ''
-      const usage = completion.usage || {}
-
-      return NextResponse.json({
-        output,
-        usage: { promptTokens: usage.prompt_tokens, completionTokens: usage.completion_tokens, totalTokens: usage.total_tokens },
-        model: completion.model, duration, finishReason: completion.choices?.[0]?.finish_reason,
-      })
-    }
   } catch (error) {
     console.error('Playground run error:', error)
 
