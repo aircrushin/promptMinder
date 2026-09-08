@@ -79,6 +79,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "16.2.10",
+    "@next/eslint-plugin-next": "16.2.10",
     "@tailwindcss/typography": "^0.5.15",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
@@ -87,6 +88,7 @@
     "drizzle-kit": "^0.31.9",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.2.10",
+    "globals": "16.4.0",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "msw": "^2.10.4",

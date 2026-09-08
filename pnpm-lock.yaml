@@ -148,6 +148,9 @@ importers:
       '@next/bundle-analyzer':
         specifier: 16.2.10
         version: 16.2.10
+      '@next/eslint-plugin-next':
+        specifier: 16.2.10
+        version: 16.2.10
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.20(tailwindcss@3.4.19(tsx@4.23.1))
@@ -172,6 +175,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.10
         version: 16.2.10(@typescript-eslint/parser@8.64.0(eslint@9.39.5(jiti@1.21.7))(typescript@6.0.3))(eslint@9.39.5(jiti@1.21.7))(typescript@6.0.3)
+      globals:
+        specifier: 16.4.0
+        version: 16.4.0
       jest:
         specifier: ^30.0.5
         version: 30.4.2(@types/node@26.1.1)(babel-plugin-macros@3.1.0)
