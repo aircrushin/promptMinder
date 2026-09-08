@@ -547,11 +547,11 @@
     "onboarding": {
       "trigger": "Quick Start",
       "headline": "First Value in Minutes",
-      "title": "Welcome to Prompt Minder",
-      "description": "Pick a role template or paste a ChatGPT/Claude chat to create your first useful prompt in minutes.",
+      "title": "Save a method that works",
+      "description": "Use a role template or extract a reusable method from a ChatGPT/Claude conversation.",
       "skip": "Maybe later",
       "startRole": "Start by Role",
-      "importFromChat": "Import Chat",
+      "importFromChat": "Extract from Chat",
       "roleCountSuffix": "role templates",
       "recommended": "Recommended",
       "roleHint": "Choose a role and we will prefill title, content, and tags for you.",
@@ -562,14 +562,14 @@
       "importSteps": [
         "Copy your ChatGPT/Claude conversation",
         "Paste it into the input area",
-        "Generate a reusable prompt draft automatically"
+        "Extract a method, then review and save it"
       ],
       "conversationLabel": "Paste Conversation",
       "conversationPlaceholder": "Example:\nUser: Help me draft a launch campaign\nAssistant: Who is your primary audience?",
-      "convert": "Convert to Prompt",
+      "convert": "Extract reusable method",
       "converting": "Converting...",
-      "importTip": "After importing, refine once with your own business context.",
-      "footerHint": "You can reopen onboarding from the empty library state anytime.",
+      "importTip": "Extraction sends the conversation to the configured Zhipu model. Remove sensitive information first; the original transcript is not saved in your library.",
+      "footerHint": "Reopen Quick Start from your prompt library anytime.",
       "importSuccess": "Draft generated from conversation. Review and create it.",
       "importError": "Import failed. Please check the conversation and try again.",
       "validationConversation": "Please paste at least 20 characters of conversation",
@@ -890,12 +890,12 @@
     "cancelButton": "Cancel",
     "saveAndResendButton": "Save and Resend",
     "inputPlaceholder": "Enter message...",
-      "currentPromptPrefix": "Currently using",
-      "currentPromptSuffix": "prompt for conversation",
-      "defaultInputHint": "Enter a message to start the conversation",
-      "copyTooltip": "Copy",
-      "copied": "Copied",
-      "regenerateTooltip": "Regenerate"
+    "currentPromptPrefix": "Currently using",
+    "currentPromptSuffix": "prompt for conversation",
+    "defaultInputHint": "Enter a message to start the conversation",
+    "copyTooltip": "Copy",
+    "copied": "Copied",
+    "regenerateTooltip": "Regenerate"
   },
   "publicPage": {
     "title": "Prompt Collection",
@@ -1473,13 +1473,44 @@
     ],
     "terminalTitle": "Terminal",
     "features": [
-      { "label": "Prompt Management", "desc": "CRUD operations with full version history" },
-      { "label": "Tag Management", "desc": "Bulk create and organize tags" },
-      { "label": "Team Collaboration", "desc": "Cross-team sharing and permissions" },
-      { "label": "Agent Integration", "desc": "Built-in agent mode for automation" }
+      {
+        "label": "Prompt Management",
+        "desc": "CRUD operations with full version history"
+      },
+      {
+        "label": "Tag Management",
+        "desc": "Bulk create and organize tags"
+      },
+      {
+        "label": "Team Collaboration",
+        "desc": "Cross-team sharing and permissions"
+      },
+      {
+        "label": "Agent Integration",
+        "desc": "Built-in agent mode for automation"
+      }
     ],
     "npmLink": "View on npm",
     "docsLink": "Documentation",
     "version": "v0.1.2 · MIT License"
+  },
+  "conversationMethod": {
+    "reviewTitle": "Review the reusable method",
+    "reviewHint": "Check the goal and method, then edit the corrections and variables to keep. Examples are excluded by default.",
+    "manualHint": "AI extraction is unavailable. This is a manual draft, not a verified extraction. Refer to the original conversation to complete the method.",
+    "truncatedHint": "The conversation was shortened to its beginning and end. The middle was omitted; check for missing constraints.",
+    "fields": {
+      "goal": "Goal (required)",
+      "steps": "Method (required)",
+      "variables": "Input variables, e.g. {{topic}}",
+      "corrections": "Corrections and constraints",
+      "example": "Reference example",
+      "notes": "Items to confirm"
+    },
+    "include": "Keep this section",
+    "reviewConfirm": "I have checked and removed private information, secrets and details that should not be reused.",
+    "back": "Back to conversation",
+    "continue": "Continue to edit and save",
+    "privateHint": "Conversation drafts are saved privately. Team workspaces still follow team access and approval rules."
   }
 }

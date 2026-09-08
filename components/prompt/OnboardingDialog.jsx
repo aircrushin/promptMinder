@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Check, Loader2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ConversationMethodReview } from '@/components/prompt/ConversationMethodReview';
 
 const DEFAULT_COPY = {
   headline: 'First Value in Minutes',
@@ -98,17 +99,20 @@ function normalizeRole(role, index) {
 }
 
 export function OnboardingDialog({
+  initialTab = 'role',
   open,
   onOpenChange,
   copy,
   isImporting,
   onApplyRole,
   onImportConversation,
+  onApplyDraft,
   onConversationInvalid,
 }) {
-  const [activeTab, setActiveTab] = useState('role');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [source, setSource] = useState('chatgpt');
   const [conversation, setConversation] = useState('');
+  const [draft, setDraft] = useState(null);
 
   const roles = useMemo(() => {
     if (Array.isArray(copy?.roles) && copy.roles.length > 0) {
@@ -136,20 +140,21 @@ export function OnboardingDialog({
     onApplyRole?.(role);
   };
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (trimmedConversation.length < 20) {
       onConversationInvalid?.();
       return;
     }
 
-    onImportConversation?.({
+    const result = await onImportConversation?.({
       source,
       conversation: trimmedConversation,
     });
+    if (result) setDraft(result);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!isImporting) onOpenChange(nextOpen); }}>
       <DialogContent className="w-[calc(100vw-1rem)] max-w-3xl max-h-[92vh] overflow-y-auto border-border bg-white p-0 shadow-2xl sm:rounded-xl">
         <div className="bg-white">
           <div className="border-b border-border px-5 pb-5 pt-6 sm:px-8 sm:pb-6 sm:pt-8">
@@ -167,16 +172,28 @@ export function OnboardingDialog({
           </div>
 
           <div className="px-5 py-5 sm:px-8 sm:py-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+            {draft ? (
+              <ConversationMethodReview
+                draft={draft}
+                onBack={() => setDraft(null)}
+                onApply={(result) => {
+                  onApplyDraft(result);
+                  setDraft(null);
+                  setConversation('');
+                }}
+              />
+            ) : <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
               <TabsList className="grid h-11 w-full grid-cols-2 rounded-lg border border-border bg-white p-1">
                 <TabsTrigger
                   value="role"
+                  disabled={isImporting}
                   className="h-9 rounded-md text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-none"
                 >
                   {uiCopy.startRole}
                 </TabsTrigger>
                 <TabsTrigger
                   value="import"
+                  disabled={isImporting}
                   className="h-9 rounded-md text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-none"
                 >
                   {uiCopy.importFromChat}
@@ -244,6 +261,7 @@ export function OnboardingDialog({
                           <button
                             key={option.id}
                             type="button"
+                            disabled={isImporting}
                             onClick={() => setSource(option.id)}
                             className={cn(
                               'h-10 min-w-[96px] border px-4 text-sm font-medium transition-colors duration-150',
@@ -278,12 +296,15 @@ export function OnboardingDialog({
 
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-foreground">{uiCopy.conversationLabel}</p>
+                      <label htmlFor="import-conversation" className="text-sm font-medium text-foreground">{uiCopy.conversationLabel}</label>
                       <span className="text-xs tabular-nums text-muted-foreground">
                         {trimmedConversation.length} / 50000
                       </span>
                     </div>
                     <Textarea
+                      id="import-conversation"
+                      maxLength={50000}
+                      disabled={isImporting}
                       value={conversation}
                       onChange={(event) => setConversation(event.target.value)}
                       placeholder={uiCopy.conversationPlaceholder}
@@ -304,12 +325,13 @@ export function OnboardingDialog({
                   <span>{isImporting ? uiCopy.converting : uiCopy.convert}</span>
                 </Button>
               </TabsContent>
-            </Tabs>
+            </Tabs>}
           </div>
 
           <DialogFooter className="flex-col-reverse gap-3 border-t border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:space-x-0 sm:px-8">
             <Button
               variant="ghost"
+              disabled={isImporting}
               onClick={() => onOpenChange(false)}
               className="h-10 px-3 text-muted-foreground hover:bg-transparent hover:text-foreground"
             >

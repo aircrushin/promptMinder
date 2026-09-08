@@ -89,7 +89,7 @@ function getTeamRequestOptions(activeTeamId) {
 }
 
 export default function PromptsPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useUser();
   const { activeTeamId, isPersonal, activeMembership } = useTeam();
   const { toast } = useToast();
@@ -105,6 +105,7 @@ export default function PromptsPage() {
   const [restoringVersionId, setRestoringVersionId] = useState(null);
   const [showNewPromptDialog, setShowNewPromptDialog] = useState(false);
   const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
+  const [onboardingTab, setOnboardingTab] = useState('role');
   const [isImportingConversation, setIsImportingConversation] = useState(false);
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState("");
@@ -343,7 +344,7 @@ export default function PromptsPage() {
           id: crypto.randomUUID(),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          is_public: true,
+          is_public: newPrompt.is_public ?? true,
         },
         getTeamRequestOptions(activeTeamId)
       );
@@ -439,27 +440,10 @@ export default function PromptsPage() {
         const data = await apiClient.importConversationToPrompt({
           source,
           conversation,
+          language,
         });
 
-        setNewPrompt({
-          title: data?.title || "",
-          content: data?.content || "",
-          description: data?.description || "",
-          tags: data?.tags || DEFAULT_PROMPT_TAGS,
-          version: data?.version || DEFAULT_PROMPT_VERSION,
-          cover_img: DEFAULT_NEW_PROMPT.cover_img,
-        });
-
-        setShowOnboardingDialog(false);
-        markOnboardingCompleted();
-        setShowNewPromptDialog(true);
-
-        toast({
-          description:
-            t?.promptsPage?.onboarding?.importSuccess ||
-            "已根据对话生成提示词草稿",
-          duration: 2000,
-        });
+        return data;
       } catch (error) {
         console.error("Error importing conversation:", error);
         toast({
@@ -474,8 +458,22 @@ export default function PromptsPage() {
         setIsImportingConversation(false);
       }
     },
-    [markOnboardingCompleted, t?.promptsPage?.onboarding, toast]
+    [language, t?.promptsPage?.onboarding, toast]
   );
+
+  const handleApplyConversationDraft = (draft) => {
+    setNewPrompt({
+      ...DEFAULT_NEW_PROMPT,
+      title: draft.title,
+      description: draft.description,
+      content: draft.content,
+      tags: draft.tags,
+      is_public: false,
+    });
+    setShowOnboardingDialog(false);
+    markOnboardingCompleted();
+    setShowNewPromptDialog(true);
+  };
 
   const handleCreateTag = useCallback(async (inputValue) => {
     try {
@@ -831,13 +829,16 @@ export default function PromptsPage() {
                       <Link href="/prompts/reviews">{tp.reviewCenter || "审批工作台"}</Link>
                     </Button>
                   )}
-                  {!isLoading && pagination.total === 0 && (
+                  {!isLoading && (
                     <Button
                       variant="outline"
-                      onClick={() => setShowOnboardingDialog(true)}
+                      onClick={() => {
+                        setOnboardingTab('import');
+                        setShowOnboardingDialog(true);
+                      }}
                       className="whitespace-nowrap"
                     >
-                      {tp?.onboarding?.trigger || "首次引导"}
+                      {tp?.onboarding?.importFromChat || "从对话提炼"}
                     </Button>
                   )}
                 </div>
@@ -1074,12 +1075,15 @@ export default function PromptsPage() {
         copy={tp}
       />
       <OnboardingDialog
+        key={onboardingTab}
+        initialTab={onboardingTab}
         open={showOnboardingDialog}
         onOpenChange={handleOnboardingOpenChange}
         copy={tp?.onboarding}
         isImporting={isImportingConversation}
         onApplyRole={handleApplyRoleTemplate}
         onImportConversation={handleImportConversation}
+        onApplyDraft={handleApplyConversationDraft}
         onConversationInvalid={() => {
           toast({
             variant: "destructive",

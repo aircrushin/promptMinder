@@ -551,11 +551,11 @@
     "onboarding": {
       "trigger": "首次引导",
       "headline": "1 分钟看到价值",
-      "title": "欢迎使用 Prompt Minder",
-      "description": "选择你的角色，或粘贴 ChatGPT/Claude 对话，1 分钟完成第一个可用提示词。",
+      "title": "保存一次做对的方法",
+      "description": "选择角色模板，或从 ChatGPT/Claude 对话中整理可复用的方法。",
       "skip": "稍后再说",
       "startRole": "按角色开始",
-      "importFromChat": "导入对话",
+      "importFromChat": "从对话提炼",
       "roleCountSuffix": "种角色模板",
       "recommended": "推荐",
       "roleHint": "选择一个角色模板，系统会自动填充标题、内容和标签。",
@@ -566,14 +566,14 @@
       "importSteps": [
         "复制你在 ChatGPT/Claude 的对话",
         "粘贴到输入框",
-        "自动提炼为可复用提示词"
+        "提炼方法，审阅后保存"
       ],
       "conversationLabel": "粘贴对话记录",
       "conversationPlaceholder": "示例：\nUser: 帮我写一个新品发布计划\nAssistant: 你希望面向哪些用户群？",
-      "convert": "转换为提示词",
+      "convert": "提炼可复用方法",
       "converting": "转换中...",
-      "importTip": "建议导入后再微调一次，保留你的业务上下文。",
-      "footerHint": "你也可以随时在空库页面再次打开首次引导",
+      "importTip": "提炼时，对话会发送给本站配置的智谱模型。请先移除敏感信息；原始对话不会保存到提示词库。",
+      "footerHint": "可随时从提示词库打开「从对话提炼」。",
       "importSuccess": "已根据对话生成草稿，请确认后创建。",
       "importError": "导入失败，请检查对话内容后重试。",
       "validationConversation": "请先粘贴至少 20 个字符的对话内容",
@@ -1498,13 +1498,44 @@
     ],
     "terminalTitle": "终端",
     "features": [
-      { "label": "提示词管理", "desc": "增删改查，版本历史一键回溯" },
-      { "label": "标签管理", "desc": "批量创建与整理分类标签" },
-      { "label": "团队协作", "desc": "跨团队共享与权限控制" },
-      { "label": "Agent 集成", "desc": "内置 Agent 模式，驱动自动化任务" }
+      {
+        "label": "提示词管理",
+        "desc": "增删改查，版本历史一键回溯"
+      },
+      {
+        "label": "标签管理",
+        "desc": "批量创建与整理分类标签"
+      },
+      {
+        "label": "团队协作",
+        "desc": "跨团队共享与权限控制"
+      },
+      {
+        "label": "Agent 集成",
+        "desc": "内置 Agent 模式，驱动自动化任务"
+      }
     ],
     "npmLink": "查看 npm 包",
     "docsLink": "使用文档",
     "version": "v0.1.2 · MIT 开源"
+  },
+  "conversationMethod": {
+    "reviewTitle": "审阅可复用的方法",
+    "reviewHint": "确认任务目标和执行方法，编辑要保留的纠正与变量。参考示例默认不保留。",
+    "manualHint": "AI 提炼暂不可用，当前为手动整理草稿。请对照原对话补全方法；这不是已验证的提炼结果。",
+    "truncatedHint": "对话较长，提炼时保留了开头与结尾，中间部分已省略。请检查是否遗漏重要约束。",
+    "fields": {
+      "goal": "任务目标（必填）",
+      "steps": "执行方法（必填）",
+      "variables": "输入变量，例如 {{topic}}",
+      "corrections": "纠正与约束",
+      "example": "参考示例",
+      "notes": "待确认事项"
+    },
+    "include": "保留此部分",
+    "reviewConfirm": "我已检查并移除不应保存的私人信息、密钥及仅适用于本次任务的内容。",
+    "back": "返回原对话",
+    "continue": "继续编辑与保存",
+    "privateHint": "从对话提炼的草稿将私有保存；团队空间内仍遵循团队权限与审批。"
   }
 }

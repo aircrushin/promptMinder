@@ -11,6 +11,7 @@ import {
 import { Loader2, PlusCircle } from "lucide-react";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { PromptForm } from "./PromptForm";
+import { useLanguage } from '@/contexts/LanguageContext';
 
 /**
  * 新建提示词对话框组件
@@ -30,6 +31,7 @@ export function NewPromptDialog({
   onCreateTag,
   copy,
 }) {
+  const { t } = useLanguage();
   if (!copy) return null;
 
   return (
@@ -53,6 +55,7 @@ export function NewPromptDialog({
           copy={copy}
         />
         
+        {prompt.is_public === false && <p className="text-sm text-muted-foreground">{t.conversationMethod.privateHint}</p>}
         <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <Button variant="outline" onClick={onCancel} className="h-10 w-full sm:w-auto">
             {copy.cancel}
