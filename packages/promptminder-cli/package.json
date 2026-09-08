@@ -1,6 +1,6 @@
 {
   "name": "@aircrushin/promptminder-cli",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "PromptMinder CLI for managing prompts, tags, and teams over HTTP APIs.",
   "license": "MIT",
   "repository": {

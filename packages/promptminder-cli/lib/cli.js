@@ -1,3 +1,4 @@
+const { handleWorkspaceSkill } = require('./workspace-skills');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -229,6 +230,11 @@ promptminder tag list [--team <id>] [--include-public <true|false>]
 promptminder tag create --name <text> [--team <id>]
 promptminder tag update <id> --name <text> [--team <id>]
 promptminder tag delete <id> [--team <id>] --yes
+promptminder skill list [--team <id>] [--search <text>]
+promptminder skill get <id> [--team <id>] [--version <label>]
+promptminder skill import <directory> [--team <id>] [--title <text>] [--version <label>] [--source-url <url>] [--license <spdx>] [--source-version <ref>]
+promptminder skill update <id> <directory> [--team <id>] [--version <new-label>]
+promptminder skill install <id> [--team <id>] [--version <label>] [--target cursor-user|cursor-project|claude|codex] [--out-dir <directory>]
 promptminder skills list
 promptminder skills install [--target cursor-user|cursor-project|claude|codex] [--skill <name>] [--force]
 promptminder skills path
@@ -573,6 +579,11 @@ async function main(argv = process.argv.slice(2)) {
 
   if (command === 'tag') {
     await handleTag(args, config);
+    return;
+  }
+
+  if (command === 'skill') {
+    printJson(await handleWorkspaceSkill(args, config, requestJson, resolveTargetDir));
     return;
   }
 

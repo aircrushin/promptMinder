@@ -152,7 +152,16 @@ function buildTagDelete(input) {
   return command;
 }
 
+function buildSkillCommand(action, input) {
+  const command = ['skill', action];
+  if (['get', 'install', 'update'].includes(action)) command.push(requireString(input.id, `skill.${action} requires "id"`));
+  if (['import', 'update'].includes(action)) command.push(requireString(input.directory, `skill.${action} requires "directory"`));
+  for (const key of ['team', 'search', 'version', 'title', 'target', 'out-dir', 'source-url', 'license', 'source-version']) pushOption(command, key, input[key]);
+  return command;
+}
+
 const ACTIONS = {
+  ...Object.fromEntries(['list', 'get', 'import', 'update', 'install'].map((action) => [`skill.${action}`, (input) => buildSkillCommand(action, input)])),
   'team.list': buildTeamList,
   'prompt.list': buildPromptList,
   'prompt.get': buildPromptGet,
@@ -170,6 +179,7 @@ function usage() {
     'promptminder-agent <action> [--input <json> | --input-file <path> | --stdin]',
     '',
     'Actions:',
+    '  skill.list | skill.get | skill.import | skill.update | skill.install',
     '  team.list',
     '  prompt.list',
     '  prompt.get',

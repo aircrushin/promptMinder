@@ -115,3 +115,46 @@ Before publishing:
 cd packages/promptminder-cli
 npm publish --access public
 ```
+
+## Workspace Skill packages (0.2.0)
+
+Use the singular `skill` command for your workspace's saved packages. The plural
+`skills` command above still manages the bundled CLI instruction skill.
+
+```bash
+promptminder skill list --team <team-id> --search review
+promptminder skill import ./review-skill --team <team-id> --license MIT --source-url https://example.com/repo --source-version <commit>
+promptminder skill get <prompt-id> --team <team-id>
+promptminder skill install <prompt-id> --team <team-id> --target codex
+promptminder skill install <prompt-id> --team <team-id> --version 1.0.1 --out-dir ./reviewed-skills
+promptminder skill update <prompt-id> ./review-skill --team <team-id> --version 1.0.2
+promptminder-agent skill.install --input '{"id":"<prompt-id>","team":"<team-id>","out-dir":"./reviewed-skills"}'
+```
+
+Omit `--team` for your personal workspace. The ID pins an immutable saved snapshot.
+Optional `--version` resolves a label in that ID's lineage; duplicate labels are
+rejected, so use the exact ID in that case. Search returns up to 200 saved versions.
+
+Imports and updates follow the team's approval setting. With approval enabled,
+the response contains a change request; the proposal becomes installable only
+after approval. Without approval, saving publishes directly. Members can propose
+improvements to a team Skill when approval is enabled. Otherwise, edits require
+the creator or a team manager.
+
+Packages require a UTF-8 `SKILL.md` with `name` and `description` frontmatter.
+Up to 200 files and 2 MB total are supported, including binary assets and executable
+permissions. The CLI rejects symlinks and unsafe paths. It installs files without
+running their scripts and refuses to overwrite an existing package, even with
+`--force`. The default target is `.cursor/skills` in the current project.
+`.promptminder-install.json` records the source, exact ID, version and file hashes;
+it never contains the access token. Re-importing an installed folder preserves
+its source record. Browser folder imports infer executable permission from a
+shebang; the editor offers an explicit permission checkbox for each file.
+
+Catalog imports preserve the stored text-file snapshot and its source/license/hash.
+That snapshot may omit upstream binary assets; use a complete local folder when
+those are needed. Web comparisons use the most recently synced catalog snapshot,
+not a live Git fetch, and merge only explicitly selected whole files.
+
+The server must apply `0005_workspace_skills` before deploying this feature.
+This package version is prepared locally; publishing it is a separate release step.
