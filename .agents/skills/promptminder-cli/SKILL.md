@@ -1,7 +1,8 @@
 ---
 name: promptminder-cli
 description: Use when running promptminder or promptminder-agent commands, setting PROMPTMINDER_TOKEN, passing --team for workspace scoping, handling JSON stderr errors like "Missing token" or HTTP 401, or using the agent wrapper with dot-notation actions and --input JSON.
-version: 1.0.0
+metadata:
+  version: 1.0.0
 license: MIT
 ---
 
@@ -11,13 +12,17 @@ license: MIT
 
 `promptminder` is a JSON-in / JSON-out CLI for managing prompts, tags, and teams via the PromptMinder API. Every success response goes to **stdout**; every error goes to **stderr** as `{"error":{"message":"...","status":null}}`.
 
-Install the CLI first:
+Requires Node.js ≥ 20. Install the CLI first:
 
 ```bash
 npm i -g @aircrushin/promptminder-cli
 ```
 
+To update, run `npm i -g @aircrushin/promptminder-cli@latest`; check the installed version with `npm list -g @aircrushin/promptminder-cli --depth=0`.
+
 ## Auth & Token
+
+Choose environment auth or local login; either is sufficient. An old `PROMPTMINDER_TOKEN` overrides a newly saved login.
 
 Token resolution order: `--token` flag -> `PROMPTMINDER_TOKEN` env var -> saved config.
 
@@ -30,7 +35,7 @@ export PROMPTMINDER_TOKEN=pm_xxx
 promptminder prompt list
 ```
 
-`promptminder auth logout` removes the saved token.
+`promptminder auth logout` removes only the saved token, not `PROMPTMINDER_TOKEN`.
 
 ## Quick Reference
 
@@ -90,12 +95,34 @@ Available actions: `team.list`, `prompt.list`, `prompt.get`, `prompt.create`, `p
 
 Run `promptminder-agent help` for the full list with input field requirements.
 
+## Workspace Skill packages (0.2.0, unreleased)
+
+As of 2026-09-10, npm latest is 0.1.3. Check `promptminder help` before using the following repository-only 0.2.0 commands; do not assume a public npm installation supports them.
+
+Singular `skill` manages workspace packages; plural `skills` manages the bundled CLI instruction skill.
+
+```text
+promptminder skill list [--team <id>] [--search <text>]
+promptminder skill get <id> [--team <id>] [--version <label>]
+promptminder skill import <directory> [--team <id>] [--version <label>]
+promptminder skill update <id> <directory> [--team <id>] [--version <new-label>]
+promptminder skill install <id> [--team <id>] [--version <label>] [--target codex] [--out-dir <directory>]
+```
+
+Agent actions: `skill.list`, `skill.get`, `skill.import`, `skill.update`, `skill.install`. Use `id` for get/update/install and `directory` for import/update in the JSON input; scope with `team`.
+
+```bash
+promptminder-agent skill.install --input '{"id":"<prompt-id>","team":"<team-id>","out-dir":"./reviewed-skills"}'
+```
+
+Omit `--team` for personal scope. IDs identify saved snapshots; `--version` selects a label in the same lineage. Team proposals must be approved before installation. Packages require `SKILL.md` with `name` and `description`, at most 200 files and 2 MB total. Installation defaults to project `.cursor/skills`, never runs package scripts, and refuses overwrites even with `--force`; choose a new `--out-dir` instead.
+
 ## Error Triage
 
 | Stderr message | Cause | Fix |
 |---|---|---|
 | `Missing token. Pass --token or run promptminder auth login.` | No token found | Set `PROMPTMINDER_TOKEN` or run `auth login` |
-| HTTP 401 | Token invalid or expired | Re-run `auth login` with a fresh token |
+| HTTP 401 | Token invalid or expired | Update the active token source; check for an old `PROMPTMINDER_TOKEN` overriding saved login |
 | `Destructive commands require --yes` | Delete without confirmation flag | Add `--yes` |
 | `Use only one of --content, --content-file, or --stdin` | Multiple content sources | Keep only one |
 

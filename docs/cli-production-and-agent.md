@@ -1,6 +1,8 @@
 # PromptMinder CLI Production Guide
 
-This guide covers the shortest safe path for production use and AI agent integration.
+This guide covers production use and AI agent integration. Requires Node.js ≥ 20.
+
+Install or update the public CLI with `npm i -g @aircrushin/promptminder-cli@latest`; inspect the installed version with `npm list -g @aircrushin/promptminder-cli --depth=0`. As of 2026-09-10, npm latest is 0.1.3; repository 0.2.0 workspace Skill commands are not yet published.
 
 ## 1. User setup
 
@@ -23,7 +25,7 @@ Recommended user flow:
 Set this variable in the environment where the AI agent runs:
 
 ```bash
-PROMPTMINDER_TOKEN=pm_xxx
+export PROMPTMINDER_TOKEN=pm_xxx
 ```
 
 PowerShell:
@@ -32,7 +34,9 @@ PowerShell:
 $env:PROMPTMINDER_TOKEN = "pm_xxx"
 ```
 
-The CLI is hard-wired to `https://www.prompt-minder.com`. Do not rely on `auth login` for production agents. Environment variables are simpler and safer.
+The CLI is hard-wired to `https://www.prompt-minder.com`. Environment auth is sufficient for production agents; no `auth login` is needed. On a personal machine, local login is an alternative: `promptminder auth login --token pm_xxx` saves the token to `~/.promptminder/config.json`.
+
+Token precedence: `--token` → `PROMPTMINDER_TOKEN` → saved config. An old environment token overrides newly saved login; `auth logout` only removes the saved token.
 
 ## 3. Direct CLI usage
 
@@ -78,7 +82,7 @@ If you want to remove the global command later:
 pnpm cli:unlink
 ```
 
-This gives you a `codex`-style workflow on your own machine. For actual npm publishing, it is better to extract the CLI into a dedicated package instead of publishing the whole web app repository.
+This gives you a `codex`-style workflow on your own machine. For npm publishing, use the dedicated package below.
 
 ## 3.2 Publishable npm package mode
 
@@ -172,6 +176,12 @@ Get-Content .\payload.json -Raw | pnpm cli:agent -- prompt.get --stdin
 - `tag.create`
 - `tag.update`
 - `tag.delete`
+
+### Workspace Skill actions (0.2.0, unreleased)
+
+Repository 0.2.0 adds `skill.list`, `skill.get`, `skill.import`, `skill.update`, and `skill.install`. These are not available in npm 0.1.3. Singular `promptminder skill` manages workspace packages; plural `promptminder skills` manages bundled CLI instructions.
+
+See the [workspace Skill guide](../packages/promptminder-cli/README.md#workspace-skill-packages-020-unreleased) for command examples, version selection, approval behavior and package limits. Publish the CLI package before documenting these commands as available in the public npm install.
 
 ## 7. Admin bootstrap only
 

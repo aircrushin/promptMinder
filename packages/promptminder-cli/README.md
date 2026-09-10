@@ -4,8 +4,17 @@ PromptMinder command line client for managing prompts, tags, and teams over the 
 
 ## Install
 
+Requires Node.js ≥ 20.
+
 ```bash
 npm i -g @aircrushin/promptminder-cli
+```
+
+Update to the latest published version and check your installation:
+
+```bash
+npm i -g @aircrushin/promptminder-cli@latest
+npm list -g @aircrushin/promptminder-cli --depth=0
 ```
 
 ## Get a token
@@ -20,6 +29,8 @@ Copy it once and keep it in your shell or secret manager.
 
 ## Environment
 
+Choose either an environment variable (recommended for scripts and agents) or local login. Setting the environment variable is sufficient; you do not need both.
+
 Set the token in the shell where the CLI runs:
 
 ```bash
@@ -32,12 +43,13 @@ PowerShell:
 $env:PROMPTMINDER_TOKEN = "pm_xxx"
 ```
 
+Alternatively, run `promptminder auth login --token pm_xxx` to save the token in `~/.promptminder/config.json`. Token precedence is `--token` → `PROMPTMINDER_TOKEN` → saved config. An old environment variable overrides a new saved login; `auth logout` only removes the saved token.
+
 The CLI is hard-wired to `https://www.prompt-minder.com`.
 
 ## Usage
 
 ```bash
-promptminder auth login --token pm_xxx
 promptminder help
 promptminder team list
 promptminder prompt list
@@ -66,10 +78,10 @@ Install the skill directly from GitHub:
 npx skills add aircrushin/promptminder-cli-skill
 ```
 
-Verify installation:
+List installed skills to verify installation (`skills find` only searches discoverable skills):
 
 ```bash
-npx skills find promptminder-cli
+npx skills list
 ```
 
 The CLI still ships bundled skills and `promptminder skills install`, but that path is now a deprecated compatibility option for existing users.
@@ -116,7 +128,9 @@ cd packages/promptminder-cli
 npm publish --access public
 ```
 
-## Workspace Skill packages (0.2.0)
+## Workspace Skill packages (0.2.0, unreleased)
+
+As of 2026-09-10, npm latest is 0.1.3. The following commands are implemented in this repository but are not available through the public npm install yet.
 
 Use the singular `skill` command for your workspace's saved packages. The plural
 `skills` command above still manages the bundled CLI instruction skill.

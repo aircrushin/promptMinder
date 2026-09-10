@@ -141,7 +141,7 @@ pnpm dev
 https://www.prompt-minder.com/settings/cli-tokens
 ```
 
-然后安装并使用 CLI：
+CLI 需要 Node.js ≥ 20。安装并使用 CLI：
 
 ```bash
 npm i -g @aircrushin/promptminder-cli
@@ -149,13 +149,22 @@ promptminder auth login --token pm_xxx
 promptminder team list
 ```
 
+更新使用 `npm i -g @aircrushin/promptminder-cli@latest`；查看已安装版本使用 `npm list -g @aircrushin/promptminder-cli --depth=0`。
+
+脚本与 AI agent 可改用 `export PROMPTMINDER_TOKEN=pm_xxx`，无需再执行本地登录。认证优先级为 `--token` → `PROMPTMINDER_TOKEN` → 本地配置；旧环境变量会覆盖新保存的 token。
+
+截至 2026-09-10，npm 最新版本仍是 0.1.3。仓库 0.2.0 的工作区 `skill list/get/import/update/install` 命令尚未发布，详见[CLI 包文档](packages/promptminder-cli/README.md#workspace-skill-packages-020-unreleased)。
+
 ### CLI Agent Skill
 
 如果你希望 Cursor、Claude Code、Codex CLI 等 AI agent 正确使用 PromptMinder CLI，优先安装独立 skill 仓库：
 
 ```bash
 npx skills add aircrushin/promptminder-cli-skill
+npx skills list
 ```
+
+`skills list` 查看已安装的技能；`skills find` 是搜索命令，不能验证本地安装。
 
 仓库地址：`https://github.com/aircrushin/promptminder-cli-skill`
 
