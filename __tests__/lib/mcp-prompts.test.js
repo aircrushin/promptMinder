@@ -4,6 +4,7 @@ import {
   buildMcpPromptAccessScope,
   getMcpPrompt,
   listMcpWorkspaces,
+  resolveMcpPromptContent,
   searchMcpPrompts,
 } from '@/lib/mcp/prompts.js'
 
@@ -133,5 +134,126 @@ describe('MCP prompt lookup', () => {
   it('找不到提示词时应返回 404', async () => {
     db.enqueueSelect([])
     await expect(getMcpPrompt('user-1', { id: 'missing', db })).rejects.toThrow('Prompt not found')
+  })
+
+  it('缺少 id 时应返回 400', async () => {
+    await expect(getMcpPrompt('user-1', { db })).rejects.toThrow('Prompt id is required')
+  })
+
+  it('指定共享团队时应只按 team_id 过滤', () => {
+    const scope = buildMcpPromptAccessScope({ userId: 'user-1', teamId: 'team-1' })
+    const sqlText = collectSqlText(scope).join('').toLowerCase()
+    expect(sqlText).toContain('team_id')
+    expect(sqlText).not.toContain('is null')
+  })
+
+  it('没有共享团队时应退回个人空间', () => {
+    const scope = buildMcpPromptAccessScope({ userId: 'user-1', teamIds: [] })
+    const sqlText = collectSqlText(scope).join('').toLowerCase()
+    expect(sqlText).toContain('is null')
+  })
+
+  it('指定个人团队 id 时应按个人空间搜索', async () => {
+    db.enqueueSelect([])
+    const result = await searchMcpPrompts('user-1', { query: 'sql', teamId: 'personal-1', db })
+    expect(result.matches).toEqual([])
+    expect(result.hint).toMatch(/No prompts matched/)
+  })
+
+  it('非成员访问指定团队时应拒绝', async () => {
+    await expect(searchMcpPrompts('user-1', { query: 'sql', teamId: 'team-missing', db }))
+      .rejects.toThrow('You are not a member of this team')
+  })
+
+  it('查询里的 id 命中时应直接返回完整内容', async () => {
+    db.enqueueSelect([
+      {
+        id: '2c9c1b3a-4d5e-4f6a-8b7c-1234567890ab',
+        title: 'SQL helper',
+        description: 'Write SQL',
+        tags: 'sql',
+        version: '1.0.0',
+        teamId: null,
+        content: 'Write careful SQL.',
+        updatedAt: '2026-09-18T00:00:00.000Z',
+      },
+    ])
+
+    const result = await searchMcpPrompts('user-1', {
+      query: 'id:2c9c1b3a-4d5e-4f6a-8b7c-1234567890ab',
+      db,
+    })
+    expect(result.total).toBe(1)
+    expect(result.matches[0].content).toBe('Write careful SQL.')
+  })
+
+  it('查询里的 id 不存在时应返回空结果', async () => {
+    db.enqueueSelect([])
+    const result = await searchMcpPrompts('user-1', {
+      query: 'id:2c9c1b3a-4d5e-4f6a-8b7c-1234567890ab',
+      db,
+    })
+    expect(result).toEqual({
+      query: expect.objectContaining({ id: '2c9c1b3a-4d5e-4f6a-8b7c-1234567890ab' }),
+      matches: [],
+      total: 0,
+    })
+  })
+
+  it('唯一高匹配时应直接取出完整提示词', async () => {
+    db.enqueueSelect([
+      {
+        id: 'prompt-1',
+        title: 'Code Review',
+        description: 'Review PRs',
+        tags: 'dev',
+        version: '1.0.0',
+        teamId: null,
+        updatedAt: '2026-09-18T00:00:00.000Z',
+      },
+    ])
+    db.enqueueSelect([
+      {
+        id: 'prompt-1',
+        title: 'Code Review',
+        description: 'Review PRs',
+        tags: 'dev',
+        version: '1.0.0',
+        teamId: null,
+        content: 'Review this diff carefully.',
+        updatedAt: '2026-09-18T00:00:00.000Z',
+      },
+    ])
+
+    const resolved = await resolveMcpPromptContent('user-1', { query: '/code-review', db })
+    expect(resolved.mode).toBe('exact')
+    expect(resolved.prompt.content).toBe('Review this diff carefully.')
+  })
+
+  it('多个匹配时应返回候选项', async () => {
+    db.enqueueSelect([
+      {
+        id: 'prompt-1',
+        title: 'Review A',
+        description: '',
+        tags: 'dev',
+        version: '1.0.0',
+        teamId: null,
+        updatedAt: '2026-09-18T00:00:00.000Z',
+      },
+      {
+        id: 'prompt-2',
+        title: 'Review B',
+        description: '',
+        tags: 'dev',
+        version: '1.0.0',
+        teamId: null,
+        updatedAt: '2026-09-17T00:00:00.000Z',
+      },
+    ])
+
+    const resolved = await resolveMcpPromptContent('user-1', { query: 'review', db })
+    expect(resolved.mode).toBe('choices')
+    expect(resolved.matches).toHaveLength(2)
   })
 })

@@ -19,6 +19,7 @@ const customJestConfig = {
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js',
     '^@clerk/mcp-tools/next$': '<rootDir>/__mocks__/clerk-mcp-tools-next.js',
     '^@clerk/mcp-tools/server$': '<rootDir>/__mocks__/clerk-mcp-tools-server.js',
+    '^mcp-handler$': '<rootDir>/__mocks__/mcp-handler.js',
   },
   collectCoverageFrom: [
     'components/**/*.{js,jsx}',

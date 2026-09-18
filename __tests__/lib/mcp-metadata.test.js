@@ -38,6 +38,22 @@ describe('MCP HTTP helpers', () => {
     expect(applyCorsHeaders()['Access-Control-Allow-Methods']).toContain('POST')
   })
 
+  it('无效 URL 时应回退到公开 origin', () => {
+    expect(getRequestOrigin({ url: 'not-a-url', headers: { get: () => null } })).toBe('https://www.prompt-minder.com')
+  })
+
+  it('应该复制已有 Headers 并覆盖 CORS', () => {
+    const headers = applyCorsHeaders(new Headers({ 'X-Test': '1' }))
+    expect(headers['X-Test'] || headers['x-test']).toBe('1')
+    expect(headers['Access-Control-Allow-Origin']).toBe('*')
+  })
+
+  it('应该给普通请求补上 CORS 头', async () => {
+    const handler = withCors(async () => new Response('ok', { headers: { 'X-Test': '1' } }))
+    const response = await handler({ method: 'POST' })
+    expect(response.status).toBe(200)
+  })
+
   it('应该在 OPTIONS 时直接返回 CORS 响应', async () => {
     const handler = withCors(async () => new Response('ok'))
     const response = await handler({ method: 'OPTIONS' })
@@ -77,8 +93,18 @@ describe('MCP OAuth metadata', () => {
   it('应该代理 Clerk 授权服务器 metadata', async () => {
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_example'
     fetchClerkAuthorizationServerMetadata.mockResolvedValue({ issuer: 'https://clerk.example' })
-
     const response = await createAuthorizationServerMetadataHandler()()
     await expect(response.json()).resolves.toEqual({ issuer: 'https://clerk.example' })
+  })
+
+  it('缺少 Clerk key 时应返回 500', async () => {
+    delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    const resource = createProtectedResourceMetadataHandler()({
+      url: 'http://localhost:3000/mcp',
+      headers: { get: () => null },
+    })
+    expect(resource.status).toBe(500)
+    const authServer = await createAuthorizationServerMetadataHandler()()
+    expect(authServer.status).toBe(500)
   })
 })

@@ -1,8 +1,9 @@
 /** @jest-environment node */
 
 import { GET as getProtectedResource, OPTIONS as optionsProtectedResource } from '@/app/.well-known/oauth-protected-resource/mcp/route.js'
-import { GET as getAuthorizationServer } from '@/app/.well-known/oauth-authorization-server/route.js'
-import { GET as getMcp, POST as postMcp, OPTIONS as mcpOptions } from '@/app/mcp/route.js'
+import { GET as getProtectedResourceRoot, OPTIONS as optionsProtectedResourceRoot } from '@/app/.well-known/oauth-protected-resource/route.js'
+import { GET as getAuthorizationServer, OPTIONS as optionsAuthorizationServer } from '@/app/.well-known/oauth-authorization-server/route.js'
+import { GET as getMcp, POST as postMcp, DELETE as deleteMcp, OPTIONS as mcpOptions } from '@/app/mcp/route.js'
 import { mcpHttpHandler } from '@/lib/mcp/server.js'
 
 jest.mock('@clerk/mcp-tools/server', () => ({
@@ -29,6 +30,13 @@ describe('MCP discovery routes', () => {
     const body = await response.json()
     expect(body.resource).toBe('https://www.prompt-minder.com/mcp')
     expect(optionsProtectedResource().status).toBe(200)
+    const root = getProtectedResourceRoot({
+      url: 'https://www.prompt-minder.com/.well-known/oauth-protected-resource',
+      headers: { get: () => null },
+    })
+    expect(root.status).toBe(200)
+    expect(optionsProtectedResourceRoot().status).toBe(200)
+    expect(optionsAuthorizationServer().status).toBe(200)
   })
 
   it('应该公开授权服务器 metadata', async () => {
@@ -44,6 +52,7 @@ describe('MCP discovery routes', () => {
     mcpHttpHandler.mockResolvedValue(new Response('ok', { status: 200 }))
     await getMcp({ method: 'GET' })
     await postMcp({ method: 'POST' })
-    expect(mcpHttpHandler).toHaveBeenCalledTimes(2)
+    await deleteMcp({ method: 'DELETE' })
+    expect(mcpHttpHandler).toHaveBeenCalledTimes(3)
   })
 })

@@ -61,9 +61,32 @@ describe('MCP auth', () => {
     expect(authInfo.extra.userId).toBe('user-2')
   })
 
+  it('没有 token 时应返回 undefined', async () => {
+    await expect(verifyMcpToken({}, '')).resolves.toBeUndefined()
+  })
+
+  it('Clerk 校验抛错时应返回 undefined', async () => {
+    authenticateCliToken.mockResolvedValue(null)
+    auth.mockRejectedValue(new Error('oauth failed'))
+    await expect(verifyMcpToken({}, 'oauth-token')).resolves.toBeUndefined()
+  })
+
+  it('缺少 Clerk 字段时应补齐后再校验', async () => {
+    authenticateCliToken.mockResolvedValue(null)
+    auth.mockResolvedValue({ userId: 'user-3' })
+    verifyClerkToken.mockReturnValue({ extra: { userId: 'user-3' } })
+    await verifyMcpToken({}, 'oauth-token')
+    expect(verifyClerkToken).toHaveBeenCalledWith(expect.objectContaining({
+      isAuthenticated: true,
+      tokenType: 'oauth_token',
+      userId: 'user-3',
+    }), 'oauth-token')
+  })
+
   it('应该从执行上下文读取 userId', async () => {
-    const result = await runWithMcpAuth({ extra: { userId: 'user-9' } }, () => getMcpUserId())
+    const result = await runWithMcpAuth({ extra: { userId: 'user-9' } }, () => requireMcpUserId())
     expect(result).toBe('user-9')
     expect(() => requireMcpUserId()).toThrow('Authentication required')
+    expect(getMcpUserId({ http: { authInfo: { extra: { userId: 'ctx-user' } } } })).toBe('ctx-user')
   })
 })
