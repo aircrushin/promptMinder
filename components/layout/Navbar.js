@@ -10,7 +10,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { Menu, Library, LayoutGrid, Languages, FlaskConical, Bell, Terminal, Puzzle } from "lucide-react";
+import { Menu, Library, LayoutGrid, Languages, FlaskConical, Bell, Terminal, Puzzle, Plug } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -359,6 +359,13 @@ export default function Navbar() {
                       <Terminal className="h-4 w-4 shrink-0" />
                       <span>CLI Tokens</span>
                     </Link>
+                    <Link
+                      href="/settings/mcp"
+                      className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Plug className="h-4 w-4 shrink-0" />
+                      <span>MCP</span>
+                    </Link>
                   </SignedIn>
                   <Button
                     variant="ghost"
@@ -394,6 +401,12 @@ export default function Navbar() {
               <Link href="/settings/cli-tokens">
                 <Terminal className="h-4 w-4" />
                 CLI
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" className="hidden md:inline-flex rounded-xl text-slate-600 hover:bg-slate-100">
+              <Link href="/settings/mcp">
+                <Plug className="h-4 w-4" />
+                MCP
               </Link>
             </Button>
           </SignedIn>

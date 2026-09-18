@@ -5,6 +5,7 @@ export default function Footer({ t }) {
     description: "Make AI prompt management simpler and more efficient...",
     product: "Product",
     cli: "CLI",
+    mcp: "MCP",
     gptImage2: "GPT Image 2",
     privacyPolicy: "Privacy Policy",
     termsOfUse: "Terms of Use",
@@ -120,6 +121,14 @@ export default function Footer({ t }) {
                       className="text-sm text-muted-foreground hover:text-foreground"
                     >
                       {translations.cli}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/settings/mcp"
+                      className="text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      {translations.mcp}
                     </Link>
                   </li>
                   <li>
