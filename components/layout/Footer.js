@@ -125,7 +125,7 @@ export default function Footer({ t }) {
                   </li>
                   <li>
                     <Link
-                      href="/settings/mcp"
+                      href="/settings/mcp/docs"
                       className="text-sm text-muted-foreground hover:text-foreground"
                     >
                       {translations.mcp}

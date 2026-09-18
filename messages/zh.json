@@ -271,7 +271,55 @@
     "tokenDescription": "OAuth 是正式接入方式。本地或脚本也可以用 CLI Token 作为 Bearer。",
     "tokenAction": "管理 CLI Tokens",
     "clerkTitle": "Clerk 后台需要打开的开关",
-    "clerkDescription": "生产环境要在 Clerk Dashboard 的 OAuth Applications 里启用 CIMD 或 Dynamic Client Registration，客户端才能自动完成授权。"
+    "clerkDescription": "生产环境要在 Clerk Dashboard 的 OAuth Applications 里启用 CIMD 或 Dynamic Client Registration，客户端才能自动完成授权。",
+    "docsAction": "查看完整文档",
+    "docs": {
+      "pageBadge": "文档",
+      "pageTitle": "MCP 接入说明",
+      "pageStatus": "oauth",
+      "pageDescription": "这页集中说明 PromptMinder 远程 MCP 能做什么，以及如何把它装进 Cursor、Claude、ChatGPT 和其他 AI 客户端。授权一次后，agent 就能用模糊查询或斜杠快捷方式取出你的提示词。",
+      "backAction": "返回 MCP 设置",
+      "overviewCards": [
+        {
+          "title": "功能",
+          "body": "只读查找：搜索提示词摘要、按 id 取完整内容、列出可访问工作区。客户端也可调用名为 prompt 的 MCP prompt。"
+        },
+        {
+          "title": "授权",
+          "body": "正式路径是 Clerk OAuth。首次连接会弹出 PromptMinder 登录页。本地调试也可用 CLI Token 作为 Bearer。"
+        }
+      ],
+      "quickstartTitle": "快速开始",
+      "quickstartDescription": "不需要安装本地 npm 包。把公开 HTTPS 地址加到客户端，完成一次 OAuth 即可开始查询。",
+      "clientsTitle": "按客户端安装",
+      "clientsDescription": "下面配置都指向同一个远程地址。支持 OAuth 的客户端会先显示 Needs login，授权完成后即可调用工具。",
+      "cursorTitle": "Cursor",
+      "cursorDescription": "打开 Cursor Settings → MCP，新增 HTTP 服务器，或把 JSON 写入 ~/.cursor/mcp.json。保存后点 Login。",
+      "claudeCodeTitle": "Claude Code",
+      "claudeCodeDescription": "在终端执行这条命令。首次调用工具时会打开浏览器授权。",
+      "claudeDesktopTitle": "Claude Desktop",
+      "claudeDesktopDescription": "写入 Claude Desktop 的 mcpServers。若当前版本还不接受远程 URL，用 mcp-remote 做本地桥接。",
+      "chatgptTitle": "ChatGPT",
+      "chatgptDescription": "在 ChatGPT 的 Connectors / 自定义连接器里粘贴 MCP 地址，然后完成 OAuth。",
+      "vscodeTitle": "VS Code Copilot",
+      "vscodeDescription": "在工作区创建 .vscode/mcp.json，或在用户 MCP 设置里添加 HTTP 服务器。",
+      "windsurfTitle": "Windsurf",
+      "windsurfDescription": "把配置写入 Windsurf 的 MCP 设置（通常是 mcp_config.json），保存后完成登录。",
+      "otherTitle": "其他 MCP 客户端",
+      "otherDescription": "任意支持 Streamable HTTP 和 OAuth 的客户端，把服务器 URL 设为这个地址即可。",
+      "toolsTitle": "当前可用能力",
+      "toolsDescription": "MVP 只开放只读查找。search_prompts 返回摘要，完整内容必须再调 get_prompt。不传 team_id 时默认搜索你能访问的全部工作区。",
+      "promptTitle": "MCP Prompt",
+      "promptDescription": "名为 prompt 的 MCP prompt 会按 query 查找。唯一高置信匹配时直接返回完整内容；多条结果会列出 id，再调用 get_prompt。",
+      "shortcutTitle": "查询快捷方式",
+      "shortcutDescription": "这些写法可用于 search_prompts 的 query，也可用于客户端里的 /prompt。",
+      "examplesTitle": "给 agent 的示例说法",
+      "examplesDescription": "把 MCP 接上之后，可以直接用这些句子让客户端去取提示词。",
+      "discoveryTitle": "发现与授权端点",
+      "discoveryDescription": "兼容 RFC 9728 / RFC 8414 的客户端可以自动发现资源服务器和授权服务器，不必手写 OAuth 细节。",
+      "troubleshootingTitle": "常见问题排查",
+      "troubleshootingDescription": "先看客户端里的 Needs login 或 401，再对照下面几类高频问题。"
+    }
   },
   "cliTokens": {
     "pageBadge": "设置",

@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   Copy,
+  ExternalLink,
   Plug,
   ShieldCheck,
   TerminalSquare,
@@ -24,6 +25,7 @@ const FALLBACK_ZH = {
   pageStatus: 'oauth',
   pageDescription: '把 PromptMinder 接到 Cursor、Claude、ChatGPT 或其他 AI agent。授权一次后，就能用模糊查询或斜杠快捷方式取出你的提示词。',
   backAction: '返回 CLI Tokens',
+  docsAction: '查看完整文档',
   signInTitle: '先登录再连接 MCP',
   signInDescription: 'MCP 使用 Clerk OAuth 授权。登录后即可把这个地址加到任意支持 MCP 的客户端。',
   signInAction: '登录',
@@ -71,6 +73,7 @@ const FALLBACK_EN = {
   pageStatus: 'oauth',
   pageDescription: 'Connect PromptMinder to Cursor, Claude, ChatGPT, or any MCP-capable agent. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.',
   backAction: 'Back to CLI Tokens',
+  docsAction: 'Full MCP docs',
   signInTitle: 'Sign in to connect MCP',
   signInDescription: 'MCP uses Clerk OAuth. After you sign in, add this URL to any MCP-compatible client.',
   signInAction: 'Sign in',
@@ -208,6 +211,13 @@ export default function McpSettingsPage() {
             >
               <ArrowLeft className="h-3 w-3" />
               {translations.backAction}
+            </Link>
+            <Link
+              href="/settings/mcp/docs"
+              className="inline-flex items-center gap-1.5 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+            >
+              {translations.docsAction}
+              <ExternalLink className="h-3 w-3" />
             </Link>
           </div>
 

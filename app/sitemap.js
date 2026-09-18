@@ -42,6 +42,12 @@ export default async function sitemap() {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/settings/mcp/docs`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
       url: `${BASE_URL}/prompts`,
       lastModified: now,
       changeFrequency: 'daily',
