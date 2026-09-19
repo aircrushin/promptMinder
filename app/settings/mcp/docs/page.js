@@ -68,7 +68,7 @@ const FALLBACK_ZH = {
   clientsTitle: '按客户端安装',
   clientsDescription: '下面配置都指向同一个远程地址。支持 OAuth 的客户端会先显示 Needs login，授权完成后即可调用工具。',
   cursorTitle: 'Cursor',
-  cursorDescription: '打开 Cursor Settings → MCP，新增 HTTP 服务器，或把 JSON 写入 ~/.cursor/mcp.json。保存后点 Login。',
+  cursorDescription: 'Cursor 只走 DCR，不支持 Clerk CIMD。把 CLI Token 写入本机 ~/.cursor/mcp.json，不要点 Login。仓库里只保留 ${env:PROMPTMINDER_TOKEN} 占位。',
   claudeCodeTitle: 'Claude Code',
   claudeCodeDescription: '在终端执行这条命令。首次调用工具时会打开浏览器授权。',
   claudeDesktopTitle: 'Claude Desktop',
@@ -142,19 +142,19 @@ const FALLBACK_ZH = {
       body: '先调用 list_teams 确认工作区。不传 team_id 会搜全部可访问空间；个人空间不要传团队 id。试试更短的词或 /标题快捷方式。',
     },
     {
-      title: '客户端无法自动注册',
-      body: '生产环境要在 Clerk Dashboard → OAuth Applications 启用 CIMD 或 Dynamic Client Registration。',
+      title: 'Incompatible auth server / DCR',
+      body: 'Cursor 只认 Dynamic Client Registration。Clerk 元数据没有 registration_endpoint，再点 Login 也不会过。把 CLI Token 写成 Authorization: Bearer，或等本服务的 /oauth/register 生效后再试 OAuth。',
     },
     {
       title: 'Claude Desktop 不认 url',
       body: '旧版只支持本地 stdio。改用 npx -y mcp-remote <MCP 地址> 做桥接，或升级到支持远程 MCP 的版本。',
     },
   ],
-  tokenTitle: '调试用 Token（可选）',
-  tokenDescription: 'OAuth 是正式接入方式。本地脚本或不支持 OAuth 的客户端，可以把 CLI Token 放进 Authorization: Bearer。',
+  tokenTitle: 'Cursor 请用 CLI Token',
+  tokenDescription: 'Cursor 桌面版经常读不到终端里的 export。本机 ~/.cursor/mcp.json 直接写 Bearer 更稳，不要把真实 token 提交到 git。',
   tokenAction: '管理 CLI Tokens',
-  clerkTitle: 'Clerk 后台需要打开的开关',
-  clerkDescription: '生产环境要在 Clerk Dashboard 的 OAuth Applications 里启用 CIMD 或 Dynamic Client Registration，客户端才能自动完成授权。',
+  clerkTitle: 'Cursor 为什么不能点 Login',
+  clerkDescription: 'Cursor 会先访问 /mcp，401 后去发现 clerk.prompt-minder.com。那份元数据没有 registration_endpoint，Cursor 又不支持 Clerk CIMD。本服务现在会公布 /oauth/register；在此生效前请用 CLI Token。',
 }
 
 const FALLBACK_EN = {
@@ -204,7 +204,7 @@ const FALLBACK_EN = {
   clientsTitle: 'Install by client',
   clientsDescription: 'Every config below points at the same remote URL. OAuth-capable clients show Needs login until authorization finishes.',
   cursorTitle: 'Cursor',
-  cursorDescription: 'Open Cursor Settings → MCP, add an HTTP server, or write this JSON to ~/.cursor/mcp.json. Save, then click Login.',
+  cursorDescription: 'Cursor only supports DCR, not Clerk CIMD. Put a CLI token in ~/.cursor/mcp.json and skip Login. The repo file should only keep ${env:PROMPTMINDER_TOKEN}.',
   claudeCodeTitle: 'Claude Code',
   claudeCodeDescription: 'Run this command in a terminal. The first tool call opens a browser for authorization.',
   claudeDesktopTitle: 'Claude Desktop',
@@ -278,19 +278,19 @@ const FALLBACK_EN = {
       body: 'Call list_teams first. Omitting team_id searches every accessible workspace; do not pass a team id for personal scope. Try a shorter phrase or a /title shortcut.',
     },
     {
-      title: 'Client cannot register',
-      body: 'In production, enable CIMD or Dynamic Client Registration under Clerk Dashboard → OAuth Applications.',
+      title: 'Incompatible auth server / DCR',
+      body: 'Cursor only accepts Dynamic Client Registration. Clerk metadata has no registration_endpoint, so Login will keep failing. Send a CLI token as Authorization: Bearer, or retry OAuth after /oauth/register is live.',
     },
     {
       title: 'Claude Desktop rejects url',
       body: 'Older builds only support local stdio. Bridge with npx -y mcp-remote <MCP URL>, or upgrade to a build that supports remote MCP.',
     },
   ],
-  tokenTitle: 'Optional debug token',
-  tokenDescription: 'OAuth is the supported login path. Local scripts or clients without OAuth can send a CLI token as Authorization: Bearer.',
+  tokenTitle: 'Use a CLI token in Cursor',
+  tokenDescription: 'Cursor desktop often cannot read a terminal export. Write Bearer into ~/.cursor/mcp.json. Never commit a real token.',
   tokenAction: 'Manage CLI Tokens',
-  clerkTitle: 'Clerk dashboard switch',
-  clerkDescription: 'In production, enable CIMD or Dynamic Client Registration under Clerk Dashboard → OAuth Applications so clients can authorize themselves.',
+  clerkTitle: 'Why Cursor Login fails',
+  clerkDescription: 'Cursor hits /mcp, gets 401, then discovers clerk.prompt-minder.com. That document has no registration_endpoint, and Cursor cannot use Clerk CIMD. This server now advertises /oauth/register; until that is live, use a CLI token.',
 }
 
 function CopyButton({ text, label, copiedLabel, className }) {
@@ -388,6 +388,9 @@ export default function McpDocsPage() {
     mcpServers: {
       promptminder: {
         url: mcpUrl,
+        headers: {
+          Authorization: 'Bearer pm_xxx',
+        },
       },
     },
   }), [mcpUrl])
@@ -422,6 +425,7 @@ export default function McpDocsPage() {
     mcpUrl,
     `${origin}/.well-known/oauth-protected-resource/mcp`,
     `${origin}/.well-known/oauth-authorization-server`,
+    `${origin}/oauth/register`,
   ]
   const quickstartSteps = translations.quickstartSteps.map((step) => {
     if (step.index === '01') {

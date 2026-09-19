@@ -57,14 +57,15 @@ const FALLBACK_ZH = {
   connectTitle: '连接到 AI 客户端',
   connectDescription: '把 MCP 地址加进去后选择登录。授权完成前，客户端会显示 Needs login。',
   cursorTitle: 'Cursor',
+  cursorDescription: 'Cursor 只走 Dynamic Client Registration，不支持 Clerk CIMD。本机写入 ~/.cursor/mcp.json，用 CLI Token 做 Bearer；不要依赖 Login。',
   claudeTitle: 'Claude Code',
   chatgptTitle: 'ChatGPT / Claude Desktop',
   chatgptBody: '在自定义连接器里粘贴 MCP 地址，然后完成 OAuth 授权。',
-  tokenTitle: '调试用 Token（可选）',
-  tokenDescription: 'OAuth 是正式接入方式。本地或脚本也可以用 CLI Token 作为 Bearer。',
+  tokenTitle: 'Cursor 请用 CLI Token',
+  tokenDescription: '把 pm_ token 写进本机 ~/.cursor/mcp.json。仓库配置只用 ${env:PROMPTMINDER_TOKEN} 占位，不要把真实 token 提交到 git。',
   tokenAction: '管理 CLI Tokens',
-  clerkTitle: 'Clerk 后台需要打开的开关',
-  clerkDescription: '生产环境要在 Clerk Dashboard 的 OAuth Applications 里启用 CIMD 或 Dynamic Client Registration，客户端才能自动完成授权。',
+  clerkTitle: 'Cursor 为什么不能点 Login',
+  clerkDescription: 'Cursor 发现 clerk.prompt-minder.com 后只认 registration_endpoint。Clerk 当前没有 DCR，也不支持 Cursor 所需的 CIMD。本服务会在 /oauth/register 补上 DCR；在此生效前请用 CLI Token。',
 }
 
 const FALLBACK_EN = {
@@ -105,14 +106,15 @@ const FALLBACK_EN = {
   connectTitle: 'Connect an AI client',
   connectDescription: 'Add the MCP URL, then choose log in. Clients show Needs login until OAuth finishes.',
   cursorTitle: 'Cursor',
+  cursorDescription: 'Cursor only supports Dynamic Client Registration, not Clerk CIMD. Write a CLI token as Bearer in ~/.cursor/mcp.json. Do not rely on Login.',
   claudeTitle: 'Claude Code',
   chatgptTitle: 'ChatGPT / Claude Desktop',
   chatgptBody: 'Paste the MCP URL into a custom connector, then complete OAuth.',
-  tokenTitle: 'Optional debug token',
-  tokenDescription: 'OAuth is the supported login path. Local scripts can also send a CLI token as a Bearer credential.',
+  tokenTitle: 'Use a CLI token in Cursor',
+  tokenDescription: 'Put a pm_ token in ~/.cursor/mcp.json. The repo config should only keep ${env:PROMPTMINDER_TOKEN}; never commit a real token.',
   tokenAction: 'Manage CLI Tokens',
-  clerkTitle: 'Clerk dashboard switch',
-  clerkDescription: 'In production, enable CIMD or Dynamic Client Registration under Clerk Dashboard → OAuth Applications so clients can authorize themselves.',
+  clerkTitle: 'Why Cursor Login fails',
+  clerkDescription: 'Cursor follows clerk.prompt-minder.com and requires registration_endpoint. Clerk has no DCR and Cursor cannot use CIMD. This server now exposes /oauth/register; until that is live, use a CLI token.',
 }
 
 function CopyButton({ text, label, copiedLabel }) {
@@ -181,13 +183,6 @@ export default function McpSettingsPage() {
   }, [])
 
   const mcpUrl = `${origin}/mcp`
-  const cursorConfig = useMemo(() => JSON.stringify({
-    mcpServers: {
-      promptminder: {
-        url: mcpUrl,
-      },
-    },
-  }, null, 2), [mcpUrl])
   const claudeCommand = `claude mcp add --transport http promptminder ${mcpUrl}`
   const tokenConfig = useMemo(() => JSON.stringify({
     mcpServers: {
@@ -302,7 +297,8 @@ export default function McpSettingsPage() {
           <p className="max-w-3xl text-sm leading-relaxed text-black/58">{translations.connectDescription}</p>
           <CodeBlock
             title={translations.cursorTitle}
-            code={cursorConfig}
+            description={translations.cursorDescription}
+            code={tokenConfig}
             copyLabel={copyLabel}
             copiedLabel={copiedLabel}
           />

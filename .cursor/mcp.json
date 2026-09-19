@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "promptminder": {
+      "url": "https://www.prompt-minder.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:PROMPTMINDER_TOKEN}"
+      }
+    }
+  }
+}

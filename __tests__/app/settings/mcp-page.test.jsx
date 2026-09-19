@@ -33,6 +33,7 @@ describe('MCP settings page', () => {
     expect(screen.getByText('search_prompts')).toBeInTheDocument()
     expect(screen.getByText('/code-review')).toBeInTheDocument()
     expect(screen.getByText(/claude mcp add --transport http promptminder/)).toBeInTheDocument()
+    expect(screen.getAllByText(/Bearer pm_xxx/).length).toBeGreaterThan(0)
     expect(screen.getByRole('link', { name: /查看完整文档/ })).toHaveAttribute('href', '/settings/mcp/docs')
   })
 })

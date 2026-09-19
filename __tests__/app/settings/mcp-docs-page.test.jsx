@@ -44,6 +44,8 @@ describe('MCP docs page', () => {
     expect(screen.getAllByText(/claude mcp add --transport http promptminder/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/mcp-remote/).length).toBeGreaterThan(0)
     expect(screen.getByText(/oauth-protected-resource\/mcp/)).toBeInTheDocument()
+    expect(screen.getAllByText(/oauth\/register/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Bearer pm_xxx/).length).toBeGreaterThan(0)
     expect(screen.getByRole('link', { name: /Back to MCP settings/i })).toHaveAttribute('href', '/settings/mcp')
   })
 
@@ -60,6 +62,7 @@ describe('MCP docs page', () => {
     expect(screen.getAllByText('/code-review').length).toBeGreaterThan(0)
     expect(screen.getAllByText(/claude mcp add --transport http promptminder/).length).toBeGreaterThan(0)
     expect(screen.getByText('帮我在 PromptMinder 里找周报相关提示词。')).toBeInTheDocument()
+    expect(screen.getByText(/Incompatible auth server/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /返回 MCP 设置/ })).toHaveAttribute('href', '/settings/mcp')
   })
 })

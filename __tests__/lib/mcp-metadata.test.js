@@ -87,14 +87,25 @@ describe('MCP OAuth metadata', () => {
       resourceUrl: expect.stringMatching(/\/mcp$/),
     }))
     expect(body.resource).toBe('https://www.prompt-minder.com/mcp')
+    expect(body.authorization_servers).toEqual(['http://localhost:3000'])
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
   })
 
-  it('应该代理 Clerk 授权服务器 metadata', async () => {
+  it('应该公布本站 DCR 端点并改写 issuer', async () => {
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_example'
-    fetchClerkAuthorizationServerMetadata.mockResolvedValue({ issuer: 'https://clerk.example' })
-    const response = await createAuthorizationServerMetadataHandler()()
-    await expect(response.json()).resolves.toEqual({ issuer: 'https://clerk.example' })
+    fetchClerkAuthorizationServerMetadata.mockResolvedValue({
+      issuer: 'https://clerk.example',
+      authorization_endpoint: 'https://clerk.example/oauth/authorize',
+    })
+    const response = await createAuthorizationServerMetadataHandler()({
+      url: 'http://localhost:3000/.well-known/oauth-authorization-server',
+      headers: { get: () => null },
+    })
+    await expect(response.json()).resolves.toEqual({
+      issuer: 'http://localhost:3000',
+      authorization_endpoint: 'https://clerk.example/oauth/authorize',
+      registration_endpoint: 'http://localhost:3000/oauth/register',
+    })
   })
 
   it('缺少 Clerk key 时应返回 500', async () => {
@@ -104,7 +115,10 @@ describe('MCP OAuth metadata', () => {
       headers: { get: () => null },
     })
     expect(resource.status).toBe(500)
-    const authServer = await createAuthorizationServerMetadataHandler()()
+    const authServer = await createAuthorizationServerMetadataHandler()({
+      url: 'http://localhost:3000/.well-known/oauth-authorization-server',
+      headers: { get: () => null },
+    })
     expect(authServer.status).toBe(500)
   })
 })
