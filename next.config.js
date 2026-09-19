@@ -12,7 +12,7 @@ const withPWA = require("next-pwa")({
   buildExcludes: [/middleware-manifest.json$/],
   runtimeCaching: [
     {
-      urlPattern: ({ url }) => /^\/(?:api\/(?:prompts|workspace-skills|evaluations)(?:\/|$)|prompts(?:\/|$))/.test(url.pathname),
+      urlPattern: ({ url }) => /^\/(?:mcp(?:\/|$)|(?:\.well-known\/)|api\/(?:prompts|workspace-skills|evaluations)(?:\/|$)|prompts(?:\/|$))/.test(url.pathname),
       handler: 'NetworkOnly',
     },
     ...require('next-pwa/cache'),
@@ -95,6 +95,13 @@ const nextConfig = {
 
   // Enable static optimization
   output: "standalone",
+
+  serverExternalPackages: [
+    "mcp-handler",
+    "@modelcontextprotocol/server",
+    "@modelcontextprotocol/core",
+    "@clerk/mcp-tools",
+  ],
 
   // modularizeImports removed - Next.js 16 handles this automatically via optimizePackageImports
 

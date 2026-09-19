@@ -28,6 +28,7 @@
     "description": "Make AI prompt management simpler and more efficient. Build your exclusive prompt library and enhance AI conversation efficiency.",
     "product": "Product",
     "cli": "CLI",
+    "mcp": "MCP",
     "privacyPolicy": "Privacy Policy",
     "termsOfUse": "Terms of Use",
     "support": "Support",
@@ -221,6 +222,100 @@
   "common": {
     "copy": "Copy",
     "copied": "Copied"
+  },
+  "mcp": {
+    "pageBadge": "Settings",
+    "pageTitle": "MCP",
+    "pageStatus": "oauth",
+    "pageDescription": "Connect PromptMinder to Cursor, Claude, ChatGPT, or any MCP-capable agent. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.",
+    "backAction": "Back to CLI Tokens",
+    "signInTitle": "Sign in to connect MCP",
+    "signInDescription": "MCP uses Clerk OAuth. After you sign in, add this URL to any MCP-compatible client.",
+    "signInAction": "Sign in",
+    "urlTitle": "Public endpoint",
+    "urlDescription": "Every MCP client connects to this HTTPS URL. The first connection opens a PromptMinder authorization screen.",
+    "toolsTitle": "What agents can do now",
+    "tools": [
+      {
+        "name": "search_prompts",
+        "body": "Search prompt summaries with natural language, slash shortcuts, tags, or an id."
+      },
+      {
+        "name": "get_prompt",
+        "body": "Load full prompt content from an id returned by search."
+      },
+      {
+        "name": "list_teams",
+        "body": "List personal and team workspaces. Omit team_id to search everything you can access."
+      }
+    ],
+    "shortcutTitle": "Lookup shortcuts",
+    "shortcutDescription": "These work in search_prompts and in clients that expose the /prompt MCP prompt.",
+    "shortcuts": [
+      { "example": "/code-review", "body": "Match a title shortcut. Hyphens and spaces are equivalent." },
+      { "example": "tag:writing or #sql", "body": "Filter by tag." },
+      { "example": "weekly report helper", "body": "Fuzzy-match title, description, and tags." },
+      { "example": "id:<uuid>", "body": "Fetch one prompt by exact id." }
+    ],
+    "connectTitle": "Connect an AI client",
+    "connectDescription": "Add the MCP URL, then choose log in. Clients show Needs login until OAuth finishes.",
+    "cursorTitle": "Cursor",
+    "claudeTitle": "Claude Code",
+    "chatgptTitle": "ChatGPT / Claude Desktop",
+    "chatgptBody": "Paste the MCP URL into a custom connector, then complete OAuth.",
+    "tokenTitle": "Optional debug token",
+    "tokenDescription": "OAuth is the supported login path. Local scripts can also send a CLI token as a Bearer credential.",
+    "tokenAction": "Manage CLI Tokens",
+    "clerkTitle": "Clerk dashboard switch",
+    "clerkDescription": "In production, enable CIMD or Dynamic Client Registration under Clerk Dashboard → OAuth Applications so clients can authorize themselves.",
+    "docsAction": "Full MCP docs",
+    "docs": {
+      "pageBadge": "Documentation",
+      "pageTitle": "MCP install guide",
+      "pageStatus": "oauth",
+      "pageDescription": "This page explains what the PromptMinder remote MCP can do and how to add it to Cursor, Claude, ChatGPT, and other AI clients. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.",
+      "backAction": "Back to MCP settings",
+      "overviewCards": [
+        {
+          "title": "Features",
+          "body": "Read-only lookup: search prompt summaries, load full content by id, and list accessible workspaces. Clients can also call the prompt MCP prompt."
+        },
+        {
+          "title": "Auth",
+          "body": "Clerk OAuth is the supported path. The first connection opens a PromptMinder login screen. Local debugging can send a CLI token as a Bearer credential."
+        }
+      ],
+      "quickstartTitle": "Quick start",
+      "quickstartDescription": "No local npm package is required. Add the public HTTPS URL to a client and complete OAuth once.",
+      "clientsTitle": "Install by client",
+      "clientsDescription": "Every config below points at the same remote URL. OAuth-capable clients show Needs login until authorization finishes.",
+      "cursorTitle": "Cursor",
+      "cursorDescription": "Open Cursor Settings → MCP, add an HTTP server, or write this JSON to ~/.cursor/mcp.json. Save, then click Login.",
+      "claudeCodeTitle": "Claude Code",
+      "claudeCodeDescription": "Run this command in a terminal. The first tool call opens a browser for authorization.",
+      "claudeDesktopTitle": "Claude Desktop",
+      "claudeDesktopDescription": "Add the server to Claude Desktop mcpServers. If your build still rejects a remote URL, bridge it with mcp-remote.",
+      "chatgptTitle": "ChatGPT",
+      "chatgptDescription": "Paste the MCP URL into ChatGPT Connectors / custom connectors, then complete OAuth.",
+      "vscodeTitle": "VS Code Copilot",
+      "vscodeDescription": "Create .vscode/mcp.json in the workspace, or add an HTTP server in user MCP settings.",
+      "windsurfTitle": "Windsurf",
+      "windsurfDescription": "Write the config to Windsurf MCP settings (usually mcp_config.json), save, then sign in.",
+      "otherTitle": "Other MCP clients",
+      "otherDescription": "Any client that supports Streamable HTTP and OAuth can use this server URL.",
+      "toolsTitle": "What agents can do now",
+      "toolsDescription": "The MVP is read-only lookup. search_prompts returns summaries; full content requires get_prompt. Omit team_id to search every workspace you can access.",
+      "promptTitle": "MCP prompt",
+      "promptDescription": "The prompt MCP prompt looks up a query. A single high-confidence match returns full content; multiple matches list ids so the client can call get_prompt.",
+      "shortcutTitle": "Lookup shortcuts",
+      "shortcutDescription": "These work in search_prompts and in clients that expose the /prompt MCP prompt.",
+      "examplesTitle": "Example prompts for agents",
+      "examplesDescription": "After the MCP is connected, these phrases are enough for a client to fetch a prompt.",
+      "discoveryTitle": "Discovery endpoints",
+      "discoveryDescription": "Clients that implement RFC 9728 and RFC 8414 can discover the resource and authorization servers without hard-coding OAuth details.",
+      "troubleshootingTitle": "Troubleshooting",
+      "troubleshootingDescription": "Start with Needs login or HTTP 401 in the client, then map it to one of these common cases."
+    }
   },
   "cliTokens": {
     "pageBadge": "Settings",

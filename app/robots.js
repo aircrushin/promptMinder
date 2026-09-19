@@ -40,6 +40,7 @@ export default function robots() {
           '/public',
           '/share/',
           '/prompts/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -55,6 +56,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -68,6 +70,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -80,6 +83,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -93,6 +97,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -106,6 +111,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -119,6 +125,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -137,6 +144,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -150,6 +158,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
@@ -163,6 +172,7 @@ export default function robots() {
           '/',
           '/public',
           '/share/',
+          '/settings/mcp/docs',
         ],
         disallow: [
           '/api/',
