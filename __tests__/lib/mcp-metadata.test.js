@@ -3,6 +3,7 @@ import {
   createAuthorizationServerMetadataHandler,
   createProtectedResourceMetadataHandler,
 } from '@/lib/mcp/metadata.js'
+import { MCP_PUBLIC_ORIGIN } from '@/lib/mcp/constants.js'
 import { applyCorsHeaders, emptyCorsResponse, getRequestOrigin, jsonWithCors, mcpErrorResult, mcpTextResult, withCors } from '@/lib/mcp/http.js'
 
 jest.mock('@clerk/mcp-tools/server', () => ({
@@ -39,7 +40,7 @@ describe('MCP HTTP helpers', () => {
   })
 
   it('无效 URL 时应回退到公开 origin', () => {
-    expect(getRequestOrigin({ url: 'not-a-url', headers: { get: () => null } })).toBe('https://www.prompt-minder.com')
+    expect(getRequestOrigin({ url: 'not-a-url', headers: { get: () => null } })).toBe(MCP_PUBLIC_ORIGIN.replace(/\/$/, ''))
   })
 
   it('应该复制已有 Headers 并覆盖 CORS', () => {
