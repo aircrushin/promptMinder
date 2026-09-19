@@ -25,12 +25,12 @@ const FALLBACK_ZH = {
   pageBadge: '文档',
   pageTitle: 'MCP 接入说明',
   pageStatus: 'oauth',
-  pageDescription: '这页集中说明 PromptMinder 远程 MCP 能做什么，以及如何把它装进 Cursor、Claude、ChatGPT 和其他 AI 客户端。授权一次后，agent 就能用模糊查询或斜杠快捷方式取出你的提示词。',
+  pageDescription: '这页集中说明 PromptMinder 远程 MCP 能做什么，以及如何把它装进 Cursor、Claude、ChatGPT 和其他 AI 客户端。授权一次后，agent 就能查找并管理你的提示词。',
   backAction: '返回 MCP 设置',
   overviewCards: [
     {
       title: '功能',
-      body: '只读查找：搜索提示词摘要、按 id 取完整内容、列出可访问工作区。客户端也可调用名为 prompt 的 MCP prompt。',
+      body: '完整增删改查：搜索摘要、按 id 取完整内容、创建/更新/删除提示词，并列出可访问工作区。客户端也可调用名为 prompt 的 MCP prompt。',
     },
     {
       title: '授权',
@@ -82,7 +82,7 @@ const FALLBACK_ZH = {
   otherTitle: '其他 MCP 客户端',
   otherDescription: '任意支持 Streamable HTTP 和 OAuth 的客户端，把服务器 URL 设为这个地址即可。',
   toolsTitle: '当前可用能力',
-  toolsDescription: 'MVP 只开放只读查找。search_prompts 返回摘要，完整内容必须再调 get_prompt。不传 team_id 时默认搜索你能访问的全部工作区。',
+  toolsDescription: 'search_prompts 返回摘要，完整内容必须再调 get_prompt。不传 team_id 时默认搜索全部可访问工作区。创建时不传 team_id 写入个人空间。删除必须 confirm=true。',
   tools: [
     {
       name: 'search_prompts',
@@ -95,6 +95,18 @@ const FALLBACK_ZH = {
     {
       name: 'list_teams',
       body: '列出可访问的个人空间和团队空间。个人空间的 team_id 为 null。',
+    },
+    {
+      name: 'create_prompt',
+      body: '新建提示词。需要 title、content；可选 description、tags、version、team_id。开启审批的团队返回待审批请求。',
+    },
+    {
+      name: 'update_prompt',
+      body: '按 id 更新 title、content、description、tags 或 version。仅创建者或团队管理员可直接写入。',
+    },
+    {
+      name: 'delete_prompt',
+      body: '按 id 永久删除。必须传 confirm=true。仅创建者或团队管理员可删除。',
     },
   ],
   promptTitle: 'MCP Prompt',
@@ -123,6 +135,14 @@ const FALLBACK_ZH = {
       title: '先选工作区再搜索',
       commands: ['先列出我的 PromptMinder 团队，再在其中搜 tag:sql。'],
     },
+    {
+      title: '写入提示词',
+      commands: ['把这段课程初始化说明存进 PromptMinder 个人空间，标题用 v4.4-G4S1-U1-L3 课程初始化。'],
+    },
+    {
+      title: '更新或删除',
+      commands: ['更新刚才那条提示词的标签为课程，确认后删除旧草稿。'],
+    },
   ],
   discoveryTitle: '发现与授权端点',
   discoveryDescription: '兼容 RFC 9728 / RFC 8414 的客户端可以自动发现资源服务器和授权服务器，不必手写 OAuth 细节。',
@@ -140,6 +160,10 @@ const FALLBACK_ZH = {
     {
       title: '搜不到结果',
       body: '先调用 list_teams 确认工作区。不传 team_id 会搜全部可访问空间；个人空间不要传团队 id。试试更短的词或 /标题快捷方式。',
+    },
+    {
+      title: '无法更新或删除',
+      body: '只有创建者或团队管理员能直接改写。删除还必须 confirm=true。开启审批的团队会先生成待审批请求。',
     },
     {
       title: 'Incompatible auth server / DCR',
@@ -161,12 +185,12 @@ const FALLBACK_EN = {
   pageBadge: 'Documentation',
   pageTitle: 'MCP install guide',
   pageStatus: 'oauth',
-  pageDescription: 'This page explains what the PromptMinder remote MCP can do and how to add it to Cursor, Claude, ChatGPT, and other AI clients. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.',
+  pageDescription: 'This page explains what the PromptMinder remote MCP can do and how to add it to Cursor, Claude, ChatGPT, and other AI clients. After one OAuth approval, agents can look up and manage your prompts.',
   backAction: 'Back to MCP settings',
   overviewCards: [
     {
       title: 'Features',
-      body: 'Read-only lookup: search prompt summaries, load full content by id, and list accessible workspaces. Clients can also call the prompt MCP prompt.',
+      body: 'Full CRUD: search summaries, load full content by id, create/update/delete prompts, and list accessible workspaces. Clients can also call the prompt MCP prompt.',
     },
     {
       title: 'Auth',
@@ -218,7 +242,7 @@ const FALLBACK_EN = {
   otherTitle: 'Other MCP clients',
   otherDescription: 'Any client that supports Streamable HTTP and OAuth can use this server URL.',
   toolsTitle: 'What agents can do now',
-  toolsDescription: 'The MVP is read-only lookup. search_prompts returns summaries; full content requires get_prompt. Omit team_id to search every workspace you can access.',
+  toolsDescription: 'search_prompts returns summaries; full content requires get_prompt. Omit team_id to search every accessible workspace. Omit team_id on create to write to the personal workspace. delete_prompt requires confirm=true.',
   tools: [
     {
       name: 'search_prompts',
@@ -231,6 +255,18 @@ const FALLBACK_EN = {
     {
       name: 'list_teams',
       body: 'List personal and team workspaces. Personal workspace uses a null team id.',
+    },
+    {
+      name: 'create_prompt',
+      body: 'Create a prompt. Requires title and content; optional description, tags, version, and team_id. Approval-enabled teams return a pending request.',
+    },
+    {
+      name: 'update_prompt',
+      body: 'Update title, content, description, tags, or version by id. Only the creator or team managers can write immediately.',
+    },
+    {
+      name: 'delete_prompt',
+      body: 'Permanently delete by id. Requires confirm=true. Only the creator or team managers can delete.',
     },
   ],
   promptTitle: 'MCP prompt',
@@ -259,6 +295,14 @@ const FALLBACK_EN = {
       title: 'Pick a workspace first',
       commands: ['List my PromptMinder teams, then search tag:sql in one of them.'],
     },
+    {
+      title: 'Create a prompt',
+      commands: ['Save this lesson-init note to my PromptMinder personal workspace with title v4.4-G4S1-U1-L3 course setup.'],
+    },
+    {
+      title: 'Update or delete',
+      commands: ['Update that prompt tag to course, then delete the old draft after I confirm.'],
+    },
   ],
   discoveryTitle: 'Discovery endpoints',
   discoveryDescription: 'Clients that implement RFC 9728 and RFC 8414 can discover the resource and authorization servers without hard-coding OAuth details.',
@@ -276,6 +320,10 @@ const FALLBACK_EN = {
     {
       title: 'No matches',
       body: 'Call list_teams first. Omitting team_id searches every accessible workspace; do not pass a team id for personal scope. Try a shorter phrase or a /title shortcut.',
+    },
+    {
+      title: 'Cannot update or delete',
+      body: 'Only the creator or team managers can write immediately. Deletion also requires confirm=true. Approval-enabled teams create a pending change request first.',
     },
     {
       title: 'Incompatible auth server / DCR',

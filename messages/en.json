@@ -227,7 +227,7 @@
     "pageBadge": "Settings",
     "pageTitle": "MCP",
     "pageStatus": "oauth",
-    "pageDescription": "Connect PromptMinder to Cursor, Claude, ChatGPT, or any MCP-capable agent. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.",
+    "pageDescription": "Connect PromptMinder to Cursor, Claude, ChatGPT, or any MCP-capable agent. After one OAuth approval, agents can search, create, update, and delete your prompts.",
     "backAction": "Back to CLI Tokens",
     "signInTitle": "Sign in to connect MCP",
     "signInDescription": "MCP uses Clerk OAuth. After you sign in, add this URL to any MCP-compatible client.",
@@ -247,6 +247,18 @@
       {
         "name": "list_teams",
         "body": "List personal and team workspaces. Omit team_id to search everything you can access."
+      },
+      {
+        "name": "create_prompt",
+        "body": "Create a prompt. Omit team_id to save in the personal workspace. Approval-enabled teams return a pending request."
+      },
+      {
+        "name": "update_prompt",
+        "body": "Update title, content, description, tags, or version by id. Only the creator or team managers can write immediately."
+      },
+      {
+        "name": "delete_prompt",
+        "body": "Permanently delete a prompt by id. Requires confirm=true. Only the creator or team managers can delete."
       }
     ],
     "shortcutTitle": "Lookup shortcuts",
@@ -274,12 +286,12 @@
       "pageBadge": "Documentation",
       "pageTitle": "MCP install guide",
       "pageStatus": "oauth",
-      "pageDescription": "This page explains what the PromptMinder remote MCP can do and how to add it to Cursor, Claude, ChatGPT, and other AI clients. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.",
+      "pageDescription": "This page explains what the PromptMinder remote MCP can do and how to add it to Cursor, Claude, ChatGPT, and other AI clients. After one OAuth approval, agents can look up and manage your prompts.",
       "backAction": "Back to MCP settings",
       "overviewCards": [
         {
           "title": "Features",
-          "body": "Read-only lookup: search prompt summaries, load full content by id, and list accessible workspaces. Clients can also call the prompt MCP prompt."
+          "body": "Full CRUD: search summaries, load full content by id, create/update/delete prompts, and list accessible workspaces. Clients can also call the prompt MCP prompt."
         },
         {
           "title": "Auth",
@@ -305,7 +317,7 @@
       "otherTitle": "Other MCP clients",
       "otherDescription": "Any client that supports Streamable HTTP and OAuth can use this server URL.",
       "toolsTitle": "What agents can do now",
-      "toolsDescription": "The MVP is read-only lookup. search_prompts returns summaries; full content requires get_prompt. Omit team_id to search every workspace you can access.",
+      "toolsDescription": "search_prompts returns summaries; full content requires get_prompt. Omit team_id to search every accessible workspace. Omit team_id on create to write to the personal workspace. delete_prompt requires confirm=true.",
       "promptTitle": "MCP prompt",
       "promptDescription": "The prompt MCP prompt looks up a query. A single high-confidence match returns full content; multiple matches list ids so the client can call get_prompt.",
       "shortcutTitle": "Lookup shortcuts",

@@ -1,6 +1,7 @@
 import { registerPromptMinderMcp } from '@/lib/mcp/tools.js'
 import { requireMcpUserId } from '@/lib/mcp/auth.js'
 import { ApiError } from '@/lib/api-error.js'
+import { createMcpPrompt, deleteMcpPrompt, updateMcpPrompt } from '@/lib/mcp/mutations.js'
 import { getMcpPrompt, listMcpWorkspaces, resolveMcpPromptContent, searchMcpPrompts } from '@/lib/mcp/prompts.js'
 
 jest.mock('@/lib/mcp/auth.js', () => ({
@@ -14,8 +15,14 @@ jest.mock('@/lib/mcp/prompts.js', () => ({
   searchMcpPrompts: jest.fn(),
 }))
 
+jest.mock('@/lib/mcp/mutations.js', () => ({
+  createMcpPrompt: jest.fn(),
+  deleteMcpPrompt: jest.fn(),
+  updateMcpPrompt: jest.fn(),
+}))
+
 describe('MCP tool registration', () => {
-  it('应该注册搜索、获取和团队工具', async () => {
+  it('应该注册搜索、获取、团队和增删改工具', async () => {
     const server = {
       registerTool: jest.fn(),
       registerPrompt: jest.fn(),
@@ -24,6 +31,9 @@ describe('MCP tool registration', () => {
     searchMcpPrompts.mockResolvedValue({ matches: [{ id: 'prompt-1', title: 'Code Review' }] })
     getMcpPrompt.mockResolvedValue({ id: 'prompt-1', content: 'Review this' })
     listMcpWorkspaces.mockResolvedValue({ workspaces: [{ id: null, name: 'Personal' }] })
+    createMcpPrompt.mockResolvedValue({ mode: 'created', prompt: { id: 'prompt-2', title: 'New' } })
+    updateMcpPrompt.mockResolvedValue({ mode: 'updated', prompt: { id: 'prompt-1', title: 'Updated' } })
+    deleteMcpPrompt.mockResolvedValue({ mode: 'deleted', id: 'prompt-1' })
 
     registerPromptMinderMcp(server)
 
@@ -31,6 +41,9 @@ describe('MCP tool registration', () => {
       'search_prompts',
       'get_prompt',
       'list_teams',
+      'create_prompt',
+      'update_prompt',
+      'delete_prompt',
     ])
     expect(server.registerPrompt).toHaveBeenCalledWith('prompt', expect.any(Object), expect.any(Function))
 
@@ -48,6 +61,36 @@ describe('MCP tool registration', () => {
     const listResult = await listHandler({}, {})
     expect(listMcpWorkspaces).toHaveBeenCalledWith('user-1')
     expect(listResult.content[0].text).toContain('Personal')
+
+    const createHandler = server.registerTool.mock.calls[3][2]
+    const createResult = await createHandler({ title: 'New', content: 'Body', tags: 'dev' }, {})
+    expect(createMcpPrompt).toHaveBeenCalledWith('user-1', {
+      title: 'New',
+      content: 'Body',
+      description: undefined,
+      tags: 'dev',
+      version: undefined,
+      teamId: undefined,
+    })
+    expect(createResult.content[0].text).toContain('prompt-2')
+
+    const updateHandler = server.registerTool.mock.calls[4][2]
+    const updateResult = await updateHandler({ id: 'prompt-1', title: 'Updated' }, {})
+    expect(updateMcpPrompt).toHaveBeenCalledWith('user-1', {
+      id: 'prompt-1',
+      teamId: undefined,
+      title: 'Updated',
+      content: undefined,
+      description: undefined,
+      tags: undefined,
+      version: undefined,
+    })
+    expect(updateResult.content[0].text).toContain('Updated')
+
+    const deleteHandler = server.registerTool.mock.calls[5][2]
+    const deleteResult = await deleteHandler({ id: 'prompt-1', confirm: true }, {})
+    expect(deleteMcpPrompt).toHaveBeenCalledWith('user-1', { id: 'prompt-1', teamId: undefined, confirm: true })
+    expect(deleteResult.content[0].text).toContain('deleted')
   })
 
   it('应该把业务错误转成 MCP error result', async () => {

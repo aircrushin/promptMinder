@@ -40,6 +40,9 @@ describe('MCP docs page', () => {
 
     expect(screen.getByText('MCP install guide')).toBeInTheDocument()
     expect(screen.getByText('search_prompts')).toBeInTheDocument()
+    expect(screen.getByText('create_prompt')).toBeInTheDocument()
+    expect(screen.getByText('update_prompt')).toBeInTheDocument()
+    expect(screen.getByText('delete_prompt')).toBeInTheDocument()
     expect(screen.getAllByText('/code-review').length).toBeGreaterThan(0)
     expect(screen.getAllByText(/claude mcp add --transport http promptminder/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/mcp-remote/).length).toBeGreaterThan(0)
@@ -59,6 +62,9 @@ describe('MCP docs page', () => {
 
     expect(screen.getByText('MCP 接入说明')).toBeInTheDocument()
     expect(screen.getByText('search_prompts')).toBeInTheDocument()
+    expect(screen.getByText('create_prompt')).toBeInTheDocument()
+    expect(screen.getByText('update_prompt')).toBeInTheDocument()
+    expect(screen.getByText('delete_prompt')).toBeInTheDocument()
     expect(screen.getAllByText('/code-review').length).toBeGreaterThan(0)
     expect(screen.getAllByText(/claude mcp add --transport http promptminder/).length).toBeGreaterThan(0)
     expect(screen.getByText('帮我在 PromptMinder 里找周报相关提示词。')).toBeInTheDocument()

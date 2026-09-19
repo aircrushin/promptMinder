@@ -23,7 +23,7 @@ const FALLBACK_ZH = {
   pageBadge: '设置',
   pageTitle: 'MCP',
   pageStatus: 'oauth',
-  pageDescription: '把 PromptMinder 接到 Cursor、Claude、ChatGPT 或其他 AI agent。授权一次后，就能用模糊查询或斜杠快捷方式取出你的提示词。',
+  pageDescription: '把 PromptMinder 接到 Cursor、Claude、ChatGPT 或其他 AI agent。授权一次后，就能查找、创建、更新和删除你的提示词。',
   backAction: '返回 CLI Tokens',
   docsAction: '查看完整文档',
   signInTitle: '先登录再连接 MCP',
@@ -44,6 +44,18 @@ const FALLBACK_ZH = {
     {
       name: 'list_teams',
       body: '查看可访问的个人空间和团队空间。不传 team_id 时默认搜全部。',
+    },
+    {
+      name: 'create_prompt',
+      body: '新建提示词。不传 team_id 写入个人空间；开启审批的团队会返回待审批请求。',
+    },
+    {
+      name: 'update_prompt',
+      body: '按 id 更新标题、内容、描述、标签或版本。仅创建者或团队管理员可直接写入。',
+    },
+    {
+      name: 'delete_prompt',
+      body: '按 id 永久删除提示词。必须传 confirm=true。仅创建者或团队管理员可删除。',
     },
   ],
   shortcutTitle: '查询快捷方式',
@@ -72,7 +84,7 @@ const FALLBACK_EN = {
   pageBadge: 'Settings',
   pageTitle: 'MCP',
   pageStatus: 'oauth',
-  pageDescription: 'Connect PromptMinder to Cursor, Claude, ChatGPT, or any MCP-capable agent. After one OAuth approval, agents can fetch your prompts with fuzzy queries or slash shortcuts.',
+  pageDescription: 'Connect PromptMinder to Cursor, Claude, ChatGPT, or any MCP-capable agent. After one OAuth approval, agents can search, create, update, and delete your prompts.',
   backAction: 'Back to CLI Tokens',
   docsAction: 'Full MCP docs',
   signInTitle: 'Sign in to connect MCP',
@@ -93,6 +105,18 @@ const FALLBACK_EN = {
     {
       name: 'list_teams',
       body: 'List personal and team workspaces. Omit team_id to search everything you can access.',
+    },
+    {
+      name: 'create_prompt',
+      body: 'Create a prompt. Omit team_id to save in the personal workspace. Approval-enabled teams return a pending request.',
+    },
+    {
+      name: 'update_prompt',
+      body: 'Update title, content, description, tags, or version by id. Only the creator or team managers can write immediately.',
+    },
+    {
+      name: 'delete_prompt',
+      body: 'Permanently delete a prompt by id. Requires confirm=true. Only the creator or team managers can delete.',
     },
   ],
   shortcutTitle: 'Lookup shortcuts',

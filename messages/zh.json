@@ -231,7 +231,7 @@
     "pageBadge": "设置",
     "pageTitle": "MCP",
     "pageStatus": "oauth",
-    "pageDescription": "把 PromptMinder 接到 Cursor、Claude、ChatGPT 或其他 AI agent。授权一次后，就能用模糊查询或斜杠快捷方式取出你的提示词。",
+    "pageDescription": "把 PromptMinder 接到 Cursor、Claude、ChatGPT 或其他 AI agent。授权一次后，就能查找、创建、更新和删除你的提示词。",
     "backAction": "返回 CLI Tokens",
     "signInTitle": "先登录再连接 MCP",
     "signInDescription": "MCP 使用 Clerk OAuth 授权。登录后即可把这个地址加到任意支持 MCP 的客户端。",
@@ -251,6 +251,18 @@
       {
         "name": "list_teams",
         "body": "查看可访问的个人空间和团队空间。不传 team_id 时默认搜全部。"
+      },
+      {
+        "name": "create_prompt",
+        "body": "新建提示词。不传 team_id 写入个人空间；开启审批的团队会返回待审批请求。"
+      },
+      {
+        "name": "update_prompt",
+        "body": "按 id 更新标题、内容、描述、标签或版本。仅创建者或团队管理员可直接写入。"
+      },
+      {
+        "name": "delete_prompt",
+        "body": "按 id 永久删除提示词。必须传 confirm=true。仅创建者或团队管理员可删除。"
       }
     ],
     "shortcutTitle": "查询快捷方式",
@@ -278,12 +290,12 @@
       "pageBadge": "文档",
       "pageTitle": "MCP 接入说明",
       "pageStatus": "oauth",
-      "pageDescription": "这页集中说明 PromptMinder 远程 MCP 能做什么，以及如何把它装进 Cursor、Claude、ChatGPT 和其他 AI 客户端。授权一次后，agent 就能用模糊查询或斜杠快捷方式取出你的提示词。",
+      "pageDescription": "这页集中说明 PromptMinder 远程 MCP 能做什么，以及如何把它装进 Cursor、Claude、ChatGPT 和其他 AI 客户端。授权一次后，agent 就能查找并管理你的提示词。",
       "backAction": "返回 MCP 设置",
       "overviewCards": [
         {
           "title": "功能",
-          "body": "只读查找：搜索提示词摘要、按 id 取完整内容、列出可访问工作区。客户端也可调用名为 prompt 的 MCP prompt。"
+          "body": "完整增删改查：搜索摘要、按 id 取完整内容、创建/更新/删除提示词，并列出可访问工作区。客户端也可调用名为 prompt 的 MCP prompt。"
         },
         {
           "title": "授权",
@@ -309,7 +321,7 @@
       "otherTitle": "其他 MCP 客户端",
       "otherDescription": "任意支持 Streamable HTTP 和 OAuth 的客户端，把服务器 URL 设为这个地址即可。",
       "toolsTitle": "当前可用能力",
-      "toolsDescription": "MVP 只开放只读查找。search_prompts 返回摘要，完整内容必须再调 get_prompt。不传 team_id 时默认搜索你能访问的全部工作区。",
+      "toolsDescription": "search_prompts 返回摘要，完整内容必须再调 get_prompt。不传 team_id 时默认搜索全部可访问工作区。创建时不传 team_id 写入个人空间。删除必须 confirm=true。",
       "promptTitle": "MCP Prompt",
       "promptDescription": "名为 prompt 的 MCP prompt 会按 query 查找。唯一高置信匹配时直接返回完整内容；多条结果会列出 id，再调用 get_prompt。",
       "shortcutTitle": "查询快捷方式",
