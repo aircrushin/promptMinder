@@ -21,7 +21,7 @@ jest.mock('lucide-react', () => ({
   Plug: (props) => <svg data-testid="plug-icon" {...props} />,
   ShieldCheck: (props) => <svg data-testid="shield-check-icon" {...props} />,
   TerminalSquare: (props) => <svg data-testid="terminal-square-icon" {...props} />,
-  WandSparkles: (props) => <svg data-testid="wand-sparkles-icon" {...props} />,
+  Wand2: (props) => <svg data-testid="wand-sparkles-icon" {...props} />,
   Wrench: (props) => <svg data-testid="wrench-icon" {...props} />,
 }))
 

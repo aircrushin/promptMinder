@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Settings2, Send, Check, Copy, HelpCircle, Trash2, User, Bot, Edit3, RotateCw } from "lucide-react"
+import { Settings2, Send, Check, Copy, HelpCircle, Trash2, User, Bot, Pen, RotateCw } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -985,7 +985,7 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
                           }}
                           title={t.chatTest.editMessageTooltip}
                         >
-                          <Edit3 className="h-3.5 w-3.5" />
+                          <Pen className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>

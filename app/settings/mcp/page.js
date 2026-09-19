@@ -11,7 +11,7 @@ import {
   Plug,
   ShieldCheck,
   TerminalSquare,
-  WandSparkles,
+  Wand2,
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { cn } from '@/lib/utils'
@@ -266,7 +266,7 @@ export default function McpSettingsPage() {
 
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <WandSparkles className="h-4 w-4 text-black/35" />
+            <Wand2 className="h-4 w-4 text-black/35" />
             <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black">{translations.toolsTitle}</h2>
           </div>
           <div className="grid gap-px bg-black md:grid-cols-3">

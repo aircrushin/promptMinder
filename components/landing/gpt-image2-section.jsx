@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowRight, ImageIcon, Music2, Sparkles } from 'lucide-react';
+import { ArrowRight, Image as ImageIcon, Music2, Sparkles } from 'lucide-react';
 import { gptImage2Prompts } from '@/app/gpt-image2/data';
 import { sunoPrompts } from '@/app/suno/data';
 

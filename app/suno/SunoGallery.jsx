@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { useAuth, useClerk } from '@clerk/nextjs';
-import { Check, Copy, ImageIcon, Import, Search, Sparkles } from 'lucide-react';
+import { Check, Copy, Image as ImageIcon, Import, Search, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';

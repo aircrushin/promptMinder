@@ -12,7 +12,7 @@ import {
   Plug,
   ShieldCheck,
   TerminalSquare,
-  WandSparkles,
+  Wand2,
   Wrench,
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -560,7 +560,7 @@ export default function McpDocsPage() {
 
         <section className="space-y-4">
           <SectionTitle
-            icon={WandSparkles}
+            icon={Wand2}
             title={translations.toolsTitle}
             description={translations.toolsDescription}
           />

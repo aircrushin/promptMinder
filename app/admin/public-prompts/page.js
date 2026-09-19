@@ -32,7 +32,7 @@ import {
 import {
   Search,
   Plus,
-  Edit,
+  Pencil,
   Trash2,
   FileText,
   Loader2,
@@ -597,7 +597,7 @@ export default function AdminPublicPromptsPage() {
                             size="icon"
                             onClick={() => openEditDialog(prompt)}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>编辑</TooltipContent>
@@ -758,7 +758,7 @@ export default function AdminPublicPromptsPage() {
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
+                <Pencil className="h-5 w-5" />
                 编辑提示词
               </DialogTitle>
               <DialogDescription>修改提示词信息</DialogDescription>
