@@ -1,6 +1,6 @@
 ---
 name: promptminder-cli
-description: Use when running promptminder or promptminder-agent commands, setting PROMPTMINDER_TOKEN, passing --team for workspace scoping, handling JSON stderr errors like "Missing token" or HTTP 401, or using the agent wrapper with dot-notation actions and --input JSON.
+description: Use when running PromptMinder CLI or agent-wrapper commands, configuring its token, or debugging team-scoped JSON I/O errors.
 ---
 
 # PromptMinder CLI

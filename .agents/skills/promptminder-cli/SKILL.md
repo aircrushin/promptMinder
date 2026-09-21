@@ -1,6 +1,6 @@
 ---
 name: promptminder-cli
-description: Use when running promptminder or promptminder-agent commands, setting PROMPTMINDER_TOKEN, passing --team for workspace scoping, handling JSON stderr errors like "Missing token" or HTTP 401, or using the agent wrapper with dot-notation actions and --input JSON.
+description: Use when running PromptMinder CLI or agent-wrapper commands, configuring its token, or debugging team-scoped JSON I/O errors.
 metadata:
   version: 1.0.0
 license: MIT
@@ -95,9 +95,9 @@ Available actions: `team.list`, `prompt.list`, `prompt.get`, `prompt.create`, `p
 
 Run `promptminder-agent help` for the full list with input field requirements.
 
-## Workspace Skill packages (0.2.0, unreleased)
+## Workspace Skill packages
 
-As of 2026-09-10, npm latest is 0.1.3. Check `promptminder help` before using the following repository-only 0.2.0 commands; do not assume a public npm installation supports them.
+These commands may exist only in this repository or a newer CLI build. Run `promptminder help` before using them; do not infer support from the installed package version.
 
 Singular `skill` manages workspace packages; plural `skills` manages the bundled CLI instruction skill.
 
