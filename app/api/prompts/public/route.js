@@ -4,6 +4,30 @@ import { auth } from '@clerk/nextjs/server'
 import { eq, and, desc, asc, inArray, count as countFn } from 'drizzle-orm'
 import { publicPrompts, promptLikes } from '@/drizzle/schema/index.js'
 
+const categoryCache = new Map()
+const CATEGORY_CACHE_TTL_MS = 5 * 60 * 1000
+
+function getCategories(language) {
+    const now = Date.now()
+    const cached = categoryCache.get(language)
+    if (cached && cached.expiresAt > now) {
+        return cached.promise
+    }
+
+    // ponytail: process-local five-minute cache; invalidate on publish if freshness matters.
+    const promise = db
+        .selectDistinct({ category: publicPrompts.category })
+        .from(publicPrompts)
+        .where(eq(publicPrompts.language, language))
+        .then((rows) => rows.map(({ category }) => ({ category })))
+        .catch((error) => {
+            categoryCache.delete(language)
+            throw error
+        })
+    categoryCache.set(language, { expiresAt: now + CATEGORY_CACHE_TTL_MS, promise })
+    return promise
+}
+
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url)
@@ -13,6 +37,7 @@ export async function GET(request) {
         const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
         const sortBy = searchParams.get('sortBy') || 'created_at'
         const sortOrder = searchParams.get('sortOrder') || 'desc'
+        const includeCategories = searchParams.get('includeCategories') !== 'false'
 
         const { userId } = await auth()
 
@@ -23,20 +48,13 @@ export async function GET(request) {
         }
         const whereCondition = and(...conditions)
 
-        // Count total
-        const countResult = await db.select({ value: countFn() }).from(publicPrompts).where(whereCondition)
-        const total = countResult[0]?.value || 0
-        const totalPages = Math.ceil(total / pageSize)
-        const currentPage = Math.max(1, Math.min(page, totalPages || 1))
-        const offset = (currentPage - 1) * pageSize
-
-        // Determine sort
+        // The first page is the hot path; run all independent reads together.
         const validSortFields = { created_at: publicPrompts.createdAt, likes: publicPrompts.likes }
         const orderCol = validSortFields[sortBy] || publicPrompts.createdAt
         const orderFn = sortOrder === 'asc' ? asc : desc
-
-        // Fetch data
-        const dataRows = await db
+        const requestedPage = Math.max(1, page)
+        const requestedOffset = (requestedPage - 1) * pageSize
+        const fetchRows = (offset) => db
             .select({
                 id: publicPrompts.id,
                 title: publicPrompts.title,
@@ -51,6 +69,21 @@ export async function GET(request) {
             .orderBy(orderFn(orderCol))
             .limit(pageSize)
             .offset(offset)
+        const [countResult, categoriesData, initialDataRows] = await Promise.all([
+            db.select({ value: countFn() }).from(publicPrompts).where(whereCondition),
+            includeCategories
+                ? getCategories(language)
+                : Promise.resolve([]),
+            fetchRows(requestedOffset)
+        ])
+        const total = countResult[0]?.value || 0
+        const totalPages = Math.ceil(total / pageSize)
+        const currentPage = Math.max(1, Math.min(page, totalPages || 1))
+        const offset = (currentPage - 1) * pageSize
+
+        const dataRows = currentPage === requestedPage
+            ? initialDataRows
+            : await fetchRows(offset)
 
         // Get user liked status
         let userLikedPrompts = new Set()
@@ -75,12 +108,6 @@ export async function GET(request) {
             likes: p.likes || 0,
             userLiked: userLikedPrompts.has(p.id)
         }))
-
-        // Get all categories
-        const categoriesData = await db
-            .select({ category: publicPrompts.category })
-            .from(publicPrompts)
-            .where(eq(publicPrompts.language, language))
 
         const categories = [...new Set(categoriesData.map(c => c.category).filter(Boolean))]
 

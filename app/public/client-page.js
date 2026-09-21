@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { PromptCard } from '@/components/prompt/PromptCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,7 @@ export default function PublicPromptsClient() {
     
     // 分类筛选状态
     const [categories, setCategories] = useState([]);
+    const categoriesLoadedRef = useRef(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     
     // 排序状态
@@ -73,6 +74,11 @@ export default function PublicPromptsClient() {
             behavior: 'smooth'
         });
     };
+
+    useEffect(() => {
+        categoriesLoadedRef.current = false;
+        setCategories([]);
+    }, [language]);
     
     useEffect(() => {
         const fetchPrompts = async () => {
@@ -87,13 +93,18 @@ export default function PublicPromptsClient() {
                     sortBy: sortBy,
                     sortOrder: 'desc'
                 });
+                const shouldLoadCategories = !categoriesLoadedRef.current;
+                params.set('includeCategories', String(shouldLoadCategories));
                 if (selectedCategory) {
                     params.set('category', selectedCategory);
                 }
                 
                 const data = await apiClient.request(`/api/prompts/public?${params.toString()}`);
                 setPrompts(data.prompts || []);
-                setCategories(data.categories || []);
+                if (shouldLoadCategories && Array.isArray(data.categories)) {
+                    setCategories(data.categories);
+                    categoriesLoadedRef.current = true;
+                }
                 setPagination(data.pagination || {
                     total: 0,
                     totalPages: 0,
