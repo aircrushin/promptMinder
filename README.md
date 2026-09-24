@@ -50,7 +50,7 @@
 ### 环境要求
 
 - Node.js 20.0 或更高版本
-- pnpm 10.x（推荐，项目脚本以 `pnpm` 为主）
+- pnpm 11.x（与 `package.json` 中 `packageManager` 一致；项目脚本以 `pnpm` 为主）
 - Git
 
 ### 本地开发
@@ -58,7 +58,7 @@
 1. **克隆项目**
 
 ```bash
-git clone https://github.com/your-username/promptMinder.git
+git clone https://github.com/aircrushin/promptMinder.git
 cd promptMinder
 ```
 
@@ -72,42 +72,45 @@ pnpm install
 3. **配置环境变量**
    创建 `.env.local` 文件并配置以下变量：
 
+完整变量清单见仓库根目录 [`.env.example`](.env.example)。本地开发至少配置：
+
 ```env
-# 数据库配置 (Neon PostgreSQL)
-DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
-
-# Supabase 配置 (仅用于文件存储)
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Clerk 认证配置
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
+# Clerk 认证
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-
-# NextAuth 配置
-AUTH_SECRET=your_auth_secret
-
-# AI API 配置
-ZHIPU_API_KEY=your_zhipu_api_key
-
-# GitHub OAuth (可选)
-GITHUB_ID=your_github_app_id
-GITHUB_SECRET=your_github_app_secret
-
-# 登录后跳转（可选）
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/prompts
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/prompts
 
-# 管理员邮箱 / Agent 调用（按需配置）
-ADMIN_EMAIL=admin@example.com
-LANGGRAPH_TOKEN=your_langgraph_token
-PROMPTMINDER_TOKEN=pm_xxx
+# 数据库 (Neon PostgreSQL)
+DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
 
-# 基础 URL
+# Supabase（文件存储等）
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+
+# AI（智谱用于生成/对话提炼；OpenAI 兼容端点用于 Playground 默认）
+ZHIPU_API_KEY=
+ZHIPUAI_API_KEY=
+OPENAI_COMPAT_API_KEY=
+OPENAI_COMPAT_URL=https://api.openai.com/v1
+
+# 管理员（逗号分隔，可选）
+ADMIN_EMAILS=admin@example.com
+
+# 应用 URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Skills 目录同步（`pnpm skills:sync`）
+SKILLS_SH_TOKEN=
+GITHUB_TOKEN=
+
+# CLI / Agent（可选）
+PROMPTMINDER_TOKEN=pm_xxx
 ```
+
+社交登录（如 GitHub）在 [Clerk 控制台](https://clerk.com/docs) 配置，无需在 `.env.local` 单独填写 GitHub App ID/Secret。
 
 4. **执行数据库迁移**
 
@@ -117,7 +120,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 pnpm db:migrate
 ```
 
-同步首批官方 Skills（需要 skills.sh 的 Vercel OIDC token）：
+同步首批官方 Skills（需配置 `SKILLS_SH_TOKEN`，或兼容的 `VERCEL_OIDC_TOKEN`）：
 
 ```bash
 pnpm skills:sync
@@ -153,7 +156,7 @@ promptminder team list
 
 脚本与 AI agent 可改用 `export PROMPTMINDER_TOKEN=pm_xxx`，无需再执行本地登录。认证优先级为 `--token` → `PROMPTMINDER_TOKEN` → 本地配置；旧环境变量会覆盖新保存的 token。
 
-截至 2026-09-10，npm 最新版本仍是 0.1.3。仓库 0.2.0 的工作区 `skill list/get/import/update/install` 命令尚未发布，详见[CLI 包文档](packages/promptminder-cli/README.md#workspace-skill-packages-020-unreleased)。
+截至 2026-09-24，npm 上 `@aircrushin/promptminder-cli` 最新版仍为 **0.1.3**。本仓库工作区 CLI 为 **0.2.0**，含 `skill list/get/import/update/install` 等命令，尚未发布到 npm，详见 [CLI 包文档](packages/promptminder-cli/README.md#workspace-skill-packages-020-unreleased)。
 
 ### CLI Agent Skill
 
@@ -244,7 +247,7 @@ pnpm db:studio     # 打开 Drizzle Studio 可视化管理数据库
    - `sql/teams.sql` — 团队与成员相关表
    - `sql/prompts.sql` — 提示词主表与版本数据
    - `sql/tags.sql` — 标签相关表
-   - `sql/projects.sql` — 项目组织相关表
+   - `sql/project.sql` — 项目组织相关表
    - `sql/contributions.sql` — 社区贡献与审核流程
 
 ## 🔄 团队审批协作说明
@@ -287,7 +290,7 @@ PromptMinder 内置 Skills 目录（路由：`/skills`），用于发现、审�
 pnpm skills:sync
 ```
 
-默认同步前 50 个精选 Skill；使用 `--limit=0` 同步全部精选项，或加 `--all` 切换到完整目录。同步前需配置 skills.sh 相关的 Vercel OIDC token。
+默认同步前 50 个精选 Skill；使用 `--limit=0` 同步全部精选项，或加 `--all` 切换到完整目录。同步前需配置 `SKILLS_SH_TOKEN`（或 `VERCEL_OIDC_TOKEN`）。
 
 ### 与 CLI Skill 的关系
 
