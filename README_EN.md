@@ -27,6 +27,8 @@ A professional prompt management platform that makes AI prompt management simple
 - ✅ **Team Collaboration** - Team creation, member management, and role-based permissions
 - ✅ **Prompt Contributions** - Community contribution features with review and publishing process
 - ✅ **Agent Skills Catalog** - Browse synced public skills, install them, or add them to your workspace
+- ✅ **Conversation method extraction** - Turn chats into goals, methods, variables, and corrections; review before private save
+- ✅ **Skill export** - Export prompts as local Skill ZIPs; catalog entries include synced text files and source metadata
 
 ### User Experience
 
@@ -48,7 +50,7 @@ A professional prompt management platform that makes AI prompt management simple
 ### Requirements
 
 - Node.js 20.0 or higher
-- pnpm 10.x (recommended; project scripts are documented with `pnpm`)
+- pnpm 11.x (matches `packageManager` in `package.json`; project scripts use `pnpm`)
 - Git
 
 ### Local Development
@@ -56,7 +58,7 @@ A professional prompt management platform that makes AI prompt management simple
 1. **Clone the project**
 
 ```bash
-git clone https://github.com/your-username/promptMinder.git
+git clone https://github.com/aircrushin/promptMinder.git
 cd promptMinder
 ```
 
@@ -70,42 +72,45 @@ pnpm install
 3. **Configure environment variables**
    Create a `.env.local` file and configure the following variables:
 
+See [`.env.example`](.env.example) at the repo root for the full list. For local development, configure at least:
+
 ```env
-# Database configuration (Neon PostgreSQL)
-DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
-
-# Supabase configuration (file storage only)
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Clerk authentication configuration
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-
-# NextAuth configuration
-AUTH_SECRET=your_auth_secret
-
-# AI API configuration
-ZHIPU_API_KEY=your_zhipu_api_key
-
-# GitHub OAuth (optional)
-GITHUB_ID=your_github_app_id
-GITHUB_SECRET=your_github_app_secret
-
-# Post-login redirects (optional)
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/prompts
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/prompts
 
-# Admin / agent integration (optional)
-ADMIN_EMAIL=admin@example.com
-LANGGRAPH_TOKEN=your_langgraph_token
-PROMPTMINDER_TOKEN=pm_xxx
+# Database (Neon PostgreSQL)
+DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
 
-# Base URL
+# Supabase (file storage)
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+
+# AI (Zhipu for generation/import; OpenAI-compatible defaults for Playground)
+ZHIPU_API_KEY=
+ZHIPUAI_API_KEY=
+OPENAI_COMPAT_API_KEY=
+OPENAI_COMPAT_URL=https://api.openai.com/v1
+
+# Admin (comma-separated, optional)
+ADMIN_EMAILS=admin@example.com
+
+# App URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Skills catalog sync (`pnpm skills:sync`)
+SKILLS_SH_TOKEN=
+GITHUB_TOKEN=
+
+# CLI / agents (optional)
+PROMPTMINDER_TOKEN=pm_xxx
 ```
+
+Configure social login (e.g. GitHub) in the [Clerk dashboard](https://clerk.com/docs); you do not need separate GitHub App env vars in `.env.local`.
 
 4. **Run database migrations**
 
@@ -115,7 +120,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 pnpm db:migrate
 ```
 
-Sync the first batch of official Skills (requires a skills.sh Vercel OIDC token):
+Sync the first batch of official Skills (requires `SKILLS_SH_TOKEN`, or compatible `VERCEL_OIDC_TOKEN`):
 
 ```bash
 pnpm skills:sync
@@ -139,7 +144,7 @@ Regular users do not need any admin script to get started. Create a token in the
 https://www.prompt-minder.com/settings/cli-tokens
 ```
 
-Then install and use the CLI:
+Then install and use the CLI (Node.js ≥ 20):
 
 ```bash
 npm i -g @aircrushin/promptminder-cli
@@ -147,13 +152,20 @@ promptminder auth login --token pm_xxx
 promptminder team list
 ```
 
+Update with `npm i -g @aircrushin/promptminder-cli@latest`. As of 2026-09-24, npm’s latest is **0.1.3**; this repo’s workspace CLI is **0.2.0** with `skill list/get/import/update/install`, not yet published—see [CLI package docs](packages/promptminder-cli/README.md#workspace-skill-packages-020-unreleased).
+
+Scripts and agents can use `export PROMPTMINDER_TOKEN=pm_xxx` instead of local login. Auth precedence: `--token` → `PROMPTMINDER_TOKEN` → saved config; a stale env var overrides a newly saved token.
+
 ### CLI Agent Skill
 
 If you want AI agents like Cursor, Claude Code, or Codex CLI to properly use PromptMinder CLI, install the standalone skill repository first:
 
 ```bash
 npx skills add aircrushin/promptminder-cli-skill
+npx skills list
 ```
+
+Use `skills list` to verify installation; `skills find` searches the registry and does not validate local installs.
 
 Repository: `https://github.com/aircrushin/promptminder-cli-skill`
 
@@ -233,7 +245,7 @@ pnpm db:studio     # Open Drizzle Studio for visual database management
    - `sql/teams.sql` — team and membership tables
    - `sql/prompts.sql` — core prompt and version data
    - `sql/tags.sql` — tag-related tables
-   - `sql/projects.sql` — project organization tables
+   - `sql/project.sql` — project organization tables
    - `sql/contributions.sql` — community contribution and review flow
 
 ## 🔄 Team Workflow Notes
@@ -265,7 +277,7 @@ Sync the catalog from public sources with:
 pnpm skills:sync
 ```
 
-Defaults to the first 50 curated skills. Use `--limit=0` for all curated items, or `--all` for the full catalog. A skills.sh Vercel OIDC token is required.
+Defaults to the first 50 curated skills. Use `--limit=0` for all curated items, or `--all` for the full catalog. Set `SKILLS_SH_TOKEN` (or `VERCEL_OIDC_TOKEN`) before syncing.
 
 ### Relationship to the CLI Skill
 
