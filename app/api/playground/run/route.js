@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireUserId } from '@/lib/auth'
+import { ApiError } from '@/lib/api-error'
 import { db } from '@/lib/db.js'
-import { getOpenAIClientConfig } from '@/lib/openai-compat'
+import { getOpenAIClientConfig, validateExternalBaseURL } from '@/lib/openai-compat'
 
 const DEFAULT_API_KEY = process.env.OPENAI_COMPAT_API_KEY || ''
 const DEFAULT_BASE_URL = process.env.OPENAI_COMPAT_URL || 'https://api.openai.com/v1'
@@ -100,6 +101,7 @@ export async function POST(request) {
   const startTime = Date.now()
 
   try {
+    const userId = await requireUserId(request)
     const body = await request.json()
     const { prompt, systemPrompt, userPrompt, settings = {}, stream = true } = body
 
@@ -113,19 +115,39 @@ export async function POST(request) {
     } = settings
 
     const normalizedProvider = (provider || 'openai').toLowerCase()
-    let finalApiKey = apiKey || DEFAULT_API_KEY
-    let resolvedBaseURL = baseURL || PROVIDER_BASE_URLS[normalizedProvider] || DEFAULT_BASE_URL
+    const suppliedApiKey = typeof apiKey === 'string' ? apiKey.trim() : ''
+    const canonicalBaseURL = PROVIDER_BASE_URLS[normalizedProvider]
+    let finalApiKey = suppliedApiKey || DEFAULT_API_KEY
+    let resolvedBaseURL = baseURL || canonicalBaseURL || DEFAULT_BASE_URL
 
     if (useStoredKey) {
-      if (normalizedProvider === 'custom') {
+      if (!canonicalBaseURL || normalizedProvider === 'custom') {
         return NextResponse.json({ error: 'Stored credentials are only supported for known providers.' }, { status: 400 })
       }
-      const userId = await requireUserId(request)
       const storedKey = await getStoredProviderKey(db, userId, normalizedProvider)
       if (!storedKey) {
         return NextResponse.json({ error: `No saved API key found for ${normalizedProvider}.` }, { status: 400 })
       }
       finalApiKey = storedKey
+      resolvedBaseURL = canonicalBaseURL
+    } else if (!suppliedApiKey) {
+      const canonical = canonicalBaseURL || DEFAULT_BASE_URL
+      let requested
+      try {
+        requested = validateExternalBaseURL(resolvedBaseURL)
+      } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 })
+      }
+      if (requested !== validateExternalBaseURL(canonical)) {
+        return NextResponse.json({ error: 'A custom endpoint requires your own API key.' }, { status: 400 })
+      }
+      resolvedBaseURL = requested
+    } else {
+      try {
+        resolvedBaseURL = validateExternalBaseURL(resolvedBaseURL)
+      } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 })
+      }
     }
 
     if (!finalApiKey) {
@@ -180,6 +202,9 @@ export async function POST(request) {
   } catch (error) {
     console.error('Playground run error:', error)
 
+    if (error instanceof ApiError) {
+      return NextResponse.json({ error: error.message }, { status: error.status || 500 })
+    }
     if (error.status === 401) return NextResponse.json({ error: 'Invalid API key. Please check your API key and try again.' }, { status: 401 })
     if (error.status === 429) return NextResponse.json({ error: 'Rate limit exceeded. Please wait a moment and try again.' }, { status: 429 })
     if (error.status === 404) return NextResponse.json({ error: 'Model not found. Please check the model name and try again.' }, { status: 404 })

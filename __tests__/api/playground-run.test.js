@@ -18,6 +18,10 @@ if (typeof Response.json !== 'function') {
 import { POST } from '@/app/api/playground/run/route';
 
 // Mock OpenAI
+jest.mock('@/lib/auth', () => ({
+  requireUserId: jest.fn().mockResolvedValue('user_test'),
+}));
+
 jest.mock('openai', () => {
   return jest.fn().mockImplementation(() => ({
     chat: {
@@ -313,4 +317,3 @@ describe('POST /api/playground/run', () => {
     });
   });
 });
-

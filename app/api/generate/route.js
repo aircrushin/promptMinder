@@ -1,3 +1,6 @@
+import { requireUserId } from '@/lib/auth';
+import { ApiError } from '@/lib/api-error';
+
 const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
 
 const AGENT_SYSTEM_PROMPT = `# Role: 高级Prompt工程专家
@@ -70,6 +73,7 @@ const AGENT_SYSTEM_PROMPT = `# Role: 高级Prompt工程专家
 
 export async function POST(req) {
   try {
+    await requireUserId(req);
     const { text } = await req.json();
 
     const apiKey = process.env.ZHIPUAI_API_KEY || process.env.ZHIPU_API_KEY;
@@ -116,6 +120,12 @@ export async function POST(req) {
       },
     });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: error.status || 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
     console.error("Error in generate route:", error);
     return new Response(
       JSON.stringify({

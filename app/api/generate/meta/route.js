@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { requireUserId } from '@/lib/auth';
+import { ApiError } from '@/lib/api-error';
 
 const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
 
@@ -9,6 +11,7 @@ const SYSTEM_PROMPT = `你是一个AI提示词元数据生成助手。根据用�
 
 export async function POST(req) {
   try {
+    await requireUserId(req);
     const { content } = await req.json();
 
     if (!content?.trim()) {
@@ -58,6 +61,9 @@ export async function POST(req) {
       description: meta.description || '',
     });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return NextResponse.json({ error: error.message }, { status: error.status || 500 });
+    }
     console.error('Error in meta generate route:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

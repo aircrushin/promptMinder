@@ -3,6 +3,7 @@ import {
   isOrcaRouterEndpoint,
   ORCAROUTER_ATTRIBUTION_HEADERS,
   ORCAROUTER_BASE_URL,
+  validateExternalBaseURL,
 } from '@/lib/openai-compat'
 
 describe('openai-compat', () => {
@@ -46,6 +47,18 @@ describe('openai-compat', () => {
         apiKey: 'sk-test',
         baseURL: 'https://api.openai.com/v1',
       })
+    })
+  })
+
+  describe('validateExternalBaseURL', () => {
+    it('应该拒绝非 HTTPS 和本地 endpoint', () => {
+      expect(() => validateExternalBaseURL('http://example.com/v1')).toThrow()
+      expect(() => validateExternalBaseURL('https://127.0.0.1/v1')).toThrow()
+      expect(() => validateExternalBaseURL('https://[::1]/v1')).toThrow()
+    })
+
+    it('应该保留安全的 HTTPS endpoint 并去掉尾部斜杠', () => {
+      expect(validateExternalBaseURL('https://api.example.com/v1///')).toBe('https://api.example.com/v1')
     })
   })
 })

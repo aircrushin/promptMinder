@@ -58,46 +58,15 @@ describe('MCP dynamic client registration', () => {
     }))
   })
 
-  it('没有共享应用时应创建新的公开客户端', async () => {
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: [] }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          client_id: 'client_new',
-          name: 'PromptMinder MCP',
-          public: true,
-          created_at: '2026-01-01T00:00:00.000Z',
-        }),
-      })
-
-    const client = await registerDynamicClient({
-      redirect_uris: ['http://127.0.0.1:99/callback'],
-    })
-
-    expect(client.client_id).toBe('client_new')
-    expect(global.fetch).toHaveBeenNthCalledWith(
-      2,
-      'https://api.clerk.com/v1/oauth_applications',
-      expect.objectContaining({ method: 'POST' }),
-    )
-  })
-
-  it('已有应用且 URI 相同时应复用', async () => {
+  it('每次注册都应创建隔离的公开客户端', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        data: [{
-          id: 'oauthapp_1',
-          name: 'PromptMinder MCP',
-          client_id: 'client_existing',
-          public: true,
-          redirect_uris: ['http://127.0.0.1:99/callback'],
-          created_at: '2026-01-01T00:00:00.000Z',
-        }],
+        client_id: 'client_new',
+        name: 'Cursor',
+        public: true,
+        redirect_uris: ['http://127.0.0.1:99/callback'],
+        created_at: '2026-01-01T00:00:00.000Z',
       }),
     })
 
@@ -105,50 +74,50 @@ describe('MCP dynamic client registration', () => {
       redirect_uris: ['http://127.0.0.1:99/callback'],
     })
 
-    expect(client.client_id).toBe('client_existing')
+    expect(client.client_id).toBe('client_new')
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.clerk.com/v1/oauth_applications',
+      expect.objectContaining({ method: 'POST', body: expect.stringContaining('127.0.0.1:99') }),
+    )
+  })
+
+  it('不会复用其他客户端的注册信息', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        client_id: 'client_new',
+        name: 'Cursor',
+        public: true,
+        redirect_uris: ['http://127.0.0.1:99/callback'],
+      }),
+    })
+
+    const client = await registerDynamicClient({
+      redirect_uris: ['http://127.0.0.1:99/callback'],
+    })
+
+    expect(client.client_id).toBe('client_new')
     expect(global.fetch).toHaveBeenCalledTimes(1)
   })
 
-  it('已有应用缺少 URI 时应补上', async () => {
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          data: [{
-            id: 'oauthapp_1',
-            name: 'PromptMinder MCP',
-            client_id: 'client_existing',
-            public: true,
-            redirect_uris: ['http://127.0.0.1:1/callback'],
-            created_at: '2026-01-01T00:00:00.000Z',
-          }],
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          id: 'oauthapp_1',
-          client_id: 'client_existing',
-          name: 'PromptMinder MCP',
-          public: true,
-          redirect_uris: ['http://127.0.0.1:1/callback', 'http://127.0.0.1:2/callback'],
-          created_at: '2026-01-01T00:00:00.000Z',
-        }),
-      })
+  it('不会把其他客户端的 URI 合并进本次注册', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        client_id: 'client_new',
+        name: 'Cursor',
+        public: true,
+        redirect_uris: ['http://127.0.0.1:2/callback'],
+      }),
+    })
 
     const client = await registerDynamicClient({
       redirect_uris: ['http://127.0.0.1:2/callback'],
     })
 
-    expect(client.redirect_uris).toEqual([
-      'http://127.0.0.1:1/callback',
-      'http://127.0.0.1:2/callback',
-    ])
-    expect(global.fetch).toHaveBeenNthCalledWith(
-      2,
-      'https://api.clerk.com/v1/oauth_applications/oauthapp_1',
-      expect.objectContaining({ method: 'PATCH' }),
-    )
+    expect(client.redirect_uris).toEqual(['http://127.0.0.1:2/callback'])
+    expect(global.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('缺少密钥时应返回 503', async () => {

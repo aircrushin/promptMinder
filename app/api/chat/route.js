@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { getOpenAIClientConfig } from '@/lib/openai-compat';
+import { getOpenAIClientConfig, validateExternalBaseURL } from '@/lib/openai-compat';
+import { requireUserId } from '@/lib/auth';
+import { ApiError } from '@/lib/api-error';
 
 const DEFAULT_API_KEY = process.env.ZHIPU_API_KEY;
 const DEFAULT_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4';
 export async function POST(request) {
   try {
+    await requireUserId(request);
     const body = await request.json();
     const { 
       messages, 
@@ -18,16 +21,27 @@ export async function POST(request) {
       baseURL = DEFAULT_BASE_URL
     } = body;
 
-    const finalApiKey = apiKey || DEFAULT_API_KEY;
+    const suppliedApiKey = typeof apiKey === 'string' ? apiKey.trim() : '';
+    const finalApiKey = suppliedApiKey || DEFAULT_API_KEY;
     
     if (!finalApiKey) {
       throw new Error('未提供 API Key');
     }
 
-    // 创建 OpenAI 客户端实例，使用传入的 baseURL
+    let normalizedBaseURL;
+    try {
+      normalizedBaseURL = validateExternalBaseURL(baseURL);
+    } catch (error) {
+      throw new ApiError(400, error.message);
+    }
+    if (!suppliedApiKey && normalizedBaseURL !== validateExternalBaseURL(DEFAULT_BASE_URL)) {
+      throw new ApiError(400, 'A custom endpoint requires your own API key');
+    }
+
+    // 创建 OpenAI 客户端实例，使用经过校验的 endpoint
     const openai = new OpenAI(getOpenAIClientConfig({
       apiKey: finalApiKey,
-      baseURL,
+      baseURL: normalizedBaseURL,
     }));
     // 准备发送给 AI 的消息
     const aiMessages = [
@@ -79,9 +93,12 @@ export async function POST(request) {
       },
     });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return NextResponse.json({ error: error.message }, { status: error.status || 500 });
+    }
     return NextResponse.json(
       { error: error.message || '处理请求时发生错误' },
       { status: 500 }
     );
   }
-} 
+}
