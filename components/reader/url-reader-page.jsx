@@ -73,6 +73,46 @@ function resolveErrorMessage(code, fallbackMessage, translations) {
   return fallbackMessage || translations.errors?.INTERNAL_ERROR || '读取失败';
 }
 
+const BLOCKED_HOSTNAME_PATTERNS = [
+  /^localhost$/i,
+  /\.localhost$/i,
+  /\.local$/i,
+  /^0(\.0){0,3}$/,
+  /^127\./,
+  /^10\./,
+  /^169\.254\./,
+  /^192\.168\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^\[?::1\]?$/,
+  /^\[?::\]?$/,
+];
+
+function validateReaderUrl(rawInput) {
+  const raw = rawInput.trim();
+  const withScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw) ? raw : `https://${raw}`;
+
+  let url;
+  try {
+    url = new URL(withScheme);
+  } catch {
+    return 'INVALID_URL_FORMAT';
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return 'UNSUPPORTED_PROTOCOL';
+  }
+
+  if (url.username || url.password) {
+    return 'CREDENTIALS_NOT_ALLOWED';
+  }
+
+  if (BLOCKED_HOSTNAME_PATTERNS.some((pattern) => pattern.test(url.hostname))) {
+    return 'BLOCKED_HOST';
+  }
+
+  return null;
+}
+
 function UrlReaderPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
