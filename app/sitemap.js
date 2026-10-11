@@ -1,6 +1,7 @@
 import { desc } from 'drizzle-orm';
 import { publicPrompts } from '@/drizzle/schema/index.js';
 import { db } from '@/lib/db.js';
+import { PREMIUM_COLLECTION } from '@/lib/premium-skills-data.js';
 
 /**
  * Sitemap 配置
@@ -41,6 +42,12 @@ export default async function sitemap() {
       changeFrequency: 'daily',
       priority: 0.9,
     },
+    ...PREMIUM_COLLECTION.skills.map((skill) => ({
+      url: `${BASE_URL}/skills/premium/${skill.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    })),
     {
       url: `${BASE_URL}/settings/mcp/docs`,
       lastModified: now,

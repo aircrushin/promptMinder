@@ -50,6 +50,13 @@
       "when": 1788566401000,
       "tag": "0006_prompt_evaluations",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791676800000,
+      "tag": "0007_premium_collection_interest",
+      "breakpoints": true
     }
   ]
 }

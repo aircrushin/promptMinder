@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Search, ShieldCheck, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { PremiumCollection } from '@/components/skill/PremiumCollection'
 import {
   Select,
   SelectContent,
@@ -147,6 +148,8 @@ export function SkillCatalog({ skills, pagination, search, sort }) {
           </form>
         </div>
       </section>
+
+      <PremiumCollection />
 
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-4 flex items-center justify-between text-sm text-slate-500">

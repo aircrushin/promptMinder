@@ -4,6 +4,7 @@ export { publicPrompts, promptLikes, promptContributions } from './public.js'
 export { userFeedback, providerKeys, cliTokens } from './user.js'
 export { agentConversations, agentMessages } from './agent.js'
 export { catalogSkills } from './skills.js'
+export { premiumCollectionInterest } from './premium.js'
 export {
   promptChangeRequests,
   promptChangeComments,
