@@ -138,7 +138,7 @@ export function PromptGrid({
                       className={`h-9 w-9 sm:h-8 sm:w-8 transition-all duration-300 ${
                         isFavorited 
                           ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' 
-                          : 'text-gray-400 hover:bg-red-50 hover:text-red-500'
+                          : 'text-gray-400 hover:bg-red-50 hover:text-red-500 dark:text-muted-foreground dark:hover:bg-red-950/30 dark:hover:text-red-300'
                       }`}
                     >
                       <Heart className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current' : ''}`} />
@@ -174,7 +174,7 @@ export function PromptGrid({
                           onToggleSubscription?.(latestPrompt.id, isSubscribed);
                         }}
                         className={`h-9 w-9 sm:h-8 sm:w-8 ${
-                          isSubscribed ? 'text-blue-600 bg-blue-50' : 'hover:bg-accent hover:text-primary'
+                          isSubscribed ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/30' : 'hover:bg-accent hover:text-primary'
                         }`}
                       >
                         <Bell className={`h-4 w-4 ${isSubscribed ? 'fill-current' : ''}`} />
@@ -233,7 +233,7 @@ export function PromptGrid({
                   </div>
                 )}
                 {hasVariables && (
-                  <div className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full dark:bg-orange-950/30 dark:text-orange-300">
                     <svg
                       className="h-3 w-3"
                       fill="none"
@@ -260,7 +260,7 @@ export function PromptGrid({
                   </div>
                 )}
                 {latestPrompt.pending_count > 0 && (
-                  <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full dark:bg-amber-950/30 dark:text-amber-300">
                     <span>{latestPrompt.pending_count} 待审批</span>
                   </div>
                 )}

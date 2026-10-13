@@ -1,4 +1,10 @@
 {
+  "theme": {
+    "label": "外观",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
   "navbar": {
     "manage": "管理",
     "new": "新建",

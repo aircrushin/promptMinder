@@ -103,7 +103,7 @@ export default function CreateTeamPage() {
 
         <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
           <CardHeader className="pb-6">
-            <CardTitle className="flex items-center gap-3 text-3xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <CardTitle className="flex items-center gap-3 text-3xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent dark:text-foreground dark:bg-none">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Sparkles className="h-6 w-6 text-primary" />
               </div>

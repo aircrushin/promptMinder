@@ -38,10 +38,10 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLORS = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  reviewed: 'bg-blue-100 text-blue-800',
-  resolved: 'bg-green-100 text-green-800',
-  rejected: 'bg-gray-100 text-gray-800',
+  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-300',
+  reviewed: 'bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-300',
+  resolved: 'bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300',
+  rejected: 'bg-gray-100 text-gray-800 dark:bg-muted dark:text-foreground',
 };
 
 const STATUS_LABELS = {
@@ -212,9 +212,9 @@ export default function AdminFeedbackPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {item.type === 'feature_request' ? (
-                        <Lightbulb className="h-4 w-4 text-amber-500" />
+                        <Lightbulb className="h-4 w-4 text-amber-500 dark:text-amber-300" />
                       ) : (
-                        <Bug className="h-4 w-4 text-red-500" />
+                        <Bug className="h-4 w-4 text-red-500 dark:text-red-300" />
                       )}
                       <span className="text-sm">
                         {item.type === 'feature_request' ? '功能' : 'Bug'}
@@ -301,9 +301,9 @@ export default function AdminFeedbackPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedFeedback?.type === 'feature_request' ? (
-                <Lightbulb className="h-5 w-5 text-amber-500" />
+                <Lightbulb className="h-5 w-5 text-amber-500 dark:text-amber-300" />
               ) : (
-                <Bug className="h-5 w-5 text-red-500" />
+                <Bug className="h-5 w-5 text-red-500 dark:text-red-300" />
               )}
               {selectedFeedback?.type === 'feature_request'
                 ? '功能建议'
@@ -316,7 +316,7 @@ export default function AdminFeedbackPage() {
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-medium mb-2">反馈内容</h4>
-              <div className="text-sm text-muted-foreground whitespace-pre-wrap bg-slate-50 p-4 rounded-lg">
+              <div className="text-sm text-muted-foreground whitespace-pre-wrap bg-slate-50 p-4 rounded-lg dark:bg-muted">
                 {selectedFeedback?.description}
               </div>
             </div>

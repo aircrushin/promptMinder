@@ -327,7 +327,7 @@ export default function AdminContributionsPage() {
         <div className="mb-10 rounded-3xl border bg-gradient-to-br from-slate-900/5 via-background to-background p-8 shadow-sm dark:from-slate-900/30">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-foreground/5 px-4 py-1 text-xs tracking-wide text-muted-foreground backdrop-blur">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-foreground/5 px-4 py-1 text-xs tracking-wide text-muted-foreground backdrop-blur dark:border-border/20">
                 <Sparkles className="h-3.5 w-3.5" /> {t?.admin?.contributions?.workbenchTitle || "审核工作台"}
               </div>
               <div>
@@ -378,7 +378,7 @@ export default function AdminContributionsPage() {
                   "dark:via-slate-900/40 dark:to-slate-900/30"
                 )}
               >
-                <div className="absolute -right-12 top-1/2 h-32 w-32 -translate-y-1/2 rounded-full bg-white/10 blur-2xl" />
+                <div className="absolute -right-12 top-1/2 h-32 w-32 -translate-y-1/2 rounded-full bg-white/10 blur-2xl dark:bg-card/10" />
                 <CardHeader className="relative flex flex-row items-start justify-between space-y-0 pb-2">
                   <div>
                     <CardTitle className="text-sm font-medium text-white/80 dark:text-white/70">
@@ -388,7 +388,7 @@ export default function AdminContributionsPage() {
                       Status
                     </span>
                   </div>
-                  <div className="rounded-xl bg-black/10 p-2 text-white/80 backdrop-blur dark:bg-white/10">
+                  <div className="rounded-xl bg-black/10 p-2 text-white/80 backdrop-blur dark:bg-white/10 dark:text-foreground/80">
                     <Icon className="h-4 w-4" />
                   </div>
                 </CardHeader>
@@ -397,7 +397,7 @@ export default function AdminContributionsPage() {
                     {stats?.[key] ?? 0}
                   </div>
                   {key !== "total" && stats?.total ? (
-                    <p className="mt-1 text-xs text-white/70">
+                    <p className="mt-1 text-xs text-white/70 dark:text-foreground/70">
                       {(t?.admin?.contributions?.percentOfTotal || "占总数 {percent}%").replace('{percent}', (stats[key] ? Math.round((stats[key] / stats.total) * 100) : 0))}
                     </p>
                   ) : null}
@@ -706,7 +706,7 @@ export default function AdminContributionsPage() {
                                   handleQuickReview(contribution.id, "approved")
                                 }
                                 disabled={isReviewing}
-                                className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                className="w-full bg-emerald-700 text-white hover:bg-emerald-800"
                               >
                                 {isReviewing ? (
                                   <>

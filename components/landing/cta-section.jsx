@@ -44,7 +44,7 @@ export function CTASection({ t }) {
   const translations = { ...fallback, ...(t || {}) };
   
   return (
-    <section className="relative overflow-hidden bg-slate-50/50 py-28">
+    <section className="relative overflow-hidden bg-slate-50/50 py-28 dark:bg-muted/50">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
       <motion.div 
         initial={{ opacity: 0, scale: 0.8 }}
@@ -74,14 +74,14 @@ export function CTASection({ t }) {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-12 text-center shadow-2xl shadow-indigo-500/10 backdrop-blur-xl transition-all duration-300 hover:shadow-indigo-500/15"
+          className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-12 text-center shadow-2xl shadow-indigo-500/10 backdrop-blur-xl transition-all duration-300 hover:shadow-indigo-500/15 dark:border-border/60 dark:bg-card/70"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/30 opacity-0 transition-opacity duration-300 hover:opacity-100" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/30 opacity-0 transition-opacity duration-300 hover:opacity-100 dark:from-indigo-950/30 dark:to-purple-950/30" />
           
           <div className="relative">
             <motion.div 
               variants={itemVariants}
-              className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm"
+              className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm dark:border-indigo-800/80 dark:bg-indigo-950/70 dark:text-indigo-300"
             >
               <Sparkles className="h-4 w-4" />
               Prompt Minder
@@ -89,16 +89,16 @@ export function CTASection({ t }) {
             
             <motion.h2 
               variants={itemVariants}
-              className="mb-6 text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl"
+              className="mb-6 text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl dark:text-foreground"
             >
-              <span className="bg-gradient-to-br from-slate-900 via-indigo-800 to-slate-900 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-br from-slate-900 via-indigo-800 to-slate-900 bg-clip-text text-transparent dark:text-foreground dark:bg-none">
                 {translations.title}
               </span>
             </motion.h2>
             
             <motion.p 
               variants={itemVariants}
-              className="mb-10 text-lg text-slate-600 md:text-xl"
+              className="mb-10 text-lg text-slate-600 md:text-xl dark:text-muted-foreground"
             >
               {translations.description}
             </motion.p>
@@ -120,10 +120,10 @@ export function CTASection({ t }) {
               
               <Link
                 href="/public"
-                className="group relative inline-flex h-14 items-center justify-center gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white px-8 text-lg font-semibold text-slate-900 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+                className="group relative inline-flex h-14 items-center justify-center gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white px-8 text-lg font-semibold text-slate-900 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-muted dark:hover:border-border"
               >
                 <span className="relative z-10">{translations.promptCollections}</span>
-                <ArrowRight className="h-5 w-5 text-slate-500 transition-all duration-200 group-hover:text-slate-700 group-hover:translate-x-0.5" />
+                <ArrowRight className="h-5 w-5 text-slate-500 transition-all duration-200 group-hover:text-slate-700 group-hover:translate-x-0.5 dark:text-muted-foreground dark:group-hover:text-foreground" />
               </Link>
             </motion.div>
           </div>

@@ -58,22 +58,22 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
 
   const getStatusIcon = () => {
     if (isRunning) {
-      return <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />;
+      return <Loader2 className="h-4 w-4 text-indigo-500 animate-spin dark:text-indigo-300" />;
     }
     if (!result) {
-      return <div className="h-4 w-4 rounded-full bg-slate-200" />;
+      return <div className="h-4 w-4 rounded-full bg-slate-200 dark:bg-muted" />;
     }
     if (result.status === 'success') {
-      return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
+      return <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />;
     }
-    return <XCircle className="h-4 w-4 text-red-500" />;
+    return <XCircle className="h-4 w-4 text-red-500 dark:text-red-300" />;
   };
 
   const getStatusColor = () => {
-    if (isRunning) return 'border-indigo-200 bg-indigo-50/50';
-    if (!result) return 'border-slate-200 bg-white';
-    if (result.status === 'success') return 'border-emerald-200 bg-emerald-50/30';
-    return 'border-red-200 bg-red-50/30';
+    if (isRunning) return 'border-indigo-200 bg-indigo-50/50 dark:border-indigo-800 dark:bg-indigo-950/30';
+    if (!result) return 'border-slate-200 bg-white dark:border-border dark:bg-card';
+    if (result.status === 'success') return 'border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-950/30';
+    return 'border-red-200 bg-red-50/30 dark:border-red-800 dark:bg-red-950/30';
   };
 
   return (
@@ -84,10 +84,10 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
         onClick={() => setExpanded(!expanded)}
       >
         {getStatusIcon()}
-        <span className="font-medium text-slate-900 flex-1">{testCase.name}</span>
+        <span className="font-medium text-slate-900 flex-1 dark:text-foreground">{testCase.name}</span>
 
         {result && result.status === 'success' && (
-          <div className="flex items-center gap-4 text-xs text-slate-500">
+          <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-muted-foreground">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger className="flex items-center gap-1">
@@ -128,29 +128,29 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
               }}
             >
               {copied ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
               ) : (
-                <Copy className="h-4 w-4 text-slate-400" />
+                <Copy className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
               )}
             </Button>
           )}
           {expanded ? (
-            <ChevronUp className="h-4 w-4 text-slate-400" />
+            <ChevronUp className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
           ) : (
-            <ChevronDown className="h-4 w-4 text-slate-400" />
+            <ChevronDown className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
           )}
         </div>
       </div>
 
       {/* Content */}
       {expanded && (
-        <div className="px-4 pb-4 space-y-4 border-t border-slate-100">
+        <div className="px-4 pb-4 space-y-4 border-t border-slate-100 dark:border-border">
           {/* System Prompt (Resolved) */}
           <div className="pt-4">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 dark:text-muted-foreground">
               {pg.systemPrompt || 'System Prompt (Resolved)'}
             </div>
-            <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
+            <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto dark:bg-muted dark:text-foreground">
               {resolvedPrompt || pg.noPromptTemplate || 'No system prompt'}
             </div>
           </div>
@@ -158,10 +158,10 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
           {/* User Prompt */}
           {testCase.userPrompt && (
             <div className="pt-4">
-              <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 dark:text-muted-foreground">
                 {pg.userPrompt || 'User Prompt'}
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
+              <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto dark:bg-muted dark:text-foreground">
                 {testCase.userPrompt}
               </div>
             </div>
@@ -169,30 +169,30 @@ function ResultCard({ testCase, result, promptTemplate, isRunning, pg }) {
 
           {/* Output */}
           <div>
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              {pg.output || 'Output'} {isStreaming ? <span className="ml-2 text-[11px] text-indigo-500">({streamingLabel})</span> : null}
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 dark:text-muted-foreground">
+              {pg.output || 'Output'} {isStreaming ? <span className="ml-2 text-[11px] text-indigo-500 dark:text-indigo-300">({streamingLabel})</span> : null}
             </div>
             {showLoader ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 text-indigo-500 animate-spin" />
-                <span className="ml-2 text-sm text-slate-500">{`${pg.running || 'Running'}...`}</span>
+                <Loader2 className="h-6 w-6 text-indigo-500 animate-spin dark:text-indigo-300" />
+                <span className="ml-2 text-sm text-slate-500 dark:text-muted-foreground">{`${pg.running || 'Running'}...`}</span>
               </div>
             ) : result?.status === 'error' ? (
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="p-4 bg-red-50 rounded-lg border border-red-200 dark:bg-red-950/30 dark:border-red-800">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5 dark:text-red-300" />
                   <div>
-                    <div className="font-medium text-red-700">{pg.error || 'Error'}</div>
-                    <div className="text-sm text-red-600 mt-1">{result.error}</div>
+                    <div className="font-medium text-red-700 dark:text-red-300">{pg.error || 'Error'}</div>
+                    <div className="text-sm text-red-600 mt-1 dark:text-red-300">{result.error}</div>
                   </div>
                 </div>
               </div>
             ) : result?.output ? (
-              <div className="max-h-[300px] overflow-y-auto p-4 bg-white rounded-lg border border-slate-200 prose prose-sm max-w-none">
+              <div className="max-h-[300px] overflow-y-auto p-4 bg-white rounded-lg border border-slate-200 prose prose-sm max-w-none dark:bg-card dark:border-border dark:prose-invert">
                 <ReactMarkdown>{result.output}</ReactMarkdown>
               </div>
             ) : (
-              <div className="p-8 text-center text-slate-400 text-sm">
+              <div className="p-8 text-center text-slate-400 text-sm dark:text-muted-foreground">
                 {pg.clickToRun || 'Click "Run All Tests" to see results'}
               </div>
             )}
@@ -255,14 +255,14 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
   }, [results]);
 
   return (
-    <Card className="border-0 shadow-lg shadow-slate-200/50">
+    <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <BarChart3 className="h-5 w-5 text-blue-500" />
+            <BarChart3 className="h-5 w-5 text-blue-500 dark:text-blue-300" />
             {pg.results}
             {hasResults && (
-              <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full">
+              <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full dark:bg-muted dark:text-muted-foreground">
                 {Object.keys(results).length} / {testCases.length}
               </span>
             )}
@@ -273,25 +273,25 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
         {stats && (
           <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t">
             <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <span className="text-slate-600">{stats.successful} {pg.passed || 'passed'}</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
+              <span className="text-slate-600 dark:text-muted-foreground">{stats.successful} {pg.passed || 'passed'}</span>
             </div>
             {stats.failed > 0 && (
               <div className="flex items-center gap-2 text-sm">
-                <XCircle className="h-4 w-4 text-red-500" />
-                <span className="text-slate-600">{stats.failed} {pg.failed || 'failed'}</span>
+                <XCircle className="h-4 w-4 text-red-500 dark:text-red-300" />
+                <span className="text-slate-600 dark:text-muted-foreground">{stats.failed} {pg.failed || 'failed'}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-slate-400" />
-              <span className="text-slate-600">
+              <Clock className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
+              <span className="text-slate-600 dark:text-muted-foreground">
                 {(pg.avgTime || 'Avg')}: {formatDuration(Math.round(stats.avgDuration))}
               </span>
             </div>
             {stats.totalTokens > 0 && (
               <div className="flex items-center gap-2 text-sm">
-                <Coins className="h-4 w-4 text-slate-400" />
-                <span className="text-slate-600">{stats.totalTokens} {pg.tokens || 'tokens'}</span>
+                <Coins className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
+                <span className="text-slate-600 dark:text-muted-foreground">{stats.totalTokens} {pg.tokens || 'tokens'}</span>
               </div>
             )}
           </div>
@@ -300,12 +300,12 @@ export function ResultComparison({ testCases, results, promptTemplate, runningCa
 
       <CardContent className="space-y-4">
         {testCases.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-slate-400 dark:text-muted-foreground">
             <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>{pg.addTestCases}</p>
           </div>
         ) : !hasResults && !hasRunningCases ? (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-slate-400 dark:text-muted-foreground">
             <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>{pg.runTestsToCompare}</p>
           </div>

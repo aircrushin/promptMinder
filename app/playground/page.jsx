@@ -437,7 +437,7 @@ function PlaygroundContent() {
     `${completedCount} completed`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/50 dark:from-background dark:via-background dark:to-background">
       <Toaster />
 
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 py-8 space-y-8">
@@ -447,7 +447,7 @@ function PlaygroundContent() {
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {header.playground || 'Playground'}
               </p>
-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mt-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mt-2 dark:text-foreground">
                 {pg.title || 'Prompt Experiment Console'}
               </h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
@@ -483,10 +483,10 @@ function PlaygroundContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <Card className="border-none shadow-lg bg-gradient-to-br from-white to-indigo-50/40">
+            <Card className="border-none shadow-lg bg-gradient-to-br from-white to-indigo-50/40 dark:from-background">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-indigo-500" />
+                  <Sparkles className="h-5 w-5 text-indigo-500 dark:text-indigo-300" />
                   {pg.promptTemplate || 'Prompt Template'}
                 </CardTitle>
                 <CardDescription className="text-sm">
@@ -526,7 +526,7 @@ function PlaygroundContent() {
                     {variables.map((v) => (
                       <span
                         key={v}
-                        className="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-md"
+                        className="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-md dark:bg-indigo-950/30 dark:text-indigo-300"
                       >
                         {'{{'}{v}{'}}'}
                       </span>
@@ -537,7 +537,7 @@ function PlaygroundContent() {
             </Card>
 
             <Card className="border-none shadow-lg">
-              <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50 dark:from-background dark:to-background">
                 <CardTitle className="text-base">
                   {pg.modelApiSettings || 'Model & API Settings'}
                 </CardTitle>
@@ -554,7 +554,7 @@ function PlaygroundContent() {
 
           <div className="lg:col-span-2 flex flex-col gap-6">
             <Card className="border-none shadow-lg flex-1 flex flex-col">
-              <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50 dark:from-background dark:to-background">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base">{pg.testCases || 'Test Cases'}</CardTitle>
@@ -579,7 +579,7 @@ function PlaygroundContent() {
             </Card>
 
             <Card className="border-none shadow-lg">
-              <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-4 border-b bg-gradient-to-br from-white to-slate-50 dark:from-background dark:to-background">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base">
@@ -636,7 +636,7 @@ function PlaygroundContent() {
                   {pg.loadingPrompts || 'Loading prompts...'}
                 </div>
               ) : promptsError ? (
-                <div className="py-10 text-center text-sm text-red-500">
+                <div className="py-10 text-center text-sm text-red-500 dark:text-red-300">
                   {promptsError}
                 </div>
               ) : Object.keys(groupedPrompts).length === 0 ? (
@@ -652,15 +652,15 @@ function PlaygroundContent() {
                   return (
                     <div
                       key={title}
-                      className="w-full text-left p-4 hover:bg-slate-50 transition-colors"
+                      className="w-full text-left p-4 hover:bg-slate-50 transition-colors dark:hover:bg-muted"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+                        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-300">
                           <FileText className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <h4 className="font-medium text-slate-900 line-clamp-1 flex-1">
+                            <h4 className="font-medium text-slate-900 line-clamp-1 flex-1 dark:text-foreground">
                               {title || pg.untitledPrompt || 'Untitled prompt'}
                             </h4>
                             <div className="flex items-center gap-2">
@@ -728,7 +728,7 @@ function PlaygroundContent() {
                             {hasMultipleVersions && (
                               <>
                                 <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
-                                <span className="text-indigo-600">
+                                <span className="text-indigo-600 dark:text-indigo-300">
                                   {prompts.length} {pg.versions || 'versions'}
                                 </span>
                               </>

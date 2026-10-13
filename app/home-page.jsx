@@ -114,15 +114,15 @@ const GptImage2Section = dynamic(
     })),
   {
     loading: () => (
-      <div className="py-28 bg-white">
+      <div className="py-28 bg-white dark:bg-card">
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.7fr)]">
             <div className="space-y-6">
-              <Skeleton className="h-6 w-48 rounded-full bg-slate-100" />
-              <Skeleton className="h-12 w-80 bg-slate-100" />
-              <Skeleton className="h-16 w-full max-w-lg bg-slate-100" />
+              <Skeleton className="h-6 w-48 rounded-full bg-slate-100 dark:bg-muted" />
+              <Skeleton className="h-12 w-80 bg-slate-100 dark:bg-muted" />
+              <Skeleton className="h-16 w-full max-w-lg bg-slate-100 dark:bg-muted" />
             </div>
-            <Skeleton className="h-72 w-full rounded-xl bg-slate-100" />
+            <Skeleton className="h-72 w-full rounded-xl bg-slate-100 dark:bg-muted" />
           </div>
         </div>
       </div>

@@ -122,19 +122,19 @@ export default function ContributionDetailPage() {
         label: t?.admin?.contributions?.status?.pending || "待审核",
         variant: "default",
         icon: <Clock className="w-4 h-4 mr-1" />,
-        color: "text-yellow-600",
+        color: "text-yellow-600 dark:text-yellow-300",
       },
       approved: {
         label: t?.admin?.contributions?.status?.approved || "已通过",
         variant: "success",
         icon: <CheckCircle className="w-4 h-4 mr-1" />,
-        color: "text-green-600",
+        color: "text-green-600 dark:text-green-300",
       },
       rejected: {
         label: t?.admin?.contributions?.status?.rejected || "已拒绝",
         variant: "destructive",
         icon: <XCircle className="w-4 h-4 mr-1" />,
-        color: "text-red-600",
+        color: "text-red-600 dark:text-red-300",
       },
     };
 
@@ -321,10 +321,10 @@ export default function ContributionDetailPage() {
                 <div className="space-y-1">
                   <Label className="text-muted-foreground">{td.publishedPrompt}</Label>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-300" />
                     <Link
                       href={`/prompts/${contribution.published_prompt_id}`}
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-blue-600 hover:underline dark:text-blue-300"
                     >
                       {td.viewPublishedPrompt}
                     </Link>
@@ -376,7 +376,7 @@ export default function ContributionDetailPage() {
                   <Button
                     onClick={() => handleReview("approved")}
                     disabled={processing}
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    className="flex-1 bg-green-700 text-white hover:bg-green-800"
                   >
                     {processing ? (
                       <>

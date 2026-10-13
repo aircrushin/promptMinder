@@ -1,4 +1,10 @@
 {
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "navbar": {
     "manage": "Manage",
     "new": "New",

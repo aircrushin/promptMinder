@@ -118,7 +118,7 @@ export default function PromptContent({
             className="transition-all duration-200"
           >
             {copySuccess ? (
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-green-500 dark:text-green-300" />
             ) : (
               <Copy className="w-4 h-4" />
             )}

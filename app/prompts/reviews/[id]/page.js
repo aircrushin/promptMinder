@@ -291,7 +291,7 @@ export default function PromptReviewDetailPage({ params }) {
                   </div>
                   <div className="text-sm whitespace-pre-wrap">{comment.content}</div>
                   {comment.mention_user_ids?.length > 0 && (
-                    <div className="text-xs text-blue-600">@{comment.mention_user_ids.join(', @')}</div>
+                    <div className="text-xs text-blue-600 dark:text-blue-300">@{comment.mention_user_ids.join(', @')}</div>
                   )}
                 </CardContent>
               </Card>

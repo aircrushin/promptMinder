@@ -155,8 +155,8 @@ export function OnboardingDialog({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { if (!isImporting) onOpenChange(nextOpen); }}>
-      <DialogContent className="w-[calc(100vw-1rem)] max-w-3xl max-h-[92vh] overflow-y-auto border-border bg-white p-0 shadow-2xl sm:rounded-xl">
-        <div className="bg-white">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-3xl max-h-[92vh] overflow-y-auto border-border bg-white p-0 shadow-2xl sm:rounded-xl dark:bg-card">
+        <div className="bg-white dark:bg-card">
           <div className="border-b border-border px-5 pb-5 pt-6 sm:px-8 sm:pb-6 sm:pt-8">
             <DialogHeader className="space-y-3 text-left">
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
@@ -183,7 +183,7 @@ export function OnboardingDialog({
                 }}
               />
             ) : <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-              <TabsList className="grid h-11 w-full grid-cols-2 rounded-lg border border-border bg-white p-1">
+              <TabsList className="grid h-11 w-full grid-cols-2 rounded-lg border border-border bg-white p-1 dark:bg-card">
                 <TabsTrigger
                   value="role"
                   disabled={isImporting}
@@ -212,7 +212,7 @@ export function OnboardingDialog({
                   {roles.map((role, index) => (
                     <div
                       key={role.id}
-                      className="group flex flex-col border border-border bg-white p-4 transition-colors duration-150 hover:border-foreground"
+                      className="group flex flex-col border border-border bg-white p-4 transition-colors duration-150 hover:border-foreground dark:bg-card"
                     >
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2.5">
@@ -267,7 +267,7 @@ export function OnboardingDialog({
                               'h-10 min-w-[96px] border px-4 text-sm font-medium transition-colors duration-150',
                               source === option.id
                                 ? 'border-foreground bg-foreground text-background'
-                                : 'border-border bg-white text-muted-foreground hover:border-foreground hover:text-foreground'
+                                : 'border-border bg-white text-muted-foreground hover:border-foreground hover:text-foreground dark:bg-card'
                             )}
                           >
                             {option.label}
@@ -308,7 +308,7 @@ export function OnboardingDialog({
                       value={conversation}
                       onChange={(event) => setConversation(event.target.value)}
                       placeholder={uiCopy.conversationPlaceholder}
-                      className="min-h-[220px] resize-none rounded-none border-border bg-white text-sm leading-6 focus-visible:ring-1 focus-visible:ring-foreground"
+                      className="min-h-[220px] resize-none rounded-none border-border bg-white text-sm leading-6 focus-visible:ring-1 focus-visible:ring-foreground dark:bg-card"
                     />
                   </div>
                 </div>

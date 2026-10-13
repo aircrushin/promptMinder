@@ -19,25 +19,25 @@ const TagsSkeleton = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-4 animate-pulse">
-      <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+      <div className="h-8 bg-gray-200 rounded w-1/4 mb-6 dark:bg-muted"></div>
       <div className="flex justify-between items-center mb-6">
-        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-        <div className="h-10 bg-gray-200 rounded w-24"></div>
+        <div className="h-8 bg-gray-200 rounded w-1/3 dark:bg-muted"></div>
+        <div className="h-10 bg-gray-200 rounded w-24 dark:bg-muted"></div>
       </div>
       <div className="space-y-8">
         <div>
-          <div className="h-6 bg-gray-200 rounded w-1/5 mb-4"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/5 mb-4 dark:bg-muted"></div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-10 bg-gray-200 rounded"></div>
+              <div key={i} className="h-10 bg-gray-200 rounded dark:bg-muted"></div>
             ))}
           </div>
         </div>
         <div>
-          <div className="h-6 bg-gray-200 rounded w-1/5 mb-4"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/5 mb-4 dark:bg-muted"></div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-10 bg-gray-200 rounded"></div>
+              <div key={i} className="h-10 bg-gray-200 rounded dark:bg-muted"></div>
             ))}
           </div>
         </div>
@@ -210,10 +210,10 @@ export default function TagsPage() {
       <div className="flex items-center gap-2 mb-4">
         <button
           onClick={() => router.push('/prompts')}
-          className="py-2 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2"
+          className="py-2 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2 dark:hover:bg-muted"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm text-gray-500">{tp.backToList}</span>
+          <span className="text-sm text-gray-500 dark:text-muted-foreground">{tp.backToList}</span>
         </button>
       </div>
       <div className="flex justify-between items-center mb-6">
@@ -221,12 +221,12 @@ export default function TagsPage() {
         <div className="flex items-center gap-2">
           {isBatchMode ? (
             <>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-muted-foreground">
                 {tp.selectedCount.replace('{count}', selectedTags.size)}
               </span>
               <button
                 onClick={exitBatchMode}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors dark:text-muted-foreground dark:hover:text-foreground"
               >
                 {tp.cancel}
               </button>
@@ -243,7 +243,7 @@ export default function TagsPage() {
               {editableTags.length > 0 && (
                 <button
                   onClick={() => setIsBatchMode(true)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors dark:text-muted-foreground dark:hover:text-foreground"
                 >
                   {tp.selectMode || '批量管理'}
                 </button>
@@ -259,7 +259,7 @@ export default function TagsPage() {
         </div>
       </div>
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-950/30 dark:text-red-300">
           {error}
         </div>
       )}
@@ -267,30 +267,30 @@ export default function TagsPage() {
       <div className="space-y-8">
         {/* 公共标签部分 - 所有上下文都显示 */}
         {publicTags.length > 0 && (
-          <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 rounded-xl p-6 border border-blue-100">
+          <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 rounded-xl p-6 border border-blue-100 dark:border-blue-800 dark:from-blue-950/30 dark:to-indigo-950/30">
             <div className="flex items-center gap-2 mb-4">
-              <Globe className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-800">{tp.publicTagsTitle || '公共标签'}</h2>
-              <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
+              <Globe className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-foreground">{tp.publicTagsTitle || '公共标签'}</h2>
+              <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border dark:text-muted-foreground dark:bg-card">
                 {tp.publicTagDescription || '所有用户都可以使用'}
               </span>
             </div>
             <div className="space-y-4">
               {Object.entries(publicTagsByCategory).map(([category, tags]) => (
                 <div key={category}>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2 dark:text-muted-foreground">
                     {categoryNames[category] || category}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {tags.map((tag) => (
                       <div
                         key={tag.id}
-                        className="group relative bg-white rounded-lg px-4 py-2 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+                        className="group relative bg-white rounded-lg px-4 py-2 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all dark:bg-card dark:border-border dark:hover:border-blue-800"
                         title={tag.description || tag.name}
                       >
                         <div className="inline-flex items-center">
-                          <span className="text-sm font-medium text-gray-700">{tag.name}</span>
-                          <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 rounded-full">
+                          <span className="text-sm font-medium text-gray-700 dark:text-foreground">{tag.name}</span>
+                          <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 rounded-full dark:bg-blue-950/30 dark:text-blue-300">
                             {tp.publicTagBadge || '公共'}
                           </span>
                         </div>
@@ -311,14 +311,14 @@ export default function TagsPage() {
               {isBatchMode && editableTags.length > 0 && (
                 <button
                   onClick={toggleSelectAll}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors dark:text-indigo-300 dark:hover:text-indigo-300"
                 >
                   {selectedTags.size === editableTags.length ? tp.deselectAll : tp.selectAll}
                 </button>
               )}
             </div>
             {editableTags.length === 0 ? (
-              <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+              <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg dark:text-muted-foreground dark:bg-muted">
                 {tp.noTeamTags || '暂无团队标签，点击右上角创建新标签'}
               </div>
             ) : (
@@ -327,26 +327,26 @@ export default function TagsPage() {
                   <div
                     key={tag.id}
                     onClick={() => isBatchMode && toggleTagSelection(tag.id)}
-                    className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors ${
+                    className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors dark:bg-muted ${
                       isBatchMode
                         ? selectedTags.has(tag.id)
-                          ? 'border-indigo-500 bg-indigo-50 cursor-pointer'
-                          : 'border-gray-200 hover:border-indigo-300 cursor-pointer'
-                        : 'border-gray-200 hover:border-indigo-300'
+                          ? 'border-indigo-500 bg-indigo-50 cursor-pointer dark:bg-indigo-950/30'
+                          : 'border-gray-200 hover:border-indigo-300 cursor-pointer dark:border-border dark:hover:border-indigo-800'
+                        : 'border-gray-200 hover:border-indigo-300 dark:border-border dark:hover:border-indigo-800'
                     }`}
                   >
                     <div className="inline-flex items-center">
                       {isBatchMode && (
                         <span className="mr-2">
                           {selectedTags.has(tag.id) ? (
-                            <CheckSquare className="w-4 h-4 text-indigo-600" />
+                            <CheckSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
                           ) : (
-                            <Square className="w-4 h-4 text-gray-400" />
+                            <Square className="w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                           )}
                         </span>
                       )}
-                      <span className="text-sm font-medium text-gray-700">{tag.name}</span>
-                      <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 rounded-full">{tp.teamTagBadge || '团队'}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-foreground">{tag.name}</span>
+                      <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 rounded-full dark:bg-blue-950/30 dark:text-blue-300">{tp.teamTagBadge || '团队'}</span>
                     </div>
                     {!isBatchMode && (
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
@@ -355,18 +355,18 @@ export default function TagsPage() {
                             e.stopPropagation();
                             handleEdit(tag);
                           }}
-                          className="p-1.5 hover:bg-gray-100 rounded-full"
+                          className="p-1.5 hover:bg-gray-100 rounded-full dark:hover:bg-muted"
                         >
-                          <Pencil className="w-4 h-4 text-gray-500" />
+                          <Pencil className="w-4 h-4 text-gray-500 dark:text-muted-foreground" />
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(tag.id);
                           }}
-                          className="p-1.5 hover:bg-gray-100 rounded-full"
+                          className="p-1.5 hover:bg-gray-100 rounded-full dark:hover:bg-muted"
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4 text-red-500 dark:text-red-300" />
                         </button>
                       </div>
                     )}
@@ -383,14 +383,14 @@ export default function TagsPage() {
               {isBatchMode && editableTags.length > 0 && (
                 <button
                   onClick={toggleSelectAll}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors dark:text-indigo-300 dark:hover:text-indigo-300"
                 >
                   {selectedTags.size === editableTags.length ? tp.deselectAll : tp.selectAll}
                 </button>
               )}
             </div>
             {editableTags.length === 0 ? (
-              <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+              <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg dark:text-muted-foreground dark:bg-muted">
                 {tp.noPrivateTags || '暂无个人标签，点击右上角创建新标签'}
               </div>
             ) : (
@@ -399,26 +399,26 @@ export default function TagsPage() {
                   <div
                     key={tag.id}
                     onClick={() => isBatchMode && toggleTagSelection(tag.id)}
-                    className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors ${
+                    className={`group relative bg-gray-50 rounded-lg px-4 py-2 border transition-colors dark:bg-muted ${
                       isBatchMode
                         ? selectedTags.has(tag.id)
-                          ? 'border-indigo-500 bg-indigo-50 cursor-pointer'
-                          : 'border-gray-200 hover:border-indigo-300 cursor-pointer'
-                        : 'border-gray-200 hover:border-indigo-300'
+                          ? 'border-indigo-500 bg-indigo-50 cursor-pointer dark:bg-indigo-950/30'
+                          : 'border-gray-200 hover:border-indigo-300 cursor-pointer dark:border-border dark:hover:border-indigo-800'
+                        : 'border-gray-200 hover:border-indigo-300 dark:border-border dark:hover:border-indigo-800'
                     }`}
                   >
                     <div className="inline-flex items-center">
                       {isBatchMode && (
                         <span className="mr-2">
                           {selectedTags.has(tag.id) ? (
-                            <CheckSquare className="w-4 h-4 text-indigo-600" />
+                            <CheckSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
                           ) : (
-                            <Square className="w-4 h-4 text-gray-400" />
+                            <Square className="w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                           )}
                         </span>
                       )}
-                      <span className="text-sm font-medium text-gray-700">{tag.name}</span>
-                      <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-indigo-50 text-indigo-600 rounded-full">{tp.privateTagBadge || '个人'}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-foreground">{tag.name}</span>
+                      <span className="ml-2 px-2 py-0.5 text-[10px] font-medium bg-indigo-50 text-indigo-600 rounded-full dark:bg-indigo-950/30 dark:text-indigo-300">{tp.privateTagBadge || '个人'}</span>
                     </div>
                     {!isBatchMode && (
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
@@ -427,18 +427,18 @@ export default function TagsPage() {
                             e.stopPropagation();
                             handleEdit(tag);
                           }}
-                          className="p-1.5 hover:bg-gray-100 rounded-full"
+                          className="p-1.5 hover:bg-gray-100 rounded-full dark:hover:bg-muted"
                         >
-                          <Pencil className="w-4 h-4 text-gray-500" />
+                          <Pencil className="w-4 h-4 text-gray-500 dark:text-muted-foreground" />
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(tag.id);
                           }}
-                          className="p-1.5 hover:bg-gray-100 rounded-full"
+                          className="p-1.5 hover:bg-gray-100 rounded-full dark:hover:bg-muted"
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4 text-red-500 dark:text-red-300" />
                         </button>
                       </div>
                     )}
@@ -460,7 +460,7 @@ export default function TagsPage() {
           <ModalFooter>
             <button
               onClick={() => setDeleteModalOpen(false)}
-              className="px-4 py-2 text-gray-500 hover:text-gray-700"
+              className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
             >
               {tp.cancel}
             </button>
@@ -483,7 +483,7 @@ export default function TagsPage() {
           <ModalFooter>
             <button
               onClick={() => setBatchDeleteModalOpen(false)}
-              className="px-4 py-2 text-gray-500 hover:text-gray-700"
+              className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
             >
               {tp.cancel}
             </button>
@@ -512,7 +512,7 @@ export default function TagsPage() {
           <ModalFooter>
             <button
               onClick={() => setEditModalOpen(false)}
-              className="px-4 py-2 text-gray-500 hover:text-gray-700"
+              className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
             >
               {tp.cancel}
             </button>

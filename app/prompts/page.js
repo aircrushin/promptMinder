@@ -803,7 +803,7 @@ export default function PromptsPage() {
   }, [favorites]);
 
   return (
-    <div className="min-h-[80vh] bg-white pb-24 sm:pb-0">
+    <div className="min-h-[80vh] bg-white pb-24 sm:pb-0 dark:bg-card">
       <div className="container px-4 py-6 sm:py-12 mx-auto max-w-7xl">
         <div className="space-y-6 sm:space-y-8">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6 sm:space-y-8">

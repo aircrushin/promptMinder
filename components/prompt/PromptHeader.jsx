@@ -373,7 +373,7 @@ export default function PromptHeader({
               onClick={handleDescriptionSave}
               disabled={isSaving}
             >
-              <Check className="h-3 w-3 text-green-600" />
+              <Check className="h-3 w-3 text-green-600 dark:text-green-300" />
             </Button>
             <Button
               size="icon"
@@ -382,7 +382,7 @@ export default function PromptHeader({
               onClick={handleDescriptionCancel}
               disabled={isSaving}
             >
-              <X className="h-3 w-3 text-red-600" />
+              <X className="h-3 w-3 text-red-600 dark:text-red-300" />
             </Button>
           </div>
         ) : (
@@ -492,7 +492,7 @@ export default function PromptHeader({
                     className="h-6 w-6"
                     onClick={handleTagSubmit}
                   >
-                    <Check className="h-3 w-3 text-green-600" />
+                    <Check className="h-3 w-3 text-green-600 dark:text-green-300" />
                   </Button>
                   <Button
                     size="icon"
@@ -500,7 +500,7 @@ export default function PromptHeader({
                     className="h-6 w-6"
                     onClick={handleTagCancel}
                   >
-                    <X className="h-3 w-3 text-red-600" />
+                    <X className="h-3 w-3 text-red-600 dark:text-red-300" />
                   </Button>
                 </div>
               ) : (

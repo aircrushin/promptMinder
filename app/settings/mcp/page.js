@@ -16,7 +16,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext'
 import { cn } from '@/lib/utils'
 
-const CODE_SURFACE_CLASSNAME = 'border-t border-white/10 bg-[#101216] text-[#f8fafc] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+const CODE_SURFACE_CLASSNAME = 'border-t border-white/10 bg-[#101216] text-[#f8fafc] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] dark:border-border/10'
 const DEFAULT_ORIGIN = 'https://www.prompt-minder.com'
 
 const FALLBACK_ZH = {
@@ -160,8 +160,8 @@ function CopyButton({ text, label, copiedLabel }) {
       className={cn(
         'inline-flex items-center gap-1.5 border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide transition-all duration-150',
         copied
-          ? 'border-black bg-black text-white'
-          : 'border-black text-black hover:bg-black hover:text-white',
+          ? 'border-black bg-black text-white dark:border-border dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+          : 'border-black text-black hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground',
       )}
     >
       {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -172,11 +172,11 @@ function CopyButton({ text, label, copiedLabel }) {
 
 function CodeBlock({ title, description, code, copyLabel, copiedLabel }) {
   return (
-    <div className="border border-black">
-      <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4">
+    <div className="border border-black dark:border-border">
+      <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4 dark:border-border">
         <div className="space-y-1">
-          <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{title}</h3>
-          {description && <p className="max-w-2xl text-sm leading-relaxed text-black/60">{description}</p>}
+          <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{title}</h3>
+          {description && <p className="max-w-2xl text-sm leading-relaxed text-black/60 dark:text-foreground/60">{description}</p>}
         </div>
         <CopyButton text={code} label={copyLabel} copiedLabel={copiedLabel} />
       </div>
@@ -220,20 +220,20 @@ export default function McpSettingsPage() {
   }, null, 2), [mcpUrl])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-card">
       <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12">
         <header className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/settings/cli-tokens"
-              className="inline-flex items-center gap-2 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+              className="inline-flex items-center gap-2 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground"
             >
               <ArrowLeft className="h-3 w-3" />
               {translations.backAction}
             </Link>
             <Link
               href="/settings/mcp/docs"
-              className="inline-flex items-center gap-1.5 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+              className="inline-flex items-center gap-1.5 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground"
             >
               {translations.docsAction}
               <ExternalLink className="h-3 w-3" />
@@ -242,27 +242,27 @@ export default function McpSettingsPage() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Plug className="h-4 w-4 text-black/35" />
-              <span className="font-mono text-xs uppercase tracking-[0.28em] text-black/40">{translations.pageBadge}</span>
+              <Plug className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+              <span className="font-mono text-xs uppercase tracking-[0.28em] text-black/40 dark:text-foreground/40">{translations.pageBadge}</span>
             </div>
             <div className="flex flex-wrap items-end gap-4">
-              <h1 className="text-4xl font-bold tracking-tight text-black">{translations.pageTitle}</h1>
+              <h1 className="text-4xl font-bold tracking-tight text-black dark:text-foreground">{translations.pageTitle}</h1>
               <div className="mb-1 flex items-center gap-1.5">
                 <span className="block h-1.5 w-1.5 animate-pulse bg-black" />
-                <span className="font-mono text-xs text-black/40">{translations.pageStatus}</span>
+                <span className="font-mono text-xs text-black/40 dark:text-foreground/40">{translations.pageStatus}</span>
               </div>
             </div>
-            <p className="max-w-3xl text-sm leading-relaxed text-black/58">{translations.pageDescription}</p>
+            <p className="max-w-3xl text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.pageDescription}</p>
           </div>
         </header>
 
         <SignedOut>
-          <section className="border border-black p-6">
-            <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.signInTitle}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-black/58">{translations.signInDescription}</p>
+          <section className="border border-black p-6 dark:border-border">
+            <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.signInTitle}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.signInDescription}</p>
             <div className="mt-4">
               <SignInButton mode="modal" redirectUrl="/settings/mcp">
-                <button className="border border-black bg-black px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-wide text-white">
+                <button className="border border-black bg-black px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-wide text-white dark:border-border dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
                   {translations.signInAction}
                 </button>
               </SignInButton>
@@ -270,11 +270,11 @@ export default function McpSettingsPage() {
           </section>
         </SignedOut>
 
-        <section className="border border-black">
-          <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4">
+        <section className="border border-black dark:border-border">
+          <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4 dark:border-border">
             <div className="space-y-1">
-              <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.urlTitle}</h2>
-              <p className="max-w-2xl text-sm leading-relaxed text-black/60">{translations.urlDescription}</p>
+              <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.urlTitle}</h2>
+              <p className="max-w-2xl text-sm leading-relaxed text-black/60 dark:text-foreground/60">{translations.urlDescription}</p>
             </div>
             <CopyButton text={mcpUrl} label={copyLabel} copiedLabel={copiedLabel} />
           </div>
@@ -285,14 +285,14 @@ export default function McpSettingsPage() {
 
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <Wand2 className="h-4 w-4 text-black/35" />
-            <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black">{translations.toolsTitle}</h2>
+            <Wand2 className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+            <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.toolsTitle}</h2>
           </div>
           <div className="grid gap-px bg-black md:grid-cols-3">
             {translations.tools.map((tool) => (
-              <div key={tool.name} className="space-y-2 bg-white px-5 py-5">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-black/50">{tool.name}</p>
-                <p className="text-sm leading-relaxed text-black/72">{tool.body}</p>
+              <div key={tool.name} className="space-y-2 bg-white px-5 py-5 dark:bg-card">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-black/50 dark:text-foreground/50">{tool.name}</p>
+                <p className="text-sm leading-relaxed text-black/72 dark:text-foreground/72">{tool.body}</p>
               </div>
             ))}
           </div>
@@ -300,14 +300,14 @@ export default function McpSettingsPage() {
 
         <section className="space-y-4">
           <div className="space-y-2">
-            <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black">{translations.shortcutTitle}</h2>
-            <p className="max-w-3xl text-sm leading-relaxed text-black/58">{translations.shortcutDescription}</p>
+            <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.shortcutTitle}</h2>
+            <p className="max-w-3xl text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.shortcutDescription}</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {translations.shortcuts.map((item) => (
-              <div key={item.example} className="border border-black p-5">
-                <code className="font-mono text-sm text-black">{item.example}</code>
-                <p className="mt-2 text-sm leading-relaxed text-black/58">{item.body}</p>
+              <div key={item.example} className="border border-black p-5 dark:border-border">
+                <code className="font-mono text-sm text-black dark:text-foreground">{item.example}</code>
+                <p className="mt-2 text-sm leading-relaxed text-black/58 dark:text-foreground/58">{item.body}</p>
               </div>
             ))}
           </div>
@@ -315,10 +315,10 @@ export default function McpSettingsPage() {
 
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <TerminalSquare className="h-4 w-4 text-black/35" />
-            <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black">{translations.connectTitle}</h2>
+            <TerminalSquare className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+            <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.connectTitle}</h2>
           </div>
-          <p className="max-w-3xl text-sm leading-relaxed text-black/58">{translations.connectDescription}</p>
+          <p className="max-w-3xl text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.connectDescription}</p>
           <CodeBlock
             title={translations.cursorTitle}
             description={translations.cursorDescription}
@@ -332,31 +332,31 @@ export default function McpSettingsPage() {
             copyLabel={copyLabel}
             copiedLabel={copiedLabel}
           />
-          <div className="border border-black p-5">
-            <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.chatgptTitle}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-black/58">{translations.chatgptBody}</p>
-            <code className="mt-3 block font-mono text-sm text-black">{mcpUrl}</code>
+          <div className="border border-black p-5 dark:border-border">
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.chatgptTitle}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.chatgptBody}</p>
+            <code className="mt-3 block font-mono text-sm text-black dark:text-foreground">{mcpUrl}</code>
           </div>
         </section>
 
         <SignedIn>
           <section className="grid gap-4 lg:grid-cols-2">
-            <div className="border border-black p-5">
+            <div className="border border-black p-5 dark:border-border">
               <div className="mb-3 flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-black/35" />
-                <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.clerkTitle}</h2>
+                <ShieldCheck className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+                <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.clerkTitle}</h2>
               </div>
-              <p className="text-sm leading-relaxed text-black/58">{translations.clerkDescription}</p>
+              <p className="text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.clerkDescription}</p>
             </div>
-            <div className="border border-black">
-              <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4">
+            <div className="border border-black dark:border-border">
+              <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4 dark:border-border">
                 <div className="space-y-1">
-                  <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.tokenTitle}</h2>
-                  <p className="text-sm leading-relaxed text-black/58">{translations.tokenDescription}</p>
+                  <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.tokenTitle}</h2>
+                  <p className="text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.tokenDescription}</p>
                 </div>
                 <Link
                   href="/settings/cli-tokens"
-                  className="inline-flex items-center border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+                  className="inline-flex items-center border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground"
                 >
                   {translations.tokenAction}
                 </Link>

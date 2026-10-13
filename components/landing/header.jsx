@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export function Header() {
   const pathname = usePathname();
@@ -32,8 +33,8 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 bg-white transition-[border-color] duration-200 ${
-        scrolled ? 'border-b border-gray-200' : 'border-b border-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 bg-white transition-[border-color] duration-200 dark:bg-card ${
+        scrolled ? 'border-b border-gray-200 dark:border-border' : 'border-b border-transparent'
       }`}
     >
       <div className="flex h-16 items-center justify-between px-5 sm:px-8 lg:px-12">
@@ -50,7 +51,7 @@ export function Header() {
             priority
             className="rounded-lg"
           />
-          <span className="hidden text-lg font-semibold text-gray-900 sm:block">
+          <span className="hidden text-lg font-semibold text-gray-900 sm:block dark:text-foreground">
             PromptMinder
           </span>
         </Link>
@@ -59,12 +60,12 @@ export function Header() {
         <div className="flex items-center gap-3">
           <SignedOut>
             <Link href="/sign-in">
-              <Button variant="ghost" className="hidden px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 sm:inline-flex">
+              <Button variant="ghost" className="hidden px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 sm:inline-flex dark:text-muted-foreground dark:hover:text-foreground">
                 {t.auth.login}
               </Button>
             </Link>
             <Link href="/sign-up">
-              <Button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30">
+              <Button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
                 {t.auth.signup}
               </Button>
             </Link>
@@ -75,8 +76,8 @@ export function Header() {
               href="/prompts"
               className={`hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 sm:flex ${
                 pathname === '/prompts'
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'text-gray-900 dark:text-foreground'
+                  : 'text-gray-500 hover:text-gray-900 dark:text-muted-foreground dark:hover:text-foreground'
               }`}
             >
               <Library className="h-4 w-4" />
@@ -86,8 +87,8 @@ export function Header() {
               href="/public"
               className={`hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 sm:flex ${
                 pathname === '/public'
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'text-gray-900 dark:text-foreground'
+                  : 'text-gray-500 hover:text-gray-900 dark:text-muted-foreground dark:hover:text-foreground'
               }`}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -97,8 +98,8 @@ export function Header() {
               href="/skills"
               className={`hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 sm:flex ${
                 pathname?.startsWith('/skills')
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'text-gray-900 dark:text-foreground'
+                  : 'text-gray-500 hover:text-gray-900 dark:text-muted-foreground dark:hover:text-foreground'
               }`}
             >
               <Puzzle className="h-4 w-4" />
@@ -106,11 +107,12 @@ export function Header() {
             </Link>
           </SignedIn>
 
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleLanguage}
-            className="h-9 w-9 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            className="h-9 w-9 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground"
           >
             <Languages className="h-[18px] w-[18px]" />
           </Button>

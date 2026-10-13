@@ -195,7 +195,7 @@ export default function NotFoundPage() {
             
             {/* 404 数字 */}
             <div className="flex items-center justify-center gap-2">
-              <span className="bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-8xl font-bold text-transparent dark:from-blue-400 dark:to-indigo-400 sm:text-9xl">
+              <span className="bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-8xl font-bold text-transparent dark:from-blue-400 dark:to-indigo-400 sm:text-9xl dark:text-foreground dark:bg-none">
                 4
               </span>
               <motion.div
@@ -210,7 +210,7 @@ export default function NotFoundPage() {
                 className="relative"
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-xl dark:bg-slate-800 sm:h-24 sm:w-24">
-                  <Sparkles className="h-10 w-10 text-amber-500 sm:h-12 sm:w-12" />
+                  <Sparkles className="h-10 w-10 text-amber-500 sm:h-12 sm:w-12 dark:text-amber-300" />
                 </div>
                 {/* 小装饰点 */}
                 <motion.div
@@ -222,7 +222,7 @@ export default function NotFoundPage() {
                   className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-amber-400"
                 />
               </motion.div>
-              <span className="bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-8xl font-bold text-transparent dark:from-blue-400 dark:to-indigo-400 sm:text-9xl">
+              <span className="bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-8xl font-bold text-transparent dark:from-blue-400 dark:to-indigo-400 sm:text-9xl dark:text-foreground dark:bg-none">
                 4
               </span>
             </div>

@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext'
 import { cn } from '@/lib/utils'
 
-const CODE_SURFACE_CLASSNAME = 'border-t border-white/10 bg-[#101216] text-[#f8fafc] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+const CODE_SURFACE_CLASSNAME = 'border-t border-white/10 bg-[#101216] text-[#f8fafc] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] dark:border-border/10'
 const DEFAULT_ORIGIN = 'https://www.prompt-minder.com'
 
 const FALLBACK_ZH = {
@@ -360,8 +360,8 @@ function CopyButton({ text, label, copiedLabel, className }) {
       className={cn(
         'inline-flex items-center gap-1.5 border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide transition-all duration-150',
         copied
-          ? 'border-black bg-black text-white'
-          : 'border-black text-black hover:bg-black hover:text-white',
+          ? 'border-black bg-black text-white dark:border-border dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+          : 'border-black text-black hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground',
         className,
       )}
     >
@@ -375,11 +375,11 @@ function CommandBlock({ title, description, commands, copyLabel, copiedLabel }) 
   const text = useMemo(() => commands.join('\n'), [commands])
 
   return (
-    <div className="border border-black">
-      <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4">
+    <div className="border border-black dark:border-border">
+      <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4 dark:border-border">
         <div className="space-y-1">
-          <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{title}</h3>
-          {description && <p className="max-w-2xl text-sm leading-relaxed text-black/60">{description}</p>}
+          <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{title}</h3>
+          {description && <p className="max-w-2xl text-sm leading-relaxed text-black/60 dark:text-foreground/60">{description}</p>}
         </div>
         <CopyButton text={text} label={copyLabel} copiedLabel={copiedLabel} />
       </div>
@@ -396,10 +396,10 @@ function SectionTitle({ icon: Icon, title, description }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-black/35" />
-        <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black">{title}</h2>
+        <Icon className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+        <h2 className="font-mono text-sm font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{title}</h2>
       </div>
-      {description && <p className="max-w-3xl text-sm leading-relaxed text-black/58">{description}</p>}
+      {description && <p className="max-w-3xl text-sm leading-relaxed text-black/58 dark:text-foreground/58">{description}</p>}
     </div>
   )
 }
@@ -486,13 +486,13 @@ export default function McpDocsPage() {
   })
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-card">
       <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12">
         <header className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/settings/mcp"
-              className="inline-flex items-center gap-2 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+              className="inline-flex items-center gap-2 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground"
             >
               <ArrowLeft className="h-3 w-3" />
               {translations.backAction}
@@ -501,25 +501,25 @@ export default function McpDocsPage() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <BookOpenText className="h-4 w-4 text-black/35" />
-              <span className="font-mono text-xs uppercase tracking-[0.28em] text-black/40">{translations.pageBadge}</span>
+              <BookOpenText className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+              <span className="font-mono text-xs uppercase tracking-[0.28em] text-black/40 dark:text-foreground/40">{translations.pageBadge}</span>
             </div>
             <div className="flex flex-wrap items-end gap-4">
-              <h1 className="text-4xl font-bold tracking-tight text-black">{translations.pageTitle}</h1>
+              <h1 className="text-4xl font-bold tracking-tight text-black dark:text-foreground">{translations.pageTitle}</h1>
               <div className="mb-1 flex items-center gap-1.5">
                 <span className="block h-1.5 w-1.5 animate-pulse bg-black" />
-                <span className="font-mono text-xs text-black/40">{translations.pageStatus}</span>
+                <span className="font-mono text-xs text-black/40 dark:text-foreground/40">{translations.pageStatus}</span>
               </div>
             </div>
-            <p className="max-w-3xl text-sm leading-relaxed text-black/58">{translations.pageDescription}</p>
+            <p className="max-w-3xl text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.pageDescription}</p>
           </div>
 
-          <section className="border border-black">
+          <section className="border border-black dark:border-border">
             <div className="grid gap-px bg-black md:grid-cols-2">
               {translations.overviewCards.map((card) => (
-                <div key={card.title} className="space-y-2 bg-white px-5 py-5">
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-black/50">{card.title}</p>
-                  <p className="text-sm leading-relaxed text-black/72">{card.body}</p>
+                <div key={card.title} className="space-y-2 bg-white px-5 py-5 dark:bg-card">
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-black/50 dark:text-foreground/50">{card.title}</p>
+                  <p className="text-sm leading-relaxed text-black/72 dark:text-foreground/72">{card.body}</p>
                 </div>
               ))}
             </div>
@@ -534,14 +534,14 @@ export default function McpDocsPage() {
           />
           <div className="grid gap-4 md:grid-cols-2">
             {quickstartSteps.map((step) => (
-              <div key={step.index} className="border border-black p-5">
+              <div key={step.index} className="border border-black p-5 dark:border-border">
                 <div className="mb-3 flex items-start justify-between gap-4">
-                  <span className="font-mono text-3xl font-bold leading-none text-black/10">{step.index}</span>
+                  <span className="font-mono text-3xl font-bold leading-none text-black/10 dark:text-foreground/10">{step.index}</span>
                   <CopyButton text={step.code} label={commonTranslations.copy} copiedLabel={commonTranslations.copied} />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{step.title}</h3>
-                  <p className="text-sm leading-relaxed text-black/58">{step.description}</p>
+                  <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{step.title}</h3>
+                  <p className="text-sm leading-relaxed text-black/58 dark:text-foreground/58">{step.description}</p>
                   <div className={cn('px-4 py-3', CODE_SURFACE_CLASSNAME)}>
                     <code className="block overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-6 text-[#f8fafc]">{step.code}</code>
                   </div>
@@ -618,15 +618,15 @@ export default function McpDocsPage() {
           />
           <div className="grid gap-px bg-black md:grid-cols-3">
             {translations.tools.map((tool) => (
-              <div key={tool.name} className="space-y-2 bg-white px-5 py-5">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-black/50">{tool.name}</p>
-                <p className="text-sm leading-relaxed text-black/72">{tool.body}</p>
+              <div key={tool.name} className="space-y-2 bg-white px-5 py-5 dark:bg-card">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-black/50 dark:text-foreground/50">{tool.name}</p>
+                <p className="text-sm leading-relaxed text-black/72 dark:text-foreground/72">{tool.body}</p>
               </div>
             ))}
           </div>
-          <div className="border border-black p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.promptTitle}</p>
-            <p className="mt-2 text-sm leading-relaxed text-black/58">{translations.promptDescription}</p>
+          <div className="border border-black p-5 dark:border-border">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.promptTitle}</p>
+            <p className="mt-2 text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.promptDescription}</p>
           </div>
         </section>
 
@@ -638,9 +638,9 @@ export default function McpDocsPage() {
           />
           <div className="grid gap-4 md:grid-cols-2">
             {translations.shortcuts.map((item) => (
-              <div key={item.example} className="border border-black p-5">
-                <code className="font-mono text-sm text-black">{item.example}</code>
-                <p className="mt-2 text-sm leading-relaxed text-black/58">{item.body}</p>
+              <div key={item.example} className="border border-black p-5 dark:border-border">
+                <code className="font-mono text-sm text-black dark:text-foreground">{item.example}</code>
+                <p className="mt-2 text-sm leading-relaxed text-black/58 dark:text-foreground/58">{item.body}</p>
               </div>
             ))}
           </div>
@@ -687,31 +687,31 @@ export default function McpDocsPage() {
           />
           <div className="grid gap-4 md:grid-cols-2">
             {translations.troubleshootingItems.map((item) => (
-              <div key={item.title} className="border border-black p-5">
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{item.title}</p>
-                <p className="mt-2 text-sm leading-relaxed text-black/58">{item.body}</p>
+              <div key={item.title} className="border border-black p-5 dark:border-border">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{item.title}</p>
+                <p className="mt-2 text-sm leading-relaxed text-black/58 dark:text-foreground/58">{item.body}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="border border-black p-5">
+          <div className="border border-black p-5 dark:border-border">
             <div className="mb-3 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-black/35" />
-              <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.clerkTitle}</h2>
+              <ShieldCheck className="h-4 w-4 text-black/35 dark:text-foreground/35" />
+              <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.clerkTitle}</h2>
             </div>
-            <p className="text-sm leading-relaxed text-black/58">{translations.clerkDescription}</p>
+            <p className="text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.clerkDescription}</p>
           </div>
-          <div className="border border-black">
-            <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4">
+          <div className="border border-black dark:border-border">
+            <div className="flex items-start justify-between gap-4 border-b border-black px-5 py-4 dark:border-border">
               <div className="space-y-1">
-                <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black">{translations.tokenTitle}</h2>
-                <p className="text-sm leading-relaxed text-black/58">{translations.tokenDescription}</p>
+                <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-black dark:text-foreground">{translations.tokenTitle}</h2>
+                <p className="text-sm leading-relaxed text-black/58 dark:text-foreground/58">{translations.tokenDescription}</p>
               </div>
               <Link
                 href="/settings/cli-tokens"
-                className="inline-flex items-center border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+                className="inline-flex items-center border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground"
               >
                 {translations.tokenAction}
               </Link>

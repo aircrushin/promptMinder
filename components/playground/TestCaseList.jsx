@@ -124,13 +124,13 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
   );
 
   return (
-    <Card className="border-0 shadow-lg shadow-slate-200/50">
+    <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <TestTube className="h-5 w-5 text-emerald-500" />
+            <TestTube className="h-5 w-5 text-emerald-500 dark:text-emerald-300" />
             {pg.testCases}
-            <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full">
+            <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full dark:bg-muted dark:text-muted-foreground">
               {testCases.length}
             </span>
           </CardTitle>
@@ -151,8 +151,8 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
               className={cn(
                 'border rounded-xl transition-all duration-200',
                 isRunning
-                  ? 'border-indigo-300 bg-indigo-50/50 ring-2 ring-indigo-200'
-                  : 'border-slate-200 hover:border-slate-300 bg-white'
+                  ? 'border-indigo-300 bg-indigo-50/50 ring-2 ring-indigo-200 dark:border-indigo-800 dark:bg-indigo-950/50'
+                  : 'border-slate-200 hover:border-slate-300 bg-white dark:border-border dark:hover:border-border dark:bg-card'
               )}
             >
               {/* Header */}
@@ -160,9 +160,9 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                 className="flex items-center gap-3 p-4 cursor-pointer"
                 onClick={() => toggleExpanded(testCase.id)}
               >
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-slate-400 dark:text-muted-foreground">
                   <GripVertical className="h-4 w-4" />
-                  <span className="text-sm font-medium text-slate-500">#{index + 1}</span>
+                  <span className="text-sm font-medium text-slate-500 dark:text-muted-foreground">#{index + 1}</span>
                 </div>
 
                 <Input
@@ -172,18 +172,18 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                     updateTestCase(testCase.id, { name: e.target.value });
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-1 border-0 bg-transparent font-medium text-slate-900 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                  className="flex-1 border-0 bg-transparent font-medium text-slate-900 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto dark:text-foreground"
                   placeholder={pg.testCaseNamePlaceholder}
                 />
 
                 <div className="flex items-center gap-1">
                   {isRunning && (
-                    <Loader2 className="h-4 w-4 text-indigo-500 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 text-indigo-500 animate-spin mr-2 dark:text-indigo-300" />
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-slate-400 hover:text-slate-600"
+                    className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:text-muted-foreground dark:hover:text-muted-foreground"
                     onClick={(e) => {
                       e.stopPropagation();
                       duplicateTestCase(testCase);
@@ -194,7 +194,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-slate-400 hover:text-red-500"
+                    className="h-8 w-8 text-slate-400 hover:text-red-500 dark:text-muted-foreground dark:hover:text-red-300"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeTestCase(testCase.id);
@@ -204,18 +204,18 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-slate-400" />
+                    <ChevronUp className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                    <ChevronDown className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
                   )}
                 </div>
               </div>
 
               {/* Variables */}
               {isExpanded && (
-                <div className="px-4 pb-4 pt-0 border-t border-slate-100">
+                <div className="px-4 pb-4 pt-0 border-t border-slate-100 dark:border-border">
                   <div className="pt-4 space-y-1.5">
-                    <Label className="text-sm font-medium text-slate-700">
+                    <Label className="text-sm font-medium text-slate-700 dark:text-foreground">
                       {pg.userPrompt || 'User Prompt'}
                     </Label>
                     <Textarea
@@ -235,7 +235,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                   ) : (
                     <div className="space-y-4 pt-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide dark:text-muted-foreground">
                           {pg.variables} ({variables.length})
                         </span>
                         <Button
@@ -257,7 +257,7 @@ export function TestCaseList({ testCases, variables, onChange, runningCases }) {
                             <div key={variable} className="space-y-1.5">
                               <Label
                                 htmlFor={`${testCase.id}-${variable}`}
-                                className="text-sm font-medium text-slate-700"
+                                className="text-sm font-medium text-slate-700 dark:text-foreground"
                               >
                                 {variable}
                               </Label>

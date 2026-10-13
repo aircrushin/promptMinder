@@ -143,10 +143,6 @@ const structuredData = generateSchemaGraph([
   },
 ]);
 
-export const viewport = {
-  themeColor: "#3b82f6",
-};
-
 export default function RootLayout({ children }) {
   return (
     <html lang="zh" suppressHydrationWarning>
@@ -163,7 +159,6 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/logo.svg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="theme-color" content="#ffffff" />
       </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>

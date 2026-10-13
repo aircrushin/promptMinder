@@ -558,7 +558,7 @@ export default function TeamsPage() {
       <div className="container mx-auto max-w-6xl px-4 py-10 space-y-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent dark:text-foreground dark:bg-none">
               {safeT.teamsPage.title}
             </h1>
             <p className="text-muted-foreground mt-2 text-base">
@@ -651,7 +651,7 @@ export default function TeamsPage() {
                 <div className="rounded-xl border border-border/50 bg-gradient-to-br from-blue-500/5 to-transparent p-5 transition-all duration-200 hover:shadow-md hover:border-blue-500/30">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div className="p-1.5 rounded-md bg-blue-500/10">
-                      <Users className="h-4 w-4 text-blue-500" />
+                      <Users className="h-4 w-4 text-blue-500 dark:text-blue-300" />
                     </div>
                     {safeT.teamsPage.membersCount}
                   </div>
@@ -662,7 +662,7 @@ export default function TeamsPage() {
                 <div className="rounded-xl border border-border/50 bg-gradient-to-br from-amber-500/5 to-transparent p-5 transition-all duration-200 hover:shadow-md hover:border-amber-500/30">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div className="p-1.5 rounded-md bg-amber-500/10">
-                      <Mail className="h-4 w-4 text-amber-500" />
+                      <Mail className="h-4 w-4 text-amber-500 dark:text-amber-300" />
                     </div>
                     {safeT.teamsPage.pendingInvites}
                   </div>

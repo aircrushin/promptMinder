@@ -35,6 +35,7 @@ A professional prompt management platform that makes AI prompt management simple
 - 📱 **Mobile Responsive** - Responsive design, perfect support for mobile devices
 - 🌍 **Internationalization** - Support for Chinese and English
 - 🎨 **Modern Interface** - Beautiful design based on Shadcn UI
+- 🌙 **Dark Mode** - Light, dark, and system appearance with saved preferences and cross-tab synchronization; [theme guide and screenshots](docs/dark-mode.md)
 - 🔍 **Smart Search** - Quick search and filtering functionality
 - 📋 **One-Click Copy** - Convenient copy and share functions
 

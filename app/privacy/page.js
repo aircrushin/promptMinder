@@ -16,72 +16,72 @@ export default function PrivacyPolicy() {
       <div className="space-y-6">
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.introductionTitle}</h2>
-          <p className="text-gray-700">{tp.introductionContent}</p>
+          <p className="text-gray-700 dark:text-foreground">{tp.introductionContent}</p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.collectionTitle}</h2>
-          <p className="text-gray-700">{tp.collectionIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.collectionIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.collectionItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.usageTitle}</h2>
-          <p className="text-gray-700">{tp.usageIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.usageIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.usageItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.sharingTitle}</h2>
-          <p className="text-gray-700">{tp.sharingIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.sharingIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.sharingItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.securityTitle}</h2>
-          <p className="text-gray-700">{tp.securityIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.securityIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.securityItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.cookiesTitle}</h2>
-          <p className="text-gray-700">{tp.cookiesIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.cookiesIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.cookiesItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.rightsTitle}</h2>
-          <p className="text-gray-700">{tp.rightsIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.rightsIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.rightsItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.updatesTitle}</h2>
-          <p className="text-gray-700">{tp.updatesContent}</p>
+          <p className="text-gray-700 dark:text-foreground">{tp.updatesContent}</p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{tp.contactTitle}</h2>
-          <p className="text-gray-700">{tp.contactIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{tp.contactIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {tp.contactItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
-          <p className="text-gray-700 mt-8">{tp.lastUpdated}</p>
+          <p className="text-gray-700 mt-8 dark:text-foreground">{tp.lastUpdated}</p>
         </section>
       </div>
     </div>

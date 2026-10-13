@@ -39,9 +39,9 @@ export function GitHubStars({ repo = "aircrushin/promptMinder", className = "" }
 
   if (loading) {
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full ${className}`}>
+      <div className={`inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full dark:bg-muted ${className}`}>
         <GitHubIcon />
-        <span className="text-sm text-gray-600">Loading...</span>
+        <span className="text-sm text-gray-600 dark:text-muted-foreground">Loading...</span>
       </div>
     );
   }
@@ -51,16 +51,16 @@ export function GitHubStars({ repo = "aircrushin/promptMinder", className = "" }
       href={`https://github.com/${repo}`}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md group ${className}`}
+      className={`inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md group dark:bg-card dark:border-border dark:hover:bg-muted ${className}`}
     >
-      <div className="text-gray-600 group-hover:text-gray-800 group-hover:scale-110 transition-all duration-200">
+      <div className="text-gray-600 group-hover:text-gray-800 group-hover:scale-110 transition-all duration-200 dark:text-muted-foreground dark:group-hover:text-foreground">
         <GitHubIcon />
       </div>
-      <span className="text-sm font-medium text-gray-700">
+      <span className="text-sm font-medium text-gray-700 dark:text-foreground">
         {stars ? `${stars} stars` : 'Star us on GitHub'}
       </span>
       <svg
-        className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors"
+        className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors dark:text-muted-foreground dark:group-hover:text-muted-foreground"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
