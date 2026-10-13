@@ -27,81 +27,7 @@ const CreatableSelect = dynamic(() => import('react-select/creatable'), {
   ssr: false,
 });
 
-// React Select 样式配置
-const getSelectStyles = (isCompact = false) => ({
-  control: (baseStyles, state) => ({
-    ...baseStyles,
-    backgroundColor: 'hsl(var(--background))',
-    borderColor: state.isFocused
-      ? 'hsl(var(--primary))'
-      : 'hsl(var(--border))',
-    borderRadius: 'calc(var(--radius) - 2px)',
-    boxShadow: state.isFocused
-      ? '0 0 0 2px hsl(var(--primary)/30%)'
-      : 'none',
-    '&:hover': {
-      borderColor: 'hsl(var(--primary))',
-    },
-    minHeight: isCompact ? '36px' : '40px',
-  }),
-  menu: (baseStyles) => ({
-    ...baseStyles,
-    backgroundColor: 'hsl(var(--background))',
-    border: '1px solid hsl(var(--border))',
-    borderRadius: 'calc(var(--radius) - 2px)',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-    zIndex: 100,
-  }),
-  option: (baseStyles, { isFocused, isSelected }) => ({
-    ...baseStyles,
-    backgroundColor: isSelected
-      ? 'hsl(var(--primary))'
-      : isFocused
-      ? 'hsl(var(--accent))'
-      : 'transparent',
-    color: isSelected
-      ? 'hsl(var(--primary-foreground))'
-      : 'inherit',
-    cursor: 'pointer',
-    '&:active': {
-      backgroundColor: 'hsl(var(--accent))',
-    },
-  }),
-  multiValue: (baseStyles) => ({
-    ...baseStyles,
-    backgroundColor: 'hsl(var(--secondary)/50%)',
-    borderRadius: 'calc(var(--radius) - 2px)',
-  }),
-  multiValueLabel: (baseStyles) => ({
-    ...baseStyles,
-    color: 'hsl(var(--secondary-foreground))',
-  }),
-  multiValueRemove: (baseStyles) => ({
-    ...baseStyles,
-    color: 'hsl(var(--secondary-foreground))',
-    '&:hover': {
-      backgroundColor: 'hsl(var(--destructive))',
-      color: 'hsl(var(--destructive-foreground))',
-    },
-  }),
-  input: (baseStyles) => ({
-    ...baseStyles,
-    color: 'hsl(var(--foreground))',
-  }),
-});
-
-const getSelectTheme = (theme) => ({
-  ...theme,
-  colors: {
-    ...theme.colors,
-    primary: 'hsl(var(--primary))',
-    primary75: 'hsl(var(--primary)/.75)',
-    primary50: 'hsl(var(--primary)/.5)',
-    primary25: 'hsl(var(--primary)/.25)',
-    danger: 'hsl(var(--destructive))',
-    dangerLight: 'hsl(var(--destructive)/.25)',
-  },
-});
+import { getSelectStyles, getSelectTheme } from '@/lib/select-styles';
 
 /**
  * 提示词表单组件
@@ -174,7 +100,7 @@ export function PromptForm({
         <div className="flex items-center justify-between">
           <Label htmlFor="title" className={isCompact ? 'text-sm font-medium' : 'text-base'}>
             {copy.formTitleLabel}
-            <span className="ml-1 text-red-500">*</span>
+            <span className="ml-1 text-red-500 dark:text-red-300">*</span>
           </Label>
           {/* AI生成标题按钮 - 仅在内容不为空时显示 */}
           {prompt.content?.trim() && (
@@ -241,7 +167,7 @@ export function PromptForm({
           )}
           required
         />
-        {errors.title && <span className="text-sm text-red-500">{errors.title}</span>}
+        {errors.title && <span className="text-sm text-red-500 dark:text-red-300">{errors.title}</span>}
       </MotionDiv>
 
       {/* 内容字段 */}
@@ -252,7 +178,7 @@ export function PromptForm({
       >
         <Label htmlFor="content" className={isCompact ? 'text-sm font-medium' : 'text-base'}>
           {copy.formContentLabel}
-          <span className="ml-1 text-red-500">*</span>
+          <span className="ml-1 text-red-500 dark:text-red-300">*</span>
         </Label>
         <div className="relative">
           <Textarea
@@ -282,7 +208,7 @@ export function PromptForm({
             </Button>
           </div>
         </div>
-        {errors.content && <span className="text-sm text-red-500">{errors.content}</span>}
+        {errors.content && <span className="text-sm text-red-500 dark:text-red-300">{errors.content}</span>}
         <p className="text-sm text-muted-foreground">{copy.variableTip}</p>
       </MotionDiv>
 

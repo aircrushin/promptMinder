@@ -60,7 +60,7 @@ export default function NewTag() {
       <h1 className="text-2xl font-bold mb-6">{t.newTagPage.title}</h1>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-950/30 dark:text-red-300">
           {error}
         </div>
       )}
@@ -69,7 +69,7 @@ export default function NewTag() {
         <div className="space-y-2">
           <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {t.newTagPage.nameLabel}
-            <span className="text-red-500 ml-1">*</span>
+            <span className="text-red-500 ml-1 dark:text-red-300">*</span>
           </label>
           <input
             type="text"
@@ -87,7 +87,7 @@ export default function NewTag() {
           <button
             type="button"
             onClick={handleDelete}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:text-foreground dark:hover:bg-muted"
           >
             {t.newTagPage.cancel}
           </button>
@@ -110,7 +110,7 @@ export default function NewTag() {
           <ModalFooter>
             <button
               onClick={() => setShowDeleteModal(false)}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:text-foreground dark:hover:bg-muted"
             >
               {t.newTagPage.continueEditing}
             </button>

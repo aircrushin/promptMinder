@@ -71,7 +71,7 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 relative overflow-hidden">
+    <div className="min-h-screen bg-neutral-50 relative overflow-hidden dark:bg-muted">
       {/* Decorative background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
@@ -80,7 +80,7 @@ export default function FeedbackPage() {
 
       {/* Subtle grid pattern overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.05]" style={{
-        backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
         backgroundSize: '50px 50px'
       }} />
 
@@ -88,7 +88,7 @@ export default function FeedbackPage() {
         {/* Back button with animated hover */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-8 group transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-8 group transition-colors dark:text-muted-foreground dark:hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           <span className="relative">
@@ -98,19 +98,19 @@ export default function FeedbackPage() {
         </Link>
 
         {/* Main card */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-neutral-200/50 border border-neutral-200 p-6 md:p-8 relative overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl shadow-neutral-200/50 border border-neutral-200 p-6 md:p-8 relative overflow-hidden dark:bg-card dark:border-border dark:shadow-none">
           {/* Decorative top accent */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-900 to-transparent" />
 
           {/* Header */}
           <div className="text-center mb-8 relative">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-neutral-900 rounded-xl mb-4 shadow-lg shadow-neutral-300/50">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-neutral-900 rounded-xl mb-4 shadow-lg shadow-neutral-300/50 dark:shadow-none">
               <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2 tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2 tracking-tight dark:text-foreground">
               用户反馈
             </h1>
-            <p className="text-neutral-500 text-base leading-relaxed">
+            <p className="text-neutral-500 text-base leading-relaxed dark:text-muted-foreground">
               您的声音推动我们前进<br className="hidden md:block" />
               帮助打造更好的体验
             </p>
@@ -119,7 +119,7 @@ export default function FeedbackPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Type selection with enhanced styling */}
             <div className="space-y-3">
-              <Label className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
+              <Label className="text-xs font-bold text-neutral-900 uppercase tracking-wider dark:text-foreground">
                 反馈类型
               </Label>
               <div className="grid grid-cols-2 gap-3">
@@ -129,13 +129,13 @@ export default function FeedbackPage() {
                   className={cn(
                     'relative group flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300',
                     type === 'feature_request'
-                      ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl shadow-neutral-300/50 scale-[1.02]'
-                      : 'border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600'
+                      ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl shadow-neutral-300/50 scale-[1.02] dark:border-border dark:shadow-none dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+                      : 'border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600 dark:border-border dark:hover:border-border dark:hover:bg-muted dark:text-muted-foreground'
                   )}
                 >
                   {type === 'feature_request' && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
-                      <svg className="w-3 h-3 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md dark:bg-card">
+                      <svg className="w-3 h-3 text-neutral-900 dark:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -146,19 +146,19 @@ export default function FeedbackPage() {
                   )}>
                     <Lightbulb className={cn(
                       'h-5 w-5',
-                      type === 'feature_request' ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700'
+                      type === 'feature_request' ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700 dark:text-muted-foreground dark:group-hover:text-foreground'
                     )} />
                   </div>
                   <div className="text-center">
                     <div className={cn(
                       'font-bold text-sm mb-0.5 transition-colors',
-                      type === 'feature_request' ? 'text-white' : 'text-neutral-700'
+                      type === 'feature_request' ? 'text-white' : 'text-neutral-700 dark:text-foreground'
                     )}>
                       功能建议
                     </div>
                     <div className={cn(
                       'text-xs leading-relaxed',
-                      type === 'feature_request' ? 'text-neutral-300' : 'text-neutral-500'
+                      type === 'feature_request' ? 'text-neutral-300 dark:text-muted-foreground' : 'text-neutral-500 dark:text-muted-foreground'
                     )}>
                       新功能或改进建议
                     </div>
@@ -171,13 +171,13 @@ export default function FeedbackPage() {
                   className={cn(
                     'relative group flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300',
                     type === 'bug'
-                      ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl shadow-neutral-300/50 scale-[1.02]'
-                      : 'border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600'
+                      ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl shadow-neutral-300/50 scale-[1.02] dark:border-border dark:shadow-none dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+                      : 'border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-neutral-600 dark:border-border dark:hover:border-border dark:hover:bg-muted dark:text-muted-foreground'
                   )}
                 >
                   {type === 'bug' && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
-                      <svg className="w-3 h-3 text-neutral-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md dark:bg-card">
+                      <svg className="w-3 h-3 text-neutral-900 dark:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -188,19 +188,19 @@ export default function FeedbackPage() {
                   )}>
                     <Bug className={cn(
                       'h-5 w-5',
-                      type === 'bug' ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700'
+                      type === 'bug' ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700 dark:text-muted-foreground dark:group-hover:text-foreground'
                     )} />
                   </div>
                   <div className="text-center">
                     <div className={cn(
                       'font-bold text-sm mb-0.5 transition-colors',
-                      type === 'bug' ? 'text-white' : 'text-neutral-700'
+                      type === 'bug' ? 'text-white' : 'text-neutral-700 dark:text-foreground'
                     )}>
                       问题反馈
                     </div>
                     <div className={cn(
                       'text-xs leading-relaxed',
-                      type === 'bug' ? 'text-neutral-300' : 'text-neutral-500'
+                      type === 'bug' ? 'text-neutral-300 dark:text-muted-foreground' : 'text-neutral-500 dark:text-muted-foreground'
                     )}>
                       报告 Bug 或问题
                     </div>
@@ -211,12 +211,12 @@ export default function FeedbackPage() {
 
             {/* Description textarea with enhanced focus states */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
-                详细描述 <span className="text-neutral-900">*</span>
+              <Label htmlFor="description" className="text-xs font-bold text-neutral-900 uppercase tracking-wider dark:text-foreground">
+                详细描述 <span className="text-neutral-900 dark:text-foreground">*</span>
               </Label>
               <div className={cn(
                 'relative rounded-xl transition-all duration-300',
-                focusedField === 'description' && 'ring-2 ring-neutral-200'
+                focusedField === 'description' && 'ring-2 ring-neutral-200 dark:ring-border'
               )}>
                 <Textarea
                   id="description"
@@ -233,8 +233,8 @@ export default function FeedbackPage() {
                   className={cn(
                     'resize-none rounded-xl border-2 transition-all duration-300 text-sm',
                     focusedField === 'description'
-                      ? 'border-neutral-900 bg-white'
-                      : 'border-neutral-200 focus:border-neutral-900'
+                      ? 'border-neutral-900 bg-white dark:border-border dark:bg-card'
+                      : 'border-neutral-200 focus:border-neutral-900 dark:border-border dark:focus:border-border'
                   )}
                   style={{ lineHeight: '1.6' }}
                 />
@@ -242,7 +242,7 @@ export default function FeedbackPage() {
               <div className="flex justify-end">
                 <span className={cn(
                   'text-xs transition-colors font-medium',
-                  description.length > 0 ? 'text-neutral-600' : 'text-neutral-400'
+                  description.length > 0 ? 'text-neutral-600 dark:text-muted-foreground' : 'text-neutral-400 dark:text-muted-foreground'
                 )}>
                   {description.length} 字符
                 </span>
@@ -251,13 +251,13 @@ export default function FeedbackPage() {
 
             {/* Email input with subtle styling */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
+              <Label htmlFor="email" className="text-xs font-bold text-neutral-900 uppercase tracking-wider dark:text-foreground">
                 联系邮箱
-                <span className="ml-2 text-xs font-normal text-neutral-400 font-sans tracking-normal">(可选)</span>
+                <span className="ml-2 text-xs font-normal text-neutral-400 font-sans tracking-normal dark:text-muted-foreground">(可选)</span>
               </Label>
               <div className={cn(
                 'relative rounded-xl transition-all duration-300',
-                focusedField === 'email' && 'ring-2 ring-neutral-200'
+                focusedField === 'email' && 'ring-2 ring-neutral-200 dark:ring-border'
               )}>
                 <Input
                   id="email"
@@ -270,12 +270,12 @@ export default function FeedbackPage() {
                   className={cn(
                     'rounded-xl border-2 transition-all duration-300 text-sm',
                     focusedField === 'email'
-                      ? 'border-neutral-900 bg-white'
-                      : 'border-neutral-200 focus:border-neutral-900'
+                      ? 'border-neutral-900 bg-white dark:border-border dark:bg-card'
+                      : 'border-neutral-200 focus:border-neutral-900 dark:border-border dark:focus:border-border'
                   )}
                 />
               </div>
-              <p className="text-xs text-neutral-400 leading-relaxed flex items-center gap-1.5">
+              <p className="text-xs text-neutral-400 leading-relaxed flex items-center gap-1.5 dark:text-muted-foreground">
                 <span className="w-1 h-1 bg-neutral-300 rounded-full" />
                 留下邮箱以便我们在处理您的反馈后通知您
               </p>
@@ -287,14 +287,14 @@ export default function FeedbackPage() {
               className={cn(
                 'w-full relative overflow-hidden rounded-xl font-bold text-sm py-4 transition-all duration-300',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                !isSubmitting && description.trim() && 'hover:shadow-lg hover:shadow-neutral-300/50 hover:scale-[1.02] active:scale-[0.98]'
+                !isSubmitting && description.trim() && 'hover:shadow-lg hover:shadow-neutral-300/50 hover:scale-[1.02] active:scale-[0.98] dark:shadow-none'
               )}
               style={{
                 background: description.trim() && !isSubmitting
-                  ? '#171717'
-                  : '#E5E5E5',
+                  ? 'hsl(var(--primary))'
+                  : 'hsl(var(--muted))',
                 border: 'none',
-                color: description.trim() && !isSubmitting ? '#FFFFFF' : '#A3A3A3'
+                color: description.trim() && !isSubmitting ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))'
               }}
               disabled={isSubmitting || !description.trim()}
             >
@@ -312,7 +312,7 @@ export default function FeedbackPage() {
               {/* Button shine effect */}
               {!isSubmitting && description.trim() && (
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite]">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-background/10" />
                 </div>
               )}
             </Button>
@@ -323,7 +323,7 @@ export default function FeedbackPage() {
         </div>
 
         {/* Footer text */}
-        <p className="text-center text-neutral-400 text-xs mt-6 leading-relaxed font-medium">
+        <p className="text-center text-neutral-400 text-xs mt-6 leading-relaxed font-medium dark:text-muted-foreground">
           每一条反馈都值得我们认真对待
         </p>
       </div>

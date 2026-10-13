@@ -384,7 +384,7 @@ export default function PublicPromptsClient() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="text-red-500 text-xl mb-4">⚠️</div>
+                    <div className="text-red-500 text-xl mb-4 dark:text-red-300">⚠️</div>
                     <p className="text-gray-600 dark:text-gray-400">
                         {t && t.publicPage ? t.publicPage.error || 'Error loading prompts' : 'Error loading prompts'}
                     </p>
@@ -427,7 +427,7 @@ export default function PublicPromptsClient() {
                     {/* Enhanced header section */}
                     <div className="text-center mb-16 space-y-6">
                         <div className="space-y-4">
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent leading-tight">
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent leading-tight dark:text-foreground dark:bg-none">
                                 {t.publicPage.title}
                             </h1>
                             <div className="h-1 w-24 bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 mx-auto rounded-full" />
@@ -462,7 +462,7 @@ export default function PublicPromptsClient() {
                                 {searchQuery && (
                                     <button
                                         onClick={clearSearch}
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10"
+                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10 dark:text-muted-foreground"
                                         title={t.publicPage.clearSearch}
                                     >
                                         <X className="h-5 w-5" />
@@ -542,7 +542,7 @@ export default function PublicPromptsClient() {
                                                         checked={contributeForm.language === 'zh'}
                                                         onChange={(e) => handleContributeInputChange('language', e.target.value)}
                                                         disabled={isSubmitting}
-                                                        className="w-4 h-4 text-slate-900"
+                                                        className="w-4 h-4 text-slate-900 dark:text-foreground"
                                                     />
                                                     <span className="text-sm">中文</span>
                                                 </label>
@@ -554,7 +554,7 @@ export default function PublicPromptsClient() {
                                                         checked={contributeForm.language === 'en'}
                                                         onChange={(e) => handleContributeInputChange('language', e.target.value)}
                                                         disabled={isSubmitting}
-                                                        className="w-4 h-4 text-slate-900"
+                                                        className="w-4 h-4 text-slate-900 dark:text-foreground"
                                                     />
                                                     <span className="text-sm">English</span>
                                                 </label>
@@ -755,7 +755,7 @@ export default function PublicPromptsClient() {
                                 className={`
                                     flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
                                     ${pagination.hasPreviousPage
-                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700'
+                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700 dark:hover:text-foreground'
                                         : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
                                     }
                                 `}
@@ -830,7 +830,7 @@ export default function PublicPromptsClient() {
                                                     min-w-[2.5rem] h-10 px-3 rounded-lg font-medium transition-all duration-300
                                                     ${isActive
                                                         ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg scale-110'
-                                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700'
+                                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700 dark:hover:text-foreground'
                                                     }
                                                 `}
                                             >
@@ -848,7 +848,7 @@ export default function PublicPromptsClient() {
                                 className={`
                                     flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
                                     ${pagination.hasNextPage
-                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700'
+                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700 dark:hover:text-foreground'
                                         : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
                                     }
                                 `}
@@ -866,7 +866,7 @@ export default function PublicPromptsClient() {
             {showBackToTop && (
                 <button
                     onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-white rounded-full shadow-xl hover:shadow-2xl backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-4 focus:ring-black/20 dark:focus:ring-white/20"
+                    className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-white rounded-full shadow-xl hover:shadow-2xl backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-4 focus:ring-black/20 dark:focus:ring-white/20 dark:border-border/20"
                     title="回到顶部/backtotop"
                     aria-label="Back to top"
                 >

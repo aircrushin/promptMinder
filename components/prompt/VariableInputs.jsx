@@ -134,7 +134,7 @@ export default function VariableInputs({
             {variable.type}
           </Badge>
           {variable.required && (
-            <span className="text-red-500 text-sm">*</span>
+            <span className="text-red-500 text-sm dark:text-red-300">*</span>
           )}
         </div>
         
@@ -156,7 +156,7 @@ export default function VariableInputs({
           <MotionDiv
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="flex items-center gap-1 text-red-500 text-sm"
+            className="flex items-center gap-1 text-red-500 text-sm dark:text-red-300"
             id={`${variable.name}-error`}
           >
             <AlertCircle className="w-4 h-4" />
@@ -191,7 +191,7 @@ export default function VariableInputs({
           <MotionDiv
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm"
+            className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm dark:bg-red-950/30 dark:border-red-800 dark:text-red-300"
           >
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />

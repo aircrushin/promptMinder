@@ -120,16 +120,16 @@ export default function PromptDiffPage({ params }) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             {tp.backToDetail || t.promptDetailPage?.backToList || '返回详情'}
           </Button>
-          <div className="h-6 w-px bg-gray-200" />
+          <div className="h-6 w-px bg-gray-200 dark:bg-muted" />
           <div className="flex items-center gap-2">
-            <GitCompare className="h-5 w-5 text-indigo-600" />
+            <GitCompare className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
             <h1 className="text-lg font-semibold">{tp.title || '版本差异对比'}</h1>
           </div>
         </div>
 
         {prompt && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
-            <span className="text-sm text-gray-700 font-medium">{prompt.title}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200 dark:bg-muted dark:border-border">
+            <span className="text-sm text-gray-700 font-medium dark:text-foreground">{prompt.title}</span>
           </div>
         )}
       </div>
@@ -138,12 +138,12 @@ export default function PromptDiffPage({ params }) {
       <Card className="mb-6 shadow-lg">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <Clock className="h-4 w-4 text-indigo-600" />
+            <div className="p-2 bg-indigo-50 rounded-lg dark:bg-indigo-950/30">
+              <Clock className="h-4 w-4 text-indigo-600 dark:text-indigo-300" />
             </div>
             <div>
               <h2 className="text-base font-semibold">{tp.selectVersionsToCompare || '选择版本进行对比'}</h2>
-              <p className="text-sm text-gray-500">{tp.compareDifferences || '对比两个版本之间的差异'}</p>
+              <p className="text-sm text-gray-500 dark:text-muted-foreground">{tp.compareDifferences || '对比两个版本之间的差异'}</p>
             </div>
           </div>
 
@@ -155,13 +155,13 @@ export default function PromptDiffPage({ params }) {
                 {tp.leftVersionLabel || '旧版本'}
               </label>
               <Select value={leftVersion || ''} onValueChange={setLeftVersion}>
-                <SelectTrigger className="hover:border-orange-300 transition-colors">
+                <SelectTrigger className="hover:border-orange-300 transition-colors dark:hover:border-orange-800">
                   <SelectValue placeholder={tp.selectVersionPlaceholder || '选择版本'}>
                     {leftVersion ? (
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-mono text-orange-600">v{versions.find((item) => item.id === leftVersion)?.version}</span>
+                        <span className="font-mono text-orange-600 dark:text-orange-300">v{versions.find((item) => item.id === leftVersion)?.version}</span>
                         {versions.find(v => v.id === leftVersion) && (
-                          <span className="text-xs text-gray-500 ml-2">
+                          <span className="text-xs text-gray-500 ml-2 dark:text-muted-foreground">
                             {new Date(versions.find(v => v.id === leftVersion).created_at).toLocaleDateString()}
                           </span>
                         )}
@@ -176,12 +176,12 @@ export default function PromptDiffPage({ params }) {
                         <div className="flex items-center gap-2">
                           <span className="font-mono">v{version.version}{version.has_skill_package ? ` · ${version.id.slice(0, 8)}` : ''}</span>
                           {index === 0 && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded border border-green-200">
+                            <span className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded border border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800">
                               {tp.latestBadge || '最新'}
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-muted-foreground">
                           {new Date(version.created_at).toLocaleDateString()}
                         </span>
                       </div>
@@ -193,7 +193,7 @@ export default function PromptDiffPage({ params }) {
 
             {/* Divider */}
             <div className="hidden md:flex items-center justify-center pb-2">
-              <ChevronRight className="h-5 w-5 text-gray-400" />
+              <ChevronRight className="h-5 w-5 text-gray-400 dark:text-muted-foreground" />
             </div>
 
             {/* Right Version */}
@@ -203,13 +203,13 @@ export default function PromptDiffPage({ params }) {
                 {tp.rightVersionLabel || '新版本'}
               </label>
               <Select value={rightVersion || ''} onValueChange={setRightVersion}>
-                <SelectTrigger className="hover:border-green-300 transition-colors">
+                <SelectTrigger className="hover:border-green-300 transition-colors dark:hover:border-green-800">
                   <SelectValue placeholder={tp.selectVersionPlaceholder || '选择版本'}>
                     {rightVersion ? (
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-mono text-green-600">v{versions.find((item) => item.id === rightVersion)?.version}</span>
+                        <span className="font-mono text-green-600 dark:text-green-300">v{versions.find((item) => item.id === rightVersion)?.version}</span>
                         {versions.find(v => v.id === rightVersion) && (
-                          <span className="text-xs text-gray-500 ml-2">
+                          <span className="text-xs text-gray-500 ml-2 dark:text-muted-foreground">
                             {new Date(versions.find(v => v.id === rightVersion).created_at).toLocaleDateString()}
                           </span>
                         )}
@@ -224,12 +224,12 @@ export default function PromptDiffPage({ params }) {
                         <div className="flex items-center gap-2">
                           <span className="font-mono">v{version.version}{version.has_skill_package ? ` · ${version.id.slice(0, 8)}` : ''}</span>
                           {index === 0 && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded border border-green-200">
+                            <span className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded border border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800">
                               {tp.latestBadge || '最新'}
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-muted-foreground">
                           {new Date(version.created_at).toLocaleDateString()}
                         </span>
                       </div>
@@ -242,7 +242,7 @@ export default function PromptDiffPage({ params }) {
 
           {/* Mobile Divider */}
           <div className="md:hidden flex items-center justify-center py-4">
-            <div className="flex items-center gap-3 text-gray-400">
+            <div className="flex items-center gap-3 text-gray-400 dark:text-muted-foreground">
               <div className="w-16 h-px bg-gray-300" />
               <span className="text-sm font-medium">VS</span>
               <div className="w-16 h-px bg-gray-300" />
@@ -253,7 +253,7 @@ export default function PromptDiffPage({ params }) {
 
       {/* Diff Viewer */}
       <Card className="shadow-lg overflow-hidden">
-        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gray-50/50">
+        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gray-50/50 dark:border-border dark:bg-muted/50">
           <div className="flex items-center gap-3">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -262,16 +262,16 @@ export default function PromptDiffPage({ params }) {
             </div>
             <div className="h-4 w-px bg-gray-300" />
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-500">{tp.versionComparison || '对比'}</span>
-              <span className="font-mono text-orange-600">v{versions.find((item) => item.id === leftVersion)?.version || '-'}</span>
-              <span className="text-gray-400">→</span>
-              <span className="font-mono text-green-600">v{versions.find((item) => item.id === rightVersion)?.version || '-'}</span>
+              <span className="text-gray-500 dark:text-muted-foreground">{tp.versionComparison || '对比'}</span>
+              <span className="font-mono text-orange-600 dark:text-orange-300">v{versions.find((item) => item.id === leftVersion)?.version || '-'}</span>
+              <span className="text-gray-400 dark:text-muted-foreground">→</span>
+              <span className="font-mono text-green-600 dark:text-green-300">v{versions.find((item) => item.id === rightVersion)?.version || '-'}</span>
             </div>
           </div>
 
           {loadingContent && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <div className="w-4 h-4 border-2 border-gray-200 border-t-indigo-600 rounded-full animate-spin" />
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-muted-foreground">
+              <div className="w-4 h-4 border-2 border-gray-200 border-t-indigo-600 rounded-full animate-spin dark:border-border" />
               {tp.loading || '加载中...'}
             </div>
           )}
@@ -281,10 +281,10 @@ export default function PromptDiffPage({ params }) {
           {contentError ? <p role="alert" className="p-4 text-destructive">{contentError}</p> : loadingContent ? (
             <div className="h-full flex flex-col items-center justify-center gap-4">
               <div className="relative">
-                <div className="w-16 h-16 border-4 border-gray-200 rounded-full" />
+                <div className="w-16 h-16 border-4 border-gray-200 rounded-full dark:border-border" />
                 <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin" />
               </div>
-              <p className="text-gray-500 text-sm">{tp.loadingVersionContent || tp.loading || '正在加载版本内容...'}</p>
+              <p className="text-gray-500 text-sm dark:text-muted-foreground">{tp.loadingVersionContent || tp.loading || '正在加载版本内容...'}</p>
             </div>
           ) : (
             <div className="h-full">

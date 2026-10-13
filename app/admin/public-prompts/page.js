@@ -382,7 +382,7 @@ export default function AdminPublicPromptsPage() {
         <div className="mb-10 rounded-3xl border bg-gradient-to-br from-blue-900/5 via-background to-background p-8 shadow-sm dark:from-blue-900/30">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-foreground/5 px-4 py-1 text-xs tracking-wide text-muted-foreground backdrop-blur">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-foreground/5 px-4 py-1 text-xs tracking-wide text-muted-foreground backdrop-blur dark:border-border/20">
                 <Globe className="h-3.5 w-3.5" /> 公开提示词管理
               </div>
               <div>
@@ -582,7 +582,7 @@ export default function AdminPublicPromptsPage() {
                             onClick={() => handleCopy(prompt.content, prompt.id)}
                           >
                             {copiedId === prompt.id ? (
-                              <Check className="h-4 w-4 text-green-500" />
+                              <Check className="h-4 w-4 text-green-500 dark:text-green-300" />
                             ) : (
                               <Copy className="h-4 w-4" />
                             )}
@@ -958,7 +958,7 @@ export default function AdminPublicPromptsPage() {
               >
                 {copiedId === selectedPrompt?.id ? (
                   <>
-                    <Check className="h-4 w-4 mr-2 text-green-500" />
+                    <Check className="h-4 w-4 mr-2 text-green-500 dark:text-green-300" />
                     已复制
                   </>
                 ) : (

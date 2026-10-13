@@ -18,15 +18,15 @@ const iconMap = {
 
 const variantStyles = {
   destructive: {
-    icon: "text-red-500",
+    icon: "text-red-500 dark:text-red-300",
     confirmButton: "bg-red-600 hover:bg-red-700",
   },
   default: {
-    icon: "text-blue-500",
+    icon: "text-blue-500 dark:text-blue-300",
     confirmButton: "bg-blue-600 hover:bg-blue-700",
   },
   warning: {
-    icon: "text-yellow-500",
+    icon: "text-yellow-500 dark:text-yellow-300",
     confirmButton: "bg-yellow-600 hover:bg-yellow-700",
   },
 };
@@ -96,7 +96,7 @@ export function ConfirmDialog({
           <Button
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`w-full sm:w-auto text-white ${styles.confirmButton}`}
+            className={`w-full sm:w-auto text-white  ${styles.confirmButton}`}
           >
             {isLoading ? "处理中..." : confirmText}
           </Button>

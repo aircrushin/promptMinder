@@ -1,51 +1,50 @@
-"use client";
+'use client';
 
-import { ClerkProvider } from "@clerk/nextjs";
-import { light } from "@clerk/themes";
-import { zhCN } from "@clerk/localizations";
-import { Toaster } from "@/components/ui/toaster";
-import { Analytics } from "@vercel/analytics/next";
-import { LanguageProvider } from "@/contexts/LanguageContext";
-import { TeamProvider } from "@/contexts/team-context";
-import Navbar from "@/components/layout/Navbar";
-import { usePathname } from "next/navigation";
-import { NO_HEADER_FOOTER_PAGES } from "@/lib/constants";
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
+import { zhCN } from '@clerk/localizations';
+import { useTheme } from 'next-themes';
+import { Toaster } from '@/components/ui/toaster';
+import { Analytics } from '@vercel/analytics/next';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+import { TeamProvider } from '@/contexts/team-context';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import Navbar from '@/components/layout/Navbar';
+import { usePathname } from 'next/navigation';
+import { NO_HEADER_FOOTER_PAGES } from '@/lib/constants';
 
-export default function Providers({ children }) {
+function ThemedProviders({ children }) {
   const pathname = usePathname();
+  const { resolvedTheme } = useTheme();
   const shouldShowHeaderFooter = !NO_HEADER_FOOTER_PAGES.includes(pathname);
 
   return (
     <ClerkProvider
       localization={zhCN}
       appearance={{
-        layout: {
-          unsafe_disableDevelopmentModeWarnings: true,
-          socialButtonsIconButton: "hover:bg-gray-100",
-        },
+        baseTheme: resolvedTheme === 'dark' ? dark : undefined,
+        layout: { unsafe_disableDevelopmentModeWarnings: true },
         elements: {
-          formButtonPrimary: "bg-black hover:bg-black/90 transition-colors",
-          headerTitle: "text-2xl font-bold text-gray-900",
-          headerSubtitle: "text-gray-600",
-          socialButtonsBlockButton:
-            "border border-gray-200 hover:bg-gray-50 transition-colors",
-          formFieldInput:
-            "rounded-lg border-gray-200 focus:border-black focus:ring-black",
-          footerActionLink: "text-black hover:text-gray-600 transition-colors",
-          dividerLine: "bg-gray-200",
-          dividerText: "text-gray-500",
-          formFieldLabel: "font-medium text-gray-700",
+          formButtonPrimary: 'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
+          headerTitle: 'text-2xl font-bold text-foreground',
+          headerSubtitle: 'text-muted-foreground',
+          socialButtonsBlockButton: 'border border-border text-foreground hover:bg-accent transition-colors',
+          formFieldInput: 'rounded-lg border-input focus:border-ring focus:ring-ring',
+          footerActionLink: 'text-foreground hover:text-muted-foreground transition-colors',
+          dividerLine: 'bg-border',
+          dividerText: 'text-muted-foreground',
+          formFieldLabel: 'font-medium text-foreground',
         },
         variables: {
-          colorPrimary: "#000000",
-          colorBackground: "#ffffff",
-          colorInputBackground: "#ffffff",
-          colorInputText: "#000000",
-          colorTextSecondary: "#4B5563",
-          fontFamily: "Inter, sans-serif",
-          borderRadius: "0.5rem",
+          colorPrimary: 'hsl(var(--primary))',
+          colorBackground: 'hsl(var(--card))',
+          colorInputBackground: 'hsl(var(--background))',
+          colorInputText: 'hsl(var(--foreground))',
+          colorText: 'hsl(var(--foreground))',
+          colorTextSecondary: 'hsl(var(--muted-foreground))',
+          fontFamily: 'Inter, sans-serif',
+          borderRadius: '0.5rem',
         },
-        baseTheme: light,
       }}
     >
       <LanguageProvider>
@@ -62,6 +61,6 @@ export default function Providers({ children }) {
   );
 }
 
-
-
-
+export default function Providers({ children }) {
+  return <ThemeProvider><ThemedProviders>{children}</ThemedProviders></ThemeProvider>;
+}

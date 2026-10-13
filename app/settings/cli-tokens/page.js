@@ -151,8 +151,8 @@ function CopyButton({ text, label, copiedLabel, className }) {
       className={cn(
         'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium border transition-all duration-150',
         copied
-          ? 'bg-black text-white border-black'
-          : 'bg-white text-black border-black hover:bg-black hover:text-white',
+          ? 'bg-black text-white border-black dark:border-border dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+          : 'bg-white text-black border-black hover:bg-black hover:text-white dark:bg-card dark:border-border dark:hover:text-foreground dark:text-foreground',
         className
       )}
     >
@@ -278,8 +278,8 @@ export default function CliTokensPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="flex items-center gap-3 font-mono text-sm text-black/40">
+      <div className="min-h-screen bg-white flex items-center justify-center dark:bg-card">
+        <div className="flex items-center gap-3 font-mono text-sm text-black/40 dark:text-foreground/40">
           <span className="inline-block w-2 h-2 bg-black animate-pulse" />
           {translations.loadingState}
         </div>
@@ -289,16 +289,16 @@ export default function CliTokensPage() {
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="w-full max-w-md border border-black">
-          <div className="border-b border-black px-6 py-4 flex items-center gap-3">
-            <Terminal className="h-4 w-4 text-black" />
+      <div className="min-h-screen bg-white flex items-center justify-center px-4 dark:bg-card">
+        <div className="w-full max-w-md border border-black dark:border-border">
+          <div className="border-b border-black px-6 py-4 flex items-center gap-3 dark:border-border">
+            <Terminal className="h-4 w-4 text-black dark:text-foreground" />
             <span className="font-mono text-sm font-medium tracking-widest uppercase">{translations.pageTitle}</span>
           </div>
           <div className="px-6 py-8 space-y-6">
             <div className="space-y-2">
-              <p className="font-mono text-xs text-black/50 uppercase tracking-widest">{translations.authTitle}</p>
-              <p className="text-sm text-black/70 leading-relaxed">
+              <p className="font-mono text-xs text-black/50 uppercase tracking-widest dark:text-foreground/50">{translations.authTitle}</p>
+              <p className="text-sm text-black/70 leading-relaxed dark:text-foreground/70">
                 {translations.authDescription}
               </p>
             </div>
@@ -312,7 +312,7 @@ export default function CliTokensPage() {
                 href="https://www.prompt-minder.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 border border-black text-sm font-mono font-medium hover:bg-black hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-black text-sm font-mono font-medium hover:bg-black hover:text-white transition-colors dark:border-border dark:hover:text-foreground"
               >
                 {translations.officialSite}
                 <ExternalLink className="h-3 w-3" />
@@ -325,46 +325,46 @@ export default function CliTokensPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-card">
       <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
 
         {/* Page Header */}
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <KeyRound className="h-3.5 w-3.5 text-black/40" />
-              <span className="font-mono text-xs text-black/40 uppercase tracking-widest">{translations.pageBadge}</span>
+              <KeyRound className="h-3.5 w-3.5 text-black/40 dark:text-foreground/40" />
+              <span className="font-mono text-xs text-black/40 uppercase tracking-widest dark:text-foreground/40">{translations.pageBadge}</span>
             </div>
             <Link
               href="/settings/cli-tokens/docs"
-              className="inline-flex items-center gap-1.5 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white"
+              className="inline-flex items-center gap-1.5 border border-black px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wide text-black transition-colors hover:bg-black hover:text-white dark:border-border dark:hover:text-foreground dark:text-foreground"
             >
               {translations.docsAction}
               <ExternalLink className="h-3 w-3" />
             </Link>
           </div>
           <div className="flex items-end gap-4">
-            <h1 className="text-4xl font-bold tracking-tight text-black leading-none">{translations.pageTitle}</h1>
+            <h1 className="text-4xl font-bold tracking-tight text-black leading-none dark:text-foreground">{translations.pageTitle}</h1>
             <div className="mb-1 flex items-center gap-1.5 pb-0.5">
               <span className="block w-1.5 h-1.5 bg-black animate-pulse" />
-              <span className="font-mono text-xs text-black/40">{translations.pageStatus}</span>
+              <span className="font-mono text-xs text-black/40 dark:text-foreground/40">{translations.pageStatus}</span>
             </div>
           </div>
-          <p className="text-sm text-black/55 max-w-xl leading-relaxed">
+          <p className="text-sm text-black/55 max-w-xl leading-relaxed dark:text-foreground/55">
             {translations.pageDescription}
           </p>
         </div>
 
         {/* Create Token */}
-        <section className="border border-black">
-          <div className="border-b border-black px-6 py-4 flex items-center justify-between">
+        <section className="border border-black dark:border-border">
+          <div className="border-b border-black px-6 py-4 flex items-center justify-between dark:border-border">
             <div>
               <h2 className="font-mono text-sm font-semibold tracking-wide uppercase">{translations.createTitle}</h2>
-              <p className="mt-0.5 font-mono text-xs text-black/45">
+              <p className="mt-0.5 font-mono text-xs text-black/45 dark:text-foreground/45">
                 {translations.createDescription}
               </p>
             </div>
-            <Plus className="h-4 w-4 text-black/30" />
+            <Plus className="h-4 w-4 text-black/30 dark:text-foreground/30" />
           </div>
 
           <div className="px-6 py-5 space-y-4">
@@ -374,7 +374,7 @@ export default function CliTokensPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder={translations.namePlaceholder}
                 maxLength={80}
-                className="flex-1 px-3 py-2 border border-black font-mono text-sm bg-white text-black placeholder:text-black/30 outline-none focus:bg-black/[0.02] transition-colors"
+                className="flex-1 px-3 py-2 border border-black font-mono text-sm bg-white text-black placeholder:text-black/30 outline-none focus:bg-black/[0.02] transition-colors dark:border-border dark:bg-card dark:text-foreground dark:placeholder:text-foreground/30"
               />
               <button
                 onClick={handleCreate}
@@ -387,39 +387,39 @@ export default function CliTokensPage() {
             </div>
 
             {newSecret && (
-              <div className="border border-black">
+              <div className="border border-black dark:border-border">
                 {/* Warning header */}
                 <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
                   <div className="space-y-0.5">
                     <p className="font-mono text-xs font-semibold uppercase tracking-widest">⚠ {translations.revealTitle}</p>
-                    <p className="font-mono text-xs text-white/60">{translations.revealDescription}</p>
+                    <p className="font-mono text-xs text-white/60 dark:text-foreground/60">{translations.revealDescription}</p>
                   </div>
                   <CopyButton
                     text={newSecret}
                     label={translations.copyToken}
                     copiedLabel={commonTranslations.copied}
-                    className="border-white text-white bg-transparent hover:bg-white hover:text-black"
+                    className="border-white text-white bg-transparent hover:bg-white hover:text-black dark:border-border dark:hover:bg-card dark:hover:text-foreground"
                   />
                 </div>
 
                 {/* Token value */}
                 <div className="bg-[#0a0a0a] px-5 py-4">
-                  <pre className="font-mono text-xs text-white/90 overflow-x-auto whitespace-pre-wrap break-all">
+                  <pre className="font-mono text-xs text-white/90 overflow-x-auto whitespace-pre-wrap break-all dark:text-foreground/90">
                     <code>{newSecret}</code>
                   </pre>
                 </div>
 
                 {/* Quick setup */}
-                <div className="border-t border-black px-5 py-4 space-y-3">
+                <div className="border-t border-black px-5 py-4 space-y-3 dark:border-border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-mono text-xs font-semibold uppercase tracking-wide text-black">{translations.quickSetupTitle}</p>
-                      <p className="font-mono text-xs text-black/45 mt-0.5">{translations.quickSetupDescription}</p>
+                      <p className="font-mono text-xs font-semibold uppercase tracking-wide text-black dark:text-foreground">{translations.quickSetupTitle}</p>
+                      <p className="font-mono text-xs text-black/45 mt-0.5 dark:text-foreground/45">{translations.quickSetupDescription}</p>
                     </div>
                     <CopyButton text={installSnippet} label={translations.copyCommand} copiedLabel={commonTranslations.copied} />
                   </div>
                   <div className="bg-[#0a0a0a] px-5 py-4">
-                    <pre className="font-mono text-xs text-white/90 overflow-x-auto">
+                    <pre className="font-mono text-xs text-white/90 overflow-x-auto dark:text-foreground/90">
                       <code>{installSnippet}</code>
                     </pre>
                   </div>
@@ -430,56 +430,56 @@ export default function CliTokensPage() {
         </section>
 
         {/* Token List */}
-        <section className="border border-black">
-          <div className="border-b border-black px-6 py-4 flex items-center justify-between">
+        <section className="border border-black dark:border-border">
+          <div className="border-b border-black px-6 py-4 flex items-center justify-between dark:border-border">
             <div>
               <h2 className="font-mono text-sm font-semibold tracking-wide uppercase">{translations.listTitle}</h2>
-              <p className="mt-0.5 font-mono text-xs text-black/45">{translations.listDescription}</p>
+              <p className="mt-0.5 font-mono text-xs text-black/45 dark:text-foreground/45">{translations.listDescription}</p>
             </div>
             {!isLoading && tokens.length > 0 && (
-              <span className="font-mono text-xs text-black/40">{interpolate(translations.listCount, { count: tokens.length })}</span>
+              <span className="font-mono text-xs text-black/40 dark:text-foreground/40">{interpolate(translations.listCount, { count: tokens.length })}</span>
             )}
           </div>
 
           {isLoading ? (
             <div className="px-6 py-12 flex items-center gap-3">
               <span className="block w-1.5 h-1.5 bg-black animate-pulse" />
-              <span className="font-mono text-xs text-black/40">{translations.listLoading}</span>
+              <span className="font-mono text-xs text-black/40 dark:text-foreground/40">{translations.listLoading}</span>
             </div>
           ) : tokens.length === 0 ? (
             <div className="px-6 py-16 text-center">
-              <Terminal className="h-8 w-8 text-black/15 mx-auto mb-4" />
-              <p className="font-mono text-sm text-black/40">{translations.emptyTitle}</p>
-              <p className="font-mono text-xs text-black/30 mt-1">
+              <Terminal className="h-8 w-8 text-black/15 mx-auto mb-4 dark:text-foreground/15" />
+              <p className="font-mono text-sm text-black/40 dark:text-foreground/40">{translations.emptyTitle}</p>
+              <p className="font-mono text-xs text-black/30 mt-1 dark:text-foreground/30">
                 {translations.emptyDescriptionPrefix} <code className="bg-black/5 px-1">promptminder auth login</code>
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-black/10">
+            <div className="divide-y divide-black/10 dark:divide-border/10">
               {tokens.map((token, index) => (
                 <div
                   key={token.id}
                   className="px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between hover:bg-black/[0.02] transition-colors"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="font-mono text-xs text-black/20 mt-0.5 w-5 text-right shrink-0 select-none">
+                    <span className="font-mono text-xs text-black/20 mt-0.5 w-5 text-right shrink-0 select-none dark:text-foreground/20">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <div className="space-y-1.5 min-w-0">
                       <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="font-mono text-sm font-semibold text-black">{token.name}</span>
+                        <span className="font-mono text-sm font-semibold text-black dark:text-foreground">{token.name}</span>
                         <span
                           className={cn(
                             'inline-flex items-center px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest border',
                             token.is_revoked
-                              ? 'border-black/20 text-black/35 bg-transparent'
-                              : 'border-black bg-black text-white'
+                              ? 'border-black/20 text-black/35 bg-transparent dark:border-border/20 dark:text-foreground/35'
+                              : 'border-black bg-black text-white dark:border-border'
                           )}
                         >
                           {token.is_revoked ? translations.statusRevoked : translations.statusActive}
                         </span>
                       </div>
-                      <div className="font-mono text-xs text-black/40 flex flex-wrap gap-x-5 gap-y-1">
+                      <div className="font-mono text-xs text-black/40 flex flex-wrap gap-x-5 gap-y-1 dark:text-foreground/40">
                         <span>{interpolate(translations.createdAt, { value: formatDateTime(token.created_at, language) })}</span>
                         <span>{interpolate(translations.lastUsedAt, { value: formatDateTime(token.last_used_at, language) })}</span>
                       </div>
@@ -491,7 +491,7 @@ export default function CliTokensPage() {
                       <button
                         disabled={revokingId === token.id}
                         onClick={() => setRevokeTarget(token)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-black/30 font-mono text-xs text-black/60 hover:border-black hover:text-black hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-black/30 font-mono text-xs text-black/60 hover:border-black hover:text-black hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 dark:border-border/30 dark:text-foreground/60 dark:hover:border-border dark:hover:text-foreground"
                       >
                         <Trash2 className="h-3 w-3" />
                         {revokingId === token.id ? translations.revokingAction : translations.revokeAction}
@@ -505,26 +505,26 @@ export default function CliTokensPage() {
         </section>
 
         {/* How to use */}
-        <section className="border border-black">
-          <div className="border-b border-black px-6 py-4">
+        <section className="border border-black dark:border-border">
+          <div className="border-b border-black px-6 py-4 dark:border-border">
             <h2 className="font-mono text-sm font-semibold tracking-wide uppercase">{translations.howToUseTitle}</h2>
           </div>
           <div className="px-6 py-5">
-            <ol className="space-y-0 divide-y divide-black/8">
+            <ol className="space-y-0 divide-y divide-black/8 dark:divide-border/8">
               {translations.steps.map(({ step, text, code, desc }) => (
                 <div key={step} className="flex items-start gap-5 py-4">
-                  <span className="font-mono text-2xl font-bold text-black/10 leading-none shrink-0 w-8">{step}</span>
+                  <span className="font-mono text-2xl font-bold text-black/10 leading-none shrink-0 w-8 dark:text-foreground/10">{step}</span>
                   <div className="space-y-1.5 min-w-0 flex-1">
-                    <p className="font-mono text-xs font-semibold uppercase tracking-wide text-black">{text}</p>
+                    <p className="font-mono text-xs font-semibold uppercase tracking-wide text-black dark:text-foreground">{text}</p>
                     {code && (
                       <div className="flex items-center gap-3">
-                        <code className="font-mono text-xs text-black/70 bg-black/5 px-2 py-1 flex-1 min-w-0 overflow-x-auto">
+                        <code className="font-mono text-xs text-black/70 bg-black/5 px-2 py-1 flex-1 min-w-0 overflow-x-auto dark:text-foreground/70">
                           {code}
                         </code>
                         <CopyButton text={code} label={commonTranslations.copy} copiedLabel={commonTranslations.copied} />
                       </div>
                     )}
-                    {desc && <p className="font-mono text-xs text-black/45">{desc}</p>}
+                    {desc && <p className="font-mono text-xs text-black/45 dark:text-foreground/45">{desc}</p>}
                   </div>
                 </div>
               ))}
@@ -536,17 +536,17 @@ export default function CliTokensPage() {
 
       {/* Revoke Dialog */}
       <AlertDialog open={Boolean(revokeTarget)} onOpenChange={(open) => !open && setRevokeTarget(null)}>
-        <AlertDialogContent className="border border-black rounded-none shadow-none p-0 gap-0 max-w-md">
-          <AlertDialogHeader className="border-b border-black px-6 py-5 space-y-1">
+        <AlertDialogContent className="border border-black rounded-none shadow-none p-0 gap-0 max-w-md dark:border-border">
+          <AlertDialogHeader className="border-b border-black px-6 py-5 space-y-1 dark:border-border">
             <AlertDialogTitle className="font-mono text-sm font-semibold uppercase tracking-wide">
               {translations.dialogTitle}
             </AlertDialogTitle>
-            <AlertDialogDescription className="font-mono text-xs text-black/55 leading-relaxed">
+            <AlertDialogDescription className="font-mono text-xs text-black/55 leading-relaxed dark:text-foreground/55">
               {translations.dialogDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="px-6 py-4 flex flex-row items-center gap-3">
-            <AlertDialogCancel className="flex-1 py-2 border border-black/30 font-mono text-xs text-black/60 hover:border-black hover:text-black hover:bg-transparent bg-transparent rounded-none shadow-none transition-colors">
+            <AlertDialogCancel className="flex-1 py-2 border border-black/30 font-mono text-xs text-black/60 hover:border-black hover:text-black hover:bg-transparent bg-transparent rounded-none shadow-none transition-colors dark:border-border/30 dark:text-foreground/60 dark:hover:border-border dark:hover:text-foreground">
               {translations.dialogCancel}
             </AlertDialogCancel>
             <AlertDialogAction

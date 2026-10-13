@@ -73,54 +73,54 @@ function CliIntroModal({ isOpen, onClose }) {
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="relative max-h-[90vh] w-full max-w-5xl overflow-auto rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,251,0.98))] shadow-[0_32px_120px_rgba(15,23,42,0.22)]">
+            <div className="relative max-h-[90vh] w-full max-w-5xl overflow-auto rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,251,0.98))] shadow-[0_32px_120px_rgba(15,23,42,0.22)] dark:border-border/80 dark:bg-none dark:bg-card">
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-500 shadow-[0_10px_30px_rgba(15,23,42,0.10)] transition-all duration-200 hover:-translate-y-0.5 hover:text-slate-900"
+                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-500 shadow-[0_10px_30px_rgba(15,23,42,0.10)] transition-all duration-200 hover:-translate-y-0.5 hover:text-slate-900 dark:border-border/80 dark:bg-card/90 dark:text-muted-foreground dark:hover:text-foreground"
               >
                 <X size={18} />
               </button>
 
               <div className="grid gap-10 p-7 sm:p-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-12 lg:p-12">
                 <div className="min-w-0">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[0.82rem] font-semibold tracking-[0.01em] text-blue-700">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[0.82rem] font-semibold tracking-[0.01em] text-blue-700 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
                     <Sparkles size={14} />
                     PromptMinder CLI
                   </div>
 
                   <div className="mt-8 max-w-2xl">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-muted-foreground">
                       Terminal-native prompt workflow
                     </p>
-                    <h2 className="mt-4 text-[clamp(2.4rem,5vw,4.4rem)] font-black leading-[0.95] tracking-[-0.05em] text-slate-950">
+                    <h2 className="mt-4 text-[clamp(2.4rem,5vw,4.4rem)] font-black leading-[0.95] tracking-[-0.05em] text-slate-950 dark:text-foreground">
                       在终端里
                       <br />
                       直接管理你的 prompts
                     </h2>
-                    <p className="mt-6 max-w-xl text-[1.05rem] leading-8 text-slate-600">
+                    <p className="mt-6 max-w-xl text-[1.05rem] leading-8 text-slate-600 dark:text-muted-foreground">
                       用更少的界面切换完成登录、团队选择、提示词管理与自动化接入。
                       这不是一个宣传页按钮，而是 PromptMinder 工作流进入终端的直接入口。
                     </p>
                   </div>
 
-                  <div className="mt-10 border-t border-slate-200">
+                  <div className="mt-10 border-t border-slate-200 dark:border-border">
                     <div className="grid gap-0 md:grid-cols-3">
-                      <div className="border-b border-slate-200 py-5 md:border-b-0 md:border-r">
-                        <p className="text-sm font-semibold text-slate-950">Install once</p>
-                        <p className="mt-2 pr-6 text-sm leading-6 text-slate-500">
+                      <div className="border-b border-slate-200 py-5 md:border-b-0 md:border-r dark:border-border">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-foreground">Install once</p>
+                        <p className="mt-2 pr-6 text-sm leading-6 text-slate-500 dark:text-muted-foreground">
                           全局安装后即可在本地脚本、终端会话和 agent 环境中调用。
                         </p>
                       </div>
-                      <div className="border-b border-slate-200 py-5 md:border-b-0 md:border-r md:px-6">
-                        <p className="text-sm font-semibold text-slate-950">Team-aware</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <div className="border-b border-slate-200 py-5 md:border-b-0 md:border-r md:px-6 dark:border-border">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-foreground">Team-aware</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-muted-foreground">
                           内置 team 作用域，适合多人共享提示词库和协作维护。
                         </p>
                       </div>
                       <div className="py-5 md:pl-6">
-                        <p className="text-sm font-semibold text-slate-950">Agent-ready</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-foreground">Agent-ready</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-muted-foreground">
                           适合脚本、CI/CD 和 AI agent pipeline，减少手工重复操作。
                         </p>
                       </div>
@@ -138,7 +138,7 @@ function CliIntroModal({ isOpen, onClose }) {
                       href="https://www.npmjs.com/package/@aircrushin/promptminder-cli"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:text-slate-950"
+                      className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:text-slate-950 dark:border-border dark:bg-card dark:text-foreground dark:hover:border-border dark:hover:text-foreground"
                     >
                       NPM 安装入口
                     </Link>
@@ -146,7 +146,7 @@ function CliIntroModal({ isOpen, onClose }) {
                       href="https://github.com/aircrushin/promptMinder/tree/main/packages/promptminder-cli"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+                      className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
                     >
                       查看源码
                     </Link>
@@ -154,14 +154,14 @@ function CliIntroModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="relative min-w-0 lg:pt-16">
-                  <div className="absolute left-5 top-0 hidden h-16 w-16 rounded-full bg-blue-100/80 blur-2xl lg:block" />
-                  <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.92),rgba(255,255,255,1))] p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] sm:p-5">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div className="absolute left-5 top-0 hidden h-16 w-16 rounded-full bg-blue-100/80 blur-2xl lg:block dark:bg-blue-950/80" />
+                  <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.92),rgba(255,255,255,1))] p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] sm:p-5 dark:border-border dark:bg-none dark:bg-card">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-border">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-muted-foreground">
                           Quick Start
                         </p>
-                        <p className="mt-1 text-sm font-medium text-slate-600">
+                        <p className="mt-1 text-sm font-medium text-slate-600 dark:text-muted-foreground">
                           从安装到登录，30 秒内完成首个连接。
                         </p>
                       </div>
@@ -173,40 +173,40 @@ function CliIntroModal({ isOpen, onClose }) {
                     </div>
 
                     <div className="mt-4 rounded-[1.35rem] bg-[#0d1321] p-4 text-left text-[0.95rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-5">
-                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.30em] text-slate-500">
+                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.30em] text-slate-500 dark:text-muted-foreground">
                         shell
                       </p>
                       <code className="mt-4 block overflow-x-auto whitespace-nowrap text-[0.98rem] text-sky-300">
                         npm i -g @aircrushin/promptminder-cli
                       </code>
-                      <code className="mt-3 block overflow-x-auto whitespace-nowrap text-[0.98rem] text-slate-100">
+                      <code className="mt-3 block overflow-x-auto whitespace-nowrap text-[0.98rem] text-slate-100 dark:text-muted-foreground">
                         promptminder auth login --token &lt;YOUR_TOKEN&gt;
                       </code>
-                      <code className="mt-3 block overflow-x-auto whitespace-nowrap text-[0.98rem] text-slate-400">
+                      <code className="mt-3 block overflow-x-auto whitespace-nowrap text-[0.98rem] text-slate-400 dark:text-muted-foreground">
                         promptminder team list
                       </code>
                     </div>
 
                     <div className="mt-4 grid gap-3">
-                      <div className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                      <div className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-border dark:bg-card">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">Auth</p>
-                          <p className="mt-1 text-sm leading-6 text-slate-500">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-foreground">Auth</p>
+                          <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-muted-foreground">
                             使用 token 登录，适合本地环境和自动化执行。
                           </p>
                         </div>
-                        <span className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                        <span className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
                           step 01
                         </span>
                       </div>
-                      <div className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                      <div className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-border dark:bg-card">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">Scope</p>
-                          <p className="mt-1 text-sm leading-6 text-slate-500">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-foreground">Scope</p>
+                          <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-muted-foreground">
                             查看并切换团队，确保命令始终落在正确 workspace。
                           </p>
                         </div>
-                        <span className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                        <span className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
                           step 02
                         </span>
                       </div>
@@ -248,7 +248,7 @@ export function HeroSection({ t }) {
   const heroCopy = { ...fallback, ...(t || {}) };
 
   return (
-    <section className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden bg-slate-50/50">
+    <section className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden bg-slate-50/50 dark:bg-muted/50">
       {/* dot grid background */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
 
@@ -266,21 +266,21 @@ export function HeroSection({ t }) {
         >
           <button
             onClick={() => setIsModalOpen(true)}
-            className="group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-4 py-2 text-sm font-medium text-blue-600 backdrop-blur-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700"
+            className="group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-4 py-2 text-sm font-medium text-blue-600 backdrop-blur-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 dark:border-blue-800 dark:bg-blue-950/80 dark:text-blue-300 dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300"
           >
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white">
               <Sparkles size={12} />
             </span>
             <span>认识 PromptMinder CLI</span>
             <span className="text-blue-400">·</span>
-            <span className="text-blue-500 transition-colors group-hover:text-blue-700">终端工作流 →</span>
+            <span className="text-blue-500 transition-colors group-hover:text-blue-700 dark:text-blue-300 dark:group-hover:text-blue-300">终端工作流 →</span>
           </button>
         </motion.div>
 
         {/* small logo icon */}
         <motion.div
           variants={itemVariants}
-          className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-md"
+          className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-md dark:bg-card"
         >
           <svg
             width="26"
@@ -291,7 +291,7 @@ export function HeroSection({ t }) {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-blue-500"
+            className="text-blue-500 dark:text-blue-300"
           >
             <path d="M12 2L2 7l10 5 10-5-10-5z" />
             <path d="M2 17l10 5 10-5" />
@@ -301,16 +301,16 @@ export function HeroSection({ t }) {
 
         {/* two-line heading — static for fast LCP (no opacity animation) */}
         <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-          <span className="block text-gray-900">
+          <span className="block text-gray-900 dark:text-foreground">
             {heroCopy.headingLine1 || fallback.headingLine1}
           </span>
-          <span className="block font-medium text-gray-400">
+          <span className="block font-medium text-gray-400 dark:text-muted-foreground">
             {heroCopy.headingLine2 || fallback.headingLine2}
           </span>
         </h1>
 
         {/* subtitle — visible on first paint */}
-        <p className="hero-description mt-5 max-w-lg text-base leading-relaxed text-gray-500 sm:text-lg">
+        <p className="hero-description mt-5 max-w-lg text-base leading-relaxed text-gray-500 sm:text-lg dark:text-muted-foreground">
           {heroCopy.description}
         </p>
 
@@ -326,7 +326,7 @@ export function HeroSection({ t }) {
           </button>
           <Link
             href="/public"
-            className="inline-flex h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-8 text-base font-semibold text-gray-700 transition-all duration-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-8 text-base font-semibold text-gray-700 transition-all duration-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5 active:translate-y-0 dark:border-border dark:bg-card dark:text-foreground dark:hover:border-border dark:hover:text-foreground"
           >
             {heroCopy.secondaryCta || fallback.secondaryCta}
           </Link>
@@ -341,39 +341,39 @@ export function HeroSection({ t }) {
             <div className="flex -space-x-2">
               {/* real team logos */}
               {/* Google */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm dark:bg-card dark:ring-border">
                 <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
               </div>
               {/* Notion */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L18.29 2.21c-.42-.326-.98-.7-2.055-.607L3.01 2.72c-.466.046-.56.28-.374.466l1.823 1.022zm.793 3.358v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.84-.046.933-.56.933-1.167V6.63c0-.606-.233-.933-.746-.886l-15.177.886c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.886l-.7.14v10.264c-.606.327-1.166.514-1.633.514-.746 0-.933-.234-1.493-.933l-4.571-7.177v6.944l1.446.327s0 .84-1.166.84l-3.218.187c-.093-.187 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.451-.233 4.758 7.27V9.481l-1.213-.14c-.094-.514.28-.886.747-.933l3.218-.187z"/></svg>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm dark:bg-card dark:ring-border">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-black dark:text-foreground"><path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L18.29 2.21c-.42-.326-.98-.7-2.055-.607L3.01 2.72c-.466.046-.56.28-.374.466l1.823 1.022zm.793 3.358v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.84-.046.933-.56.933-1.167V6.63c0-.606-.233-.933-.746-.886l-15.177.886c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.886l-.7.14v10.264c-.606.327-1.166.514-1.633.514-.746 0-.933-.234-1.493-.933l-4.571-7.177v6.944l1.446.327s0 .84-1.166.84l-3.218.187c-.093-.187 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.451-.233 4.758 7.27V9.481l-1.213-.14c-.094-.514.28-.886.747-.933l3.218-.187z"/></svg>
               </div>
               {/* Slack */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm dark:bg-card dark:ring-border">
                 <svg width="14" height="14" viewBox="0 0 24 24"><path d="M5.042 15.165a2.528 2.528 0 01-2.52 2.523A2.528 2.528 0 010 15.165a2.527 2.527 0 012.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 012.521-2.52 2.527 2.527 0 012.521 2.52v6.313A2.528 2.528 0 018.834 24a2.528 2.528 0 01-2.521-2.522v-6.313z" fill="#E01E5A"/><path d="M8.834 5.042a2.528 2.528 0 01-2.521-2.52A2.528 2.528 0 018.834 0a2.528 2.528 0 012.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 012.521 2.521 2.528 2.528 0 01-2.521 2.521H2.522A2.528 2.528 0 010 8.834a2.528 2.528 0 012.522-2.521h6.312z" fill="#36C5F0"/><path d="M18.956 8.834a2.528 2.528 0 012.522-2.521A2.528 2.528 0 0124 8.834a2.528 2.528 0 01-2.522 2.521h-2.522V8.834zm-1.271 0a2.528 2.528 0 01-2.521 2.521 2.528 2.528 0 01-2.521-2.521V2.522A2.528 2.528 0 0115.164 0a2.528 2.528 0 012.521 2.522v6.312z" fill="#2EB67D"/><path d="M15.164 18.956a2.528 2.528 0 012.521 2.522A2.528 2.528 0 0115.164 24a2.528 2.528 0 01-2.521-2.522v-2.522h2.521zm0-1.271a2.528 2.528 0 01-2.521-2.521 2.528 2.528 0 012.521-2.521h6.314A2.528 2.528 0 0124 15.164a2.528 2.528 0 01-2.522 2.521h-6.314z" fill="#ECB22E"/></svg>
               </div>
               {/* Figma */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm dark:bg-card dark:ring-border">
                 <svg width="12" height="16" viewBox="0 0 38 57"><path d="M19 28.5a9.5 9.5 0 119.5 9.5A9.5 9.5 0 0119 28.5z" fill="#1ABCFE"/><path d="M0 47.5A9.5 9.5 0 019.5 38H19v9.5a9.5 9.5 0 11-19 0z" fill="#0ACF83"/><path d="M19 0v19h9.5a9.5 9.5 0 000-19H19z" fill="#FF7262"/><path d="M0 9.5A9.5 9.5 0 009.5 19H19V0H9.5A9.5 9.5 0 000 9.5z" fill="#F24E1E"/><path d="M0 28.5A9.5 9.5 0 009.5 38H19V19H9.5A9.5 9.5 0 000 28.5z" fill="#A259FF"/></svg>
               </div>
               {/* Vercel */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm">
-                <svg width="14" height="12" viewBox="0 0 76 65" fill="#000"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z"/></svg>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-white shadow-sm dark:bg-card dark:ring-border">
+                <svg width="14" height="12" viewBox="0 0 76 65" fill="currentColor" className="text-black dark:text-foreground"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z"/></svg>
               </div>
             </div>
-            <span className="text-sm text-gray-500">{heroCopy.trustText || fallback.trustText}</span>
+            <span className="text-sm text-gray-500 dark:text-muted-foreground">{heroCopy.trustText || fallback.trustText}</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm dark:border-border dark:bg-card dark:text-muted-foreground">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 dark:text-emerald-300"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               {heroCopy.trustBadges?.openSource || fallback.trustBadges.openSource}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm dark:border-border dark:bg-card dark:text-muted-foreground">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 dark:text-blue-300"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               {heroCopy.trustBadges?.secure || fallback.trustBadges.secure}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm dark:border-border dark:bg-card dark:text-muted-foreground">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500 dark:text-purple-300"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               {heroCopy.trustBadges?.teamReady || fallback.trustBadges.teamReady}
             </span>
           </div>
@@ -400,10 +400,10 @@ export function HeroSection({ t }) {
         className="absolute left-[4%] top-[12%] z-20 hidden w-60 lg:block xl:left-[8%]"
       >
         <motion.div animate={floatAnimation(0)}>
-          <div className="relative rounded-2xl bg-amber-100 p-5 shadow-lg rotate-[-3deg]">
+          <div className="relative rounded-2xl bg-amber-100 p-5 shadow-lg rotate-[-3deg] dark:bg-amber-950/30">
             {/* pushpin */}
             <span className="absolute -top-2 left-6 text-lg">📌</span>
-            <p className="font-medium leading-snug text-amber-900/80" style={{ fontFamily: "'Georgia', serif" }}>
+            <p className="font-medium leading-snug text-amber-900/80 dark:text-amber-300/80" style={{ fontFamily: "'Georgia', serif" }}>
               &ldquo;Organize your prompts, track versions, and collaborate with your team effortlessly.&rdquo;
             </p>
           </div>
@@ -427,20 +427,20 @@ export function HeroSection({ t }) {
         className="absolute right-[4%] top-[10%] z-20 hidden w-56 lg:block xl:right-[8%]"
       >
         <motion.div animate={floatAnimation(0.6)}>
-          <div className="rounded-2xl bg-white p-5 shadow-lg rotate-[2deg]">
+          <div className="rounded-2xl bg-white p-5 shadow-lg rotate-[2deg] dark:bg-card">
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-500 dark:bg-blue-950/30 dark:text-blue-300">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
                 Latest Version
               </span>
             </div>
-            <p className="text-sm font-bold text-gray-900">v2.4 — Optimized prompt</p>
-            <p className="mt-1 text-xs text-gray-400">Updated 2h ago</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-foreground">v2.4 — Optimized prompt</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-muted-foreground">Updated 2h ago</p>
           </div>
         </motion.div>
       </motion.div>
@@ -453,37 +453,37 @@ export function HeroSection({ t }) {
         className="absolute bottom-[10%] left-[3%] z-20 hidden w-64 lg:block xl:left-[6%]"
       >
         <motion.div animate={floatAnimation(1.2)}>
-          <div className="rounded-2xl bg-white p-5 shadow-lg rotate-[2deg]">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <div className="rounded-2xl bg-white p-5 shadow-lg rotate-[2deg] dark:bg-card">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
               Active Prompts
             </p>
 
             {/* prompt item 1 */}
             <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-600">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-300">
                 A
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">Blog writer v3</p>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <p className="text-sm font-medium text-gray-800 dark:text-foreground">Blog writer v3</p>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-muted">
                   <div className="h-full w-[78%] rounded-full bg-indigo-400" />
                 </div>
               </div>
-              <span className="text-[11px] font-medium text-gray-400">78%</span>
+              <span className="text-[11px] font-medium text-gray-400 dark:text-muted-foreground">78%</span>
             </div>
 
             {/* prompt item 2 */}
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-600">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-300">
                 B
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">Code reviewer</p>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <p className="text-sm font-medium text-gray-800 dark:text-foreground">Code reviewer</p>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-muted">
                   <div className="h-full w-[54%] rounded-full bg-emerald-400" />
                 </div>
               </div>
-              <span className="text-[11px] font-medium text-gray-400">54%</span>
+              <span className="text-[11px] font-medium text-gray-400 dark:text-muted-foreground">54%</span>
             </div>
           </div>
         </motion.div>
@@ -497,33 +497,33 @@ export function HeroSection({ t }) {
         className="absolute bottom-[8%] right-[3%] z-20 hidden w-56 lg:block xl:right-[7%]"
       >
         <motion.div animate={floatAnimation(1.8)}>
-          <div className="rounded-2xl bg-white p-5 shadow-lg rotate-[-2deg]">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <div className="rounded-2xl bg-white p-5 shadow-lg rotate-[-2deg] dark:bg-card">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
               AI Models
             </p>
             <div className="flex items-center gap-3">
               {/* GPT */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 shadow-sm" title="GPT">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 shadow-sm dark:bg-emerald-950/30" title="GPT">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M22.282 9.821a5.985 5.985 0 00-.516-4.91 6.046 6.046 0 00-6.51-2.9A6.065 6.065 0 0011.708.2a6.046 6.046 0 00-5.764 4.162 5.985 5.985 0 00-4.006 2.903 6.046 6.046 0 00.749 7.091 5.985 5.985 0 00.516 4.911 6.046 6.046 0 006.51 2.9A6.065 6.065 0 0013.292 23.8a6.046 6.046 0 005.764-4.162 5.985 5.985 0 004.006-2.903 6.046 6.046 0 00-.749-7.091z" fill="#10a37f" fillOpacity="0.15" stroke="#10a37f" strokeWidth="1.2"/>
                 </svg>
               </div>
               {/* Claude */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 shadow-sm" title="Claude">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 shadow-sm dark:bg-orange-950/30" title="Claude">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#d97706" fillOpacity="0.15" stroke="#d97706" strokeWidth="1.5"/>
                   <path d="M8 12h8M12 8v8" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </div>
               {/* Gemini */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 shadow-sm" title="Gemini">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 shadow-sm dark:bg-blue-950/30" title="Gemini">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" fill="#4285f4" fillOpacity="0.15" stroke="#4285f4" strokeWidth="1.5" strokeLinejoin="round"/>
                   <circle cx="12" cy="12" r="3" fill="#4285f4" fillOpacity="0.3" stroke="#4285f4" strokeWidth="1"/>
                 </svg>
               </div>
               {/* More */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-xs font-bold text-gray-400 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-xs font-bold text-gray-400 shadow-sm dark:bg-muted dark:text-muted-foreground">
                 +5
               </div>
             </div>
@@ -539,11 +539,11 @@ export function HeroSection({ t }) {
         className="absolute left-[2%] top-[48%] z-20 hidden w-52 lg:block xl:left-[5%]"
       >
         <motion.div animate={floatAnimation(2.2)}>
-          <div className="rounded-2xl bg-white p-4 shadow-lg rotate-[-1.5deg]">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Diff Preview</p>
-            <div className="space-y-1 rounded-lg bg-gray-50 p-3 font-mono text-[11px]">
+          <div className="rounded-2xl bg-white p-4 shadow-lg rotate-[-1.5deg] dark:bg-card">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">Diff Preview</p>
+            <div className="space-y-1 rounded-lg bg-gray-50 p-3 font-mono text-[11px] dark:bg-muted">
               <p className="text-red-400 line-through">- Write a blog post about AI</p>
-              <p className="text-emerald-500">+ Write a detailed, SEO-optimized blog post about AI trends in 2025</p>
+              <p className="text-emerald-500 dark:text-emerald-300">+ Write a detailed, SEO-optimized blog post about AI trends in 2025</p>
             </div>
           </div>
         </motion.div>
@@ -557,16 +557,16 @@ export function HeroSection({ t }) {
         className="absolute right-[2%] top-[52%] z-20 hidden w-48 lg:block xl:right-[5%]"
       >
         <motion.div animate={floatAnimation(2.6)}>
-          <div className="rounded-2xl bg-white p-4 shadow-lg rotate-[1.5deg]">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Tags</p>
+          <div className="rounded-2xl bg-white p-4 shadow-lg rotate-[1.5deg] dark:bg-card">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">Tags</p>
             <div className="flex flex-wrap gap-1.5">
               {[
-                { label: 'GPT-4', color: 'bg-emerald-50 text-emerald-600' },
-                { label: 'Writing', color: 'bg-blue-50 text-blue-600' },
-                { label: 'Code', color: 'bg-purple-50 text-purple-600' },
-                { label: 'Marketing', color: 'bg-amber-50 text-amber-600' },
-                { label: 'Research', color: 'bg-rose-50 text-rose-600' },
-                { label: 'Chat', color: 'bg-sky-50 text-sky-600' },
+                { label: 'GPT-4', color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-300' },
+                { label: 'Writing', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-300' },
+                { label: 'Code', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-300' },
+                { label: 'Marketing', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300' },
+                { label: 'Research', color: 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-300' },
+                { label: 'Chat', color: 'bg-sky-50 text-sky-600 dark:bg-sky-950/30 dark:text-sky-300' },
               ].map((tag) => (
                 <span key={tag.label} className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${tag.color}`}>
                   {tag.label}

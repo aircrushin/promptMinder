@@ -26,13 +26,13 @@ export default function Footer({ t }) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-gradient-to-b from-white via-slate-50 to-white">
+    <footer className="border-t border-border bg-gradient-to-b from-white via-slate-50 to-white dark:from-background dark:via-background dark:to-background">
       <div className="max-w-7xl mx-auto pt-12 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* 品牌区域 */}
           <div className="space-y-8 xl:col-span-1">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 [-webkit-background-clip:text] [background-clip:text] text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 [-webkit-background-clip:text] [background-clip:text] text-transparent dark:text-foreground dark:bg-none">
                 PromptMinder
               </span>
             </Link>
@@ -111,7 +111,7 @@ export default function Footer({ t }) {
             <div className="md:grid md:grid-cols-2 md:gap-12">
               {/* Product */}
               <div className="text-left">
-                <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">
+                <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase dark:text-foreground">
                   {translations.product}
                 </h3>
                 <ul className="mt-4 space-y-4">
@@ -160,7 +160,7 @@ export default function Footer({ t }) {
 
               {/* Support */}
               <div className="mt-12 md:mt-0 text-left">
-                <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">
+                <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase dark:text-foreground">
                   {translations.support}
                 </h3>
                 <ul className="mt-4 space-y-4">
@@ -196,7 +196,7 @@ export default function Footer({ t }) {
 
             {/* Friendly Links */}
             <div className="text-left">
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">
+              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase dark:text-foreground">
                 {translations.friendlyLinks}
               </h3>
               <ul className="mt-4 space-y-4">

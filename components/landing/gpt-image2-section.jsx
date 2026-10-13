@@ -64,7 +64,7 @@ export function GptImage2Section({ t }) {
     .filter(Boolean);
 
   return (
-    <section className="relative overflow-hidden bg-slate-50/50 py-28">
+    <section className="relative overflow-hidden bg-slate-50/50 py-28 dark:bg-muted/50">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
       <div className="absolute right-0 top-0 -z-10 h-[600px] w-[600px] bg-indigo-500/8 blur-[120px]" />
       <div className="absolute bottom-0 left-0 -z-10 h-[600px] w-[600px] bg-blue-500/8 blur-[120px]" />
@@ -80,7 +80,7 @@ export function GptImage2Section({ t }) {
           <div className="flex flex-col justify-center gap-8">
             <div className="space-y-5">
               <motion.div variants={itemVariants}>
-                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm">
+                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm dark:border-indigo-800/80 dark:bg-indigo-950/70 dark:text-indigo-300">
                   <Sparkles className="h-3.5 w-3.5" />
                   {badge}
                 </span>
@@ -88,16 +88,16 @@ export function GptImage2Section({ t }) {
 
               <motion.h2
                 variants={itemVariants}
-                className="max-w-2xl text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl"
+                className="max-w-2xl text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl dark:text-foreground"
               >
-                <span className="bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent dark:text-foreground dark:bg-none">
                   {title}
                 </span>
               </motion.h2>
 
               <motion.p
                 variants={itemVariants}
-                className="max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg"
+                className="max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg dark:text-muted-foreground"
               >
                 {description}
               </motion.p>
@@ -107,7 +107,7 @@ export function GptImage2Section({ t }) {
               {pageCategories.map((cat) => (
                 <span
                   key={cat}
-                  className="inline-flex items-center rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm shadow-slate-200/40"
+                  className="inline-flex items-center rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm shadow-slate-200/40 dark:border-border/80 dark:bg-card/80 dark:text-muted-foreground dark:shadow-none"
                 >
                   {categoryLabel[cat] || cat}
                 </span>
@@ -139,7 +139,7 @@ export function GptImage2Section({ t }) {
           </div>
 
           <motion.div variants={itemVariants} className="relative min-h-[560px] sm:min-h-[620px]">
-            <span className="absolute left-4 top-2 z-30 inline-flex items-center rounded-full border border-indigo-200/80 bg-indigo-50/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-600 shadow-sm backdrop-blur-sm">
+            <span className="absolute left-4 top-2 z-30 inline-flex items-center rounded-full border border-indigo-200/80 bg-indigo-50/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-600 shadow-sm backdrop-blur-sm dark:border-indigo-800/80 dark:bg-indigo-950/90 dark:text-indigo-300">
               {featuredLabel}
             </span>
 
@@ -147,22 +147,22 @@ export function GptImage2Section({ t }) {
               <TiltCard
                 baseRotateX={5}
                 baseRotateY={-8}
-                className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
+                className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.12)] dark:border-border/80 dark:bg-card"
               >
-                <div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-indigo-600">
+                <div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3 dark:border-border/80">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-foreground">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-indigo-600 dark:border-border dark:bg-muted dark:text-indigo-300">
                       <ImageIcon className="h-3.5 w-3.5" />
                     </span>
                     {collections.gptImage2Title || 'GPT Image2'}
                   </div>
-                  <span className="text-xs text-slate-500">{gptImage2Prompts.length} prompts</span>
+                  <span className="text-xs text-slate-500 dark:text-muted-foreground">{gptImage2Prompts.length} prompts</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 p-3">
                   {images.map((item) => (
                     <div
                       key={item.id}
-                      className={`group relative aspect-square overflow-hidden rounded-xl bg-slate-100 ${item.className || ''}`}
+                      className={`group relative aspect-square overflow-hidden rounded-xl bg-slate-100 dark:bg-muted ${item.className || ''}`}
                     >
                       <Image
                         src={item.image}
@@ -185,19 +185,19 @@ export function GptImage2Section({ t }) {
               <TiltCard
                 baseRotateX={-4}
                 baseRotateY={8}
-                className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_28px_64px_rgba(15,23,42,0.14)]"
+                className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_28px_64px_rgba(15,23,42,0.14)] dark:border-border/80 dark:bg-card"
               >
-                <div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 text-indigo-600">
+                <div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3 dark:border-border/80">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-foreground">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 text-indigo-600 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-300">
                       <Music2 className="h-3.5 w-3.5" />
                     </span>
                     {collections.sunoTitle || 'Suno'}
                   </div>
-                  <span className="text-xs text-slate-500">{sunoPrompts.length} templates</span>
+                  <span className="text-xs text-slate-500 dark:text-muted-foreground">{sunoPrompts.length} templates</span>
                 </div>
                 <div className="space-y-3 p-4">
-                  <div className="flex h-16 items-end gap-1 border-b border-slate-100 pb-3">
+                  <div className="flex h-16 items-end gap-1 border-b border-slate-100 pb-3 dark:border-border">
                     {waveformHeights.map((height, index) => (
                       <span
                         key={index}
@@ -210,15 +210,15 @@ export function GptImage2Section({ t }) {
                     {sunoSamples.map((item) => (
                       <div
                         key={item.id}
-                        className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3"
+                        className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-border/80 dark:bg-muted/80"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                          <span className="shrink-0 rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-indigo-600">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-foreground">{item.title}</p>
+                          <span className="shrink-0 rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-300">
                             {item.category}
                           </span>
                         </div>
-                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-muted-foreground">
                           {item.prompt}
                         </p>
                       </div>
@@ -311,19 +311,19 @@ function CollectionLink({ href, icon: Icon, eyebrow, title, description }) {
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm shadow-slate-200/40 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-white hover:shadow-md hover:shadow-indigo-500/10"
+      className="group rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm shadow-slate-200/40 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-white hover:shadow-md hover:shadow-indigo-500/10 dark:border-border/80 dark:bg-card/80 dark:hover:border-indigo-800 dark:hover:bg-card dark:shadow-none"
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-indigo-600 transition-colors group-hover:border-indigo-100 group-hover:bg-indigo-50">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-indigo-600 transition-colors group-hover:border-indigo-100 group-hover:bg-indigo-50 dark:border-border dark:bg-muted dark:text-indigo-300 dark:group-hover:border-indigo-800 dark:group-hover:bg-indigo-950/30">
           <Icon className="h-4 w-4" />
         </div>
-        <ArrowRight className="mt-1 h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-indigo-600" />
+        <ArrowRight className="mt-1 h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-indigo-600 dark:text-muted-foreground dark:group-hover:text-indigo-300" />
       </div>
-      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-muted-foreground">
         {eyebrow}
       </p>
-      <h3 className="mt-1 text-lg font-semibold tracking-[-0.03em] text-slate-900">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+      <h3 className="mt-1 text-lg font-semibold tracking-[-0.03em] text-slate-900 dark:text-foreground">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-muted-foreground">{description}</p>
     </Link>
   );
 }

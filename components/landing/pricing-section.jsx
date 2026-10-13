@@ -48,15 +48,15 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section className="relative overflow-hidden bg-slate-50/50 py-24">
+    <section className="relative overflow-hidden bg-slate-50/50 py-24 dark:bg-muted/50">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
 
       <div className="relative container mx-auto px-4">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-4xl font-extrabold text-slate-900 md:text-5xl">
+          <h2 className="mb-4 text-4xl font-extrabold text-slate-900 md:text-5xl dark:text-foreground">
             选择适合您的方案
           </h2>
-          <p className="text-lg text-slate-600">
+          <p className="text-lg text-slate-600 dark:text-muted-foreground">
             灵活的价格方案，满足不同规模团队的需求
           </p>
         </div>
@@ -71,8 +71,8 @@ export function PricingSection() {
               transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
               className={`relative flex flex-col overflow-hidden rounded-[2rem] p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 ${
                 plan.popular
-                  ? "border-2 border-indigo-500 bg-white shadow-2xl shadow-indigo-500/20"
-                  : "border border-white/40 bg-white/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60"
+                  ? "border-2 border-indigo-500 bg-white shadow-2xl shadow-indigo-500/20 dark:bg-card"
+                  : "border border-white/40 bg-white/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 dark:border-border/40 dark:bg-card/60 dark:shadow-none"
               }`}
             >
               {plan.popular && (
@@ -81,19 +81,19 @@ export function PricingSection() {
                 </div>
               )}
               
-              <h3 className="mb-2 text-xl font-bold text-slate-900">{plan.name}</h3>
+              <h3 className="mb-2 text-xl font-bold text-slate-900 dark:text-foreground">{plan.name}</h3>
               <div className="mb-6 flex items-baseline">
-                <span className="text-4xl font-extrabold text-slate-900">{plan.price}</span>
+                <span className="text-4xl font-extrabold text-slate-900 dark:text-foreground">{plan.price}</span>
                 {plan.period && (
-                  <span className="ml-1 text-slate-500">{plan.period}</span>
+                  <span className="ml-1 text-slate-500 dark:text-muted-foreground">{plan.period}</span>
                 )}
               </div>
               
               <ul className="mb-8 space-y-4 flex-1">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-slate-600">
+                  <li key={i} className="flex items-center gap-3 text-slate-600 dark:text-muted-foreground">
                     <div className={`flex h-5 w-5 items-center justify-center rounded-full ${
-                      plan.popular ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
+                      plan.popular ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-300" : "bg-slate-100 text-slate-500 dark:bg-muted dark:text-muted-foreground"
                     }`}>
                       <svg
                         className="h-3 w-3"

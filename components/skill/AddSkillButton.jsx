@@ -42,7 +42,7 @@ export function AddSkillButton({ skill }) {
     <button
       onClick={addToWorkspace}
       disabled={busy}
-      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-ring dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
     >
       <Download className="h-4 w-4" />
       {zh ? '添加到工作区' : 'Add to workspace'}

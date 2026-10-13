@@ -329,20 +329,20 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
   };
 
   return (
-    <Card className="border-0 shadow-lg shadow-slate-200/50">
+    <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none">
       <CardHeader
         className="pb-3 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Settings2 className="h-5 w-5 text-amber-500" />
+            <Settings2 className="h-5 w-5 text-amber-500 dark:text-amber-300" />
             {pg.apiSettings || 'API Settings'}
           </CardTitle>
           {isExpanded ? (
-            <ChevronUp className="h-5 w-5 text-slate-400" />
+            <ChevronUp className="h-5 w-5 text-slate-400 dark:text-muted-foreground" />
           ) : (
-            <ChevronDown className="h-5 w-5 text-slate-400" />
+            <ChevronDown className="h-5 w-5 text-slate-400 dark:text-muted-foreground" />
           )}
         </div>
       </CardHeader>
@@ -396,7 +396,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
 
           {/* Provider credential management */}
           {selectedProvider !== 'custom' && (
-            <div className="space-y-3 rounded-lg border bg-white/70 p-3">
+            <div className="space-y-3 rounded-lg border bg-white/70 p-3 dark:bg-card/70">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium">{pg.storedCredential || 'Stored Credential'}</p>
@@ -461,7 +461,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between rounded-md border bg-slate-50 px-3 py-2">
+              <div className="flex items-center justify-between rounded-md border bg-slate-50 px-3 py-2 dark:bg-muted">
                 <div>
                   <p className="text-sm font-medium">{pg.useStoredKey || 'Use stored key'}</p>
                   <p className="text-xs text-muted-foreground">
@@ -499,9 +499,9 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
                 onClick={() => setShowApiKey(!showApiKey)}
               >
                 {showApiKey ? (
-                  <EyeOff className="h-4 w-4 text-slate-400" />
+                  <EyeOff className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
                 ) : (
-                  <Eye className="h-4 w-4 text-slate-400" />
+                  <Eye className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
                 )}
               </Button>
             </div>
@@ -522,7 +522,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
                   type="button"
                   onClick={() => loadCatalogModels(selectedProvider, { refresh: true })}
                   disabled={isLoadingModels}
-                  className="text-xs text-slate-500 hover:text-slate-950 disabled:opacity-50"
+                  className="text-xs text-slate-500 hover:text-slate-950 disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground"
                 >
                   {isLoadingModels
                     ? (pg.loadingModels || 'Loading…')
@@ -564,12 +564,12 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
 
           {/* Parameters */}
           <div className="space-y-4 pt-2 border-t">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-foreground">
               {pg.modelParameters || 'Model Parameters'}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <HelpCircle className="h-4 w-4 text-slate-400" />
+                    <HelpCircle className="h-4 w-4 text-slate-400 dark:text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p>
@@ -585,7 +585,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">{pg.temperature || 'Temperature'}</Label>
-                <span className="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                <span className="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded dark:text-muted-foreground dark:bg-muted">
                   {settings.temperature.toFixed(2)}
                 </span>
               </div>
@@ -606,7 +606,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">{pg.maxTokens || 'Max Tokens'}</Label>
-                <span className="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                <span className="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded dark:text-muted-foreground dark:bg-muted">
                   {settings.maxTokens}
                 </span>
               </div>
@@ -627,7 +627,7 @@ export function PlaygroundSettings({ settings, onSettingsChange }) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">{pg.topP || 'Top P'}</Label>
-                <span className="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                <span className="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded dark:text-muted-foreground dark:bg-muted">
                   {settings.topP.toFixed(2)}
                 </span>
               </div>

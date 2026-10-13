@@ -72,7 +72,7 @@ export function TestimonialSection({ t }) {
   }));
 
   return (
-    <section className="relative overflow-hidden bg-slate-50/50 py-28">
+    <section className="relative overflow-hidden bg-slate-50/50 py-28 dark:bg-muted/50">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
       <div className="absolute left-1/4 top-0 -z-10 h-[400px] w-[400px] bg-indigo-500/10 blur-[100px]" />
       <div className="absolute right-1/4 bottom-0 -z-10 h-[400px] w-[400px] bg-purple-500/10 blur-[100px]" />
@@ -87,7 +87,7 @@ export function TestimonialSection({ t }) {
         >
           <motion.h2 
             variants={titleVariants}
-            className="text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent"
+            className="text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent dark:text-foreground dark:bg-none"
           >
             {translations.title}
           </motion.h2>
@@ -105,13 +105,13 @@ export function TestimonialSection({ t }) {
               key={`${testimonial.author}-${index}`}
               variants={cardVariants}
               whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
-              className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/60 bg-white/70 p-8 shadow-lg shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300 hover:border-indigo-200/80 hover:bg-white/90 hover:shadow-2xl hover:shadow-indigo-500/15"
+              className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/60 bg-white/70 p-8 shadow-lg shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300 hover:border-indigo-200/80 hover:bg-white/90 hover:shadow-2xl hover:shadow-indigo-500/15 dark:border-border/60 dark:bg-card/70 dark:hover:border-indigo-800/80 dark:hover:bg-card/90"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 via-indigo-50/0 to-indigo-100/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 via-indigo-50/0 to-indigo-100/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-indigo-950/0 dark:via-indigo-950/0 dark:to-indigo-950/30" />
               
               <div className="relative">
                 <MessageCircle className="mb-4 h-8 w-8 text-indigo-200 transition-colors duration-300 group-hover:text-indigo-300" />
-                <p className="text-lg leading-relaxed text-slate-700 font-medium">
+                <p className="text-lg leading-relaxed text-slate-700 font-medium dark:text-foreground">
                   &ldquo;{testimonial.content}&rdquo;
                 </p>
               </div>
@@ -120,7 +120,7 @@ export function TestimonialSection({ t }) {
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
-                  className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-indigo-50 shadow-md"
+                  className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-indigo-50 shadow-md dark:border-border dark:bg-indigo-950/30"
                 >
                   <Image
                     src={testimonial.avatar}
@@ -131,8 +131,8 @@ export function TestimonialSection({ t }) {
                   />
                 </motion.div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900 transition-colors duration-300 group-hover:text-indigo-700">{testimonial.author}</p>
-                  <p className="text-xs font-medium uppercase tracking-wide text-indigo-600/80">{testimonial.title}</p>
+                  <p className="text-sm font-bold text-slate-900 transition-colors duration-300 group-hover:text-indigo-700 dark:text-foreground dark:group-hover:text-indigo-300">{testimonial.author}</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-indigo-600/80 dark:text-indigo-300/80">{testimonial.title}</p>
                 </div>
               </div>
 

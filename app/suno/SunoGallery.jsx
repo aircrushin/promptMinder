@@ -140,27 +140,27 @@ export default function SunoGallery({ prompts }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f4] text-slate-950">
-      <section className="border-b border-slate-200 bg-[#fbfaf7]">
+    <div className="min-h-screen bg-[#f7f7f4] text-slate-950 dark:bg-card dark:text-foreground">
+      <section className="border-b border-slate-200 bg-[#fbfaf7] dark:border-border dark:bg-card">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 lg:grid-cols-[minmax(0,0.98fr)_minmax(360px,0.72fr)] lg:px-12 lg:py-16">
           <div className="flex flex-col justify-between gap-12">
             <div className="max-w-3xl space-y-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-border dark:bg-card dark:text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
                 {pageCopy?.badge || 'Suno Prompt Library'}
               </div>
               <div className="space-y-5">
-                <h1 className="max-w-4xl text-4xl font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
+                <h1 className="max-w-4xl text-4xl font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl dark:text-foreground">
                   {pageCopy?.title || 'Suno Music Prompt Templates'}
                 </h1>
-                <p className="max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+                <p className="max-w-2xl text-base leading-8 text-slate-600 sm:text-lg dark:text-muted-foreground">
                   {pageCopy?.description ||
                     'Filter, copy, and import Suno style prompt templates extracted from the article into your prompt library.'}
                 </p>
               </div>
             </div>
 
-            <div className="grid max-w-2xl grid-cols-2 divide-x divide-slate-200 border-y border-slate-200 py-5">
+            <div className="grid max-w-2xl grid-cols-2 divide-x divide-slate-200 border-y border-slate-200 py-5 dark:divide-border dark:border-border">
               <Metric value={prompts.length} label={pageCopy?.metrics?.cases || 'Cases'} />
               <Metric
                 value={filters.length - 1}
@@ -169,7 +169,7 @@ export default function SunoGallery({ prompts }) {
             </div>
           </div>
 
-          <div className="relative min-h-[460px] overflow-hidden rounded-lg border border-slate-200 bg-white">
+          <div className="relative min-h-[460px] overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-border dark:bg-card">
             <Image
               src={getPromptImageSrc(featuredPrompt)}
               alt={`${featuredPrompt?.title || 'Suno prompt'} 示例图`}
@@ -180,13 +180,13 @@ export default function SunoGallery({ prompts }) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-950/12 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white sm:p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70 dark:text-foreground/70">
                 {pageCopy?.featuredSample || 'Featured prompt'}
               </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em]">
                 {featuredPrompt?.title || 'Suno'}
               </h2>
-              <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-6 text-white/78">
+              <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-6 text-white/78 dark:text-foreground/78">
                 {featuredPrompt?.prompt || ''}
               </p>
             </div>
@@ -195,7 +195,7 @@ export default function SunoGallery({ prompts }) {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
-        <div className="sticky top-16 z-20 -mx-5 border-b border-slate-200 bg-[#f7f7f4]/92 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+        <div className="sticky top-16 z-20 -mx-5 border-b border-slate-200 bg-[#f7f7f4]/92 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 dark:border-border dark:bg-card">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
               {filters.map((filter) => (
@@ -206,8 +206,8 @@ export default function SunoGallery({ prompts }) {
                   className={cn(
                     'h-9 shrink-0 rounded-md border px-4 text-sm font-medium transition-colors',
                     activeFilter === filter.id
-                      ? 'border-slate-950 bg-slate-950 text-white'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-950'
+                      ? 'border-slate-950 bg-slate-950 text-white dark:border-border dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-950 dark:border-border dark:bg-card dark:text-muted-foreground dark:hover:border-border dark:hover:text-foreground'
                   )}
                 >
                   {filter.label}
@@ -216,13 +216,13 @@ export default function SunoGallery({ prompts }) {
             </div>
 
             <label className="relative block w-full lg:max-w-sm">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-muted-foreground" />
               <span className="sr-only">{pageCopy?.searchSrOnly || 'Search prompts'}</span>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={pageCopy?.searchPlaceholder || 'Search title, category, or prompt'}
-                className="h-10 w-full rounded-md border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-950"
+                className="h-10 w-full rounded-md border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-950 dark:border-border dark:bg-card dark:text-foreground dark:placeholder:text-muted-foreground dark:focus:border-border"
               />
             </label>
           </div>
@@ -232,13 +232,13 @@ export default function SunoGallery({ prompts }) {
           {filteredPrompts.map((item) => (
             <article
               key={item.id}
-              className="group flex min-h-[650px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition-colors hover:border-slate-300"
+              className="group flex min-h-[650px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition-colors hover:border-slate-300 dark:border-border dark:bg-card dark:hover:border-border"
               onMouseEnter={() => setFeaturedPrompt(item)}
             >
               <button
                 type="button"
                 onClick={() => setFeaturedPrompt(item)}
-                className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 text-left"
+                className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 text-left dark:bg-muted"
                 aria-label={(pageCopy?.previewAriaLabel || 'Preview {title}').replace('{title}', item.title)}
               >
                 <Image
@@ -253,18 +253,18 @@ export default function SunoGallery({ prompts }) {
               <div className="flex flex-1 flex-col p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-muted-foreground">
                       {categoryLabels[item.category] || item.category}
                     </p>
-                    <h2 className="mt-2 text-xl font-semibold tracking-[-0.035em] text-slate-950">
+                    <h2 className="mt-2 text-xl font-semibold tracking-[-0.035em] text-slate-950 dark:text-foreground">
                       {item.title}
                     </h2>
                   </div>
-                  <ImageIcon className="mt-1 h-5 w-5 shrink-0 text-slate-300" />
+                  <ImageIcon className="mt-1 h-5 w-5 shrink-0 text-slate-300 dark:text-muted-foreground" />
                 </div>
 
-                <div className="mt-5 flex-1 rounded-md border border-slate-200 bg-slate-50">
-                  <p className="h-52 overflow-y-auto whitespace-pre-wrap px-4 py-3 text-sm leading-6 text-slate-600 [scrollbar-width:thin]">
+                <div className="mt-5 flex-1 rounded-md border border-slate-200 bg-slate-50 dark:border-border dark:bg-muted">
+                  <p className="h-52 overflow-y-auto whitespace-pre-wrap px-4 py-3 text-sm leading-6 text-slate-600 [scrollbar-width:thin] dark:text-muted-foreground">
                     {item.prompt}
                   </p>
                 </div>
@@ -274,7 +274,7 @@ export default function SunoGallery({ prompts }) {
                     type="button"
                     variant="outline"
                     onClick={() => copyPrompt(item)}
-                    className="h-10 rounded-md border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+                    className="h-10 rounded-md border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-muted dark:hover:text-foreground"
                   >
                     {copiedId === item.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     {copiedId === item.id ? pageCopy?.buttons?.copied || 'Copied' : pageCopy?.buttons?.copy || 'Copy'}
@@ -285,7 +285,7 @@ export default function SunoGallery({ prompts }) {
                     type="button"
                     onClick={() => importPrompt(item)}
                     disabled={importingId === item.id}
-                    className="h-10 rounded-md border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
+                    className="h-10 rounded-md border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white dark:border-border dark:hover:text-foreground dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
                   >
                     <Import className="h-4 w-4" />
                     {importingId === item.id
@@ -299,11 +299,11 @@ export default function SunoGallery({ prompts }) {
         </div>
 
         {filteredPrompts.length === 0 && (
-          <div className="my-16 rounded-lg border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-            <p className="text-base font-medium text-slate-900">
+          <div className="my-16 rounded-lg border border-dashed border-slate-300 bg-white px-6 py-14 text-center dark:border-border dark:bg-card">
+            <p className="text-base font-medium text-slate-900 dark:text-foreground">
               {pageCopy?.emptyState?.title || 'No matching prompts'}
             </p>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 dark:text-muted-foreground">
               {pageCopy?.emptyState?.description || 'Try another keyword or switch to all categories.'}
             </p>
           </div>
@@ -316,8 +316,8 @@ export default function SunoGallery({ prompts }) {
 function Metric({ value, label }) {
   return (
     <div className="px-5 first:pl-0">
-      <p className="text-3xl font-semibold tracking-[-0.04em] text-slate-950">{value}</p>
-      <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-foreground">{value}</p>
+      <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-muted-foreground">{label}</p>
     </div>
   );
 }

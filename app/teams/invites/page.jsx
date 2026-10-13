@@ -93,7 +93,7 @@ export default function TeamInvitesPage() {
                 <Mail className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-3xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                <CardTitle className="text-3xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent dark:text-foreground dark:bg-none">
                   {tp.title}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">

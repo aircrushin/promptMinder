@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { oneDark, oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { useTheme } from 'next-themes';
 import {
   Tooltip,
   TooltipContent,
@@ -99,6 +100,7 @@ const getSavedSettings = () => {
 };
 
 export default function ChatTest({ prompt, variableValues = {}, hasVariables = false }) {
+  const { resolvedTheme } = useTheme();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [messages, setMessages] = useState([]);
@@ -1033,19 +1035,19 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
                             <MessageLoading />
                           </div>
                         ) : message.role === 'assistant' ? (
-                          <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-pre:my-0 prose-headings:mb-2 prose-headings:mt-4 prose-li:my-0.5">
+                          <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-pre:my-0 prose-headings:mb-2 prose-headings:mt-4 prose-li:my-0.5 dark:prose-invert">
                             <ReactMarkdown
                               components={{
                                 code({ node, inline, className, children, ...props }) {
                                   const match = /language-(\w+)/.exec(className || '');
                                   return !inline && match ? (
                                     <div className="not-prose rounded-md my-3 bg-black/90 relative group">
-                                      <div className="flex items-center justify-between px-4 py-1.5 border-b border-white/10">
-                                        <span className="text-xs text-gray-400">{match[1]}</span>
+                                      <div className="flex items-center justify-between px-4 py-1.5 border-b border-white/10 dark:border-border/10">
+                                        <span className="text-xs text-gray-400 dark:text-muted-foreground">{match[1]}</span>
                                         <Button
                                           variant="ghost"
                                           size="icon"
-                                          className="h-6 w-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                          className="h-6 w-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity dark:text-muted-foreground dark:hover:text-foreground"
                                           onClick={() => handleCopyMessage(String(children).replace(/\n$/, ''), `code-${index}`)}
                                         >
                                           {copiedMessageId === `code-${index}` ? (
@@ -1056,7 +1058,7 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
                                         </Button>
                                       </div>
                                       <SyntaxHighlighter
-                                        style={oneDark}
+                                        style={resolvedTheme === 'dark' ? oneDark : oneLight}
                                         language={match[1]}
                                         PreTag="div"
                                         {...props}
@@ -1098,7 +1100,7 @@ export default function ChatTest({ prompt, variableValues = {}, hasVariables = f
                                 onClick={() => handleCopyMessage(message.content, index)}
                               >
                                 {copiedMessageId === index ? (
-                                  <Check className="h-3.5 w-3.5 text-green-500" />
+                                  <Check className="h-3.5 w-3.5 text-green-500 dark:text-green-300" />
                                 ) : (
                                   <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                                 )}

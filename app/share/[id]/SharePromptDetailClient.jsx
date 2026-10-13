@@ -120,7 +120,7 @@ export default function SharePromptDetailClient({ initialPrompt, id }) {
       <div className="mx-auto p-4 sm:p-6 max-w-4xl">
         <Card className="border-none shadow-2xl backdrop-blur-sm bg-background/80">
           <CardContent className="p-8">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary-foreground [-webkit-background-clip:text] [background-clip:text] text-transparent drop-shadow-sm">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary-foreground [-webkit-background-clip:text] [background-clip:text] text-transparent drop-shadow-sm dark:text-foreground dark:bg-none">
               {prompt.title}
             </h1>
             

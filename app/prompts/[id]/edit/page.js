@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { SkillFiles, SkillFolderInput } from '@/components/skill/SkillFiles';
 import { useTeam } from '@/contexts/team-context';
+import { getSelectStyles, getSelectTheme } from '@/lib/select-styles';
 
 const CreatableSelect = dynamic(() => import('react-select/creatable'), {
   loading: () => <Skeleton className="h-10 w-full" />,
@@ -278,7 +279,7 @@ export default function EditPrompt({ params }) {
                 <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
                   <Label htmlFor="title" className="text-base">
                     {tp.formTitleLabel}
-                    <span className="ml-1 text-red-500">*</span>
+                    <span className="ml-1 text-red-500 dark:text-red-300">*</span>
                   </Label>
                   <Input
                     id="title"
@@ -292,7 +293,7 @@ export default function EditPrompt({ params }) {
                 <MotionDiv className="space-y-2" whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
                   <Label htmlFor="content" className="text-base">
                     {tp.formContentLabel}
-                    <span className="ml-1 text-red-500">*</span>
+                    <span className="ml-1 text-red-500 dark:text-red-300">*</span>
                   </Label>
                   <div className="relative">
                     <Textarea
@@ -358,6 +359,8 @@ export default function EditPrompt({ params }) {
                     className="basic-multi-select"
                     classNamePrefix="select"
                     {...tagSelectProps}
+                    styles={getSelectStyles()}
+                    theme={getSelectTheme}
                     instanceId="tags-select"
                   />
                 </div>

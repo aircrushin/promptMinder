@@ -16,72 +16,72 @@ export default function TermsOfService() {
       <div className="space-y-6">
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.acceptanceTitle}</h2>
-          <p className="text-gray-700">{ts.acceptanceContent}</p>
+          <p className="text-gray-700 dark:text-foreground">{ts.acceptanceContent}</p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.serviceDescriptionTitle}</h2>
-          <p className="text-gray-700">{ts.serviceDescriptionIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.serviceDescriptionIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {ts.serviceDescriptionItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.userResponsibilitiesTitle}</h2>
-          <p className="text-gray-700">{ts.userResponsibilitiesIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.userResponsibilitiesIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {ts.userResponsibilitiesItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.intellectualPropertyTitle}</h2>
-          <p className="text-gray-700">{ts.intellectualPropertyIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.intellectualPropertyIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {ts.intellectualPropertyItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.serviceChangesTitle}</h2>
-          <p className="text-gray-700">{ts.serviceChangesIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.serviceChangesIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {ts.serviceChangesItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.disclaimerTitle}</h2>
-          <p className="text-gray-700">{ts.disclaimerIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.disclaimerIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {ts.disclaimerItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.disputeResolutionTitle}</h2>
-          <p className="text-gray-700">{ts.disputeResolutionIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.disputeResolutionIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
             {ts.disputeResolutionItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.termsModificationTitle}</h2>
-          <p className="text-gray-700">{ts.termsModificationContent}</p>
+          <p className="text-gray-700 dark:text-foreground">{ts.termsModificationContent}</p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{ts.contactTitle}</h2>
-          <p className="text-gray-700">{ts.contactIntro}</p>
-          <ul className="list-disc ml-6 mt-2 text-gray-700">
+          <p className="text-gray-700 dark:text-foreground">{ts.contactIntro}</p>
+          <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
              {ts.contactItems.map((item, index) => <li key={index}>{item}</li>)}
           </ul>
         </section>
 
         <section>
-          <p className="text-gray-700 mt-8">{ts.lastUpdated}</p>
+          <p className="text-gray-700 mt-8 dark:text-foreground">{ts.lastUpdated}</p>
         </section>
       </div>
     </div>

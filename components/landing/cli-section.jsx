@@ -86,7 +86,7 @@ export function CLISection({ t }) {
   }
 
   return (
-    <section className="relative overflow-hidden bg-slate-50/50 py-28">
+    <section className="relative overflow-hidden bg-slate-50/50 py-28 dark:bg-muted/50">
       {/* Grid pattern — identical to feature-section */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
       {/* Ambient blurs */}
@@ -105,7 +105,7 @@ export function CLISection({ t }) {
           <div>
             {/* Badge */}
             <motion.div variants={itemVariants} className="mb-5">
-              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 shadow-sm dark:border-indigo-800/80 dark:bg-indigo-950/70 dark:text-indigo-300">
                 <Terminal className="h-3.5 w-3.5" />
                 {tr.badge}
               </span>
@@ -114,9 +114,9 @@ export function CLISection({ t }) {
             {/* Heading */}
             <motion.h2
               variants={itemVariants}
-              className="mb-5 text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl"
+              className="mb-5 text-4xl font-extrabold leading-tight text-slate-900 sm:text-5xl dark:text-foreground"
             >
-              <span className="bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent dark:text-foreground dark:bg-none">
                 {tr.title}
               </span>
             </motion.h2>
@@ -124,7 +124,7 @@ export function CLISection({ t }) {
             {/* Description */}
             <motion.p
               variants={itemVariants}
-              className="mb-8 text-lg leading-relaxed text-slate-600"
+              className="mb-8 text-lg leading-relaxed text-slate-600 dark:text-muted-foreground"
             >
               {tr.description}
             </motion.p>
@@ -140,20 +140,20 @@ export function CLISection({ t }) {
                 return (
                   <div
                     key={item.key}
-                    className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/70 shadow-lg shadow-indigo-500/5 backdrop-blur-xl"
+                    className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/70 shadow-lg shadow-indigo-500/5 backdrop-blur-xl dark:border-border/60 dark:bg-card/70"
                   >
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-200/60 px-5 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-200/60 px-5 py-3 dark:border-border/60">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-muted-foreground">
                         {item.label}
                       </p>
                       <button
                         onClick={() => handleCopy(item.key, item.command)}
                         aria-label={item.copyLabel}
                         title={item.copyLabel}
-                        className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                        className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-muted-foreground dark:hover:bg-indigo-950/30 dark:hover:text-indigo-300"
                       >
                         {isCopied ? (
-                          <Check className="h-4 w-4 text-emerald-500" />
+                          <Check className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
                         ) : (
                           <Clipboard className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                         )}
@@ -161,8 +161,8 @@ export function CLISection({ t }) {
                     </div>
                     <div className="flex">
                       <div className="flex flex-1 items-center gap-3 px-5 py-4">
-                        <span className="select-none font-mono text-base font-semibold text-indigo-500">$</span>
-                        <code className="flex-1 select-all break-all font-mono text-sm text-slate-800 sm:text-base">
+                        <span className="select-none font-mono text-base font-semibold text-indigo-500 dark:text-indigo-300">$</span>
+                        <code className="flex-1 select-all break-all font-mono text-sm text-slate-800 sm:text-base dark:text-foreground">
                           {item.command}
                         </code>
                       </div>
@@ -178,17 +178,17 @@ export function CLISection({ t }) {
                 href="https://www.npmjs.com/package/@aircrushin/promptminder-cli"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 underline-offset-4 transition-colors hover:text-indigo-700 hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 underline-offset-4 transition-colors hover:text-indigo-700 hover:underline dark:text-indigo-300 dark:hover:text-indigo-300"
               >
                 {tr.npmLink}
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
-              <span className="h-4 w-px bg-slate-200" />
+              <span className="h-4 w-px bg-slate-200 dark:bg-muted" />
               <a
                 href="https://github.com/aircrushin/promptMinder/tree/main/packages/promptminder-cli"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 hover:underline dark:text-muted-foreground dark:hover:text-foreground"
               >
                 {tr.docsLink}
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -201,13 +201,13 @@ export function CLISection({ t }) {
             {/* Soft glow behind card */}
             <div className="absolute -inset-6 -z-10 rounded-3xl bg-indigo-500/8 blur-2xl" />
 
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/70 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/70 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl dark:border-border/60 dark:bg-card/70">
               {/* macOS-style title bar */}
-              <div className="flex items-center gap-2 border-b border-slate-200/60 bg-slate-50/80 px-4 py-3">
+              <div className="flex items-center gap-2 border-b border-slate-200/60 bg-slate-50/80 px-4 py-3 dark:border-border/60 dark:bg-muted/80">
                 <div className="h-3 w-3 rounded-full bg-red-400/90" />
                 <div className="h-3 w-3 rounded-full bg-yellow-400/90" />
                 <div className="h-3 w-3 rounded-full bg-emerald-400/90" />
-                <span className="ml-3 text-xs font-medium text-slate-400">
+                <span className="ml-3 text-xs font-medium text-slate-400 dark:text-muted-foreground">
                   {tr.terminalTitle} — promptminder
                 </span>
               </div>
@@ -235,7 +235,7 @@ export function CLISection({ t }) {
                       </span>
                       <span
                         className={
-                          line.isOutput ? "text-emerald-300/80" : "text-slate-200"
+                          line.isOutput ? "text-emerald-300/80" : "text-slate-200 dark:text-muted-foreground"
                         }
                       >
                         {line.command}

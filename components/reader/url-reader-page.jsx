@@ -175,27 +175,27 @@ function UrlReaderPage() {
   }, [result?.content, result?.sourceUrl]);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-background dark:via-background dark:to-background">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.12),_transparent_28%)]" />
       <div className="relative mx-auto flex min-h-[calc(100vh-65px)] w-full max-w-6xl flex-col px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
           <section className="space-y-4 pt-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-4 py-1.5 text-sm font-medium text-sky-700 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-4 py-1.5 text-sm font-medium text-sky-700 shadow-sm dark:border-sky-800 dark:bg-card/90 dark:text-sky-300">
               <Sparkles className="h-4 w-4" />
               <span>{translations.badge}</span>
             </div>
             <div className="max-w-3xl space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-foreground">
                 {translations.title}
               </h1>
-              <p className="text-base leading-7 text-slate-600 sm:text-lg">
+              <p className="text-base leading-7 text-slate-600 sm:text-lg dark:text-muted-foreground">
                 {translations.description}
               </p>
             </div>
           </section>
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_320px]">
-            <Card className="border-slate-200/80 bg-white/85 shadow-xl shadow-slate-200/50 backdrop-blur">
+            <Card className="border-slate-200/80 bg-white/85 shadow-xl shadow-slate-200/50 backdrop-blur dark:border-border/80 dark:bg-card/85 dark:shadow-none">
               <CardHeader className="space-y-2">
                 <CardTitle>{translations.resultTitle}</CardTitle>
                 <CardDescription>{translations.resultDescription}</CardDescription>
@@ -204,7 +204,7 @@ function UrlReaderPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="reader-url-input"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-sm font-medium text-slate-700 dark:text-foreground"
                   >
                     {translations.inputLabel}
                   </label>
@@ -220,7 +220,7 @@ function UrlReaderPage() {
                         }
                       }}
                       placeholder={translations.inputPlaceholder}
-                      className="h-11 rounded-xl border-slate-200 bg-white"
+                      className="h-11 rounded-xl border-slate-200 bg-white dark:border-border dark:bg-card"
                     />
                     <Button
                       type="button"
@@ -241,22 +241,22 @@ function UrlReaderPage() {
                 </div>
 
                 {error ? (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300">
                     {error}
                   </div>
                 ) : null}
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-slate-700">{translations.resultTitle}</p>
-                    <p className="text-sm text-slate-500">{translations.resultDescription}</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-foreground">{translations.resultTitle}</p>
+                    <p className="text-sm text-slate-500 dark:text-muted-foreground">{translations.resultDescription}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Input
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder={translations.searchPlaceholder}
-                      className="h-9 w-full min-w-0 rounded-lg border-slate-200 bg-white sm:w-52"
+                      className="h-9 w-full min-w-0 rounded-lg border-slate-200 bg-white sm:w-52 dark:border-border dark:bg-card"
                     />
                     <Button
                       type="button"
@@ -283,8 +283,8 @@ function UrlReaderPage() {
 
                 <div className="relative">
                   {isLoading ? (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/85 backdrop-blur-sm">
-                      <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/85 backdrop-blur-sm dark:bg-card/85">
+                      <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm dark:border-border dark:bg-card dark:text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         {translations.submitting}
                       </div>
@@ -292,8 +292,8 @@ function UrlReaderPage() {
                   ) : null}
 
                   {searchResults ? (
-                    <div className="h-[420px] overflow-auto rounded-2xl border border-slate-200 bg-slate-950 px-4 py-4 text-sm text-slate-100">
-                      <div className="mb-3 text-xs text-slate-400">
+                    <div className="h-[420px] overflow-auto rounded-2xl border border-slate-200 bg-slate-950 px-4 py-4 text-sm text-slate-100 dark:border-border dark:text-muted-foreground">
+                      <div className="mb-3 text-xs text-slate-400 dark:text-muted-foreground">
                         {formatMessage(translations.searchResults, {
                           count: searchResults.length,
                         })}
@@ -303,19 +303,19 @@ function UrlReaderPage() {
                           {searchResults.map((match) => (
                             <div
                               key={`${match.lineNumber}-${match.line}`}
-                              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+                              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 dark:border-border/10 dark:bg-card/5"
                             >
                               <div className="mb-1 text-xs text-sky-300/80">
                                 Line {match.lineNumber}
                               </div>
-                              <div className="font-mono text-[13px] leading-6 text-slate-100">
+                              <div className="font-mono text-[13px] leading-6 text-slate-100 dark:text-muted-foreground">
                                 {match.line || '\u00A0'}
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="flex h-full min-h-[320px] items-center justify-center text-slate-400">
+                        <div className="flex h-full min-h-[320px] items-center justify-center text-slate-400 dark:text-muted-foreground">
                           {translations.searchNoResults}
                         </div>
                       )}
@@ -326,19 +326,19 @@ function UrlReaderPage() {
                       readOnly
                       value={result?.content || ''}
                       placeholder={translations.outputPlaceholder}
-                      className="h-[420px] resize-none rounded-2xl border-slate-200 bg-slate-950 px-4 py-4 font-mono text-[13px] leading-6 text-slate-100 placeholder:text-slate-500"
+                      className="h-[420px] resize-none rounded-2xl border-slate-200 bg-slate-950 px-4 py-4 font-mono text-[13px] leading-6 text-slate-100 placeholder:text-slate-500 dark:border-border dark:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                   )}
                 </div>
 
                 {result?.sourceUrl ? (
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-muted-foreground">
                     <span>{translations.sourceLabel}</span>
-                    <span className="max-w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-xs text-slate-700">
+                    <span className="max-w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-xs text-slate-700 dark:border-border dark:bg-muted dark:text-foreground">
                       {result.sourceUrl}
                     </span>
                     {result.truncated ? (
-                      <span className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-700">
+                      <span className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
                         {translations.truncated}
                       </span>
                     ) : null}
@@ -347,7 +347,7 @@ function UrlReaderPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200/80 bg-white/80 shadow-lg shadow-slate-200/40">
+            <Card className="border-slate-200/80 bg-white/80 shadow-lg shadow-slate-200/40 dark:border-border/80 dark:bg-card/80 dark:shadow-none">
               <CardHeader className="space-y-2">
                 <CardTitle className="text-lg">{translations.helperTitle}</CardTitle>
                 <CardDescription>
@@ -359,12 +359,12 @@ function UrlReaderPage() {
                   {translations.helperItems.map((item, index) => (
                     <li
                       key={item}
-                      className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3"
+                      className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-border dark:bg-muted/80"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
                         {index + 1}
                       </span>
-                      <span className="text-sm leading-6 text-slate-600">{item}</span>
+                      <span className="text-sm leading-6 text-slate-600 dark:text-muted-foreground">{item}</span>
                     </li>
                   ))}
                 </ol>

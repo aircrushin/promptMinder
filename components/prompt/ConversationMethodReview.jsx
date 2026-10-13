@@ -19,8 +19,8 @@ function ConversationMethodReview({ draft, onApply, onBack }) {
       <div className="space-y-2" aria-live="polite">
         <h3 className="text-lg font-semibold">{copy.reviewTitle}</h3>
         <p className="text-sm text-muted-foreground">{copy.reviewHint}</p>
-        {draft.mode === 'manual' && <p className="text-sm text-amber-700">{copy.manualHint}</p>}
-        {draft.truncated && <p className="text-sm text-amber-700">{copy.truncatedHint}</p>}
+        {draft.mode === 'manual' && <p className="text-sm text-amber-700 dark:text-amber-300">{copy.manualHint}</p>}
+        {draft.truncated && <p className="text-sm text-amber-700 dark:text-amber-300">{copy.truncatedHint}</p>}
       </div>
       {METHOD_FIELDS.map((field) => (
         <div key={field} className="space-y-2">
