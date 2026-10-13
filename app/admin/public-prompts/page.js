@@ -423,7 +423,7 @@ export default function AdminPublicPromptsPage() {
                   resetForm();
                   setIsCreateOpen(true);
                 }}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4" />
                 新建提示词
@@ -738,7 +738,7 @@ export default function AdminPublicPromptsPage() {
               <Button
                 onClick={handleCreate}
                 disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 {isSubmitting ? (
                   <>
@@ -855,7 +855,7 @@ export default function AdminPublicPromptsPage() {
               <Button
                 onClick={handleUpdate}
                 disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 {isSubmitting ? (
                   <>

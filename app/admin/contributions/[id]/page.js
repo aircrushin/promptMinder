@@ -376,7 +376,7 @@ export default function ContributionDetailPage() {
                   <Button
                     onClick={() => handleReview("approved")}
                     disabled={processing}
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    className="flex-1 bg-green-700 text-white hover:bg-green-800"
                   >
                     {processing ? (
                       <>
