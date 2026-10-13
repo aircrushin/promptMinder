@@ -108,6 +108,14 @@ function AdminSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname?.startsWith("/admin/premium-interest")} tooltip="Premium 意向报表" className="h-12 text-base rounded-lg my-1">
+                  <Link href="/admin/premium-interest" className="gap-4">
+                    <LayoutDashboard className="size-5" />
+                    <span>Premium 意向报表</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

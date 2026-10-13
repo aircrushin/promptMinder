@@ -77,7 +77,7 @@ export async function GET(request) {
         .limit(100),
     ])
 
-    return NextResponse.json({ summary, latest })
+    return NextResponse.json({ summary, latest }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     return handleApiError(error, 'Unable to load premium interest.')
   }
