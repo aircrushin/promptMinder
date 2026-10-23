@@ -273,7 +273,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-3 sm:gap-6">
+        <div className="flex items-center gap-2 sm:gap-3">
           <NavigationMenu className="hidden sm:flex">
             <NavigationMenuList className="space-x-1">
               {navItems.map(({ href, label, icon: Icon }) => (
@@ -400,13 +400,13 @@ export default function Navbar() {
           </Button>
 
           <SignedIn>
-            <Button asChild variant="ghost" className="hidden md:inline-flex rounded-xl text-slate-600 hover:bg-slate-100 dark:text-muted-foreground dark:hover:bg-muted">
+            <Button asChild variant="ghost" className="hidden md:inline-flex rounded-xl px-2.5 text-slate-600 hover:bg-slate-100 dark:text-muted-foreground dark:hover:bg-muted">
               <Link href="/settings/cli-tokens">
                 <Terminal className="h-4 w-4" />
                 CLI
               </Link>
             </Button>
-            <Button asChild variant="ghost" className="hidden md:inline-flex rounded-xl text-slate-600 hover:bg-slate-100 dark:text-muted-foreground dark:hover:bg-muted">
+            <Button asChild variant="ghost" className="hidden md:inline-flex rounded-xl px-2.5 text-slate-600 hover:bg-slate-100 dark:text-muted-foreground dark:hover:bg-muted">
               <Link href="/settings/mcp">
                 <Plug className="h-4 w-4" />
                 MCP
