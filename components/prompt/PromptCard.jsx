@@ -168,13 +168,12 @@ function PromptCardComponent({ prompt }) {
 
   return (
     <div className="group">
-      <Card className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/80 dark:border-gray-700/80 hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 hover:-translate-y-1 overflow-hidden rounded-xl">
-        {/* Subtle gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-purple-50/0 group-hover:from-blue-50/40 group-hover:to-purple-50/40 dark:group-hover:from-blue-950/30 dark:group-hover:to-purple-950/30 transition-all duration-300 pointer-events-none" />
+      <Card className="relative bg-card border border-border hover:border-foreground/40 transition-colors duration-200 hover:-translate-y-0.5 overflow-hidden rounded-xl">
+        <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/40 transition-colors duration-200 pointer-events-none" />
         
         <CardHeader className="relative z-10 pb-3">
           <div className="flex justify-between items-start gap-3">
-            <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-900 dark:group-hover:text-blue-100 transition-colors duration-300 flex-1">
+            <CardTitle className="text-lg font-semibold text-card-foreground leading-tight flex-1">
               {prompt.title || prompt.role}
             </CardTitle>
             <div className="flex items-center gap-1">
@@ -189,23 +188,23 @@ function PromptCardComponent({ prompt }) {
                       size="icon"
                       className={`flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 ${
                         hasLiked
-                          ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400'
-                          : 'text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400'
-                      } hover:scale-105`}
+                          ? 'text-destructive bg-destructive/10'
+                          : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'
+                      }`}
                     >
                       <Heart className={`h-4 w-4 transition-transform duration-300 ${hasLiked ? 'fill-current' : ''}`} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+                    className="bg-popover text-popover-foreground border border-border shadow-md"
                   >
                     <p className="font-medium">{hasLiked ? '已点赞' : '点赞'}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
                 {/* <Heart className={`h-3.5 w-3.5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} /> */}
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-muted-foreground">
                   {likes}
                 </span>
               </div>
@@ -217,14 +216,14 @@ function PromptCardComponent({ prompt }) {
                       variant="ghost"
                       size="icon"
                       disabled={isImporting}
-                      className="flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105"
+                      className="flex-shrink-0 h-8 w-8 rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     >
                       <ImportIcon className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+                    className="bg-popover text-popover-foreground border border-border shadow-md"
                   >
                     <p className="font-medium">{t.publicPage.importTooltip}</p>
                   </TooltipContent>
@@ -240,8 +239,8 @@ function PromptCardComponent({ prompt }) {
                       className={`flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 ${
                         copied
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
-                          : 'text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400'
-                      } hover:scale-105`}
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      }`}
                     >
                       {copied ? (
                         <CheckIcon className="h-4 w-4 transition-transform duration-300" />
@@ -252,7 +251,7 @@ function PromptCardComponent({ prompt }) {
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+                    className="bg-popover text-popover-foreground border border-border shadow-md"
                   >
                     <p className="font-medium">{copied ? t.publicPage.copiedTooltip : t.publicPage.copyTooltip}</p>
                   </TooltipContent>
@@ -264,7 +263,7 @@ function PromptCardComponent({ prompt }) {
           {/* Category badge */}
           {prompt.category && (
             <div className="mt-3">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-secondary text-secondary-foreground border border-border">
                 {prompt.category}
               </span>
             </div>
@@ -272,13 +271,12 @@ function PromptCardComponent({ prompt }) {
         </CardHeader>
         
         <CardContent className="relative z-10 pt-0 pb-6">
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300 line-clamp-[10]">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line line-clamp-[10]">
             {prompt.prompt}
           </p>
         </CardContent>
         
-        {/* Bottom accent line */}
-        <div className="h-1 bg-gradient-to-r from-blue-500/0 via-blue-500/30 to-purple-500/0 group-hover:from-blue-500/70 group-hover:via-blue-500/90 group-hover:to-purple-500/70 transition-all duration-300" />
+        <div className="h-px bg-border group-hover:bg-foreground/60 transition-colors duration-200" />
       </Card>
     </div>
   );

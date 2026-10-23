@@ -368,10 +368,10 @@ export default function PublicPromptsClient() {
     // Loading state
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground/70"></div>
-                    <p className="mt-4 text-gray-600 dark:text-gray-400">
+                    <p className="mt-4 text-muted-foreground">
                         {t && t.publicPage ? t.publicPage.loading || 'Loading...' : 'Loading...'}
                     </p>
                 </div>
@@ -382,13 +382,13 @@ export default function PublicPromptsClient() {
     // Error state
     if (error) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-red-500 text-xl mb-4 dark:text-red-300">⚠️</div>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-muted-foreground">
                         {t && t.publicPage ? t.publicPage.error || 'Error loading prompts' : 'Error loading prompts'}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">{error}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{error}</p>
                     <button 
                         onClick={() => window.location.reload()} 
                         className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
@@ -403,7 +403,7 @@ export default function PublicPromptsClient() {
     // Handle case where translations are not loaded yet
     if (!t || !t.publicPage) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground/70"></div>
                 </div>
@@ -412,7 +412,7 @@ export default function PublicPromptsClient() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
+        <div className="min-h-screen bg-background text-foreground">
             {/* GEO优化：提示词合集结构化数据 */}
             {structuredData && (
                 <script
@@ -421,28 +421,28 @@ export default function PublicPromptsClient() {
                 />
             )}
             {/* Background decoration */}
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-black/5 via-transparent to-black/5 dark:from-white/5 dark:to-white/5 pointer-events-none -z-10" />
+            <div className="fixed inset-x-0 top-0 h-px bg-border pointer-events-none -z-10" />
             <div className="relative align-center justify-center">
                 <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:py-20">
                     {/* Enhanced header section */}
                     <div className="text-center mb-16 space-y-6">
                         <div className="space-y-4">
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent leading-tight dark:text-foreground dark:bg-none">
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-foreground leading-tight">
                                 {t.publicPage.title}
                             </h1>
-                            <div className="h-1 w-24 bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 mx-auto rounded-full" />
+                            <div className="h-px w-20 bg-foreground/60 mx-auto" />
                         </div>
                         
-                        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
+                        <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                             {t.publicPage.subtitle}
                         </p>
                         
-                        <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                            <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
-                            <span className="px-4 bg-white/80 dark:bg-gray-900/80 rounded-full py-1">
+                        <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
+                            <div className="h-px bg-border w-12" />
+                            <span className="px-3 py-1 rounded-full border border-border bg-card">
                                 {t.publicPage.totalPrompts.replace('{count}', pagination.total)}
                             </span>
-                            <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent w-12" />
+                            <div className="h-px bg-border w-12" />
                         </div>
                     </div>
 
@@ -451,18 +451,18 @@ export default function PublicPromptsClient() {
                         <div className="flex flex-col sm:flex-row gap-4 items-center">
                             {/* 搜索框 */}
                             <div className="relative flex-1 max-w-2xl">
-                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 h-5 w-5 z-10 pointer-events-none" />
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5 z-10 pointer-events-none" />
                                 <Input
                                     type="text"
                                     placeholder={t.publicPage.searchPlaceholder}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-12 pr-12 h-12 text-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-border dark:border-gray-700 focus:border-foreground/30 dark:focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10 dark:focus:ring-foreground/20 shadow-lg transition-all duration-300"
+                                    className="pl-12 pr-12 h-12 text-lg bg-card border-border focus:border-ring focus:ring-2 focus:ring-ring/20 transition-colors"
                                 />
                                 {searchQuery && (
                                     <button
                                         onClick={clearSearch}
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10 dark:text-muted-foreground"
+                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
                                         title={t.publicPage.clearSearch}
                                     >
                                         <X className="h-5 w-5" />
@@ -474,7 +474,7 @@ export default function PublicPromptsClient() {
                             <Dialog open={isContributeOpen} onOpenChange={setIsContributeOpen}>
                                 <DialogTrigger asChild>
                                     <Button 
-                                        className="h-12 px-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-primary-foreground shadow-lg hover:shadow-xl whitespace-nowrap"
+                                        className="h-12 px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
                                     >
                                         <Plus className="w-5 h-5 mr-2" />
                                         {t.publicPage.contributeButton}
@@ -574,7 +574,7 @@ export default function PublicPromptsClient() {
                                             <Button 
                                                 type="submit" 
                                                 disabled={isSubmitting}
-                                                className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-primary-foreground"
+                                                className="bg-primary text-primary-foreground hover:bg-primary/90"
                                             >
                                                 {isSubmitting ? t.publicPage.contributeSubmitting : t.publicPage.contributeSubmit}
                                             </Button>
@@ -589,9 +589,9 @@ export default function PublicPromptsClient() {
                             <button
                                 onClick={() => handleSortChange('created_at')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                                    sortBy === 'created_at'
-                                        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
-                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                        sortBy === 'created_at'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-card text-muted-foreground border border-border hover:bg-accent hover:text-accent-foreground'
                                 }`}
                             >
                                 <Clock className="w-4 h-4" />
@@ -600,9 +600,9 @@ export default function PublicPromptsClient() {
                             <button
                                 onClick={() => handleSortChange('likes')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                                    sortBy === 'likes'
-                                        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
-                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                        sortBy === 'likes'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-card text-muted-foreground border border-border hover:bg-accent hover:text-accent-foreground'
                                 }`}
                             >
                                 <Heart className="w-4 h-4" />
@@ -616,9 +616,9 @@ export default function PublicPromptsClient() {
                                 <button
                                     onClick={() => handleCategoryChange('')}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                                        selectedCategory === ''
-                                            ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
-                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                            selectedCategory === ''
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-card text-muted-foreground border border-border hover:bg-accent hover:text-accent-foreground'
                                     }`}
                                 >
                                     {language === 'zh' ? '全部' : 'All'}
@@ -628,9 +628,9 @@ export default function PublicPromptsClient() {
                                         key={category}
                                         onClick={() => handleCategoryChange(category)}
                                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                                            selectedCategory === category
-                                                ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg'
-                                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-border dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                                selectedCategory === category
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'bg-card text-muted-foreground border border-border hover:bg-accent hover:text-accent-foreground'
                                         }`}
                                     >
                                         {category}
@@ -660,14 +660,14 @@ export default function PublicPromptsClient() {
                         (<div className="mx-auto max-w-4xl py-16">
                             <div className="text-center mb-8">
                                 <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">🔍</div>
-                                <h3 className="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                <h3 className="text-xl font-medium text-muted-foreground mb-2">
                                     {t.publicPage.noResults}
                                 </h3>
-                                <p className="text-gray-500 dark:text-gray-500 mb-6">
+                                <p className="text-muted-foreground mb-6">
                                     {t.publicPage.tryOtherKeywords}{' '}
                                     <button
                                         onClick={clearSearch}
-                                        className="text-foreground underline hover:text-foreground/70 dark:text-white dark:hover:text-white/80"
+                                        className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
                                     >
                                         {t.publicPage.clearSearch}
                                     </button>
@@ -675,7 +675,7 @@ export default function PublicPromptsClient() {
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                <div className="rounded-2xl border border-border/70 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
+                                <div className="rounded-xl border border-border bg-card p-4">
                                     <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
                                         <Sparkles className="h-4 w-4" />
                                         {t.publicPage.recommendedKeywordsTitle}
@@ -685,7 +685,7 @@ export default function PublicPromptsClient() {
                                             <button
                                                 key={keyword}
                                                 onClick={() => handleSuggestedKeywordClick(keyword)}
-                                                className="rounded-full border border-border bg-background px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-slate-900 hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-100 dark:hover:text-gray-900"
+                                        className="rounded-full border border-border bg-background px-3 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                             >
                                                 {keyword}
                                             </button>
@@ -697,7 +697,7 @@ export default function PublicPromptsClient() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-border/70 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
+                                <div className="rounded-xl border border-border bg-card p-4">
                                     <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
                                         <Filter className="h-4 w-4" />
                                         {t.publicPage.relatedCategoriesTitle}
@@ -707,7 +707,7 @@ export default function PublicPromptsClient() {
                                             <button
                                                 key={category}
                                                 onClick={() => handleRelatedCategoryClick(category)}
-                                                className="rounded-full border border-border bg-background px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-slate-900 hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-100 dark:hover:text-gray-900"
+                                                className="rounded-full border border-border bg-background px-3 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                             >
                                                 {category}
                                             </button>
@@ -719,7 +719,7 @@ export default function PublicPromptsClient() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-border/70 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
+                                <div className="rounded-xl border border-border bg-card p-4">
                                     <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
                                         <TrendingUp className="h-4 w-4" />
                                         {t.publicPage.trendingContentTitle}
@@ -729,7 +729,7 @@ export default function PublicPromptsClient() {
                                             <button
                                                 key={prompt.id}
                                                 onClick={() => handleTrendingPromptClick(prompt)}
-                                                className="flex w-full items-start justify-between gap-2 rounded-xl border border-border bg-background px-3 py-2 text-left transition-colors hover:bg-slate-900 hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-100 dark:hover:text-gray-900"
+                                                className="flex w-full items-start justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-left transition-colors hover:bg-accent hover:text-accent-foreground"
                                             >
                                                 <span className="line-clamp-1 text-sm">{prompt.title || prompt.role}</span>
                                                 <span className="shrink-0 text-xs opacity-80">♥ {prompt.likes || 0}</span>
@@ -755,8 +755,8 @@ export default function PublicPromptsClient() {
                                 className={`
                                     flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
                                     ${pagination.hasPreviousPage
-                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700 dark:hover:text-foreground'
-                                        : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
+                                        ? 'bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border'
+                                        : 'bg-muted text-muted-foreground/60 cursor-not-allowed border border-border'
                                     }
                                 `}
                             >
@@ -829,8 +829,8 @@ export default function PublicPromptsClient() {
                                                 className={`
                                                     min-w-[2.5rem] h-10 px-3 rounded-lg font-medium transition-all duration-300
                                                     ${isActive
-                                                        ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 text-white shadow-lg scale-110'
-                                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700 dark:hover:text-foreground'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border'
                                                     }
                                                 `}
                                             >
@@ -848,8 +848,8 @@ export default function PublicPromptsClient() {
                                 className={`
                                     flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300
                                     ${pagination.hasNextPage
-                                        ? 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-slate-900 hover:to-slate-700 hover:text-white shadow-md hover:shadow-lg border border-border dark:border-gray-700 dark:hover:text-foreground'
-                                        : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-800'
+                                        ? 'bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border'
+                                        : 'bg-muted text-muted-foreground/60 cursor-not-allowed border border-border'
                                     }
                                 `}
                             >
@@ -866,7 +866,7 @@ export default function PublicPromptsClient() {
             {showBackToTop && (
                 <button
                     onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 hover:from-slate-800 hover:to-slate-700 text-white rounded-full shadow-xl hover:shadow-2xl backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-4 focus:ring-black/20 dark:focus:ring-white/20 dark:border-border/20"
+                    className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-ring/40"
                     title="回到顶部/backtotop"
                     aria-label="Back to top"
                 >
