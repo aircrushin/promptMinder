@@ -257,7 +257,7 @@ export function HeroSection({ t }) {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 flex flex-col items-center px-6 py-24 text-center"
+        className="relative z-10 flex translate-y-6 flex-col items-center px-6 py-24 text-center lg:translate-y-8"
       >
         {/* Announcement Banner */}
         <motion.div
