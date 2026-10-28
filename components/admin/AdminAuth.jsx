@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,19 +14,45 @@ export default function AdminAuth({ children }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const { isLoaded: isClerkLoaded, isSignedIn, user } = useUser();
 
   // 检查是否已经验证
   useEffect(() => {
+    if (!isClerkLoaded) return;
     const token = localStorage.getItem("admin_token");
     const savedEmail = localStorage.getItem("admin_email");
 
     if (token && savedEmail) {
       // 验证 token 是否仍然有效
       verifyToken(token);
+    } else if (!isSignedIn) {
+      setIsLoading(false);
     } else {
+      setEmail(user?.primaryEmailAddress?.emailAddress || "");
+      verifyCurrentUser();
+    }
+  }, [isClerkLoaded, isSignedIn, user]);
+
+  const verifyCurrentUser = async () => {
+    setIsVerifying(true);
+    try {
+      const response = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user?.primaryEmailAddress?.emailAddress || "" }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "验证失败");
+      localStorage.setItem("admin_token", data.token);
+      localStorage.setItem("admin_email", data.email);
+      setIsVerified(true);
+    } catch (error) {
+      setError(error.message || "验证失败，请重试");
+    } finally {
+      setIsVerifying(false);
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const verifyToken = async (token) => {
     try {
@@ -96,6 +124,22 @@ export default function AdminAuth({ children }) {
   }
 
   if (!isVerified) {
+    if (!isSignedIn) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background px-4">
+          <Card className="w-full max-w-md">
+            <CardHeader className="space-y-1 text-center">
+              <div className="flex justify-center mb-4"><Shield className="w-8 h-8 text-primary" /></div>
+              <CardTitle className="text-2xl">请先登录</CardTitle>
+              <CardDescription>管理员后台需要使用已验证的 Prompt Minder 账号登录。</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full"><Link href="/sign-in?redirect_url=/admin">登录并继续</Link></Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <Card className="w-full max-w-md">

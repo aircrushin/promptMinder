@@ -3,6 +3,7 @@
 import { NextRequest } from 'next/server'
 import {
   ADMIN_TOKEN_MAX_AGE_MS,
+  createAdminToken,
   getAdminEmails,
   parseAdminToken,
   requireAdmin,
@@ -10,19 +11,19 @@ import {
 } from '@/lib/admin-auth.js'
 import { ApiError } from '@/lib/api-error.js'
 
-function createAdminToken(email, timestamp = Date.now()) {
-  return Buffer.from(`${email}:${timestamp}`).toString('base64')
-}
-
 describe('admin-auth', () => {
   const originalAdminEmails = process.env.ADMIN_EMAILS
+  const originalTokenSecret = process.env.ADMIN_TOKEN_SECRET
 
   beforeEach(() => {
     process.env.ADMIN_EMAILS = 'admin@example.com,other@example.com'
+    process.env.ADMIN_TOKEN_SECRET = 'test-admin-token-secret'
   })
 
   afterEach(() => {
     process.env.ADMIN_EMAILS = originalAdminEmails
+    if (originalTokenSecret === undefined) delete process.env.ADMIN_TOKEN_SECRET
+    else process.env.ADMIN_TOKEN_SECRET = originalTokenSecret
   })
 
   it('parses valid admin tokens', () => {

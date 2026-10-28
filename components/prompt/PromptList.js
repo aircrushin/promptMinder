@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useState, memo } from 'react';
 import { Card } from "@/components/ui/card"
@@ -17,6 +20,7 @@ import { useClipboard } from '@/lib/clipboard';
 function PromptList({ prompts, onDelete, onShare }) {
   const { toast } = useToast();
   const { copy } = useClipboard();
+  const router = useRouter();
   const [selectedVersions, setSelectedVersions] = useState(null);
 
   // 按标题对提示词进行分组
@@ -61,13 +65,25 @@ function PromptList({ prompts, onDelete, onShare }) {
           return (
             <Card 
               key={title}
-              className="group relative rounded-lg border p-6 hover:shadow-md transition-all bg-card cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={title}
+              className="group relative rounded-lg border p-6 hover:shadow-md transition-all bg-card cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={(e) => {
                 e.preventDefault();
                 if (versions.length > 1) {
                   showVersions(e, versions);
                 } else {
-                  window.location.href = `/prompts/${latestPrompt.id}`;
+                  router.push(`/prompts/${latestPrompt.id}`);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                if (versions.length > 1) {
+                  setSelectedVersions(versions);
+                } else {
+                  router.push(`/prompts/${latestPrompt.id}`);
                 }
               }}
             >
@@ -142,7 +158,8 @@ function PromptList({ prompts, onDelete, onShare }) {
                       e.stopPropagation();
                       handleCopy(latestPrompt.content);
                     }}
-                    className="h-8 w-8"
+                    aria-label="复制提示词"
+                    className="h-11 w-11"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -153,7 +170,8 @@ function PromptList({ prompts, onDelete, onShare }) {
                       e.stopPropagation();
                       handleShare(latestPrompt.id);
                     }}
-                    className="h-8 w-8"
+                    aria-label="分享提示词"
+                    className="h-11 w-11"
                   >
                     <Share2 className="h-4 w-4" />
                   </Button>
@@ -164,7 +182,8 @@ function PromptList({ prompts, onDelete, onShare }) {
                       e.stopPropagation();
                       onDelete(latestPrompt.id);
                     }}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    aria-label="删除提示词"
+                    className="h-11 w-11 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -186,7 +205,7 @@ function PromptList({ prompts, onDelete, onShare }) {
                 href={`/prompts/${version.id}`}
                 className="block"
                >
-                <Card className="p-4 hover:bg-accent cursor-pointer">
+                <Card className="p-4 hover:bg-accent cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-medium">v{version.version}</div>

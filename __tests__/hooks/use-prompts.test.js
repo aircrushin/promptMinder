@@ -35,9 +35,11 @@ describe('usePrompts', () => {
     Object.assign(apiClient, mockApiClient)
     
     // Mock crypto.randomUUID
-    global.crypto = {
-      randomUUID: jest.fn().mockReturnValue('test-uuid')
-    }
+    if (!global.crypto) global.crypto = {}
+    Object.defineProperty(global.crypto, 'randomUUID', {
+      configurable: true,
+      value: jest.fn().mockReturnValue('test-uuid'),
+    })
     
     // Mock navigator.clipboard
     Object.assign(navigator, {
@@ -46,11 +48,7 @@ describe('usePrompts', () => {
       }
     })
     
-    // Mock window.location
-    delete window.location
-    window.location = {
-      origin: 'http://localhost:3000'
-    }
+    window.history.replaceState({}, '', '/')
   })
 
   describe('usePrompts hook', () => {
@@ -262,7 +260,7 @@ describe('usePrompts', () => {
       })
       
       expect(mockApiClient.sharePrompt).toHaveBeenCalledWith('1')
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('http://localhost:3000/share/1')
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('http://localhost/share/1')
       
       expect(mockToast).toHaveBeenCalledWith({
         title: '分享成功',

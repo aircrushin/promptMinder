@@ -77,7 +77,7 @@ describe('UrlReaderPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '提取文本' }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('first line\nsecond line')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('提取结果会显示在这里').value).toBe('first line\nsecond line');
     });
 
     expect(global.fetch).toHaveBeenCalledWith('/api/reader', expect.objectContaining({
@@ -103,7 +103,9 @@ describe('UrlReaderPage', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: '提取文本' }));
 
-    await screen.findByDisplayValue('copy me');
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('提取结果会显示在这里').value).toBe('copy me');
+    });
 
     fireEvent.click(screen.getByRole('button', { name: '复制文本' }));
 

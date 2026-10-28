@@ -33,8 +33,10 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url)
         const language = searchParams.get('lang') || 'zh'
         const category = searchParams.get('category') || ''
-        const page = parseInt(searchParams.get('page') || '1', 10)
-        const pageSize = parseInt(searchParams.get('pageSize') || '20', 10)
+        const parsedPage = Number.parseInt(searchParams.get('page') || '1', 10)
+        const parsedPageSize = Number.parseInt(searchParams.get('pageSize') || '20', 10)
+        const page = Number.isSafeInteger(parsedPage) ? Math.max(1, parsedPage) : 1
+        const pageSize = Number.isSafeInteger(parsedPageSize) ? Math.min(100, Math.max(1, parsedPageSize)) : 20
         const sortBy = searchParams.get('sortBy') || 'created_at'
         const sortOrder = searchParams.get('sortOrder') || 'desc'
         const includeCategories = searchParams.get('includeCategories') !== 'false'
@@ -52,7 +54,7 @@ export async function GET(request) {
         const validSortFields = { created_at: publicPrompts.createdAt, likes: publicPrompts.likes }
         const orderCol = validSortFields[sortBy] || publicPrompts.createdAt
         const orderFn = sortOrder === 'asc' ? asc : desc
-        const requestedPage = Math.max(1, page)
+        const requestedPage = page
         const requestedOffset = (requestedPage - 1) * pageSize
         const fetchRows = (offset) => db
             .select({

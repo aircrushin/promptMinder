@@ -310,9 +310,10 @@ describe('POST /api/playground/run', () => {
 
       expect(response.status).toBe(200);
       expect(data.usage).toEqual({
-        promptTokens: undefined,
-        completionTokens: undefined,
-        totalTokens: undefined,
+        promptTokens: null,
+        completionTokens: null,
+        totalTokens: null,
+        cachedTokens: null,
       });
     });
   });

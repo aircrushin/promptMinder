@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server';
-import { getAdminEmails, parseAdminToken } from '@/lib/admin-auth.js';
+import { auth, clerkClient } from '@clerk/nextjs/server';
+import { createAdminToken, getAdminEmails, parseAdminToken } from '@/lib/admin-auth.js';
 
 export async function POST(request) {
   try {
-    const { email } = await request.json();
-
-    if (!email || !email.trim()) {
-      return NextResponse.json(
-        { error: '请输入邮箱地址' },
-        { status: 400 }
-      );
-    }
-
-    const trimmedEmail = email.trim().toLowerCase();
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: '请先登录' }, { status: 401 });
+    const client = typeof clerkClient === 'function' ? await clerkClient() : clerkClient;
+    const user = await client.users.getUser(userId);
+    const trimmedEmail = (user.emailAddresses?.find((item) => item.id === user.primaryEmailAddressId)?.emailAddress
+      || user.emailAddresses?.[0]?.emailAddress || '').trim().toLowerCase();
     const adminEmails = getAdminEmails();
 
     if (adminEmails.includes(trimmedEmail)) {
-      const token = Buffer.from(`${trimmedEmail}:${Date.now()}`).toString('base64');
+      const token = createAdminToken(trimmedEmail);
 
       return NextResponse.json({
         success: true,

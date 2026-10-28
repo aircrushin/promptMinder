@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db.js'
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/admin-auth.js'
 import { eq, and, asc } from 'drizzle-orm'
 import { publicTags } from '@/drizzle/schema/index.js'
 import { toSnakeCase } from '@/lib/case-utils.js'
@@ -50,19 +50,7 @@ export async function GET(request) {
  */
 export async function POST(request) {
   try {
-    const { userId, sessionClaims } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 })
-    }
-
-    // 检查是否为管理员（可以通过 Clerk 的 metadata 或特定角色判断）
-    // 这里简化处理，实际项目中应该检查管理员权限
-    const isAdmin = sessionClaims?.metadata?.role === 'admin'
-    
-    if (!isAdmin) {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 })
-    }
+    const userId = requireAdmin(request)
 
     const { name, description, category, sortOrder } = await request.json()
 
@@ -94,17 +82,7 @@ export async function POST(request) {
  */
 export async function PATCH(request) {
   try {
-    const { userId, sessionClaims } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 })
-    }
-
-    const isAdmin = sessionClaims?.metadata?.role === 'admin'
-    
-    if (!isAdmin) {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 })
-    }
+    requireAdmin(request)
 
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')
@@ -149,17 +127,7 @@ export async function PATCH(request) {
  */
 export async function DELETE(request) {
   try {
-    const { userId, sessionClaims } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 })
-    }
-
-    const isAdmin = sessionClaims?.metadata?.role === 'admin'
-    
-    if (!isAdmin) {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 })
-    }
+    requireAdmin(request)
 
     const { searchParams } = new URL(request.url)
     const tagId = searchParams.get('id')

@@ -103,7 +103,27 @@ export async function POST(request) {
   try {
     const userId = await requireUserId(request)
     const body = await request.json()
-    const { prompt, systemPrompt, userPrompt, settings = {}, stream = true } = body
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+    // Non-streaming is the safe API default; the Playground UI opts into SSE explicitly.
+    const { prompt, systemPrompt, userPrompt, settings = {}, stream = false } = body
+
+    for (const [name, value] of Object.entries({ prompt, systemPrompt, userPrompt })) {
+      if (value !== undefined && value !== null && typeof value !== 'string') {
+        return NextResponse.json({ error: `${name} must be a string` }, { status: 400 })
+      }
+      if (typeof value === 'string' && value.length > 200000) {
+        return NextResponse.json({ error: `${name} is too long` }, { status: 413 })
+      }
+    }
+
+    if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+      return NextResponse.json({ error: 'settings must be an object' }, { status: 400 })
+    }
+    if (typeof stream !== 'boolean') {
+      return NextResponse.json({ error: 'stream must be a boolean' }, { status: 400 })
+    }
 
     if (!prompt && !systemPrompt && !userPrompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -113,6 +133,16 @@ export async function POST(request) {
       apiKey, baseURL, model = 'gpt-3.5-turbo', temperature = 0.7,
       maxTokens = 2000, topP = 0.7, provider = 'openai', useStoredKey = false,
     } = settings
+
+    if (!Number.isFinite(temperature) || temperature < 0 || temperature > 2) {
+      return NextResponse.json({ error: 'temperature must be between 0 and 2' }, { status: 400 })
+    }
+    if (!Number.isSafeInteger(maxTokens) || maxTokens < 1 || maxTokens > 32768) {
+      return NextResponse.json({ error: 'maxTokens must be between 1 and 32768' }, { status: 400 })
+    }
+    if (!Number.isFinite(topP) || topP < 0 || topP > 1) {
+      return NextResponse.json({ error: 'topP must be between 0 and 1' }, { status: 400 })
+    }
 
     const normalizedProvider = (provider || 'openai').toLowerCase()
     const suppliedApiKey = typeof apiKey === 'string' ? apiKey.trim() : ''

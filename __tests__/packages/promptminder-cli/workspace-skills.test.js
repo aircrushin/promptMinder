@@ -24,11 +24,17 @@ describe('工作区 Skill 文件安装与版本选择', () => {
     const result = installSkillVersion(prompt, root);
     expect(fs.readFileSync(path.join(result.installed, 'assets/image.bin'))).toEqual(binary);
     expect(fs.readFileSync(path.join(result.installed, 'references/guide.md'), 'utf8')).toBe('\ufeff保留本地方法');
-    expect(fs.statSync(path.join(result.installed, 'scripts/run.sh')).mode & 0o100).toBe(0o100);
+    if (process.platform !== 'win32') {
+      expect(fs.statSync(path.join(result.installed, 'scripts/run.sh')).mode & 0o100).toBe(0o100);
+    }
     const receipt = JSON.parse(fs.readFileSync(path.join(result.installed, RECEIPT_PATH)));
     expect(receipt).toMatchObject({ prompt_id: id, version: '1.0.0', team_id: 'team-a', source: pkg.source });
     expect(receipt.sha256['assets/image.bin']).toHaveLength(64);
-    expect(readSkillDirectory(result.installed)).toEqual({ ...pkg, files: expect.arrayContaining(pkg.files) });
+    const installedPackage = readSkillDirectory(result.installed);
+    const expectedFiles = process.platform === 'win32'
+      ? pkg.files.map((file) => ({ ...file, executable: false }))
+      : pkg.files;
+    expect(installedPackage).toEqual({ ...pkg, files: expect.arrayContaining(expectedFiles) });
     expect(() => installSkillVersion({ ...prompt, version: '2.0.0' }, root)).toThrow(/exist/i);
     expect(JSON.parse(fs.readFileSync(path.join(result.installed, RECEIPT_PATH))).version).toBe('1.0.0');
   });
@@ -44,6 +50,7 @@ describe('工作区 Skill 文件安装与版本选择', () => {
       expect(fs.readdirSync(root)).toEqual([]);
     }
     const result = installSkillVersion(prompt, root);
+    if (process.platform === 'win32') return;
     fs.symlinkSync('/etc/hosts', path.join(result.installed, 'link'));
     expect(() => readSkillDirectory(result.installed)).toThrow(/regular files/);
   });

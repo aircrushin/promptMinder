@@ -36,12 +36,12 @@ describe('TagFilter', () => {
     )
 
     // 检查选中的标签
-    const reactTag = screen.getByText('React')
-    const jsTag = screen.getByText('JavaScript')
+    const reactTag = screen.getByRole('button', { name: 'React' })
+    const jsTag = screen.getByRole('button', { name: 'JavaScript' })
     
     // 选中的标签应该有default变体样式
-    expect(reactTag.closest('[class*="variant"]')).toBeInTheDocument()
-    expect(jsTag.closest('[class*="variant"]')).toBeInTheDocument()
+    expect(reactTag).toHaveAttribute('aria-pressed', 'true')
+    expect(jsTag).toHaveAttribute('aria-pressed', 'true')
 
     // 检查未选中的标签
     const cssTag = screen.getByText('CSS')
@@ -92,7 +92,7 @@ describe('TagFilter', () => {
     )
 
     mockTags.forEach(tag => {
-      const tagElement = screen.getByText(tag)
+      const tagElement = screen.getByRole('button', { name: tag })
       expect(tagElement).toHaveClass('cursor-pointer', 'hover:opacity-80')
     })
   })
@@ -133,7 +133,7 @@ describe('TagFilter', () => {
       />
     )
 
-    const selectedReactTag = screen.getByText('React')
+    const selectedReactTag = screen.getAllByRole('button', { name: 'React' }).find((button) => button.getAttribute('aria-pressed') === 'true')
     
     // 第二次点击 - 取消选中
     fireEvent.click(selectedReactTag)

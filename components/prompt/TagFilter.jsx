@@ -12,18 +12,19 @@ function TagFilter({ allTags, selectedTags, onTagSelect, className = "" }) {
 
   return (
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      {allTags.map((tag) => (
+      {allTags.map((tag, index) => (
         <button
           type="button"
-          key={tag}
+          key={`${tag}-${index}`}
           aria-pressed={selectedTags.includes(tag)}
           onClick={() => toggleTag(tag)}
           className={cn(
-            'inline-flex min-h-9 items-center rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-8 md:px-2 md:py-1 md:text-[11px]',
+            'inline-flex min-h-9 cursor-pointer items-center rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-8 md:px-2 md:py-1 md:text-[11px]',
             selectedTags.includes(tag)
               ? 'border-transparent bg-primary text-primary-foreground shadow'
-              : 'border-input bg-background text-foreground hover:bg-accent'
+            : 'border-input bg-background text-foreground hover:bg-accent'
           )}
+          style={{ cursor: 'pointer' }}
         >
           {tag}
         </button>

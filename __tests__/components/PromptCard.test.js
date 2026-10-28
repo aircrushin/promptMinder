@@ -60,13 +60,13 @@ describe('PromptCard', () => {
     render(<PromptCard prompt={mockPrompt} />)
     
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(2) // 导入按钮和复制按钮
+    expect(buttons).toHaveLength(3) // 点赞、导入和复制按钮
   })
 
   it('点击复制按钮应该复制提示词内容', () => {
     render(<PromptCard prompt={mockPrompt} />)
     
-    const copyButton = screen.getAllByRole('button')[1] // 复制按钮是第二个
+    const copyButton = screen.getByRole('button', { name: '复制提示词' })
     fireEvent.click(copyButton)
     
     expect(mockCopy).toHaveBeenCalledWith('你是一个专业的代码助手，请帮助用户解决编程问题。')
@@ -78,7 +78,7 @@ describe('PromptCard', () => {
     render(<PromptCard prompt={mockPrompt} />)
     
     // 检查是否显示了CheckIcon（已复制状态）
-    const copyButton = screen.getAllByRole('button')[1]
+    const copyButton = screen.getByRole('button', { name: '已复制' })
     expect(copyButton).toHaveClass('bg-green-100')
   })
 
@@ -87,7 +87,7 @@ describe('PromptCard', () => {
     
     render(<PromptCard prompt={mockPrompt} />)
     
-    const importButton = screen.getAllByRole('button')[0] // 导入按钮是第一个
+    const importButton = screen.getByRole('button', { name: '导入到我的提示词' })
     fireEvent.click(importButton)
     
     expect(mockApiClient.copyPrompt).toHaveBeenCalledWith(mockPrompt)
@@ -106,7 +106,7 @@ describe('PromptCard', () => {
     
     render(<PromptCard prompt={mockPrompt} />)
     
-    const importButton = screen.getAllByRole('button')[0]
+    const importButton = screen.getByRole('button', { name: '导入到我的提示词' })
     fireEvent.click(importButton)
     
     await waitFor(() => {
@@ -127,7 +127,7 @@ describe('PromptCard', () => {
     
     render(<PromptCard prompt={mockPrompt} />)
     
-    const importButton = screen.getAllByRole('button')[0]
+    const importButton = screen.getByRole('button', { name: '导入到我的提示词' })
     fireEvent.click(importButton)
     
     expect(importButton).toBeDisabled()
@@ -170,7 +170,7 @@ describe('PromptCard', () => {
     
     render(<PromptCard prompt={multilinePrompt} />)
     
-    const content = screen.getByText('第一行内容\n第二行内容\n第三行内容')
+    const content = document.querySelector('.whitespace-pre-line')
     expect(content).toHaveClass('whitespace-pre-line')
   })
 

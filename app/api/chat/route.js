@@ -4,12 +4,14 @@ import { getOpenAIClientConfig, validateExternalBaseURL } from '@/lib/openai-com
 import { requireUserId } from '@/lib/auth';
 import { ApiError } from '@/lib/api-error';
 
-const DEFAULT_API_KEY = process.env.ZHIPU_API_KEY;
 const DEFAULT_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4';
 export async function POST(request) {
   try {
     await requireUserId(request);
     const body = await request.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      throw new ApiError(400, 'Invalid request body');
+    }
     const { 
       messages, 
       apiKey, 
@@ -22,7 +24,8 @@ export async function POST(request) {
     } = body;
 
     const suppliedApiKey = typeof apiKey === 'string' ? apiKey.trim() : '';
-    const finalApiKey = suppliedApiKey || DEFAULT_API_KEY;
+    const defaultApiKey = process.env.ZHIPUAI_API_KEY || process.env.ZHIPU_API_KEY || '';
+    const finalApiKey = suppliedApiKey || defaultApiKey;
     
     if (!finalApiKey) {
       throw new Error('未提供 API Key');
@@ -44,6 +47,10 @@ export async function POST(request) {
       baseURL: normalizedBaseURL,
     }));
     // 准备发送给 AI 的消息
+    if (!Array.isArray(messages)) {
+      throw new ApiError(400, 'messages must be an array');
+    }
+
     const aiMessages = [
       { role: 'system', content: systemPrompt },
       ...messages
@@ -66,12 +73,6 @@ export async function POST(request) {
           for await (const chunk of completion) {
             // 获取当前块的内容
             const content = chunk.choices[0]?.delta?.content || '';
-            // 打印数据块信息
-            console.log('收到数据块:', {
-              content: content,
-              timestamp: new Date().toISOString(),
-              chunkInfo: chunk
-            });
             // 将内容编码为 UTF-8
             const bytes = new TextEncoder().encode(content);
             // 将内容推送到流中

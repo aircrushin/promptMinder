@@ -6,8 +6,24 @@ describe('TeamService', () => {
   let mockSupabase
 
   beforeEach(() => {
+    const selectResult = []
     mockSupabase = {
-      from: jest.fn(),
+      select: jest.fn(() => ({
+        from: jest.fn(() => ({
+          where: jest.fn(() => Promise.resolve(selectResult)),
+        })),
+      })),
+      insert: jest.fn(() => ({
+        values: jest.fn(() => ({
+          returning: jest.fn(() => Promise.resolve([])),
+        })),
+      })),
+      delete: jest.fn(),
+      __setSelectResult: (rows) => {
+        mockSupabase.select.mockImplementation(() => ({
+          from: jest.fn(() => ({ where: jest.fn(() => Promise.resolve(rows)) })),
+        }))
+      },
     }
     service = new TeamService(mockSupabase)
   })
@@ -22,70 +38,20 @@ describe('TeamService', () => {
     }
 
     it('should create a team successfully when under limit', async () => {
-      const createdTeam = { id: 'team-1', ...teamData, owner_id: ownerId }
-
-      // Mock for checking team count
-      const countBuilder = {
-        eq: jest.fn().mockResolvedValue({ count: 0, error: null })
-      }
-
-      // Mock for inserting team
-      // Chain: .insert(...).select().single()
-      const insertBuilder = {
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: createdTeam, error: null })
-      }
-
-      // Main builder returned by from('teams')
-      // Handles .select(..., { count }) -> countBuilder
-      // Handles .insert(...) -> insertBuilder
-      const mainBuilder = {
-        select: jest.fn().mockImplementation((...args) => {
-          const options = args[1]
-          if (options && options.count === 'exact') {
-            return countBuilder
-          }
-          return insertBuilder
-        }),
-        insert: jest.fn().mockReturnValue(insertBuilder)
-      }
-
-      // Mock for team_members
-      const membersBuilder = {
-        insert: jest.fn().mockResolvedValue({ error: null })
-      }
-
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'teams') return mainBuilder
-        if (table === 'team_members') return membersBuilder
-        return { select: jest.fn().mockReturnThis() }
-      })
+      const createdTeam = { id: 'team-1', name: teamData.name, description: teamData.description, avatarUrl: null,
+        isPersonal: false, createdBy: ownerId, ownerId }
+      mockSupabase.__setSelectResult([{ value: 0 }])
+      mockSupabase.insert.mockImplementationOnce(() => ({
+        values: jest.fn(() => ({ returning: jest.fn(() => Promise.resolve([createdTeam])) })),
+      }))
 
       const result = await service.createTeam(teamData, ownerId)
-      expect(result).toEqual(createdTeam)
-      
-      // Verify count check was called
-      expect(mainBuilder.select).toHaveBeenCalledWith('*', { count: 'exact', head: true })
-      expect(countBuilder.eq).toHaveBeenCalledWith('owner_id', ownerId)
-      
-      // Verify insert was called
-      expect(mainBuilder.insert).toHaveBeenCalled()
+      expect(result).toMatchObject({ id: createdTeam.id, name: teamData.name })
+      expect(mockSupabase.insert).toHaveBeenCalledTimes(2)
     })
 
     it('should throw error when user already has 2 teams', async () => {
-      // Mock for checking team count
-      const countBuilder = {
-        eq: jest.fn().mockResolvedValue({ count: 2, error: null })
-      }
-
-      const mainBuilder = {
-        select: jest.fn().mockReturnValue(countBuilder)
-      }
-
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'teams') return mainBuilder
-        return { select: jest.fn().mockReturnThis() }
-      })
+      mockSupabase.__setSelectResult([{ value: 2 }])
 
       await expect(service.createTeam(teamData, ownerId))
         .rejects

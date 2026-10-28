@@ -186,11 +186,12 @@ function PromptCardComponent({ prompt }) {
                       onClick={handleLike}
                       variant="ghost"
                       size="icon"
-                      className={`flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 ${
+                      className={`flex-shrink-0 h-11 w-11 rounded-lg transition-all duration-300 ${
                         hasLiked
                           ? 'text-destructive bg-destructive/10'
                           : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'
                       }`}
+                      aria-label={hasLiked ? '取消点赞' : '点赞'}
                     >
                       <Heart className={`h-4 w-4 transition-transform duration-300 ${hasLiked ? 'fill-current' : ''}`} />
                     </Button>
@@ -216,7 +217,8 @@ function PromptCardComponent({ prompt }) {
                       variant="ghost"
                       size="icon"
                       disabled={isImporting}
-                      className="flex-shrink-0 h-8 w-8 rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      className="flex-shrink-0 h-11 w-11 rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      aria-label={t.publicPage.importTooltip || '导入提示词'}
                     >
                       <ImportIcon className="h-4 w-4" />
                     </Button>
@@ -236,11 +238,12 @@ function PromptCardComponent({ prompt }) {
                       onClick={handleCopy}
                       variant="ghost"
                       size="icon"
-                      className={`flex-shrink-0 h-8 w-8 rounded-lg transition-all duration-300 ${
+                      className={`flex-shrink-0 h-11 w-11 rounded-lg transition-all duration-300 ${
                         copied
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
                           : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                       }`}
+                      aria-label={copied ? (t.publicPage.copied || '已复制') : (t.publicPage.copy || '复制提示词')}
                     >
                       {copied ? (
                         <CheckIcon className="h-4 w-4 transition-transform duration-300" />

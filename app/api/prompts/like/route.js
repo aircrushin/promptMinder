@@ -17,17 +17,14 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Check if already liked
-        const existing = await db.select({ id: promptLikes.id }).from(promptLikes)
-            .where(and(eq(promptLikes.promptId, promptId), eq(promptLikes.userId, userId)))
-            .limit(1)
+        const inserted = await db.insert(promptLikes)
+            .values({ promptId, userId })
+            .onConflictDoNothing({ target: [promptLikes.promptId, promptLikes.userId] })
+            .returning({ id: promptLikes.id })
 
-        if (existing[0]) {
+        if (!inserted[0]) {
             return NextResponse.json({ success: true, message: 'Already liked', liked: true })
         }
-
-        // Insert like
-        await db.insert(promptLikes).values({ promptId, userId })
 
         // Increment likes count
         const result = await db
@@ -64,9 +61,15 @@ export async function DELETE(request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Delete like
-        await db.delete(promptLikes)
+        const deleted = await db.delete(promptLikes)
             .where(and(eq(promptLikes.promptId, promptId), eq(promptLikes.userId, userId)))
+            .returning({ id: promptLikes.id })
+
+        if (!deleted[0]) {
+            const existing = await db.select({ likes: publicPrompts.likes }).from(publicPrompts)
+                .where(eq(publicPrompts.id, promptId)).limit(1)
+            return NextResponse.json({ success: true, liked: false, likes: existing[0]?.likes || 0 })
+        }
 
         // Decrement likes count
         const result = await db

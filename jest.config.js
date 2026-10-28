@@ -9,13 +9,16 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/__tests__/helpers/'],
+  // Keep Next's standalone output out of Jest's haste map after a production build.
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
     '^@/hooks/(.*)$': '<rootDir>/hooks/$1',
     '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
+    '^@clerk/nextjs/server$': '<rootDir>/__mocks__/clerk-nextjs-server.js',
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js',
     '^@clerk/mcp-tools/next$': '<rootDir>/__mocks__/clerk-mcp-tools-next.js',
     '^@clerk/mcp-tools/server$': '<rootDir>/__mocks__/clerk-mcp-tools-server.js',

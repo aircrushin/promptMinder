@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 import { Copy, Share2, Trash2, Clock, PlusCircle, Heart, Bell } from "lucide-react";
 import { extractVariables } from "@/lib/promptVariables";
 
@@ -31,7 +32,7 @@ const PromptCardSkeleton = () => (
 
 export const PromptGridSkeleton = () => (
   <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-    <Card className="group relative border p-4 sm:p-5 hover:shadow-md transition-all bg-card cursor-pointer border-dashed h-[160px] sm:h-[180px] flex items-center justify-center">
+    <Card className="group relative border p-4 sm:p-5 hover:shadow-md transition-all bg-card cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border-dashed h-[160px] sm:h-[180px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-2">
         <Skeleton className="h-10 w-10 rounded-full" />
         <Skeleton className="h-5 w-24" />
@@ -46,7 +47,16 @@ export const PromptGridSkeleton = () => (
 const NewPromptCard = ({ onClick, label }) => (
   <Card
     onClick={onClick}
-    className="group relative border p-4 sm:p-5 hover:shadow-xl transition-all duration-300 ease-in-out bg-card cursor-pointer border-dashed h-[160px] sm:h-[180px] flex items-center justify-center overflow-hidden"
+    role="button"
+    tabIndex={0}
+    onKeyDown={(event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onClick?.();
+      }
+    }}
+    aria-label={label}
+    className="group relative border p-4 sm:p-5 hover:shadow-xl transition-all duration-300 ease-in-out bg-card cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border-dashed h-[160px] sm:h-[180px] flex items-center justify-center overflow-hidden"
   >
     <div className="flex flex-col items-center gap-3 text-muted-foreground group-hover:scale-110 transition-transform duration-300">
       <div className="bg-primary/10 p-3 rounded-full">
@@ -110,7 +120,16 @@ export function PromptGrid({
         return (
           <Card
             key={title}
-            className="group relative rounded-lg border p-4 sm:p-5 hover:shadow-lg transition-all duration-300 ease-in-out bg-card cursor-pointer overflow-hidden"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleCardClick();
+              }
+            }}
+            aria-label={title}
+            className="group relative rounded-lg border p-4 sm:p-5 hover:shadow-lg transition-all duration-300 ease-in-out bg-card cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring overflow-hidden"
             onClick={handleCardClick}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -135,7 +154,8 @@ export function PromptGrid({
                         event.stopPropagation();
                         onToggleFavorite?.(latestPrompt.id, isFavorited);
                       }}
-                      className={`h-9 w-9 sm:h-8 sm:w-8 transition-all duration-300 ${
+                      aria-label={isFavorited ? "取消收藏" : "收藏提示词"}
+                      className={`h-11 w-11 sm:h-10 sm:w-10 transition-all duration-300 ${
                         isFavorited 
                           ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' 
                           : 'text-gray-400 hover:bg-red-50 hover:text-red-500 dark:text-muted-foreground dark:hover:bg-red-950/30 dark:hover:text-red-300'
@@ -150,7 +170,8 @@ export function PromptGrid({
                         event.stopPropagation();
                         onCopyPrompt?.(latestPrompt.content);
                       }}
-                      className="h-9 w-9 sm:h-8 sm:w-8 hover:bg-accent hover:text-primary"
+                      aria-label="复制提示词"
+                      className="h-11 w-11 sm:h-10 sm:w-10 hover:bg-accent hover:text-primary"
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -161,7 +182,8 @@ export function PromptGrid({
                         event.stopPropagation();
                         onSharePrompt?.(latestPrompt.id);
                       }}
-                      className="h-9 w-9 sm:h-8 sm:w-8 hover:bg-accent hover:text-primary"
+                      aria-label="分享提示词"
+                      className="h-11 w-11 sm:h-10 sm:w-10 hover:bg-accent hover:text-primary"
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
@@ -173,7 +195,8 @@ export function PromptGrid({
                           event.stopPropagation();
                           onToggleSubscription?.(latestPrompt.id, isSubscribed);
                         }}
-                        className={`h-9 w-9 sm:h-8 sm:w-8 ${
+                        aria-label={isSubscribed ? "取消订阅提示词" : "订阅提示词"}
+                        className={`h-11 w-11 sm:h-10 sm:w-10 ${
                           isSubscribed ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/30' : 'hover:bg-accent hover:text-primary'
                         }`}
                       >
@@ -188,7 +211,8 @@ export function PromptGrid({
                           event.stopPropagation();
                           onDeletePrompt?.(latestPrompt.id);
                         }}
-                        className="h-9 w-9 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        aria-label="删除提示词"
+                        className="h-11 w-11 sm:h-10 sm:w-10 text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -220,7 +244,14 @@ export function PromptGrid({
                   <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-border/50" title={`Created by ${latestPrompt.creator.fullName || latestPrompt.creator.email}`}>
                     <div className="h-4 w-4 rounded-full overflow-hidden bg-secondary ring-1 ring-border/50 flex-shrink-0">
                         {latestPrompt.creator.imageUrl ? (
-                            <img src={latestPrompt.creator.imageUrl} alt="" className="h-full w-full object-cover" />
+                            <Image
+                              src={latestPrompt.creator.imageUrl}
+                              alt=""
+                              width={16}
+                              height={16}
+                              unoptimized
+                              className="h-full w-full object-cover"
+                            />
                         ) : (
                             <div className="h-full w-full flex items-center justify-center text-[10px] font-medium">
                                 {(latestPrompt.creator.firstName?.[0] || latestPrompt.creator.email?.[0] || '?').toUpperCase()}

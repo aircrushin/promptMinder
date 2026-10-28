@@ -3,7 +3,9 @@ import { apiClient, ApiError } from '@/lib/api-client';
 import { DEFAULTS, UI_CONFIG } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 
-export function usePrompts(filters = {}) {
+const EMPTY_FILTERS = Object.freeze({});
+
+export function usePrompts(filters = EMPTY_FILTERS) {
   const [prompts, setPrompts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -181,7 +183,9 @@ export function usePrompts(filters = {}) {
 
 // Hook for searching and filtering prompts
 export function usePromptSearch(prompts, searchQuery, selectedTags) {
-  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+  // Start unfiltered and apply the initial query through the same debounce path
+  // as subsequent edits, avoiding a flash of filtered results on mount.
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -219,4 +223,4 @@ export function usePromptSearch(prompts, searchQuery, selectedTags) {
     filteredPrompts,
     debouncedQuery,
   };
-} 
+}

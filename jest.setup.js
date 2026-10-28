@@ -1,45 +1,30 @@
 import '@testing-library/jest-dom'
 
-// Prefer the runtime Fetch API (Node / undici). Overwriting native Request breaks
-// Next.js 16.2+ NextRequest/NextResponse. Only polyfill when missing (e.g. older jsdom).
-if (typeof globalThis.Request === 'undefined') {
-  globalThis.Request = class Request {
-    constructor(url, options = {}) {
-      this.url = url
-      this.method = options.method || 'GET'
-      this.headers = new Map(Object.entries(options.headers || {}))
-      this.body = options.body
-    }
-
-    async json() {
-      return JSON.parse(this.body || '{}')
-    }
-  }
+// jsdom does not expose the Node Fetch text codecs in every Jest runtime.
+// Neon's HTTP driver requires them while importing server route modules.
+const { TextEncoder: NodeTextEncoder, TextDecoder: NodeTextDecoder } = require('util')
+if (typeof globalThis.TextEncoder === 'undefined') globalThis.TextEncoder = NodeTextEncoder
+if (typeof globalThis.TextDecoder === 'undefined') globalThis.TextDecoder = NodeTextDecoder
+const { ReadableStream, TransformStream, WritableStream } = require('stream/web')
+if (typeof globalThis.ReadableStream === 'undefined') globalThis.ReadableStream = ReadableStream
+if (typeof globalThis.TransformStream === 'undefined') globalThis.TransformStream = TransformStream
+if (typeof globalThis.WritableStream === 'undefined') globalThis.WritableStream = WritableStream
+if (typeof globalThis.clearImmediate === 'undefined') globalThis.clearImmediate = clearTimeout
+if (typeof globalThis.setImmediate === 'undefined') globalThis.setImmediate = setTimeout
+if (typeof globalThis.performance?.markResourceTiming !== 'function') {
+  globalThis.performance.markResourceTiming = () => undefined
 }
 
-if (typeof globalThis.Response === 'undefined') {
-  globalThis.Response = class Response {
-    constructor(body, options = {}) {
-      this.body = body
-      this.status = options.status || 200
-      this.headers = new Map(Object.entries(options.headers || {}))
-    }
-
-    static json(data, init = {}) {
-      const body = JSON.stringify(data)
-      return new globalThis.Response(body, {
-        ...init,
-        headers: {
-          'Content-Type': 'application/json',
-          ...init.headers,
-        },
-      })
-    }
-
-    async json() {
-      return JSON.parse(this.body || '{}')
-    }
-  }
+// jsdom does not expose Fetch primitives in every Jest runtime. Use the same
+// implementation as Next's edge runtime so NextRequest can safely extend it.
+const edgeFetch = require('next/dist/compiled/@edge-runtime/primitives/fetch')
+if (typeof globalThis.Request === 'undefined') globalThis.Request = edgeFetch.Request
+if (typeof globalThis.Response === 'undefined') globalThis.Response = edgeFetch.Response
+if (typeof globalThis.Headers === 'undefined') globalThis.Headers = edgeFetch.Headers
+if (typeof globalThis.FormData === 'undefined') globalThis.FormData = edgeFetch.FormData
+if (typeof globalThis.fetch === 'undefined') globalThis.fetch = edgeFetch.fetch
+if (typeof globalThis.NextRequest === 'undefined') {
+  globalThis.NextRequest = require('next/server').NextRequest
 }
 
 // Mock Next.js router
@@ -123,17 +108,6 @@ jest.mock('@supabase/supabase-js', () => ({
     })),
     auth: {
       getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
-    },
-  })),
-}))
-
-// Mock OpenAI
-jest.mock('openai', () => ({
-  default: jest.fn().mockImplementation(() => ({
-    chat: {
-      completions: {
-        create: jest.fn(),
-      },
     },
   })),
 }))

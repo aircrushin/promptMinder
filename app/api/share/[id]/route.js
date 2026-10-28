@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
     const versionRows = await db
       .select({ id: prompts.id, version: prompts.version, createdAt: prompts.createdAt })
       .from(prompts)
-      .where(and(eq(prompts.title, rows[0].title), eq(prompts.isPublic, true)))
+      .where(and(eq(prompts.lineageId, rows[0].lineageId), eq(prompts.isPublic, true)))
       .orderBy(desc(prompts.createdAt))
 
     prompt.versions = versionRows.map(toSnakeCase)

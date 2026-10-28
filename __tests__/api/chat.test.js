@@ -57,6 +57,7 @@ describe('/api/chat', () => {
     }
 
     // Mock environment variable
+    delete process.env.ZHIPUAI_API_KEY
     process.env.ZHIPU_API_KEY = 'test-api-key'
 
     const request = new NextRequest('http://localhost:3000/api/chat', {
@@ -113,6 +114,7 @@ describe('/api/chat', () => {
 
   it('应该处理缺少API Key的情况', async () => {
     // 清除环境变量
+    delete process.env.ZHIPUAI_API_KEY
     delete process.env.ZHIPU_API_KEY
 
     const requestBody = {

@@ -7,6 +7,7 @@ jest.mock('@/hooks/use-toast')
 
 describe('clipboard utilities', () => {
   const mockToast = jest.fn()
+  const nativeCreateElement = document.createElement.bind(document)
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -17,9 +18,14 @@ describe('clipboard utilities', () => {
     delete document.execCommand
     
     // Mock document.createElement and related methods
-    document.createElement = jest.fn()
-    document.body.appendChild = jest.fn()
-    document.body.removeChild = jest.fn()
+    document.createElement = jest.fn((tagName) => {
+      if (tagName === 'textarea') return { value: '', style: {}, focus: jest.fn(), select: jest.fn() }
+      return nativeCreateElement(tagName)
+    })
+    const nativeAppendChild = document.body.appendChild.bind(document.body)
+    const nativeRemoveChild = document.body.removeChild.bind(document.body)
+    document.body.appendChild = jest.fn((node) => node instanceof Node ? nativeAppendChild(node) : node)
+    document.body.removeChild = jest.fn((node) => node instanceof Node ? nativeRemoveChild(node) : node)
   })
 
   describe('copyToClipboard', () => {

@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/premium-interest/route';
 import { db } from '@/lib/db';
 import { buildInterestSummary, reportCsv } from '@/lib/premium-interest-report';
+import { createAdminToken } from '@/lib/admin-auth.js';
 
 jest.mock('@/lib/db', () => ({ db: { select: jest.fn() } }));
 jest.mock('@clerk/nextjs/server', () => ({ auth: jest.fn() }));
@@ -10,10 +11,10 @@ jest.mock('@/drizzle/schema/index.js', () => ({ premiumCollectionInterest: {} })
 
 describe('premium interest report', () => {
   const original = process.env.ADMIN_EMAILS;
-  beforeEach(() => { jest.clearAllMocks(); process.env.ADMIN_EMAILS = 'admin@example.com'; });
-  afterAll(() => { if (original === undefined) delete process.env.ADMIN_EMAILS; else process.env.ADMIN_EMAILS = original; });
-  const request = (email, timestamp = Date.now()) => new NextRequest('http://localhost/api/premium-interest', {
-    headers: email ? { 'x-admin-email': email, 'x-admin-token': Buffer.from(`${email}:${timestamp}`).toString('base64') } : {},
+  beforeEach(() => { jest.clearAllMocks(); process.env.ADMIN_EMAILS = 'admin@example.com'; process.env.ADMIN_TOKEN_SECRET = 'test-admin-token-secret'; });
+  afterAll(() => { if (original === undefined) delete process.env.ADMIN_EMAILS; else process.env.ADMIN_EMAILS = original; delete process.env.ADMIN_TOKEN_SECRET; });
+  const request = (email, timestamp) => new NextRequest('http://localhost/api/premium-interest', {
+    headers: email ? { 'x-admin-email': email, 'x-admin-token': createAdminToken(email, timestamp) } : {},
   });
   it.each([[undefined, 401], ['user@example.com', 403]])('rejects %s before database access', async (email, status) => {
     expect((await GET(request(email))).status).toBe(status);
