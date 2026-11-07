@@ -172,13 +172,13 @@ function PromptCardComponent({ prompt }) {
         <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/40 transition-colors duration-200 pointer-events-none" />
         
         <CardHeader className="relative z-10 pb-3">
-          <div className="flex justify-between items-start gap-3">
-            <CardTitle className="text-lg font-semibold text-card-foreground leading-tight flex-1">
+          <div className="flex flex-wrap items-start gap-3">
+            <CardTitle className="min-w-0 flex-1 break-words text-lg font-semibold text-card-foreground leading-tight">
               {prompt.title || prompt.role}
             </CardTitle>
-            <div className="flex items-center gap-1">
+            <div className="ml-auto flex max-w-full shrink-0 flex-wrap items-center justify-end gap-1">
              
-              <div className="flex items-center gap-0.15">
+              <div className="flex items-center gap-0.5">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
