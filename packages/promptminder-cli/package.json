@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "PromptMinder CLI for managing prompts, tags, and teams over HTTP APIs.",
   "license": "MIT",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aircrushin/promptMinder.git",

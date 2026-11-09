@@ -45,7 +45,7 @@ const customJestConfig = {
     '!jest.config.js',
     '!jest.setup.js',
     '!next.config.js',
-    '!tailwind.config.js',
+    '!tailwind.config.cjs',
     '!postcss.config.mjs',
   ],
   coverageReporters: ['text', 'lcov', 'html', 'json'],
