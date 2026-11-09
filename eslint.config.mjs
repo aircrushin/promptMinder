@@ -8,6 +8,9 @@ export default [
       '.next/**',
       'node_modules/**',
       'coverage/**',
+      '.cloudflare/**',
+      '.vinext/**',
+      'dist/**',
     ],
   },
   {

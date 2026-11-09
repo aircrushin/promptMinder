@@ -55,3 +55,6 @@ next-env.d.ts
 .playwright-cli
 output
 .env*
+/dist/
+.vinext/
+.cloudflare/

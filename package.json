@@ -3,7 +3,7 @@
   "version": "0.2.1",
   "private": true,
   "bin": {
-    "promptminder": "./bin/promptminder.js"
+    "promptminder": "./bin/promptminder.cjs"
   },
   "scripts": {
     "dev": "next dev",
@@ -23,14 +23,18 @@
     "db:baseline": "node drizzle/migrate.js --baseline",
     "db:push": "drizzle-kit push --config drizzle.config.mjs",
     "db:studio": "drizzle-kit studio --config drizzle.config.mjs",
-    "cli": "node ./bin/promptminder.js",
+    "cli": "node ./bin/promptminder.cjs",
     "cli:link": "pnpm link --global",
     "cli:unlink": "pnpm unlink --global",
-    "cli:agent": "node ./scripts/promptminder-agent.js",
+    "cli:agent": "node ./scripts/promptminder-agent.cjs",
     "skills:sync": "node ./scripts/sync-skills.js",
     "cli:pack": "npm pack ./packages/promptminder-cli",
-    "cli:token": "node ./scripts/create-cli-token.js",
-    "cli:whoami": "node ./scripts/cli-whoami.js"
+    "cli:token": "node ./scripts/create-cli-token.cjs",
+    "cli:whoami": "node ./scripts/cli-whoami.cjs",
+    "dev:vinext": "vite dev --port 3001",
+    "build:vinext": "vite build",
+    "start:vinext": "vite preview",
+    "deploy:vinext": "vinext-cloudflare deploy"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
@@ -58,6 +62,7 @@
     "@radix-ui/react-visually-hidden": "^1.2.0",
     "@supabase/supabase-js": "^2.110.7",
     "@vercel/analytics": "^1.4.1",
+    "@vinext/cloudflare": "^1.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "diff": "^5.2.2",
@@ -72,18 +77,21 @@
     "next-themes": "0.4.6",
     "openai": "^4.77.0",
     "postgres": "^3.4.8",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-markdown": "^9.0.1",
     "react-select": "^5.8.3",
+    "react-server-dom-webpack": "^19.3.1",
     "react-syntax-highlighter": "^15.6.1",
     "remark-gfm": "^4.0.1",
     "sharp": "^0.35.5",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "vinext": "^1.4.4",
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "2.0.0-beta.v.12",
     "@next/bundle-analyzer": "16.3.8",
     "@next/eslint-plugin-next": "16.3.8",
     "@tailwindcss/typography": "^0.5.15",
@@ -91,6 +99,9 @@
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-rsc": "^0.5.39",
+    "cf": "1.0.0-beta.28",
     "drizzle-kit": "^0.31.9",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.3.8",
@@ -100,6 +111,7 @@
     "msw": "^2.10.4",
     "postcss": "^8.5.29",
     "tailwindcss": "^3.4.1",
+    "vite": "8.3.0",
     "webpack-bundle-analyzer": "^4.10.2"
   },
   "packageManager": "pnpm@11.0.9",
@@ -117,5 +129,6 @@
       "js-yaml@3": "3.15.2",
       "js-yaml@4": "4.3.2"
     }
-  }
+  },
+  "type": "module"
 }
