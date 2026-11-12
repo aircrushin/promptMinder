@@ -294,6 +294,25 @@
     ]
   },
   {
+    "value": "uberllm",
+    "label": "UberLLM",
+    "description": "UberLLM OpenAI-compatible gateway: one key for many vendors' chat models, prepaid credit (https://uberllm.dev).",
+    "baseURL": "https://api.uberllm.dev/v1",
+    "endpoints": [
+      {
+        "value": "uberllm",
+        "label": "UberLLM",
+        "url": "https://api.uberllm.dev/v1"
+      }
+    ],
+    "models": [
+      { "value": "deepseek/deepseek-v4.1-flash", "label": "DeepSeek V4.1 Flash" },
+      { "value": "openai/gpt-4o-mini", "label": "GPT-4o Mini" },
+      { "value": "anthropic/claude-sonnet-4.6", "label": "Claude Sonnet 4.6" },
+      { "value": "google/gemini-2.5-flash", "label": "Gemini 2.5 Flash" }
+    ]
+  },
+  {
     "value": "custom",
     "label": "Custom Provider",
     "description": "Use any OpenAI-compatible API by configuring the endpoint and key manually.",
